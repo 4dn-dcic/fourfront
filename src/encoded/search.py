@@ -1455,9 +1455,6 @@ def format_facets(es_results, facets, total, additional_facets, request, doc_typ
             'total' : 0
             # To be added depending on facet['aggregation_type']: 'terms', 'min', 'max', 'min_as_string', 'max_as_string', ...
         }
-        if (facet.get('group_by_field') is not None and  facet.get('group_by_item_type') is not None and
-            facet.get('group_by_key_field') is not None and  facet.get('group_by_value_field') is not None):
-            result_facet['group_by'] = facet.get('group_by_field')
 
         result_facet.update({ k:v for k,v in facet.items() if k not in result_facet.keys() })
         used_facets.add(field)
@@ -1489,11 +1486,23 @@ def format_facets(es_results, facets, total, additional_facets, request, doc_typ
             else:
                 # Default - terms, range, or histogram buckets. Buckets may not be present
                 result_facet['terms'] = aggregations[full_agg_name]["primary_agg"]["buckets"]
-                if 'group_by' in result_facet:
-                    group_by_dict = get_facet_group_by_dict(request, facet.get('group_by_item_type'), facet.get('group_by_key_field'), facet.get('group_by_value_field'))
-                    for t in result_facet['terms']:
-                        t['grouping_key'] = group_by_dict[t['key']][0]
-                        t['is_group_item'] = True
+                
+                if 'group_by' in facet:
+                    group_by = facet['group_by']
+                    # check required fields
+                    if 'field' in group_by and 'item_type' in group_by and 'item_type_key_field' in group_by and 'item_type_value_field' in group_by:
+                        # get [key: value[]] from item_type collection
+                        group_by_dict = get_facet_group_by_dict(request, group_by['item_type'], group_by['item_type_key_field'], group_by['item_type_value_field'])
+                        # ignore grouping if type=item_type returns no value (or none of them are not released for anonymous users) 
+                        if group_by_dict is not None and len(group_by_dict) > 0:
+                            result_facet['group_by'] = group_by['field'] #override
+                            for t in result_facet['terms']:
+                                t['grouping_key'] = group_by_dict[t['key']][0] if t['key'] in group_by_dict and len(group_by_dict[t['key']]) > 0 else 'None'
+                                t['is_group_item'] = True
+                    else:
+                        del result_facet['group_by']
+                
+                
                 # Choosing to show facets with one term for summary info on search it provides
                 if len(result_facet.get('terms', [])) < 1:
                     continue
