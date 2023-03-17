@@ -7,6 +7,7 @@ import os
 import pkg_resources
 import sentry_sdk
 import subprocess
+from pyramid.session import SignedCookieSessionFactory
 
 from codeguru_profiler_agent import Profiler
 from dcicutils.ecs_utils import ECSUtils
@@ -213,6 +214,8 @@ def main(global_config, **local_config):
     config.include('pyramid_multiauth')  # must be before calling set_authorization_policy
     # Override default authz policy set by pyramid_multiauth
     config.set_authorization_policy(LocalRolesAuthorizationPolicy())
+    
+    # This creates a session factory (from definition in Snovault/app.py)
     config.include(session)
 
     # must include, as tm.attempts was removed from pyramid_tm

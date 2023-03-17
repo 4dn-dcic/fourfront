@@ -9,6 +9,7 @@ import { ItemDetailList } from '@hms-dbmi-bgm/shared-portal-components/es/compon
  */
 export default class FallbackView extends React.PureComponent {
     render() {
+        console.log('rendering fallback view');
         var { context, schemas } = this.props;
         return (
             <div className="view-item mt-25 container" id="content">

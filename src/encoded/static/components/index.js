@@ -6,6 +6,15 @@
  * Here we import all of our Content Views (Page Views) and register them
  * to `globals.content_views` so that they may be picked up and routed to in
  * the root `App` component.
+ * 
+ * VERY IMPORTANT: The routing mechanism dispatching from the back-end is based on the 
+ * "title" field ie: if the back-end returns JSON with title=login-success that will trigger
+ * the rendering of the LoginSuccessView. In addition, there is some weirdness with 
+ * "npm run dev-quick" where it will not reload new components into the system, nor 
+ * can they be imported directly from SPC in this file - so you need to override all components
+ * from SPC in this repo before configuring the dispatch below. See LoginSuccessView.js and
+ * authentication.py for a basic illustration of how it works. - Will March 17 2023
+ * 
  */
 
 import { content_views }        from './globals';
@@ -51,6 +60,9 @@ import MicroscopySearchView     from './browse/MicroscopySearchView';
 import PublicationSearchView    from './browse/PublicationSearchView';
 import SubscriptionsView        from './browse/SubscriptionsView';
 import FileSearchView           from './browse/FileSearchView';
+
+// login success view
+import LoginSuccessView         from './navigation/components/LoginSuccessView';
 
 
 content_views.register(StaticPage,    'StaticPage');
@@ -110,6 +122,8 @@ content_views.register(SearchView,              'PublicationSearchResults', 'sel
 content_views.register(SearchView,              'PublicationSearchResults', 'multiselect');
 content_views.register(SubscriptionsView,       'Submissions'); // TODO: Rename 'Submissions' to 'Subscriptions' on back-end (?)
 content_views.register(FileSearchView,          'FileSearchResults');
+
+content_views.register(LoginSuccessView,        'login-success');
 
 // Fallback for anything we haven't registered
 content_views.fallback = function () {

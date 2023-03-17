@@ -54,9 +54,9 @@ export const AccountNav = React.memo(function AccountNav(props){
     if (!session) { // Render login button
         return (
             <Nav className="navbar-acct">
-                <RedisLoginController {...{ updateAppSessionState, auth0Options }}>
+                <LoginController {...{ updateAppSessionState, auth0Options }}>
                     <LoginNavItem {...{ schemas, session, href, windowWidth }} key="login-register" className="user-account-item" />
-                </RedisLoginController>
+                </LoginController>
             </Nav>
         );
     }

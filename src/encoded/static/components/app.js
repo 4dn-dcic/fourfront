@@ -675,6 +675,7 @@ export default class App extends React.PureComponent {
     updateAppSessionState(callback = null){
         // get user actions (a function of log in) from local storage
         const userInfo  = JWT.getUserInfo();
+        console.log('attempting user state update', userInfo);
         // We definitively use Cookies for JWT.
         // It can be unset via response headers from back-end.
         // const currentToken = JWT.get('cookie');
@@ -1289,9 +1290,9 @@ class ContentRenderer extends React.PureComponent {
         } else if (status) {                // error catching
             content = <ErrorPage currRoute={routeLeaf} status={status}/>;
         } else if (context) {               // What should occur (success)
-
+            console.log('context:', context);
             var ContentView = (contentViews || globalContentViews).lookup(context, currentAction);
-
+            console.log('content view', ContentView);
             if (!ContentView){ // Handle the case where context is not loaded correctly
                 content = <ErrorPage status={null}/>;
             } else if (currentAction && _.contains(['edit', 'add', 'create'], currentAction)) { // Handle content edit + create action permissions
