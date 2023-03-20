@@ -90,18 +90,7 @@ def includeme(config):
     config.add_route('create-unauthorized-user', '/create-unauthorized-user')
     if 'redis.server' in config.registry.settings:  # enable callback and success ack only when Redis in use
         config.add_route('callback', '/callback')
-        config.add_route('login-success', '/login-success')
     config.scan(__name__)
-
-
-@view_config(route_name='login-success', request_method='GET', permission=NO_PERMISSION_REQUIRED)
-def login_success(context, request):
-    """ /login-success as an ack in the backend so it can be rendered in the front-end and redirected """
-    return {
-        '@type': ['login-success'],
-        '@context': '/login-success',
-        'title': 'login-success'
-    }
 
 
 @view_config(route_name='callback', request_method='GET', permission=NO_PERMISSION_REQUIRED)
@@ -123,7 +112,7 @@ def callback(context, request):
         raise HTTPForbidden('Auth0 not configured, no callback possible')
 
     # Create auth0 payload, send and get JWT back
-    auth0_redirect_uri = f'{request.host_url}/login-success'  # redirect to /login-success to trigger client side component, which will redirect to /
+    auth0_redirect_uri = f'{request.host_url}'
     auth0_payload = {
         'grant_type': 'authorization_code',
         'client_id': auth0_client,
@@ -158,7 +147,11 @@ def callback(context, request):
         overwrite=True,
         secure=is_https
     )
-    raise HTTPTemporaryRedirect(location=auth0_redirect_uri, headers=request.response.headers)
+    return {
+        '@type': ['callback'],
+        '@context': '/callback',
+        'title': 'callback'
+    }
 
 
 class NamespacedAuthenticationPolicy(object):
@@ -511,7 +504,6 @@ def session_properties(context, request):
 
     #if 'auth.userid' in request.session:
     #    properties['auth.userid'] = request.session['auth.userid']
-
     return properties
 
 

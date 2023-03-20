@@ -123,7 +123,7 @@ content_views.register(SearchView,              'PublicationSearchResults', 'mul
 content_views.register(SubscriptionsView,       'Submissions'); // TODO: Rename 'Submissions' to 'Subscriptions' on back-end (?)
 content_views.register(FileSearchView,          'FileSearchResults');
 
-content_views.register(LoginSuccessView,        'login-success');
+content_views.register(LoginSuccessView,        'callback');
 
 // Fallback for anything we haven't registered
 content_views.fallback = function () {

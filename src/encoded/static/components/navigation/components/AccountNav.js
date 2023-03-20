@@ -51,6 +51,7 @@ const auth0Options = {
 export const AccountNav = React.memo(function AccountNav(props){
     const { session, updateAppSessionState, schemas, ...passProps } = props;
     const { windowWidth, href } = passProps;
+    updateAppSessionState();  // call this in an attempt before rendering the component?
     if (!session) { // Render login button
         return (
             <Nav className="navbar-acct">

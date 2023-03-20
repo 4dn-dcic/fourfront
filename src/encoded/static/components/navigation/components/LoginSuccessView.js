@@ -1,7 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import _ from 'underscore';
 import * as JWT from '@hms-dbmi-bgm/shared-portal-components/es/components/util/json-web-token';
 import { event as trackEvent, setUserID } from '@hms-dbmi-bgm/shared-portal-components/es/components/util/analytics';
+import { load, fetch, promise as ajaxPromise } from '@hms-dbmi-bgm/shared-portal-components/es/components/util/ajax';
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Alerts';
 import { navigate } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { ItemDetailList } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/ItemDetailList';
@@ -21,6 +23,7 @@ import { ItemDetailList } from '@hms-dbmi-bgm/shared-portal-components/es/compon
 export default class LoginSuccessView extends React.PureComponent {
 
     static propTypes = {
+        'updateAppSessionState' : PropTypes.func.isRequired,
         'readyToRedirect': PropTypes.bool
     };
     
@@ -62,12 +65,12 @@ export default class LoginSuccessView extends React.PureComponent {
 
                 // Fetch user profile and (outdated/to-revisit-later) use their primary lab as the eventLabel.
                 const profileURL = (_.findWhere(user_actions, { 'id' : 'profile' }) || {}).href;
-
+                console.log('profileURL', profileURL);
                 if (profileURL){
                     this.setState({ "isLoading" : false });
 
                     JWT.saveUserInfoLocalStorage(userInfoResponse);
-                    //updateAppSessionState(); // <- this function (in App.js) is now expected to call `Alerts.deQueue(Alerts.LoggedOut);`
+                    updateAppSessionState(); // <- this function (in App.js) is now expected to call `Alerts.deQueue(Alerts.LoggedOut);`
                     console.info('Login completed');
 
                     // Register an analytics event for UI login.
@@ -80,6 +83,8 @@ export default class LoginSuccessView extends React.PureComponent {
                             onLogin(profile);
                         }
 
+                        console.log('in profile load', profile);
+
                         const { uuid: userId, groups = null } = profile;
 
                         setUserID(userId);
@@ -91,12 +96,6 @@ export default class LoginSuccessView extends React.PureComponent {
                             userGroups: groups && (JSON.stringify(groups.sort()))
                         });
 
-                        // Refresh the content/context of our page now that we have a JWT stored as a cookie!
-                        // It will return same page but with any auth'd page actions.
-
-                        // Attempt to preserve hash, if any, but don't scroll to it.
-                        const windowHash = (window && window.location && window.location.hash) || '';
-                        navigate(windowHash, { "inPlace" : true, "dontScrollToTop" : !!(windowHash) });
                     }, 'GET', ()=>{
                         throw new Error('Request to profile URL failed.');
                     });
@@ -105,7 +104,7 @@ export default class LoginSuccessView extends React.PureComponent {
                 }
             }).catch((error)=>{
                 // Handle Errors
-                logger.error("Error during login: ", error.description);
+                //logger.error("Error during login: ", error.description);
                 console.log(error);
 
                 this.setState({ "isLoading" : false });
