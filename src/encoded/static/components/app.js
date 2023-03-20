@@ -675,7 +675,6 @@ export default class App extends React.PureComponent {
     updateAppSessionState(callback = null){
         // get user actions (a function of log in) from local storage
         const userInfo  = JWT.getUserInfo();
-        console.log('attempting user state update', userInfo);
         // We definitively use Cookies for JWT.
         // It can be unset via response headers from back-end.
         // const currentToken = JWT.get('cookie');
