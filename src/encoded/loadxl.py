@@ -9,7 +9,7 @@ import structlog
 import webtest
 
 from base64 import b64encode
-from dcicutils.misc_utils import ignored
+from dcicutils.misc_utils import ignored, VirtualApp
 from PIL import Image
 from pkg_resources import resource_filename
 from pyramid.paster import get_app
@@ -81,7 +81,33 @@ class LoadGenWrapper(object):
             logger.error('load_data: failed to load with iter_response', error=self.caught)
 
 
-def load_data_via_ingester(vapp, ontology_json):
+def load_data_via_ingester(vapp: VirtualApp, ontology_json: dict, itype: str = "ontology_term") -> dict:
+    """
+    Entry point for call from encoded.ingester.processors.handle_ontology_update (2023-03-08).
+    """
+    response = load_all_gen(vapp, ontology_json, None, overwrite=True, itype=itype, from_json=True, patch_only=False)
+    results = {"post": [], "patch": [], "skip": [], "error": []}
+    unique_uuids = set()
+    for item in response:
+        if (item := item.decode("ascii")) and (item_split := item.split()) and len(item_split) == 2:
+            action = item_split[0].lower()
+            if action.endswith(":"):
+                action = action[:-1]
+            uuid = item_split[1]
+            if action == "post":
+                results["post"].append(uuid)
+            elif action == "patch":
+                results["patch"].append(uuid)
+            elif action == "skip":
+                results["skip"].append(uuid)
+            elif action == "error":
+                results["error"].append(uuid)
+            unique_uuids.add(uuid)
+    results["unique"] = len(unique_uuids)
+    return results
+
+
+def obsolete_load_data_via_ingester(vapp, ontology_json):
     """
     Entry point for call from encoded.ingester.processors.handle_ontology_update (2023-03-08).
     """

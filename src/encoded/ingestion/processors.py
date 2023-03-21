@@ -1,3 +1,4 @@
+import json
 import structlog
 from dcicutils.misc_utils import PRINT
 from ..loadxl import load_data_via_ingester
@@ -92,7 +93,14 @@ def handle_ontology_update(submission: SubmissionFolio):
         INFO(f"Ontology ingestion handler initiated load.")
         # The response is a generate so we need to dereference it to actually cause it to do its work;
         # and its string value is a text summary of what was done.
-        dereferenced_load_data_response = str(load_data_response)
         INFO(f"Ontology ingestion handler load complete; summary below.")
-        INFO(dereferenced_load_data_response)
+        INFO(f"Created: {len(load_data_response['post'])}")
+        INFO(f"Updated: {len(load_data_response['patch'])}")
+        INFO(f"Skipped: {len(load_data_response['skip'])}")
+        INFO(f"Errored: {len(load_data_response['error'])}")
+        INFO(f"Uniques: {load_data_response['unique']}")
+        INFO(f"Summary: s3://{submission.bucket}/{submission.submission_id}/submission.json")
+        INFO(f"TheFile: {submission.parameters.get('datafile_url')}")
+        result = {"result": load_data_response}
+        submission.process_standard_bundle_results(result)
     log.warning("Ontology ingestion handler done.")

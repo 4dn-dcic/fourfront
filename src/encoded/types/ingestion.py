@@ -96,7 +96,7 @@ class SubmissionFolio:
 
     @contextlib.contextmanager
     def s3_output(self, key_name, key_type='txt'):
-        key = "%s/%s.%s" % (self.submission_id, key_name, key_type)
+        key = "%s/%s%s" % (self.submission_id, key_name, "" if key_name.endswith(f".{key_type}") else f".{key_type}")
         self.resolution[key_name] = key
         with s3_output_stream(self.s3_client, bucket=self.bucket, key=key,
                               s3_encrypt_key_id=self.s3_encrypt_key_id) as fp:
