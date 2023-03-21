@@ -34,7 +34,7 @@ export default class LoginSuccessView extends React.PureComponent {
     }
 
     /**
-     * This component is meant to be loaded upon navigating the /callback
+     * This component is meant to be loaded upon navigating from backend on authentication to the /callback
      * Once that has happened, we should have stored a jwtToken as a cookie that 
      * we can use to make authenticated requests ie: the below calls should return
      * clean responses if the user successfully logged in and error out appropriately if

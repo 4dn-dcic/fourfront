@@ -88,8 +88,7 @@ def includeme(config):
     config.add_route('impersonate-user', '/impersonate-user')
     config.add_route('session-properties', '/session-properties')
     config.add_route('create-unauthorized-user', '/create-unauthorized-user')
-    if 'redis.server' in config.registry.settings:  # enable callback and success ack only when Redis in use
-        config.add_route('callback', '/callback')
+    config.add_route('callback', '/callback')
     config.scan(__name__)
 
 
@@ -98,6 +97,8 @@ def callback(context, request):
     """ /callback for Fourfront that will result in a session token
         Note that this sets jwtToken as to not break the front-end
     """
+    if 'redis.server' not in request.registry.settings:
+        raise HTTPForbidden('Calls to /callback are not allowed when Redis not in use')
     auth0_code = request.params.get('code', None)
     if not auth0_code:
         raise HTTPForbidden('No code sent back from Auth0')

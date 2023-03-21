@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 
 
 def nginx_server_process(prefix='', echo=False):
+    """ Handler that spins up nginx and listens on port 8000 """
     args = [
         os.path.join(prefix, 'nginx'),
         '-c', resource_filename('encoded', 'nginx-dev.conf'),
@@ -36,13 +37,30 @@ def nginx_server_process(prefix='', echo=False):
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
     )
-
     if not echo:
         process.stdout.close()
-
     if echo:
         print('Started: http://localhost:8000')
+    return process
 
+
+def redis_server_process(echo=False):
+    """ Handler that spins up a Redis server on port 6379 (default)"""
+    args = [
+        'redis-server', 
+        '--daemonize',
+        'yes'
+    ]
+    process = subprocess.Popen(
+        args,
+        close_fds=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+    )
+    if not echo:
+        process.stdout.close()
+    if echo:
+        print('Started Redis Server at redis://localhost:6379')
     return process
 
 
@@ -81,8 +99,9 @@ def main():
 
     postgres = postgresql_fixture.server_process(pgdata, echo=True)
     elasticsearch = elasticsearch_fixture.server_process(esdata, echo=True)
+    redis = redis_server_process(echo=True)
     nginx = nginx_server_process(echo=True)
-    processes = [postgres, elasticsearch, nginx]
+    processes = [postgres, elasticsearch, redis, nginx]
 
 
     @atexit.register
