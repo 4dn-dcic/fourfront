@@ -93,7 +93,7 @@ def handle_ontology_update(submission: SubmissionFolio):
         INFO(f"Ontology ingestion handler initiated load.")
         # The response is a generate so we need to dereference it to actually cause it to do its work;
         # and its string value is a text summary of what was done.
-        INFO(f"Ontology ingestion handler load complete; summary below.")
+        INFO(f"Ontology ingestion handler complete; summary below.")
         INFO(f"Created: {len(load_data_response['post'])}")
         INFO(f"Updated: {len(load_data_response['patch'])}")
         INFO(f"Skipped: {len(load_data_response['skip'])}")
@@ -103,4 +103,4 @@ def handle_ontology_update(submission: SubmissionFolio):
         INFO(f"TheFile: {submission.parameters.get('datafile_url')}")
         result = {"result": load_data_response}
         submission.process_standard_bundle_results(result)
-    log.warning("Ontology ingestion handler done.")
+    log.warning("Ontology ingestion handler returning.")
