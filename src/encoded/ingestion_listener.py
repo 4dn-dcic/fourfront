@@ -85,17 +85,24 @@ def submit_for_ingestion(context, request):
 
     check_true(request.content_type == 'multipart/form-data',  # even though we can't declare we accept this
                "Expected request to have content_type 'multipart/form-data'.", error_class=SubmissionFailure)
-
     bs_env = beanstalk_env_from_request(request)
     bundles_bucket = metadata_bundles_bucket(request.registry)
-    datafile = request.POST['datafile']
-    if not isinstance(datafile, cgi.FieldStorage):
+    datafile = request.POST.get('datafile')
+    if datafile is None:
+        # S3 protocol; not uploading from here (SubmitCGAP uploads directly).
+        # Added circa March 2023.
+        datafile_bucket = request.POST['datafile_bucket']
+        datafile_key = request.POST['datafile_key']
+        filename = request.POST['datafile_source_filename']
+        override_name = None
+    elif isinstance(datafile, cgi.FieldStorage):
+        filename = datafile.filename
+        override_name = request.POST.get('override_name', None)
+    else:
         # e.g., specifically it might be b'' when no file is selected,
         # but IMPORTANTLY, cgi.FieldStorage has no predefined boolean value,
         # so we can't just ask to check 'not datafile'. Sigh. -kmp 5-Aug-2020
         raise UnspecifiedFormParameter('datafile')
-    filename = datafile.filename
-    override_name = request.POST.get('override_name', None)
     parameters = dict(request.POST)  # Convert to regular dictionary, which is also a copy
     parameters['datafile'] = filename
 
@@ -135,8 +142,9 @@ def submit_for_ingestion(context, request):
     # ``input_file`` contains the actual file data which needs to be
     # stored somewhere.
 
-    input_file_stream = request.POST['datafile'].file
-    input_file_stream.seek(0)
+    if datafile is not None:
+        input_file_stream = request.POST['datafile'].file
+        input_file_stream.seek(0)
 
     # NOTE: Some reference information about uploading files to s3 is here:
     #   https://boto3.amazonaws.com/v1/documentation/api/latest/guide/s3-uploading-files.html
@@ -146,7 +154,8 @@ def submit_for_ingestion(context, request):
 
     # submission_id = str(uuid.uuid4())
     _, ext = os.path.splitext(filename)
-    object_name = "{id}/datafile{ext}".format(id=submission_id, ext=ext)
+    # TODO: What to make object_name if datafile is None (i.e. S3 protocol i.e. not uploading here) ?
+    object_name = submission_id if datafile is None else "{id}/datafile{ext}".format(id=submission_id, ext=ext)
     manifest_name = "{id}/manifest.json".format(id=submission_id)
 
     # We might need to extract some additional information from the GAC
@@ -166,16 +175,14 @@ def submit_for_ingestion(context, request):
     else:
         additional_info = " (no SSEKMSKeyId)"
 
-    try:
-        # Make sure to pass any extra args.
-        s3_client.upload_fileobj(input_file_stream, Bucket=bundles_bucket, Key=object_name, **extra_kwargs)
-
-    except botocore.exceptions.ClientError as e:
-
-        log.error(e)
-
-        success = False
-        message = f"{full_class_name(e)}: {str(e)}{additional_info}"
+    if datafile is not None:
+        try:
+            # Make sure to pass any extra args.
+            s3_client.upload_fileobj(input_file_stream, Bucket=bundles_bucket, Key=object_name, **extra_kwargs)
+        except botocore.exceptions.ClientError as e:
+            log.error(e)
+            success = False
+            message = f"{full_class_name(e)}: {str(e)}{additional_info}"
 
     # This manifest will be stored in the manifest.json file on on s3 AND will be returned from this endpoint call.
     manifest_content = {
@@ -199,17 +206,14 @@ def submit_for_ingestion(context, request):
 
     if success:
 
-        try:
-            with io.BytesIO(manifest_content_formatted.encode('utf-8')) as fp:
-                s3_client.upload_fileobj(fp, Bucket=bundles_bucket, Key=manifest_name, **extra_kwargs)
-
-        except botocore.exceptions.ClientError as e:
-
-            log.error(e)
-
-            message = f"{full_class_name(e)} (while uploading metadata): {str(e)}{additional_info}"
-
-            raise SubmissionFailure(message)
+        if datafile is None:
+            try:
+                with io.BytesIO(manifest_content_formatted.encode('utf-8')) as fp:
+                    s3_client.upload_fileobj(fp, Bucket=bundles_bucket, Key=manifest_name, **extra_kwargs)
+            except botocore.exceptions.ClientError as e:
+                log.error(e)
+                message = f"{full_class_name(e)} (while uploading metadata): {str(e)}{additional_info}"
+                raise SubmissionFailure(message)
 
         queue_manager = get_queue_manager(request, override_name=override_name)
         _, failed = queue_manager.add_uuids([submission_id], ingestion_type=ingestion_type)

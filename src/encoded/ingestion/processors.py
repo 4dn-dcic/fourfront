@@ -61,22 +61,38 @@ def handle_ontology_update(submission: SubmissionFolio):
     """
     log.warning("Ontology ingestion handler starting.")
     with submission.processing_context():
-        log.warning(f"Ontology ingestion handler invoked: {submission.bucket}/{submission.object_name}")
-        # The following get_s3_input_json call downloads from S3 the payload/data file, opens it, and loads
-        # its contents (assumed to be JSON), and returns it as a dictionary; the location of this data file in
-        # S3 is assumed to be the bucket named by submission.bucket and the key named by submission.object_name.
-        ontology_json = submission.get_s3_input_json()
+        # The following get_s3_input_json call downloads from S3 the payload/data file,
+        # opens it, and loads its contents (assumed to be JSON), and returns it as a dictionary.
+        if not isinstance(submission.parameters, dict):
+            log.error(f"Ontology ingestion handler found no parameters with file location!")  
+            return
+        datafile_bucket = submission.parameters.get("datafile_bucket")
+        if not datafile_bucket:
+            log.error(f"Ontology ingestion handler found no file bucket!")  
+            return
+        datafile_key = submission.parameters.get("datafile_key")
+        if not datafile_key:
+            log.error(f"Ontology ingestion handler found no file key (bucket: {datafile_bucket})!")  
+            return
+        log.warning(f"Ontology ingestion handler file: {datafile_bucket}/{datafile_key}")
+        try:
+            ontology_json = submission.get_s3_input_json(bucket=datafile_bucket, key=datafile_key)
+        except Exception as e:
+            log.error(f"Ontology ingestion handler error on file load: {datafile_bucket}/{datafile_key}")
+            log.error(str(e))
+            return 
+        log.warning(f"Ontology ingestion handler file loaded: {datafile_bucket}/{datafile_key}")
         # The loadx module expects to see the terms in the "ontology_terms" key.
         ontology_json["ontology_term"] = ontology_json.pop("terms", [])
         # Get the number of ontology terms just for logging purposes.
         ontology_term_count = len(ontology_json["ontology_term"])
-        INFO(f"Ontology ingestion handler downloaded ontology file. Term count: {ontology_term_count}")
+        INFO(f"Ontology ingestion handler ontology file term count: {ontology_term_count}")
         # Call into the loadx module to do the actual load of the ontology data.
         load_data_response = load_data_via_ingester(submission.vapp, ontology_json)
         INFO(f"Ontology ingestion handler initiated load.")
         # The response is a generate so we need to dereference it to actually cause it to do its work;
         # and its string value is a text summary of what was done.
         dereferenced_load_data_response = str(load_data_response)
-        INFO(f"Ontology ingestion handler load done. Summary below.")
+        INFO(f"Ontology ingestion handler load complete; summary below.")
         INFO(dereferenced_load_data_response)
     log.warning("Ontology ingestion handler done.")
