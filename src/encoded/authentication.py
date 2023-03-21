@@ -416,6 +416,20 @@ def logout(context, request):
     browser cookies and re-requesting the current 4DN URL.
     """
 
+    # Delete Redis Session Token, if in use
+    registry = request.registry
+    session_token = get_jwt(request)
+    if REDIS in registry:
+        redis_handler = registry[REDIS]
+        env_name = registry.settings['env.name']
+        redis_session_token = RedisSessionToken.from_redis(
+            redis_handler=redis_handler,
+            namespace=env_name,
+            token=session_token
+        )
+        if redis_session_token:
+            redis_session_token.delete_session_token(redis_handler=redis_handler)
+    
     # Deletes the cookie
     request.response.set_cookie(
         name='jwtToken',
@@ -571,12 +585,20 @@ def impersonate_user(context, request):
         algorithm=JWT_ENCODING_ALGORITHM
 	)
 
+    if 'redis.server' in request.registry.settings:
+        redis_session_token = RedisSessionToken.from_redis(
+            redis_handler=request.registry[REDIS],
+            namespace=request.registry.settings['env.name'],
+            token=id_token
+        )
+        if not redis_session_token:
+            raise HTTPForbidden('Unable to generate session token for impersonate user')
+
     is_https = request.scheme == "https"
 
     request.response.set_cookie(
         "jwtToken",
-        value=id_token.decode('utf-8'),
-        # THE BELOW NEEDS TESTING RE: CLOUD ENVIRONMENT:
+        value=redis_session_token.get_session_token(),
         domain=request.domain,
         path="/",
         httponly=True,
