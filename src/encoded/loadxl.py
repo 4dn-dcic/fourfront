@@ -84,40 +84,35 @@ class LoadGenWrapper(object):
 def load_data_via_ingester(vapp: VirtualApp, ontology_json: dict, itype: str = "ontology_term") -> dict:
     """
     Entry point for call from encoded.ingester.processors.handle_ontology_update (2023-03-08).
+    Returns dictionary itemizing the created (post), updated (patch), skipped (skip), and
+    errored (error) ontology term uuids; as well as a count of the number of unique uuids processed.
     """
     response = load_all_gen(vapp, ontology_json, None, overwrite=True, itype=itype, from_json=True, patch_only=False)
     results = {"post": [], "patch": [], "skip": [], "error": []}
     unique_uuids = set()
     for item in response:
-        if (item := item.decode("ascii")) and (item_split := item.split()) and len(item_split) == 2:
-            action = item_split[0].lower()
-            if action.endswith(":"):
-                action = action[:-1]
-            uuid = item_split[1]
-            if action == "post":
-                results["post"].append(uuid)
-            elif action == "patch":
-                results["patch"].append(uuid)
-            elif action == "skip":
-                results["skip"].append(uuid)
-            elif action == "error":
-                results["error"].append(uuid)
-            unique_uuids.add(uuid)
+        # ASSUME each item in the response looks something like one of (string or bytes):
+        # POST: 15425d13-01ce-4e61-be5d-cd04401dff29
+        # PATCH: 5b45e66f-7b4f-4923-824b-d0864a689bb
+        # SKIP: 4efe24b5-eb17-4406-adb8-060ea2ae2180
+        # ERROR: 906c4667-483e-4a08-96b9-3ce85ce8bf8c
+        if isinstance(item, bytes):
+            item = item.decode("ascii")
+        if not isinstance(item, str):
+            continue
+        item_split = item.split()
+        if len(item_split) != 2:
+            continue
+        action = item_split[0].lower()
+        if action.endswith(":"):
+            action = action[:-1]
+        uuid = item_split[1]
+        if not results.get(action):
+            results[action] = []
+        results[action].append(uuid)
+        unique_uuids.add(uuid)
     results["unique"] = len(unique_uuids)
     return results
-
-
-def obsolete_load_data_via_ingester(vapp, ontology_json):
-    """
-    Entry point for call from encoded.ingester.processors.handle_ontology_update (2023-03-08).
-    """
-    return Response(
-        content_type="text/plain",
-        app_iter=LoadGenWrapper(
-            load_all_gen(vapp, ontology_json, None, overwrite=True,
-                         itype="ontology_term", from_json=True, patch_only=False)
-        )
-    )
 
 
 @view_config(route_name='load_data', request_method='POST', permission='add')
