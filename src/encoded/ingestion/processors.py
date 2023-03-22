@@ -91,10 +91,12 @@ def handle_ontology_update(submission: SubmissionFolio):
         # Get the number of ontology terms just for logging purposes.
         ontology_term_count = len(ontology_json["ontology_term"])
         INFO(f"Ontology ingestion handler ontology file term count: {ontology_term_count}")
-        # Call into the loadx module to do the actual load of the ontology data.
+        # Call into the loadx module to do the actual load of the ontology data;
+        # its results are a dictionary itemizing the created (post), updated (patch),
+        # skipped (skip), and errored (error) ontology term uuids.
         load_data_results = load_data_via_ingester(submission.vapp, ontology_json)
         log.warning(f"Ontology ingestion handler file processed: {datafile_bucket}/{datafile_key}")
-        validation_output = [
+        load_data_summary = [
             f"Ontology ingestion summary:",
             f"Created: {len(load_data_results['post'])}",
             f"Updated: {len(load_data_results['patch'])}",
@@ -105,12 +107,15 @@ def handle_ontology_update(submission: SubmissionFolio):
             f"Summary: s3://{submission.bucket}/{submission.submission_id}/submission.json",
             f"TheFile: {submission.parameters.get('datafile_url')}"
         ]
-        INFO(validation_output)
-        results = {"result": load_data_results, "validation_output": validation_output}
-        # This causes the validation_output to be made available to the output of submit-ontology.
-        # as well as inserting the validation_output into the database (additional_data/validation_output).
+        INFO(load_data_summary)
+        results = {"result": load_data_results, "validation_output": load_data_summary}
+        # This causes the load_data_summary to be made available to the output of submit-ontology.
+        # as well as inserting this load_data_summary into the database (additional_data/validation_output).
         submission.note_additional_datum("validation_output", from_dict=results)
-        # This ends up wrting the results to s3://{submission.bucket}/{submission.submission_id}/submission.json
-        # as well as inserting the results into the database.
-        #submission.process_standard_bundle_results(results)
+        # This causes the results to be written to s3://{submission.bucket}/{submission.submission_id}/submission.json;
+        # note that it does NOT insert the results into the database (due to the s3_only=True flag), as we do NOT want
+        # to insert this potentially huge results (i.e. the lists of created, updated, skippped, errored uuids) into
+        # the database (not to mention its path to get there, i.e. via HTTP POST/PATCH to the Portal); but we DO
+        # want these more detailed results in S3 for inspection/troubleshooting purposes.
+        submission.process_standard_bundle_results(results, s3_only=True)
     log.warning("Ontology ingestion handler returning.")

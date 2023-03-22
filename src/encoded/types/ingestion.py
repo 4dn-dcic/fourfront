@@ -207,24 +207,27 @@ class SubmissionFolio:
                               s3_encrypt_key_id=s3_encrypt_key_id) as fp:
             PRINT(json.dumps(resolution, indent=2), file=fp)
 
-    def process_standard_bundle_results(self, bundle_result):
+    def process_standard_bundle_results(self, bundle_result, s3_only=False):
 
         # Next several files are created only if relevant.
 
         if bundle_result.get('result'):
             with self.s3_output(key_name='submission.json', key_type='json') as fp:
                 print(json.dumps(bundle_result['result'], indent=2), file=fp)
-                self.note_additional_datum('result', from_dict=bundle_result, default={})
+                if not s3_only:
+                    self.note_additional_datum('result', from_dict=bundle_result, default={})
 
         if bundle_result.get('post_output'):
             with self.s3_output(key_name='submission_response') as fp:
                 self.show_report_lines(bundle_result['post_output'], fp)
-                self.note_additional_datum('post_output', from_dict=bundle_result, default=[])
+                if not s3_only:
+                    self.note_additional_datum('post_output', from_dict=bundle_result, default=[])
 
         if bundle_result.get('upload_info'):
             with self.s3_output(key_name='upload_info') as fp:
                 print(json.dumps(bundle_result['upload_info'], indent=2), file=fp)
-                self.note_additional_datum('upload_info', from_dict=bundle_result, default=[])
+                if not s3_only:
+                    self.note_additional_datum('upload_info', from_dict=bundle_result, default=[])
 
     @staticmethod
     def show_report_lines(lines, fp, default="Nothing to report."):
