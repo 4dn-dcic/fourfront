@@ -10,9 +10,12 @@ log = structlog.getLogger(__name__)
 INGESTION_UPLOADERS = {}
 
 
-def INFO(*args):
-    PRINT(*args)
-    log.info(*args)
+def INFO(args):
+    if isinstance(args, list):
+        for arg in args:
+            print(arg) ; log.info(arg)
+    else:
+        print(args) ; log.info(args)
 
 
 def ingestion_processor(processor_type):
@@ -89,18 +92,21 @@ def handle_ontology_update(submission: SubmissionFolio):
         ontology_term_count = len(ontology_json["ontology_term"])
         INFO(f"Ontology ingestion handler ontology file term count: {ontology_term_count}")
         # Call into the loadx module to do the actual load of the ontology data.
-        load_data_response = load_data_via_ingester(submission.vapp, ontology_json)
-        INFO(f"Ontology ingestion handler initiated load.")
-        # The response is a generate so we need to dereference it to actually cause it to do its work;
-        # and its string value is a text summary of what was done.
-        INFO(f"Ontology ingestion handler complete; summary below.")
-        INFO(f"Created: {len(load_data_response['post'])}")
-        INFO(f"Updated: {len(load_data_response['patch'])}")
-        INFO(f"Skipped: {len(load_data_response['skip'])}")
-        INFO(f"Errored: {len(load_data_response['error'])}")
-        INFO(f"Uniques: {load_data_response['unique']}")
-        INFO(f"Summary: s3://{submission.bucket}/{submission.submission_id}/submission.json")
-        INFO(f"TheFile: {submission.parameters.get('datafile_url')}")
-        result = {"result": load_data_response}
-        submission.process_standard_bundle_results(result)
+        load_data_results = load_data_via_ingester(submission.vapp, ontology_json)
+        log.warning(f"Ontology ingestion handler file processed: {datafile_bucket}/{datafile_key}")
+        validation_output = [
+            f"Ontology ingestion summary:",
+            f"Created: {len(load_data_results['post'])}",
+            f"Updated: {len(load_data_results['patch'])}",
+            f"Skipped: {len(load_data_results['skip'])}",
+            f"Errored: {len(load_data_results['error'])}",
+            f"Uniques: {load_data_results['unique']}",
+            f"Ontology ingestion files:",
+            f"Summary: s3://{submission.bucket}/{submission.submission_id}/submission.json",
+            f"TheFile: {submission.parameters.get('datafile_url')}"
+        ]
+        INFO(validation_output)
+        results = {"result": load_data_results, "validation_output": validation_output}
+        submission.note_additional_datum("validation_output", from_dict=results)
+        submission.process_standard_bundle_results(results)
     log.warning("Ontology ingestion handler returning.")
