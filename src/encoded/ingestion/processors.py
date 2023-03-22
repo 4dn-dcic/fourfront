@@ -116,6 +116,6 @@ def handle_ontology_update(submission: SubmissionFolio):
         # note that it does NOT insert the results into the database (due to the s3_only=True flag), as we do NOT want
         # to insert this potentially huge results (i.e. the lists of created, updated, skippped, errored uuids) into
         # the database (not to mention its path to get there, i.e. via HTTP POST/PATCH to the Portal); but we DO
-        # want these more detailed results in S3 for inspection/troubleshooting purposes.
+        # want these more detailed results in S3 for auditing/inspection/troubleshooting purposes.
         submission.process_standard_bundle_results(results, s3_only=True)
     log.warning("Ontology ingestion handler returning.")
