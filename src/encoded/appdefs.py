@@ -106,6 +106,7 @@ ITEM_INDEX_ORDER = [
     'FileCalibration',
     'FileFastq',
     'FileMicroscopy',
+    'FileOther',
     'FileProcessed',
     'FileSet',
     'FileSetCalibration',
