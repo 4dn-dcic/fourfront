@@ -81,13 +81,13 @@ class LoadGenWrapper(object):
             logger.error('load_data: failed to load with iter_response', error=self.caught)
 
 
-def load_data_via_ingester(vapp: VirtualApp, ontology_json: dict, itype: str = "ontology_term") -> dict:
+def load_data_via_ingester(vapp: VirtualApp, ontology: dict, itype: str = "ontology_term") -> dict:
     """
     Entry point for call from encoded.ingester.processors.handle_ontology_update (2023-03-08).
     Returns dictionary itemizing the created (post), updated (patch), skipped (skip), and
     errored (error) ontology term uuids; as well as a count of the number of unique uuids processed.
     """
-    response = load_all_gen(vapp, ontology_json, None, overwrite=True, itype=itype, from_json=True, patch_only=False)
+    response = load_all_gen(vapp, ontology, None, overwrite=True, itype=itype, from_json=True, patch_only=False)
     results = {"post": [], "patch": [], "skip": [], "error": []}
     unique_uuids = set()
     for item in response:

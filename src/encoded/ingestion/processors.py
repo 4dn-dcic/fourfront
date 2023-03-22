@@ -94,7 +94,7 @@ def handle_ontology_update(submission: SubmissionFolio):
         # Call into the loadx module to do the actual load of the ontology data;
         # its results are a dictionary itemizing the created (post), updated (patch),
         # skipped (skip), and errored (error) ontology term uuids.
-        load_data_results = load_data_via_ingester(submission.vapp, ontology_json)
+        load_data_results = load_data_via_ingester(vapp=submission.vapp, ontology=ontology_json)
         log.warning(f"Ontology ingestion handler file processed: {datafile_bucket}/{datafile_key}")
         load_data_summary = [
             f"Ontology ingestion summary:",
