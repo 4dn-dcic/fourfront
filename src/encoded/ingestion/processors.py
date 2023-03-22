@@ -107,6 +107,10 @@ def handle_ontology_update(submission: SubmissionFolio):
         ]
         INFO(validation_output)
         results = {"result": load_data_results, "validation_output": validation_output}
+        # This causes the validation_output to be made available to the output of submit-ontology.
+        # as well as inserting the validation_output into the database (additional_data/validation_output).
         submission.note_additional_datum("validation_output", from_dict=results)
-        submission.process_standard_bundle_results(results)
+        # This ends up wrting the results to s3://{submission.bucket}/{submission.submission_id}/submission.json
+        # as well as inserting the results into the database.
+        #submission.process_standard_bundle_results(results)
     log.warning("Ontology ingestion handler returning.")
