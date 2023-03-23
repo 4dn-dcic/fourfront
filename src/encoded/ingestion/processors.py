@@ -61,7 +61,40 @@ def handle_data_bundle(submission: SubmissionFolio):
 
 @ingestion_processor('ontology')
 def handle_ontology_update(submission: SubmissionFolio):
-    """ Idea being you can submit a SubmissionFolio item that corresponds to an ontology term update.
+    """
+    Main handler for ontology file ingestion. Use submit-ontoloy (in SubmitCGAP repo) to submit a local ontology
+    file (presumably generated via generate-ontology in this repo, with some possible manual steps there), which
+    creates file_other and ingestion_submission objects, uploads the ontology file to S3 (via aws command-line
+    directly from the submit-ontology process, i.e. not via Fourfront), and places message on SQS to pick up here.
+    Here we download the ontology file from S3, process it (into the database, via loadx), and returns a summary.
+
+    FYI: Here is a more detailed summary of the steps for the submit-ontology process:
+   - Call Fourfront /FileOther endpoint to create file_other type object (in database); returns HTTP 201 and its uuid,
+     e.g. 19734227-f380-4283-a1bb-ac14c169240f, which corresponds to S3 bucket key where actual given ontology file
+     will be uploaded; this bucket (e.g. encoded-4dn-blobs) comes from the blob_bucket property in development.ini;
+     returns JSON containing (crucially) an upload_credentials property with an upload_url (e.g. s3://encoded-4dn-blobs/
+     19734227-f380-4283-a1bb-ac14c169240f/4DNFIN2WOIYQ.json) and other credentials which will allow submit-ontology to
+     actually upload the ontology file via the aws command via sub-process.
+   - Upload actual (local) ontology file to S3, e.g. s3://encoded-4dn-blobs/19734227-f380-4283-a1bb-ac14c169240f/
+     4DNFIN2WOIYQ.json, using upload_credentials returned from the above /FileOther call, using a sub-process to
+     the aws command-line utility. This is the crucial thing that differentiates this new process from existing
+     ingestion processes, i.e. we upload the file directly, locally from submit-ontology rather than submitting
+     to a (Fourfront) HTTP based endpoint call, which would be susceptible to timeouts for large files.
+   - Call Fourfront /IngestionSubmission endpoint to create ingestion_submission type object (in database); returns
+     HTTP 201 and its uuid, e.g. 8c24d660-68ad-4671-aa9d-38e0eb81cd94, which corresponds to S3 bucket key where the
+     metadata about the ontology ingestion processing will be stored; this bucket (e.g. metadata-bundles-fourfront-local) 
+     comes from the metadata_bundles_bucket property in development.ini.
+   - Call Fourfront /ingestion-submissions/{ingestion_submission_uuid}/submit_for_ingestion endpoint which uploads
+     the manifest.json to S3, e.g. s3:///8c24d660-68ad-4671-aa9d-38e0eb81cd94/manifest.json, and updates the
+     ingestion_submission object, e.g. 8c24d660-68ad-4671-aa9d-38e0eb81cd94, in the database with more info;
+     and puts a message on SQS which will notify the ingester ontology process that we have a file to process.
+   - Ingester then picks up the (above mentioned) SQS message, its ID corresponding to the ingestion_submission object ID,
+     e.g. 8c24d660-68ad-4671-aa9d-38e0eb81cd94, and downloads the manifest.json, e.g. from s3://metadata-bundles-fourfront-local/
+     8c24d660-68ad-4671-aa9d-38e0eb81cd94/manifest.json from where it gets the location of the actual ontology data file,
+     e.g. s3://encoded-4dn-blobs/19734227-f380-4283-a1bb-ac14c169240f/4DNFIN2WOIYQ.json, which it downloads and processes;
+     this also creates in S3, e.g. s3://metadata-bundles-fourfront-local/8c24d660-68ad-4671-aa9d-38e0eb81cd94, the files
+     started.txt, resolution.json (with S3 locations of manifest.json, started.txt, and submission.json),
+     and submission.json (with detailed results of ingestion process).
     """
     log.warning("Ontology ingestion handler starting.")
     with submission.processing_context():
@@ -95,6 +128,10 @@ def handle_ontology_update(submission: SubmissionFolio):
         # its results are a dictionary itemizing the created (post), updated (patch),
         # skipped (skip), and errored (error) ontology term uuids.
         load_data_results = load_data_via_ingester(vapp=submission.vapp, ontology=ontology_json)
+        # Note we take special care to ensure the details of the load (i.e. the itemization of all
+        # ontology term uuids created, updated, skipped, or errored) are placed in the submission.json
+        # file in S3 (s3://{submission.bucket}/{submission.submission_id}/submission.json), but NOT put
+        # into the database (as it could be a large amount of data which we do not need in the database).
         log.warning(f"Ontology ingestion handler file processed: {datafile_bucket}/{datafile_key}")
         load_data_summary = [
             f"Ontology ingestion summary:",
