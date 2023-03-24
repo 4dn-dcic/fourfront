@@ -207,7 +207,22 @@ class SubmissionFolio:
                               s3_encrypt_key_id=s3_encrypt_key_id) as fp:
             PRINT(json.dumps(resolution, indent=2), file=fp)
 
-    def process_standard_bundle_results(self, bundle_result, s3_only=False):
+    def process_standard_bundle_results(self, bundle_result: dict, s3_only: bool = False) -> None:
+        """
+        If the given bundle_result contains either a result, post_output, or upload_info property,
+        then writes the contents of that property to an S3 key with either the name submission.json,
+        post_output.txt, or upload_info.txt, respectively; and in the bucket name self.bucket.
+
+        Additionally, for these three properties (result, post_output, upload_info), add them to the
+        self.other_details["additional_data"] property of this SubmissionFolio object, so that this
+        data will ultimately be written to the database (for the IngestionSubmission object).
+
+        HOWEVER, if the s3_only (False by default) argument is True then the given result will
+        NOT be added to the other_details["additional_data"] of this SubmissionFolio object,
+        rather the given result will ONLY be written to S3. This is to prevent potentially
+        larger amounts of data from ultimately being written to the database (for the
+        IngestionSubmission object), but rather have them stored ONLY in S3.
+        """
 
         # Next several files are created only if relevant.
 

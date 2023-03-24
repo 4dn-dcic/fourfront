@@ -1,6 +1,6 @@
 {
     "title": "Other file",
-    "description": "Other files to ingest.",
+    "description": "Files of a kind other than the ones we've assigned a task-specific File type.",
     "id": "/profiles/file_other.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",

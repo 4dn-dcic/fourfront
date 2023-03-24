@@ -5,6 +5,7 @@ import json
 import magic
 import mimetypes
 import os
+import re
 import structlog
 import webtest
 
@@ -90,6 +91,7 @@ def load_data_via_ingester(vapp: VirtualApp, ontology: dict, itype: str = "ontol
     response = load_all_gen(vapp, ontology, None, overwrite=True, itype=itype, from_json=True, patch_only=False)
     results = {"post": [], "patch": [], "skip": [], "error": []}
     unique_uuids = set()
+    INGESTION_RESPONSE_PATTERN = re.compile(r"^([A-Z]+): ([0-9a-f-]+)$")
     for item in response:
         # ASSUME each item in the response looks something like one of (string or bytes):
         # POST: 15425d13-01ce-4e61-be5d-cd04401dff29
@@ -98,15 +100,15 @@ def load_data_via_ingester(vapp: VirtualApp, ontology: dict, itype: str = "ontol
         # ERROR: 906c4667-483e-4a08-96b9-3ce85ce8bf8c
         if isinstance(item, bytes):
             item = item.decode("ascii")
-        if not isinstance(item, str):
+        elif not isinstance(item, str):
+            log.warning(f"load_data_via_ingester: skipping response item of unexpected type ({type(item)}): {item!r}")
             continue
-        item_split = item.split()
-        if len(item_split) != 2:
+        match = INGESTION_RESPONSE_PATTERN.match(item)
+        if not match:
+            log.warning(f"load_data_via_ingester: skipping response item in unexpected form: {item!r}")
             continue
-        action = item_split[0].lower()
-        if action.endswith(":"):
-            action = action[:-1]
-        uuid = item_split[1]
+        action = match.group(1).lower()
+        uuid = match.group(2)
         if not results.get(action):
             results[action] = []
         results[action].append(uuid)

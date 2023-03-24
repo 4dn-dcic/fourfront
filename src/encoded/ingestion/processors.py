@@ -119,7 +119,7 @@ def handle_ontology_update(submission: SubmissionFolio):
             log.error(str(e))
             return 
         log.warning(f"Ontology ingestion handler file loaded: {datafile_bucket}/{datafile_key}")
-        # The loadx module expects to see the terms in the "ontology_terms" key.
+        # The loadx module expects to see the terms in the "ontology_term" key.
         ontology_json["ontology_term"] = ontology_json.pop("terms", [])
         # Get the number of ontology terms just for logging purposes.
         ontology_term_count = len(ontology_json["ontology_term"])
