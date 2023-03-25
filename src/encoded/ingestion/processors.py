@@ -68,7 +68,7 @@ def handle_ontology_update(submission: SubmissionFolio):
     directly from the submit-ontology process, i.e. not via Fourfront), and places message on SQS to pick up here.
     Here we download the ontology file from S3, process it (into the database, via loadx), and returns a summary.
 
-    FYI: Here is a more detailed summary of the steps for the submit-ontology process:
+    Here is a more detailed summary of the steps for the submit-ontology process:
    - Call Fourfront /FileOther endpoint to create file_other type object (in database); returns HTTP 201 and its uuid,
      e.g. 19734227-f380-4283-a1bb-ac14c169240f, which corresponds to S3 bucket key where actual given ontology file
      will be uploaded; this bucket (e.g. encoded-4dn-blobs) comes from the blob_bucket property in development.ini;
