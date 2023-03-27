@@ -388,25 +388,24 @@ def metadata_tsv(context, request):
             return True
 
         for set_accession, exp_accession, file_accession in accession_triples:
-            return True
-            # if (
-            #     (('Experiment Set Accession' in column_vals_dict and set_accession == column_vals_dict['Experiment Set Accession']) or set_accession == 'NONE') and
-            #     (('Experiment Accession' in column_vals_dict and exp_accession == column_vals_dict['Experiment Accession']) or exp_accession == 'NONE') and
-            #     (file_accession == column_vals_dict['File Accession'] or column_vals_dict['Related File Relationship'] == 'reference file for' or file_accession == 'NONE')
-            # ):
-            #     # if the file is a raw file (actually if classification is not processed file, then we assume it as a raw file),
-            #     # then add the related exp to the exp_raw_file_cache dict. to check 
-            #     # whether to include exp's ref files since we will include ref files if at least one raw file
-            #     # is selected for download.
-            #     if exp_accession and len(column_vals_dict['File Classification']) > 0 and column_vals_dict['File Classification'] != 'processed file':
-            #         exp_raw_file_cache[exp_accession] = True
+            if (
+                (('Experiment Set Accession' in column_vals_dict and set_accession == column_vals_dict['Experiment Set Accession']) or set_accession == 'NONE') and
+                (('Experiment Accession' in column_vals_dict and exp_accession == column_vals_dict['Experiment Accession']) or exp_accession == 'NONE') and
+                (file_accession == column_vals_dict['File Accession'] or column_vals_dict['Related File Relationship'] == 'reference file for' or file_accession == 'NONE')
+            ):
+                # if the file is a raw file (actually if classification is not processed file, then we assume it as a raw file),
+                # then add the related exp to the exp_raw_file_cache dict. to check 
+                # whether to include exp's ref files since we will include ref files if at least one raw file
+                # is selected for download.
+                if exp_accession and len(column_vals_dict['File Classification']) > 0 and column_vals_dict['File Classification'] != 'processed file':
+                    exp_raw_file_cache[exp_accession] = True
                 
-            #     # include ref files if at least one raw file of the parent experiment is already selected for downloads, else discard it
-            #     if exp_accession and column_vals_dict['Related File Relationship'] == 'reference file for':
-            #         if exp_accession not in exp_raw_file_cache:
-            #             return False
+                # include ref files if at least one raw file of the parent experiment is already selected for downloads, else discard it
+                if exp_accession and column_vals_dict['Related File Relationship'] == 'reference file for':
+                    if exp_accession not in exp_raw_file_cache:
+                        return False
  
-            #     return True
+                return True
         
         return False
 
