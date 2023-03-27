@@ -6,6 +6,12 @@ fourfront
 Change Log
 ----------
 
+5.1.5
+======
+
+* Pin auth0-lock in SPC to v11
+
+
 5.1.4
 =====
 
