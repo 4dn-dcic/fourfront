@@ -61,8 +61,9 @@ import PublicationSearchView    from './browse/PublicationSearchView';
 import SubscriptionsView        from './browse/SubscriptionsView';
 import FileSearchView           from './browse/FileSearchView';
 
-// login success view
+// auth related views
 import LoginSuccessView         from './navigation/components/LoginSuccessView';
+import UserRegistrationModal    from './navigation/components/UserRegistrationModal';
 
 
 content_views.register(StaticPage,    'StaticPage');
@@ -124,6 +125,7 @@ content_views.register(SubscriptionsView,       'Submissions'); // TODO: Rename 
 content_views.register(FileSearchView,          'FileSearchResults');
 
 content_views.register(LoginSuccessView,        'callback');
+content_views.register(UserRegistrationModal,   'registration');
 
 // Fallback for anything we haven't registered
 content_views.fallback = function () {

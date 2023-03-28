@@ -128,7 +128,7 @@ def callback(context, request):
     auth0_response_json = auth0_response.json()
     auth0_jwt = auth0_response_json.get('id_token')
     if not auth0_jwt:
-        raise HTTPUnauthorized('No JWT returned from Auth0, check Auth0 configuration')
+        raise LoginDenied('No JWT returned from Auth0, check Auth0 configuration')
 
     # Generate a session from Redis
     redis_handler = registry[REDIS]
@@ -137,6 +137,25 @@ def callback(context, request):
         namespace=env_name,
         jwt=auth0_jwt
     )
+
+    # Check that the user exists in our database, if they do not, redirect them to /registration
+    email = Auth0AuthenticationPolicy.get_token_info(auth0_jwt, request).get('email', '').lower()
+    if not email:
+        raise LoginDenied('No email extracted from JWT, not possible to continue')
+    try:
+        Auth0AuthenticationPolicy.get_user_info(request, email, redis_session_token.get_session_token())
+    except HTTPUnauthorized:
+        # in this case return a different response that the UI can interpret to pull up the registration modal
+        return {
+            '@type': ['registration'],
+            '@context': '/callback',
+            'title': 'registration'
+        }
+    except Exception as e:
+        raise LoginDenied(f'Unknown error encountered trying to extract user from DB {str(e)}')
+
+    # If we made it here, we got a success response from the database (the user exists) and we should
+    # store the session token
     redis_session_token.store_session_token(redis_handler=redis_handler)
     request.response.set_cookie(
         'jwtToken',  # note that although we are setting jwtToken, it is NOT a JWT when going through this route
@@ -275,21 +294,28 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
 
         # At this point, email has been authenticated with their Auth0 provider, but we don't know yet if this email is in our database.
         # If not authenticated (not in our DB), request.user_info will throw an HTTPUnauthorized error.
-
-        # Allow access basic user credentials from request obj after authenticating & saving request
         def get_user_info(request):
-            user_props = request.embed('/session-properties', as_user=email) # Performs an authentication against DB for user.
-            if not user_props.get('details'):
-                raise HTTPUnauthorized(
-                    title="Could not find user info for {}".format(email),
-                    headers={'WWW-Authenticate': "Bearer realm=\"{}\"; Basic realm=\"{}\"".format(request.domain, request.domain) }
-                )
-            user_props['id_token'] = id_token
-            return user_props
+            # This indirection is necessary, otherwise needed parameters don't make it
+            return self.get_token_info(request, email, id_token)
 
         request.set_property(get_user_info, "user_info", True)
         return email
 
+    @staticmethod
+    def get_user_info(request, email, id_token):
+        """ 
+        Previously an inner method, redefined here so can be used outside, but can only be used within a route
+        Allow access basic user credentials from request obj after authenticating & saving request 
+        """
+        user_props = request.embed('/session-properties', as_user=email)  # Performs an authentication against DB for user.
+        if not user_props.get('details'):
+            raise HTTPUnauthorized(
+                title="Could not find user info for {}".format(email),
+                headers={'WWW-Authenticate': "Bearer realm=\"{}\"; Basic realm=\"{}\"".format(request.domain, request.domain) }
+            )
+        user_props['id_token'] = id_token
+        return user_props
+    
     @staticmethod
     def get_token_info(token, request):
         '''
@@ -407,16 +433,15 @@ def login(context, request):
 @debug_log
 def logout(context, request):
     """
-    This endpoint proxies a request to Auth0 for it to remove its session cookies.
-    See https://auth0.com/docs/api/authentication#enterprise-saml-and-others-
+    This endpoint is called by the front-end upon executing a logout. It will delete
+    the session token passed to it from Redis storage, which has the effect of logging
+    out the user internally. If this isn't done there is no harm as the session token
+    will expire after 3 hours anyway. 
 
-    The Auth0 endpoint is meant to be navigated to by end-user as part of SSO logout (?)
-    So this endpoint may not be needed at moment. Kept for reference.
-
-    The front-end handles logging out by discarding the locally-held JWT from
-    browser cookies and re-requesting the current 4DN URL.
+    We do not send the logout signal to Auth0 at this time, since we handle it on our end.
+    It may be undesirable to send this signal as it will log the user out of all sessions
+    tied to that account.
     """
-
     # Delete Redis Session Token, if in use
     registry = request.registry
     session_token = get_jwt(request)
@@ -431,7 +456,7 @@ def logout(context, request):
         if redis_session_token:
             redis_session_token.delete_session_token(redis_handler=redis_handler)
     
-    # Deletes the cookie
+    # Tell the browser to delete the cookie
     request.response.set_cookie(
         name='jwtToken',
         value=None,
@@ -441,17 +466,19 @@ def logout(context, request):
         overwrite=True
     )
 
-    request.response.status_code = 401
+    # previously returned 401 - I think 200 (or even 204) is "more correct" - Will March 28 2023
+    request.response.status_code = 200
     request.response.headers['WWW-Authenticate'] = (
         "Bearer realm=\"{}\", title=\"Session Expired\"; Basic realm=\"{}\""
         .format(request.domain, request.domain)
     )
-
     return { "deleted_cookie" : True }
 
     # TODO: NEED DO THIS CLIENTSIDE SO IT UNSETS USER'S COOKIE - MUST BE THRU REDIRECT NOT AJAX
     # (we don't do this - i.e. we don't bother to log user out of all of Auth0 session, just out of
     # own web app)
+    # Note that in the Redis factor using Auth0 we are sticking with this behavior, but a callout may
+    # be necessary to RAS when that system is integrated - Will March 28 2023
 
     # call auth0 to logout -
     # auth0_logout_url = "https://{domain}/v2/logout" \

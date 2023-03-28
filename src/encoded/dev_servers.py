@@ -97,13 +97,20 @@ def main():
     ### ... to HERE to disable recreation of test db
     ### may have to `rm /tmp/snovault/pgdata/postmaster.pid`
 
+    app = get_app(args.config_uri, args.app_name)
+    settings = app.registry.settings
+    
+    # For now - required components
     postgres = postgresql_fixture.server_process(pgdata, echo=True)
     elasticsearch = elasticsearch_fixture.server_process(esdata, echo=True)
-    redis = redis_server_process(echo=True)
     nginx = nginx_server_process(echo=True)
-    processes = [postgres, elasticsearch, redis, nginx]
-
-
+    processes = [postgres, elasticsearch, nginx]
+    
+    # Optional components
+    if 'redis.server' in settings:
+        redis = redis_server_process(echo=True)
+        processes.append(redis)
+   
     @atexit.register
     def cleanup_process():
         for process in processes:
@@ -117,8 +124,6 @@ def main():
                 pass
             process.wait()
 
-
-    app = get_app(args.config_uri, args.app_name)
 
     # clear queues and initialize indices before loading data. No indexing yet.
     # this is needed for items with properties stored in ES
