@@ -530,7 +530,7 @@ const ExternalLinksRow = React.memo(function LinksRow(props){
         <div className="homepage-links-row external-links">
             <div className="links-wrapper row mb-2">
                 <div className="col-12 col-md-3">
-                    <a className="link-block external-link" href="http://www.4dnucleome.org/" target="_blank" rel="noopener noreferrer">
+                    <a className="link-block external-link" href="https://www.4dnucleome.org/" target="_blank" rel="noopener noreferrer">
                         <span>Main 4DN Portal</span>
                     </a>
                 </div>
