@@ -140,7 +140,7 @@
     "underscore": "^1.13.3",
     "url": "^0.11.0",
     "uuid": "^8.3.2",
-    "vitessce": "^1.1.20",
+    "vitessce": "^2.0.3",
     "jsonwebtoken": "^8.5.1"
   },
   "optionalDependencies": {
