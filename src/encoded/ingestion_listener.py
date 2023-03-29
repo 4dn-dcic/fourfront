@@ -18,8 +18,6 @@ import webtest
 from dcicutils.env_utils import is_stg_or_prd_env
 from dcicutils.misc_utils import VirtualApp, ignored, check_true, full_class_name, environ_bool, PRINT
 from pyramid import paster
-from pyramid.httpexceptions import HTTPNotFound, HTTPMovedPermanently  # , HTTPServerError
-from pyramid.request import Request
 # Possibly still needed by some commented-out code.
 # from pyramid.response import Response
 from pyramid.view import view_config
@@ -27,8 +25,6 @@ from snovault.util import debug_log
 from .ingestion.common import metadata_bundles_bucket, get_parameter, IngestionReport
 from .ingestion.exceptions import UnspecifiedFormParameter, SubmissionFailure  # , BadParameter
 from .ingestion.ingestion_listener_base import (
-    STATUS_QUEUED,
-    STATUS_INGESTED,
     DEBUG_SUBMISSIONS,
     IngestionListenerBase,
 )
@@ -91,8 +87,6 @@ def submit_for_ingestion(context, request):
     if datafile is None:
         # S3 protocol; not uploading from here (SubmitCGAP uploads directly).
         # Added circa March 2023.
-        datafile_bucket = request.POST['datafile_bucket']
-        datafile_key = request.POST['datafile_key']
         filename = request.POST['datafile_source_filename']
         override_name = None
     elif isinstance(datafile, cgi.FieldStorage):
