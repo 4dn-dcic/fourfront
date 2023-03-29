@@ -240,8 +240,7 @@ def metadata_tsv(context, request):
     Alternatively, can accept a GET request wherein all files from ExpSets matching search query params are included.
     '''
 
-    search_params = dict(request.GET) # Must use request.GET to get URI query params only (exclude POST params, etc.)
-
+    search_params = request.GET.dict_of_lists() # Must use request.GET to get URI query params only (exclude POST params, etc.)
     # If conditions are met (equal number of accession per Item type), will be a list with tuples: (ExpSetAccession, ExpAccession, FileAccession)
     accession_triples = None
     filename_to_suggest = None
@@ -266,10 +265,7 @@ def metadata_tsv(context, request):
         search_path = '/search/'
     search_params['field'] = []
     search_params['sort'] = ['accession']
-    search_params['type'] = search_params.get('type', 'ExperimentSetReplicate')
-    # workaround for file only search since type=File returns more than 10K results that prevent iterating all after ES7 upgrade
-    if search_params['type'][0:4] == 'File' and search_params['type'][4:7] != 'Set':
-        search_params['frame'] = 'page'
+    search_params['type'] = search_params.get('type', ['ExperimentSetReplicate'])[0]
     header = []
 
     def add_field_to_search_params(itemType, field):

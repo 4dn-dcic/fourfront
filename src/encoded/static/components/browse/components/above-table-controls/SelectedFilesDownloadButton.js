@@ -3,11 +3,12 @@
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import url from 'url';
+import queryString from 'query-string';
 import _ from 'underscore';
 import memoize from 'memoize-one';
 import Modal from 'react-bootstrap/esm/Modal';
 
-import { console, ajax, JWT, typedefs, analytics, object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { console, ajax, JWT, typedefs, analytics, object, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { display as dateTimeDisplay } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';
 import { uniqueFileCount, fileCountWithDuplicates } from './../SelectedFilesController';
 import { onLoginNavItemClick } from './../../../navigation/components/LoginNavItem';
@@ -195,6 +196,11 @@ class SelectedFilesDownloadModal extends React.PureComponent {
 
         if ('search' === analytics.hrefToListName(window && window.location.href)) {
             action = "/metadata/?type=File&sort=accession";
+            // workaround for file only search since type=File returns more than 10K results that prevent iterating all after ES7 upgrade
+            const parts = _.clone(memoizedUrlParse(window.location.href));
+            const modifiedQuery = _.omit(parts.query || {}, ['currentAction', 'type', 'sort', 'limit']);
+            const modifiedSearch = queryString.stringify(modifiedQuery);
+            action += '&' + modifiedSearch;
         }
         return (
             <Modal show className="batch-files-download-modal" onHide={onHide} bsSize="large">
