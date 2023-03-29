@@ -267,6 +267,9 @@ def metadata_tsv(context, request):
     search_params['field'] = []
     search_params['sort'] = ['accession']
     search_params['type'] = search_params.get('type', 'ExperimentSetReplicate')
+    # workaround for file only search since type=File returns more than 10K results that prevent iterating all after ES7 upgrade
+    if search_params['type'][0:4] == 'File' and search_params['type'][4:7] != 'Set':
+        search_params['frame'] = 'page'
     header = []
 
     def add_field_to_search_params(itemType, field):
