@@ -168,7 +168,7 @@ function FileViewVitessce (props) {
         return {
             "version": "1.0.1",
             "name": name,
-            "description": description,
+            "description": description || "-",
             "datasets": [
                 {
                     "uid": "A",

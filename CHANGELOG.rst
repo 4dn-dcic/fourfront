@@ -71,6 +71,20 @@ Adding ingestion support (from cgap-portal as initial guide):
 * Updated ``encoded/types/file.py`` with new ``FileOther`` type.
 
 
+5.1.5
+======
+
+* Pin auth0-lock in SPC to v11
+
+
+5.1.4
+=====
+
+`PR Vitessce upgrade  <https://github.com/4dn-dcic/fourfront/pull/1792>`_
+
+* upgrade from 1.1.20 to 2.0.3
+
+
 5.1.3
 =====
 
