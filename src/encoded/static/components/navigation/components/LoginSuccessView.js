@@ -50,6 +50,7 @@ export default class LoginSuccessView extends React.PureComponent {
         ])
         .then((response) => {
             // this may not be needed?
+            console.log('got response from session properties', response);
             if (response.code || response.status) throw response;
             return response;
         })
@@ -99,6 +100,7 @@ export default class LoginSuccessView extends React.PureComponent {
                     throw new Error('Request to profile URL failed.');
                 });
             } else {
+                console.log('in failed user profile fetch');
                 throw new Error('No profile URL found in user_actions.');
             }
             }).catch((error)=>{

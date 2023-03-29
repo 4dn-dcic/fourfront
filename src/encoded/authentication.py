@@ -92,13 +92,18 @@ def includeme(config):
     config.scan(__name__)
 
 
+def redis_is_active(request):
+    """ Quick helper to standardize detecting whether redis is in use """
+    return 'redis.server' in request.registry.settings
+
+
 @view_config(route_name='callback', request_method='GET', permission=NO_PERMISSION_REQUIRED)
 def callback(context, request):
     """ /callback for Fourfront that will result in a session token
         Note that this sets jwtToken as to not break the front-end
     """
-    if 'redis.server' not in request.registry.settings:
-        raise HTTPForbidden('Calls to /callback are not allowed when Redis not in use')
+    if not redis_is_active(request):
+        raise HTTPForbidden('Calls to /callback are not allowed when Redis not in use - check your ini file')
     auth0_code = request.params.get('code', None)
     if not auth0_code:
         raise HTTPForbidden('No code sent back from Auth0')
@@ -146,16 +151,26 @@ def callback(context, request):
         Auth0AuthenticationPolicy.get_user_info(request, email, redis_session_token.get_session_token())
     except HTTPUnauthorized:
         # in this case return a different response that the UI can interpret to pull up the registration modal
-        return {
+        resp_json = {
             '@type': ['registration'],
             '@context': '/callback',
-            'title': 'registration'
+            'title': 'registration',
+            '@graph': [
+                email  # this is needed by the front-end to render the UserRegistrationModal
+            ]
         }
     except Exception as e:
         raise LoginDenied(f'Unknown error encountered trying to extract user from DB {str(e)}')
+    else:
+        resp_json = {
+            '@type': ['callback'],
+            '@context': '/callback',
+            'title': 'callback'
+    }
 
-    # If we made it here, we got a success response from the database (the user exists) and we should
-    # store the session token
+    # Give a session token unconditionally so we can retrieve JWT later on 
+    # in the registration scenario (if an unknown user) or make auth'd requests
+    # as an existing user
     redis_session_token.store_session_token(redis_handler=redis_handler)
     request.response.set_cookie(
         'jwtToken',  # note that although we are setting jwtToken, it is NOT a JWT when going through this route
@@ -167,11 +182,7 @@ def callback(context, request):
         overwrite=True,
         secure=is_https
     )
-    return {
-        '@type': ['callback'],
-        '@context': '/callback',
-        'title': 'callback'
-    }
+    return resp_json
 
 
 class NamespacedAuthenticationPolicy(object):
@@ -273,7 +284,7 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
             # print('Missing assertion.', 'unauthenticated_userid', request)
             return None
 
-        if 'redis.server' in request.registry.settings:
+        if redis_is_active(request):
             session_token = RedisSessionToken.from_redis(
                 redis_handler=request.registry[REDIS],
                 namespace=request.registry.settings['env.name'],
@@ -445,7 +456,7 @@ def logout(context, request):
     # Delete Redis Session Token, if in use
     registry = request.registry
     session_token = get_jwt(request)
-    if REDIS in registry:
+    if redis_is_active(request):
         redis_handler = registry[REDIS]
         env_name = registry.settings['env.name']
         redis_session_token = RedisSessionToken.from_redis(
@@ -613,7 +624,7 @@ def impersonate_user(context, request):
         algorithm=JWT_ENCODING_ALGORITHM
 	)
 
-    if 'redis.server' in request.registry.settings:
+    if redis_is_active(request):
         redis_session_token = RedisSessionToken.from_redis(
             redis_handler=request.registry[REDIS],
             namespace=request.registry.settings['env.name'],
@@ -683,10 +694,33 @@ def create_unauthorized_user(context, request):
     recaptcha_resp = request.json.get('g-recaptcha-response')
     if not recaptcha_resp:
         raise LoginDenied()
+    
+    registry = request.registry
 
-    email = "<no auth0 authenticated e-mail supplied>"
-    if hasattr(request, "_auth0_authenticated"):
-        email = request._auth0_authenticated # equal to: jwt_info['email'].lower()
+    # old method for retrieving auth'd email - request object should have _auth0_authenticated set
+    # NOTE: it is not obvious to me how this works... probably should be looked into - Will March 29 2023
+    if not redis_is_active(request):
+        email = "<no auth0 authenticated e-mail supplied>"
+        if hasattr(request, "_auth0_authenticated"):
+            email = request._auth0_authenticated # equal to: jwt_info['email'].lower()
+    
+    # new method for retrieving auth'd email - request should have transmitted a session token
+    # from which we can get the JWT and the email they auth'd with
+    else:
+        id_token = get_jwt(request)
+        redis_handler = registry[REDIS]
+        env_name = registry.settings['env.name']
+        redis_session_token = RedisSessionToken.from_redis(
+            redis_handler=redis_handler,
+            namespace=env_name,
+            token=id_token
+        )
+        jwt_info = redis_session_token.decode_jwt(
+                audience=request.registry.settings['auth0.client'],
+                secret=request.registry.settings['auth0.secret']
+        )
+        email = jwt_info.get('email', '<no e-mail supplied>').lower()
+
     user_props = request.json
     user_props_email = user_props.get("email", "<no e-mail supplied>").lower()
     if user_props_email != email:
