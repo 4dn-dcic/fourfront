@@ -241,6 +241,12 @@
                 "description": "Item class name (e.g. ExperimentHiC)",
                 "type": "string"
             }
+        },
+        "cfde_term": {
+            "title": "CFDE Experiment Type",
+            "description": "CFDE term that corresponds to the 4DN experiment type based on OBI ontology",
+            "type": "string",
+            "linkTo": "OntologyTerm"
         }
     },
     "facets": {

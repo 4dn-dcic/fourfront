@@ -55,6 +55,7 @@ COMMON_EXCLUDED_URI_PARAMS = [
     'mode', 'redirected_from', 'datastore', 'referrer',
     'currentAction', 'additional_facet'
 ]
+ES_MAX_HIT_TOTAL = 10000
 
 
 @view_config(route_name='search', request_method='GET', permission='search')
@@ -175,6 +176,13 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     result['total'] = total = es_results['hits']['total']['value']
     result['facets'] = format_facets(es_results, facets, total, additional_facets, search_frame)
     result['aggregations'] = format_extra_aggregations(es_results)
+
+    # After ES7 upgrade, 'total' does not return the exact count if it is >10000. This restriction
+    # requires many UI components' and tests' update. So, we attempt to get a more precise result
+    # from facets. (It is interesting that type=Item's doc_count is calculated correctly whereas the 'total'
+    # is not.)
+    if total == ES_MAX_HIT_TOTAL:
+        result['total'] = total = get_total_from_facets(result['facets'], total)
 
     # Add batch actions
     # TODO: figure out exactly what this does. Provide download URLs?
@@ -1578,6 +1586,18 @@ def get_iterable_search_results(request, search_path='/search/', param_lists=Non
     subreq = make_search_subreq(request, '{}?{}'.format(search_path, urlencode(param_lists, True)) )
     return iter_search_results(None, subreq, **kwargs)
 
+def get_total_from_facets(facets, total):
+    '''
+    Loops through facets, and grabs total count from the term having type=Item
+    '''
+    for facet in facets:
+        if facet['field'] == 'type' and facet['terms']:
+            for term in facet['terms']:
+                if term['key'] == 'Item' and term['doc_count']:
+                    return term['doc_count']
+
+    #fallback
+    return total
 
 # Update? used in ./batch_download.py
 def iter_search_results(context, request, **kwargs):
