@@ -354,7 +354,7 @@ def convert_external_links(content, reference_domain):
     matches = re.findall(r"(<a[^>]*href=[\"\']https?://(?P<domain>[\w\-\.]+)(?:\S*)[\"\'][^>]*>[^<]+</a>)", content, re.DOTALL)
     
     for match in matches:
-        match_domain_lower = match[1].casefold()      
+        match_domain_lower = match[1].casefold()
         # compares the found links with domain (we have a special condition to check staging/data indexing)
         # todo: replace hard-coded domain names with env. variables etc.
         if (reference_domain_lower != match_domain_lower) and not (reference_domain_lower == 'staging.4dnucleome.org' and match_domain_lower == 'data.4dnucleome.org'):

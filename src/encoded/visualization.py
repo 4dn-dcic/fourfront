@@ -32,7 +32,6 @@ def includeme(config):
     config.add_route('trace_workflow_runs',         '/trace_workflow_run_steps/{file_uuid}/', traverse='/{file_uuid}')
     config.add_route('bar_plot_chart',              '/bar_plot_aggregations')
     config.add_route('recently_released_datasets',  '/recently_released_datasets')
-    config.add_route('request_domain',              '/request_domain')
     config.add_route('date_histogram_aggregations', '/date_histogram_aggregations/')
     config.add_route('add_files_to_higlass_viewconf', '/add_files_to_higlass_viewconf/')
     config.scan(__name__)
@@ -382,11 +381,6 @@ def recently_released_datasets(context, request):
 
     return ret_result
 
-
-@view_config(route_name='request_domain', request_method=['GET'])
-@debug_log
-def request_domain(context, request):
-    return request.domain
 
 
 @view_config(route_name='date_histogram_aggregations', request_method=['GET', 'POST'])
