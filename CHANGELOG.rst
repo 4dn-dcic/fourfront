@@ -6,6 +6,14 @@ fourfront
 Change Log
 ----------
 
+5.1.8
+=====
+
+`PR Metadata.tsv Improvements  <https://github.com/4dn-dcic/fourfront/pull/1795>`_
+
+* /metadata end-point traverses only filtered files instead of all files in FileSearchView (Browse, ExpSet and Exp. pages remained as is.)
+
+
 5.1.7
 =====
 
