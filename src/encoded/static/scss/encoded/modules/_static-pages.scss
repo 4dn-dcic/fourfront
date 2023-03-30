@@ -762,6 +762,21 @@
 	&:not([id]) .section-title > i.icon-link {
 		display: none;
 	}
+
+	a[target="_blank"] { 
+		padding-right: 5px !important;
+		border-radius: 5px;
+		&:after {
+			font-family: $fa-font-family;
+			font-weight: 900;
+			content: "\f35d";
+			font-size: 0.6rem;
+			padding-left: 3px;
+			line-height: 1.31rem;
+			vertical-align: top;
+			display: inline-block;
+		}
+	} 
 }
 
 
