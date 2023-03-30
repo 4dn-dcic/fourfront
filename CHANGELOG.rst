@@ -6,6 +6,14 @@ fourfront
 Change Log
 ----------
 
+5.1.6
+=====
+
+`PR Static content - open external links in new tab  <https://github.com/4dn-dcic/fourfront/pull/1773>`_
+
+* Convert links in static content: add no tracking, styling, and target="_blank" attributes 
+
+
 5.1.5
 ======
 
