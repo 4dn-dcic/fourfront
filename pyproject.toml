@@ -114,6 +114,7 @@ codeguru-profiler-agent = "^1.2.4"
 supervisor = "^4.2.4"
 wheel = "0.37.1"
 auth0-python = "^4.0.0"
+pillow = "^9.4.0"
 
 
 [tool.poetry.dev-dependencies]
