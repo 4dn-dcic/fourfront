@@ -748,8 +748,9 @@ def create_unauthorized_user(context, request):
     # validate recaptcha_resp
     # https://developers.google.com/recaptcha/docs/verify
     recap_url = 'https://www.google.com/recaptcha/api/siteverify'
+    recap_secret = request.registry.settings['g.recaptcha.secret']
     recap_values = {
-        'secret': request.registry.settings['g.recaptcha.secret'],
+        'secret': recap_secret,
         'response': recaptcha_resp
     }
     data = urlencode(recap_values).encode()
@@ -763,7 +764,7 @@ def create_unauthorized_user(context, request):
             raise HTTPForbidden(title="Could not create user. Try logging in again.")
     else:
         # error with re-captcha
-        logger.error(f'Error from captcha {recap_res}')
+        logger.error(f'Recaptcha used {recap_secret[0:10]} Error from captcha {recap_res}')
         raise HTTPUnauthorized(
             title="Invalid reCAPTCHA. Try logging in again.",
             headers={'WWW-Authenticate': "Bearer realm=\"{}\"; Basic realm=\"{}\"".format(request.domain, request.domain) }
