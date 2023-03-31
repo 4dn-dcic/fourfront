@@ -3,6 +3,7 @@ import os
 from operator import itemgetter
 import jwt
 import json
+import logging
 
 from passlib.context import CryptContext
 from urllib.parse import urlencode
@@ -38,6 +39,10 @@ from snovault.schema_utils import validate_request
 from snovault.util import debug_log
 from snovault.redis.interfaces import REDIS
 from dcicutils.redis_tools import RedisSessionToken
+
+
+logger = logging.getLogger(__name__)
+
 
 CRYPT_CONTEXT = __name__ + ':crypt_context'
 
@@ -750,7 +755,6 @@ def create_unauthorized_user(context, request):
     data = urlencode(recap_values).encode()
     headers = {"Content-Type": "application/x-www-form-urlencoded; charset=utf-8"}
     recap_res = requests.get(recap_url, params=data, headers=headers).json()
-
     if recap_res['success']:
         sno_res = sno_collection_add(user_coll, request, False)  # POST User
         if sno_res.get('status') == 'success':
@@ -759,6 +763,7 @@ def create_unauthorized_user(context, request):
             raise HTTPForbidden(title="Could not create user. Try logging in again.")
     else:
         # error with re-captcha
+        logger.error(f'Error from captcha {recap_res}')
         raise HTTPUnauthorized(
             title="Invalid reCAPTCHA. Try logging in again.",
             headers={'WWW-Authenticate': "Bearer realm=\"{}\"; Basic realm=\"{}\"".format(request.domain, request.domain) }
