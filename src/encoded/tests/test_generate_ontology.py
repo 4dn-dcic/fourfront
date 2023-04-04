@@ -6,6 +6,7 @@ from collections import OrderedDict
 from rdflib import URIRef
 from unittest import mock
 from ..commands import generate_ontology as go
+from ..ingestion import encoded_api_connection
 from ..commands.owltools import Owler
 
 
@@ -127,7 +128,8 @@ def get_fdn_ontology_side_effect(*args, **kwargs):
 
 def test_get_ontologies_all(connection):
     prefixes = ['EFO', 'UBERON', 'OBI']
-    with mock.patch('encoded.commands.generate_ontology.search_metadata', return_value=all_ontology):
+#   with mock.patch('encoded.commands.generate_ontology.search_metadata', return_value=all_ontology):
+    with mock.patch('encoded.ingestion.encoded_api_connection.search_metadata', return_value=all_ontology):
         ont_list = 'all'
         ontologies = go.get_ontologies(connection, ont_list)
         assert len(ontologies) == 3
@@ -286,7 +288,8 @@ def test_get_slim_terms(connection, slim_terms_by_ont):
     present = ['developmental', 'assay']
     absent = ['organ', 'system', 'cell']
     test_slim_terms = slim_terms_by_ont
-    with mock.patch('encoded.commands.generate_ontology.search_metadata',
+#   with mock.patch('encoded.commands.generate_ontology.search_metadata',
+    with mock.patch('encoded.ingestion.encoded_api_connection.search_metadata',
                     side_effect=test_slim_terms):
         terms = go.get_slim_terms(connection)
         assert len(terms) == 3

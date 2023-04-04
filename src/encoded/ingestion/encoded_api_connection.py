@@ -173,6 +173,10 @@ class EncodedAPIConnection:
                 offset += 1
                 if not isinstance(ignore, Callable) or not ignore(item):
                     yield item
+            if isinstance(response, list):
+                # This can happen from tests (e.g. tests/test_generate_ontology),
+                # where we mock search_metadata to just return a static list.
+                break
             if offset == offset_before_iteration:
                 # No results in this result set (page); we are done.
                 break
