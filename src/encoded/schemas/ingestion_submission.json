@@ -4,11 +4,7 @@
     "id": "/profiles/ingestion_submission.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": [
-        "lab",
-        "award",
-        "ingestion_type"
-    ],
+    "required": [ "ingestion_type" ],
     "additionalProperties": false,
     "identifyingProperties": [
         "uuid",

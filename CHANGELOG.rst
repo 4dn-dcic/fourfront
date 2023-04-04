@@ -69,6 +69,7 @@ Adding ingestion support (from cgap-portal as initial guide):
 * Updated ``groupfinder`` in ``encoded/authorization.py`` to include ``INGESTION`` in ``localname``
 * Added ``encoded/schemas/file_other.json`` (totally new).
 * Updated ``encoded/types/file.py`` with new ``FileOther`` type.
+* Updated ``encoded/schemas/ingestion_submission.py`` to remove ``award`` and ``lab`` from ``required``.
 
 
 5.1.7
