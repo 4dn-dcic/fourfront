@@ -139,7 +139,8 @@ def test_get_ontologies_all(connection):
 
 def test_get_ontologies_one(connection):
     prefix = 'EFO'
-    with mock.patch('encoded.commands.generate_ontology.get_metadata', side_effect=get_fdn_ontology_side_effect):
+#   with mock.patch('encoded.commands.generate_ontology.get_metadata', side_effect=get_fdn_ontology_side_effect):
+    with mock.patch('encoded.ingestion.encoded_api_connection.get_metadata', side_effect=get_fdn_ontology_side_effect):
         ont_list = 'EFO'
         ontologies = go.get_ontologies(connection, ont_list)
         assert len(ontologies) == 1
@@ -149,7 +150,8 @@ def test_get_ontologies_one(connection):
 def test_get_ontologies_not_in_db(connection):
     prefix = 'EFO'
     all_ontology.append({'@type': ['Error', 'Item'], 'ontology_prefix': 'FAKE'})
-    with mock.patch('encoded.commands.generate_ontology.get_metadata',
+#   with mock.patch('encoded.commands.generate_ontology.get_metadata',
+    with mock.patch('encoded.ingestion.encoded_api_connection.get_metadata',
                     return_value={'@type': ['Error', 'Item'], 'ontology_prefix': 'FAKE'}):
         ont_list = 'FAKE'
         ontologies = go.get_ontologies(connection, ont_list)

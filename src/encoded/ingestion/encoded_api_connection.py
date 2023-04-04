@@ -62,24 +62,8 @@ class EncodedAPIConnection:
         """
         Returns the ontology (dictionary) for the given uuid or None if not found.
         """
-        if self._is_uuid(ontology_uuid):
-            query = self._normalize_query(f"ontologys/{ontology_uuid}/")
-            return self.get_result(query)
-        else:
-            # Looks like the given ontology is a actually name rather than a uuid.
-            # look it up its uuid in the list of all ontologies (via search_ontologies;
-            ontologies = self.search_ontologies()
-            if not ontologies:
-                return None
-            ontology_uuid = [ontology["uuid"] for ontology in ontologies if ontology["ontology_prefix"] == ontology_uuid]
-            if len(ontology_uuid) == 0:
-                return None
-            if len(ontology_uuid) > 1:
-                raise Exception(f"Too many ontologies returned for: {ontology_uuid}")
-            ontology_uuid = ontology_uuid[0]
-            if not self._is_uuid(ontology_uuid):
-                raise Exception(f"Invalid uuid for ontology: {ontology_uuid}")
-            return self.get_ontology(ontology_uuid)
+        query = self._normalize_query(f"ontologys/{ontology_uuid}/")
+        return self.get_result(query)
 
     def search_ontology_terms_set(self,
                                   category: Optional[str] = None,
@@ -261,15 +245,3 @@ class EncodedAPIConnection:
         elif not isinstance(n, int):
             return None
         return n if n >= 0 else None
-
-    @staticmethod
-    def _is_uuid(value: str) -> bool:
-        """
-        Returns True iff the given value looks like a uuid, otherwise False.
-        """
-        try:
-            uuid.UUID(value)
-            return True
-        except Exception as e:
-            pass
-        return False
