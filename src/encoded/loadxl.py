@@ -101,11 +101,11 @@ def load_data_via_ingester(vapp: VirtualApp, ontology: dict, itype: str = "ontol
         if isinstance(item, bytes):
             item = item.decode("ascii")
         elif not isinstance(item, str):
-            log.warning(f"load_data_via_ingester: skipping response item of unexpected type ({type(item)}): {item!r}")
+            logger.warning(f"load_data_via_ingester: skipping response item of unexpected type ({type(item)}): {item!r}")
             continue
         match = INGESTION_RESPONSE_PATTERN.match(item)
         if not match:
-            log.warning(f"load_data_via_ingester: skipping response item in unexpected form: {item!r}")
+            logger.warning(f"load_data_via_ingester: skipping response item in unexpected form: {item!r}")
             continue
         action = match.group(1).lower()
         uuid = match.group(2)
