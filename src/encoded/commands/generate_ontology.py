@@ -5,7 +5,6 @@ import pkg_resources
 import re
 import requests
 import sys
-from typing import Optional
 
 from collections import Counter
 from dcicutils.ff_utils import get_authentication_with_server, get_metadata, search_metadata, unified_authentication
@@ -26,7 +25,6 @@ from ..commands.owltools import (
     OnProperty,
     Deprecated
 )
-from ..ingestion.encoded_api_connection import EncodedAPIConnection
 
 
 EPILOG = __doc__
@@ -38,14 +36,6 @@ HAS_PART = "http://purl.obolibrary.org/obo/BFO_0000051"
 ACHIEVES_PLANNED_OBJECTIVE = "http://purl.obolibrary.org/obo/OBI_0000417"
 
 ontregex = re.compile(r'( +\(((EFO|SO|UBERON|4DN|OBI), )*(EFO|SO|UBERON|4DN|OBI)\))')
-
-ONTOLOGY_TERMS_TO_IGNORE = [
-    "111112bc-8535-4448-903e-854af460a233",
-    "111113bc-8535-4448-903e-854af460a233",
-    "111114bc-8535-4448-903e-854af460a233",
-    "111116bc-8535-4448-903e-854af460a233",
-    "111117bc-8535-4448-903e-854af460a233"
-]
 
 
 def iterative_parents(nodes, terms, data):
@@ -388,18 +378,37 @@ def get_definition_term_uris(ontology, as_rdf=True):
     return get_syndef_terms_as_uri(ontology, 'definition_terms', as_rdf)
 
 
-def get_slim_terms(connection, limit: Optional[int] = None):
+def get_slim_terms(connection):
     """Retrieves ontology_term jsons for those terms that have 'is_slim_for'
         field populated
     """
-    return EncodedAPIConnection(connection).search_ontology_slim_terms(limit=limit)
+    # currently need to hard code the categories of slims but once the ability
+    # to search all can add parameters to retrieve all or just the terms in the
+    # categories passed as a list
+    slim_categories = ['developmental', 'assay', 'organ', 'system', 'cell']
+    search_suffix = 'search/?type=OntologyTerm&is_slim_for='
+    slim_terms = []
+    for cat in slim_categories:
+        try:
+            terms = search_metadata(search_suffix + cat, connection)
+            slim_terms.extend(terms)
+        except TypeError as e:
+            print(e)
+            continue
+    return slim_terms
 
 
-def get_existing_ontology_terms(connection, limit: Optional[int] = None):  # , ontologies=None):
+def get_existing_ontology_terms(connection):  # , ontologies=None):
     """Retrieves all existing ontology terms from the db
     """
-    connection = EncodedAPIConnection(connection)
-    return connection.search_ontology_terms_as_dict(limit=limit, ignore=lambda term: term["uuid"] in ONTOLOGY_TERMS_TO_IGNORE)
+    search_suffix = 'search/?type=OntologyTerm&status=released&status=obsolete'  # + ont_list
+    db_terms = search_metadata(search_suffix, connection, page_limit=200, is_generator=True)
+    ignore = [
+        "111112bc-8535-4448-903e-854af460a233", "111113bc-8535-4448-903e-854af460a233",
+        "111114bc-8535-4448-903e-854af460a233", "111116bc-8535-4448-903e-854af460a233",
+        "111117bc-8535-4448-903e-854af460a233"
+    ]
+    return {t['term_id']: t for t in db_terms if t['uuid'] not in ignore}
 
 
 def get_ontologies(connection, ont_list):
@@ -408,12 +417,11 @@ def get_ontologies(connection, ont_list):
     """
     ontologies = []
     if ont_list == 'all':
-        ontologies = EncodedAPIConnection(connection).search_ontologies()
+        ontologies = search_metadata('search/?type=Ontology', connection)
     else:
-        ontologies = [EncodedAPIConnection(connection).get_ontology(ont_list)]
+        ontologies = [get_metadata('ontologys/' + ont_list, connection)]
     # removing item not found cases with reporting
     if not isinstance(ontologies, (list, tuple)):
-        print(type(ontologies))
         print("we must not have got ontologies... bailing")
         sys.exit()
     for i, ontology in enumerate(ontologies):
@@ -440,9 +448,6 @@ def connect2server(env=None, key=None, args=None):
 
     try:
         auth = get_authentication_with_server(key, env)
-        # TODO
-        # Add option to use local credentials, e.g. end up with something like:
-        # auth = {'secret': 'your-localhost-secret', 'key': 'your-localhost-key', 'server': 'http://localhost:8000'}
     except Exception:
         print("Authentication failed")
         sys.exit(1)
@@ -632,7 +637,7 @@ def update_parents(termid, ontid, tparents, dparents, simple, connection):
     dpmeta = dparents
     if not dpmeta or 'source_ontologies' not in dpmeta[0] or 'term_id' not in dpmeta[0]:
         # make sure we have the required fields - should be embedded but maybe not
-        dpmeta = [EncodedAPIConnection(connection).search_ontology_term(p.get('uuid')) for p in dparents]
+        dpmeta = [get_metadata(p.get('uuid'), connection) for p in dparents]
     for dp in dpmeta:
         donts = [o.get('uuid') for o in dp.get('source_ontologies')]
     dp2chk = [p.get('uuid') for p in dpmeta if ontid in donts]
@@ -1005,7 +1010,6 @@ def parse_args(args):
                         help="The name of the key to use in the keyfile.")
     parser.add_argument('--app-name', help="Pyramid app name in configfile - needed to load terms directly")
     parser.add_argument('--config-uri', help="path to configfile - needed to load terms directly")
-    parser.add_argument('--limit-terms', type=int, default=None, help="Limit the number of ontology terms to fetch; for testing.")
     parser.add_argument('--local-key', help='Local access key ID if using local env.')
     parser.add_argument('--local-secret', help='Local access key secret if using local env.')
 
@@ -1037,7 +1041,7 @@ def main():
         key = str(keys[args.keyname])
     else:
         key = args.key
-    connection = connect2server(env=args.env, key=key, args=args)
+    connection = connect2server(args.env, key, args)
     print("Pre-processing")
     ontologies = get_ontologies(connection, args.ontology)
     if len(ontologies) > 1 and args.simple:
@@ -1047,9 +1051,9 @@ def main():
         if o['ontology_name'].startswith('4DN') or o['ontology_name'].startswith('CGAP'):
             ontologies.pop(i)
     print('HAVE ONTOLOGY INFO')
-    slim_terms = get_slim_terms(connection, limit=args.limit_terms)
+    slim_terms = get_slim_terms(connection)
     print('HAVE SLIM TERMS')
-    db_terms = get_existing_ontology_terms(connection, limit=args.limit_terms)
+    db_terms = get_existing_ontology_terms(connection)
     print('HAVE DB TERMS')
     terms = {}
     deprecated = []
@@ -1110,7 +1114,7 @@ def main():
         if obsoletes:
             problems = []
             for obsolete in obsoletes:
-                result = EncodedAPIConnection(connection).get_ontology_term_links(obsolete['uuid'])
+                result = get_metadata(obsolete['uuid'] + '/@@links', connection)
                 if result.get('uuids_linking_to'):
                     for item in result['uuids_linking_to']:
                         if 'parents' not in item.get('field', ''):
