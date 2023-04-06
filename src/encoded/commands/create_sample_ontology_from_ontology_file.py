@@ -10,7 +10,6 @@
 # python create_sample_ontology_file_from_ontology_file.py ontology_file.json --uuids COMMA-SEPARATED-UUIDS > output.json
 
 import argparse
-import copy
 import json
 import io
 import sys

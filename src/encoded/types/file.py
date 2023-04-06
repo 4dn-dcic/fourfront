@@ -629,7 +629,7 @@ class File(Item):
             file_formats = []
             for xfile in extra_files:
                 # ensure a file_format (identifier for extra_file) is given and non-null
-                if not('file_format' in xfile and bool(xfile['file_format'])):
+                if not ('file_format' in xfile and bool(xfile['file_format'])):
                     continue
                 eformat = xfile['file_format']
                 if eformat.startswith('/file-formats/'):
@@ -1545,7 +1545,7 @@ def update_google_analytics(context, request, ga_config, filename, file_size_dow
 
     # Catch error here
     try:
-        resp = requests.post(
+        _ = requests.post(
             "https://ssl.google-analytics.com/collect?z=" + str(datetime.datetime.utcnow().timestamp()),
             data=urllib.parse.urlencode(ga_payload),
             timeout=5.0,

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import argparse
 import logging
-import os
 import json
 from datetime import datetime
 from dcicutils import ff_utils
