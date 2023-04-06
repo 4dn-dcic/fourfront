@@ -5,9 +5,9 @@
 # which each chosen ontology term record DEPENDS (this is the important/value-add bit).
 #
 # Example Usage:
-# python create_sample_ontology_file_from_ontology_file.py --help
-# python create_sample_ontology_file_from_ontology_file.py ontology_file.json --count NUMBER > output.json
-# python create_sample_ontology_file_from_ontology_file.py ontology_file.json --uuids COMMA-SEPARATED-UUIDS > output.json
+# create-sample-ontology-file-from-ontology-file --help
+# create-sample-ontology-file-from-ontology-file ontology_file.json --count NUMBER > output.json
+# create-sample-ontology-file-from-ontology-file ontology_file.json --uuids COMMA-SEPARATED-UUIDS > output.json
 
 import argparse
 import json
@@ -18,17 +18,23 @@ from typing import Optional
 
 def main():
     args = parse_args(sys.argv[1:])
-    sample_ontology_json = create_sample_ontology_from_ontology_file(args.ontology_file, args.count, args.uuids, args.terms, args.quiet)
+    sample_ontology_json = create_sample_ontology_from_ontology_file(args.ontology_file,
+                                                                     args.count, args.uuids, args.terms,
+                                                                     args.quiet)
     print(json.dumps(sample_ontology_json, indent=4))
 
 
 def parse_args(args):
     parser = argparse.ArgumentParser()
     parser.add_argument('ontology_file', help="Source ontology file.")
-    parser.add_argument('--count', default=None, type=int, help="Number of ontology term records to put in the sample; default is 1.")
-    parser.add_argument('--uuids', default=None, type=str, help="One or more comma-separated list of ontology term uuids.")
-    parser.add_argument('--terms', default=None, type=str, help="One or more comma-separated list of ontology term ids.")
-    parser.add_argument('--quiet', default=False, action='store_true', help="If specified silently supress warnings/errors.")
+    parser.add_argument('--count', default=None, type=int,
+                        help="Number of ontology term records to put in the sample; default is 1.")
+    parser.add_argument('--uuids', default=None, type=str,
+                        help="One or more comma-separated list of ontology term uuids.")
+    parser.add_argument('--terms', default=None, type=str,
+                        help="One or more comma-separated list of ontology term ids.")
+    parser.add_argument('--quiet', default=False, action='store_true',
+                        help="If specified silently supress warnings/errors.")
     args = parser.parse_args(args)
     if args.count is not None and args.count <= 0:
         print("Count must be greater than zero!")
@@ -61,18 +67,26 @@ def create_sample_ontology_from_ontology_file(ontology_file: str,
     of uuids and/or terms. This INCLUDES any/all referenced parent (RECURSIVELY) ontology term
     records. Returned list is SORTED by uuid (for debugging/troubleshooting consistency).
     """
-    ontology_json = {}
     with io.open(ontology_file, "r") as fp:
         ontology_json = json.load(fp)
     ontology_terms_by_uuid = {ontology_term["uuid"]: ontology_term for ontology_term in ontology_json["terms"]}
-    ontology_terms_by_term_id = {ontology_term["term_id"]: ontology_term for ontology_term in ontology_json["terms"] if ontology_term.get("term_id")}
-    sample_ontology_term_uuids = get_unique_sample_ontology_term_uuids(count, uuids, terms, quiet, ontology_terms_by_uuid, ontology_terms_by_term_id)
+    ontology_terms_by_term_id = {ontology_term["term_id"]: ontology_term
+                                 for ontology_term in ontology_json["terms"]if ontology_term.get("term_id")}
+    sample_ontology_term_uuids = get_unique_sample_ontology_term_uuids(count, uuids, terms,
+                                                                       quiet,
+                                                                       ontology_terms_by_uuid,
+                                                                       ontology_terms_by_term_id)
     sample_ontology_terms = get_ontology_terms(sample_ontology_term_uuids, quiet, ontology_terms_by_uuid)
     ontology_json["terms"] = sample_ontology_terms
     return ontology_json
 
 
-def get_unique_sample_ontology_term_uuids(count: Optional[int], uuids: Optional[list], terms: Optional[list], quiet: bool, source_ontology_terms_by_uuid: dict, source_ontology_terms_by_term_id: dict) -> list:
+def get_unique_sample_ontology_term_uuids(count: Optional[int],
+                                          uuids: Optional[list],
+                                          terms: Optional[list],
+                                          quiet: bool,
+                                          source_ontology_terms_by_uuid: dict,
+                                          source_ontology_terms_by_term_id: dict) -> list:
     """
     Returns a set of ontology term uuids for the given number of (initial) ontology term records in
     the give source ontology, OR the for the ontology terms specified in the given list of ontology
@@ -120,19 +134,23 @@ def get_ontology_term_parent_uuids(ontology_term: dict, quiet: bool, source_onto
     if ontology_term_parents:
         for parent_ontology_term_uuid in ontology_term_parents:
             if not source_ontology_terms_by_uuid.get(parent_ontology_term_uuid):
-                print(f"WARNING: Parent ({parent_ontology_term_uuid}) fo ontology term not found in ontology: {ontology_term['uuid']}")
+                print(f"WARNING: Parent ({parent_ontology_term_uuid}) of ontology term"
+                      f" not found in ontology: {ontology_term['uuid']}")
                 return set()
             parent_ontology_term = source_ontology_terms_by_uuid[parent_ontology_term_uuid]
             if not parent_ontology_term:
                 if not quiet:
-                    raise Exception(f"Referenced parent ontology term not found in ontology: {parent_ontology_term_uuid}")
+                    raise Exception(f"Referenced parent ontology term not found in ontology:"
+                                    " {parent_ontology_term_uuid}")
             else:
                 parents.add(parent_ontology_term_uuid)
-                parents.update(get_ontology_term_parent_uuids(parent_ontology_term, quiet, source_ontology_terms_by_uuid))
+                parents.update(get_ontology_term_parent_uuids(parent_ontology_term,
+                                                              quiet,
+                                                              source_ontology_terms_by_uuid))
     return parents
 
 
-def get_ontology_terms(ontology_term_uuids: set, quiet: bool, source_ontology_terms_by_uuid: dict) -> list:
+def get_ontology_terms(ontology_term_uuids: list, quiet: bool, source_ontology_terms_by_uuid: dict) -> list:
     """
     Returns a list of ontology terms (list of dictionary) for the given set of ontology term uuids.
     If an ontology term is not found for a given ontology term uuid is not found then and exception is raised.
