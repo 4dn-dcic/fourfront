@@ -7,7 +7,7 @@ import requests
 import sys
 
 from collections import Counter
-from dcicutils.ff_utils import get_authentication_with_server, get_metadata, search_metadata, unified_authentication
+from dcicutils.ff_utils import get_authentication_with_server, get_metadata, search_metadata
 from rdflib.collection import Collection
 from uuid import uuid4
 from ..commands.owltools import (
