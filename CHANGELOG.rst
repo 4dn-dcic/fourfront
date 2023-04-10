@@ -6,6 +6,17 @@ fourfront
 Change Log
 ----------
 
+5.2.0
+=====
+
+`PR 1789: Not facets <https://github.com/4dn-dcic/fourfront/pull/1789>`_
+
+* Add a new folder for storing FontAwesome v6 icons and a couple of icons for not facets
+* Update BrowseView code to not duplicate facets for omitted terms
+* Some 4DN-specific styling for not facets
+* Attach new release of SPC v0.1.63
+
+
 5.1.7
 =====
 
