@@ -8,6 +8,7 @@ from uuid import uuid4
 
 import pkg_resources
 import requests
+from pathlib import Path
 from dcicutils.ff_utils import (get_authentication_with_server, get_metadata,
                                 search_metadata)
 from rdflib.collection import Collection
@@ -1036,7 +1037,7 @@ def parse_args(args):
                         help="An access key dictionary including key, secret and server.\
                         \"{'key': 'ABCDEF', 'secret': 'supersecret', 'server': 'https://data.4dnucleome.org'}\" ")
     parser.add_argument('--keyfile',
-                        default='',
+                        default='{}/keypairs.json'.format(Path.home()),
                         help="A file where access keys are stored.")
     parser.add_argument('--keyname',
                         default='default',
@@ -1066,10 +1067,14 @@ def main():
     print('Writing to %s' % postfile)
 
     # fourfront connection
-    if args.keyfile:
-        with open(args.keyfile, 'r') as keyfile:
-            keys = json.load(keyfile)
-        key = str(keys[args.keyname])
+    if args.keyname:
+        try:
+            with open(args.keyfile, 'r') as keyfile:
+                keys = json.load(keyfile)
+            key = str(keys[args.keyname])
+        except Exception as e:
+            print("Keypairs file '{}' not found or can't be read".format(args.keyfile))
+            sys.exit()
     else:
         key = args.key
     connection = connect2server(args.env, key)
@@ -1138,19 +1143,19 @@ def main():
             pretty = True
         if args.phase:
             phasing = True
-        out_dict = {
-            'ontologies': {
-                o['uuid']: {k: o[k] for k in ['current_ontology_version', 'ontology_versions'] if k in o}
-                for o in new_versions
-            }
-        }
+        out_dict = {}
+        out_dict.setdefault('ontology', [])
+        for o in new_versions:
+            import pdb; pdb.set_trace()
+            out_dict['ontology'].append({k: o[k] for k in ['uuid', 'current_ontology_version', 'ontology_versions'] if k in o})
         if phasing:
             print("PHASING TERM INFO")
             phased_terms = order_terms_by_phasing(post_ids, updates)
-            out_dict['terms'] = phased_terms
+            out_dict['ontology_term'] = phased_terms
         else:
-            out_dict['terms']: updates
-
+            print("NOT PHASING")
+            out_dict['ontology_term'] = updates
+        print(out_dict.keys())
         print("WRITING OUTPUT")
         write_outfile(out_dict, postfile, pretty)
 

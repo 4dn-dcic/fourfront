@@ -9,6 +9,18 @@ Change Log
 5.1.7
 =====
 
+Update generate_ontology script to:
+
+* fix a bug that obsoleted a term even if it was linked to more than one Ontology
+* change the output json file to use item type names as keys for each section (i.e. ontology and ontology_term) 
+* optionally allow a local .owl file to be specified as input (instead of remote download from source)
+* optionally phase the json (no longer needed for ingest but could be useful for local testing)
+* updated some tests
+
+
+5.1.7
+=====
+
 `PR Npm package upgrades  <https://github.com/4dn-dcic/fourfront/pull/1791>`_
 
 * sass-loader, underscore, and query-string packages upgraded

@@ -22,7 +22,7 @@ def test_parse_args_defaults():
     assert args.pretty is False
     assert args.phase is False
     assert args.owlfile is None
-    assert not args.keyfile
+    assert args.keyfile == "{}/keypairs.json".format(os.path.expanduser('~'))
     assert args.key is None
     assert args.keyname == 'default'
 
