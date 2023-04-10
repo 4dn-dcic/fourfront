@@ -1031,6 +1031,11 @@ def initialize_facets(request, doc_types, prepared_terms, schemas, additional_fa
                     disabled_facets.append(schema_facet[0])
                     continue  # Skip disabled facets.
                 facets.append(schema_facet)
+                # ensure grouping field facet appended
+                if schema_facet[1].get('group_by') is not None and len(schema_facet[1]['group_by'].get('field', '')) > 0:
+                    group_by_field = schema_facet[1]['group_by']['field']
+                    group_by_title = group_by_field.split('.')[-1]
+                    facets.append((group_by_field, {'title': group_by_title, 'is_for_grouping': True, 'default_hidden': True}))
 
     # Add facets for any non-schema ?field=value filters requested in the search (unless already set)
     used_facets = [facet[0] for facet in facets + append_facets]
@@ -1038,6 +1043,7 @@ def initialize_facets(request, doc_types, prepared_terms, schemas, additional_fa
         facet[1]['title'] for facet in facets + append_facets
         if 'title' in facet[1]
     ]
+    group_by_facets = [facet[0] for facet in facets if facet[1].get('is_for_grouping', False)]
     for field in prepared_terms:
         if field.startswith('embedded'):
             split_field = field.strip().split('.')  # Will become, e.g. ['embedded', 'experiments_in_set', 'files', 'file_size', 'from']
@@ -1061,7 +1067,7 @@ def initialize_facets(request, doc_types, prepared_terms, schemas, additional_fa
             else:
                 is_object_title = False
 
-            if title_field in used_facets or title_field in disabled_facets:
+            if title_field in used_facets or title_field in disabled_facets or use_field in group_by_facets:
                 # Cancel if already in facets or is disabled
                 continue
             used_facets.append(title_field)
@@ -1496,9 +1502,22 @@ def format_facets(es_results, facets, total, additional_facets, request, doc_typ
                         # ignore grouping if type=item_type returns no value (or none of them are not released for anonymous users) 
                         if group_by_dict is not None and len(group_by_dict) > 0:
                             result_facet['group_by'] = group_by['field'] #override
-                            for t in result_facet['terms']:
-                                t['grouping_key'] = group_by_dict[t['key']][0] if t['key'] in group_by_dict and len(group_by_dict[t['key']]) > 0 else 'None'
-                                t['is_group_item'] = True
+                            group_by_terms = deepcopy(aggregations['terms:' + group_by['field'].replace('.', '-')]["primary_agg"]["buckets"])
+                            group_by_keys_found = []
+                            for gbt in group_by_terms:
+                                gbt['terms'] = list(filter(lambda term: term['key'] in group_by_dict[gbt['key']], result_facet['terms']))
+                                if len(gbt['terms']) < 1:
+                                    gbt['has_suggested_terms'] = True
+                                    gbt['terms'] = [{'key': v, 'doc_count': 0} for v in group_by_dict[gbt['key']]]
+                                gbt['is_parent'] = True
+                                group_by_keys_found.append(gbt['key'])
+                            # always add missing
+                            group_by_keys_missing = list(filter (lambda key: key not in group_by_keys_found, group_by_dict.keys()))
+                            group_by_terms = group_by_terms + [{'key': key, 'doc_count': 0, 'is_parent': True, 'terms': []} for key in group_by_keys_missing]
+
+                            result_facet['terms'] = group_by_terms
+                        else:
+                            del result_facet['group_by']
                     else:
                         del result_facet['group_by']
                 
@@ -1624,12 +1643,12 @@ def get_facet_group_by_dict(request, item_type, key_field, value_field):
     primary_agg = {
         "field_0" : {
             "terms" : {
-                "field" : "embedded." + key_field + ".raw",
+                "field" : "embedded." + value_field + ".raw",
                 "size" : 100
             },
             "aggs" : { "group_by" : {
                             "terms" : {
-                                "field": "embedded." + value_field + ".raw"
+                                "field": "embedded." + key_field + ".raw"
                             }
                     }
             }
