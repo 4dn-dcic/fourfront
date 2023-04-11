@@ -16,8 +16,15 @@ def test_parse_args_defaults():
     args = []
     args = go.parse_args(args)
     assert args.ontology == 'all'
-    assert args.key is None
     assert args.env == 'data'
+    assert args.simple is False
+    assert args.full is False
+    assert args.pretty is False
+    assert args.phase is False
+    assert args.owlfile is None
+    assert args.keyfile == "{}/keypairs.json".format(os.path.expanduser('~'))
+    assert args.key is None
+    assert args.keyname == 'default'
 
 
 @pytest.fixture
@@ -58,62 +65,70 @@ def test_connect2server(connection):
 
 # see ontology schema for full schema
 # now synonym_terms and definition_terms are fully embedded
-all_ontology = [{'download_url': 'http://www.ebi.ac.uk/efo/efo_inferred.owl',
-                 'synonym_terms': [
-                     '/ontology-terms/111111bc-8535-4448-903e-854af460a233/',
-                     '/ontology-terms/111112bc-8535-4448-903e-854af460a233/'],
-                 '@id': '/ontologys/530006bc-8535-4448-903e-854af460b254/',
-                 '@type': ['Ontology', 'Item'],
-                 'definition_terms': [
-                     '/ontology-terms/111115bc-8535-4448-903e-854af460a233/',
-                     '/ontology-terms/111116bc-8535-4448-903e-854af460a233/'],
-                 'namespace_url': 'http://www.ebi.ac.uk/efo/',
-                 'ontology_prefix': 'EFO',
-                 'uuid': '530006bc-8535-4448-903e-854af460b254',
-                 'ontology_name': 'Experimental Factor Ontology'
-                 },
-                 {'ontology_name': 'Uberon',
-                  '@type': ['Ontology', 'Item'],
-                  'ontology_prefix': 'UBERON',
-                  'namespace_url': 'http://purl.obolibrary.org/obo/',
-                  'download_url': 'http://purl.obolibrary.org/obo/uberon/composite-metazoan.owl',
-                  '@id': '/ontologys/530016bc-8535-4448-903e-854af460b254/',
-                  'definition_terms': ['/ontology-terms/111116bc-8535-4448-903e-854af460a233/'],
-                  'uuid': '530016bc-8535-4448-903e-854af460b254',
-                 },
-                 {'ontology_name': 'Ontology for Biomedical Investigations',
-                  '@type': ['Ontology', 'Item'],
-                  'ontology_prefix': 'OBI',
-                  'namespace_url': 'http://purl.obolibrary.org/obo/',
-                  'download_url': 'http://purl.obolibrary.org/obo/obi.owl',
-                  '@id': '/ontologys/530026bc-8535-4448-903e-854af460b254/',
-                  'definition_terms': [
-                     {'term_name': 'definition',
-                      '@type': ['OntologyTerm', 'Item'],
-                      'term_id': 'IAO:0000115',
-                      '@id': '/ontology-terms/111116bc-8535-4448-903e-854af460a233/',
-                      'uuid': '111116bc-8535-4448-903e-854af460a233',
-                      'term_url': 'http://purl.obolibrary.org/obo/IAO_0000115'
-                     }
-                  ],
-                  'uuid': '530026bc-8535-4448-903e-854af460b254',
-                  'synonym_terms': [
-                    {'term_name': 'alternative term',
-                     '@type': ['OntologyTerm', 'Item'],
-                     'term_id': 'IAO:0000118',
-                     '@id': '/ontology-terms/111117bc-8535-4448-903e-854af460a233/',
-                     'uuid': '111117bc-8535-4448-903e-854af460a233',
-                     'term_url': 'http://purl.obolibrary.org/obo/IAO_0000118'
-                    },
-                    {'term_name': 'alternative term',
-                     '@type': ['OntologyTerm', 'Item'],
-                     'term_id': 'IAO:0000118',
-                     '@id': '/ontology-terms/111117bc-8535-4448-903e-854af460a233/',
-                     'uuid': '111117bc-8535-4448-903e-854af460a233',
-                     'term_url': 'http://purl.obolibrary.org/obo/IAO_0000118'
-                    }
-                   ]
-                  }]
+all_ontology = [
+    {
+        'download_url': 'http://www.ebi.ac.uk/efo/efo_inferred.owl',
+        'synonym_terms': [
+            '/ontology-terms/111111bc-8535-4448-903e-854af460a233/',
+            '/ontology-terms/111112bc-8535-4448-903e-854af460a233/'],
+        '@id': '/ontologys/530006bc-8535-4448-903e-854af460b254/',
+        '@type': ['Ontology', 'Item'],
+        'definition_terms': [
+            '/ontology-terms/111115bc-8535-4448-903e-854af460a233/',
+            '/ontology-terms/111116bc-8535-4448-903e-854af460a233/'],
+        'namespace_url': 'http://www.ebi.ac.uk/efo/',
+        'ontology_prefix': 'EFO',
+        'uuid': '530006bc-8535-4448-903e-854af460b254',
+        'ontology_name': 'Experimental Factor Ontology'
+    },
+    {
+        'ontology_name': 'Uberon',
+        '@type': ['Ontology', 'Item'],
+        'ontology_prefix': 'UBERON',
+        'namespace_url': 'http://purl.obolibrary.org/obo/',
+        'download_url': 'http://purl.obolibrary.org/obo/uberon/composite-metazoan.owl',
+        '@id': '/ontologys/530016bc-8535-4448-903e-854af460b254/',
+        'definition_terms': ['/ontology-terms/111116bc-8535-4448-903e-854af460a233/'],
+        'uuid': '530016bc-8535-4448-903e-854af460b254',
+    },
+    {
+        'ontology_name': 'Ontology for Biomedical Investigations',
+        '@type': ['Ontology', 'Item'],
+        'ontology_prefix': 'OBI',
+        'namespace_url': 'http://purl.obolibrary.org/obo/',
+        'download_url': 'http://purl.obolibrary.org/obo/obi.owl',
+        '@id': '/ontologys/530026bc-8535-4448-903e-854af460b254/',
+        'definition_terms': [
+            {
+                'term_name': 'definition',
+                '@type': ['OntologyTerm', 'Item'],
+                'term_id': 'IAO:0000115',
+                '@id': '/ontology-terms/111116bc-8535-4448-903e-854af460a233/',
+                'uuid': '111116bc-8535-4448-903e-854af460a233',
+                'term_url': 'http://purl.obolibrary.org/obo/IAO_0000115'
+            }
+        ],
+        'uuid': '530026bc-8535-4448-903e-854af460b254',
+        'synonym_terms': [
+            {
+                'term_name': 'alternative term',
+                '@type': ['OntologyTerm', 'Item'],
+                'term_id': 'IAO:0000118',
+                '@id': '/ontology-terms/111117bc-8535-4448-903e-854af460a233/',
+                'uuid': '111117bc-8535-4448-903e-854af460a233',
+                'term_url': 'http://purl.obolibrary.org/obo/IAO_0000118'
+            },
+            {
+                'term_name': 'alternative term',
+                '@type': ['OntologyTerm', 'Item'],
+                'term_id': 'IAO:0000118',
+                '@id': '/ontology-terms/111117bc-8535-4448-903e-854af460a233/',
+                'uuid': '111117bc-8535-4448-903e-854af460a233',
+                'term_url': 'http://purl.obolibrary.org/obo/IAO_0000118'
+            }
+        ]
+    }
+]
 
 
 def get_fdn_ontology_side_effect(*args, **kwargs):
@@ -129,10 +144,6 @@ def test_get_ontologies_all(connection):
     prefixes = ['EFO', 'UBERON', 'OBI']
     with mock.patch('encoded.commands.generate_ontology.search_metadata', return_value=all_ontology):
         ont_list = 'all'
-        print('xyzzy')
-        print(type(connection))
-        print(connection)
-        print(ont_list)
         ontologies = go.get_ontologies(connection, ont_list)
         assert len(ontologies) == 3
         for ont in ontologies:
@@ -149,7 +160,6 @@ def test_get_ontologies_one(connection):
 
 
 def test_get_ontologies_not_in_db(connection):
-    prefix = 'EFO'
     all_ontology.append({'@type': ['Error', 'Item'], 'ontology_prefix': 'FAKE'})
     with mock.patch('encoded.commands.generate_ontology.get_metadata',
                     return_value={'@type': ['Error', 'Item'], 'ontology_prefix': 'FAKE'}):
@@ -412,7 +422,7 @@ def test_get_definition_term_uris(syn_uris, syn_uris_as_URIRef):
                 assert str(uri) in syn_uris
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def owler():
     with mock.patch.object(go, 'Owler') as mocked:
         yield mocked
@@ -840,14 +850,14 @@ def test_cleanup_non_fields(terms_w_stuff):
         assert k in terms['term1']
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def mock_get_synonyms():
     syn_lists = [[], ['syn1'], ['syn1', 'syn2']]
     with mock.patch('encoded.commands.generate_ontology.get_synonyms', side_effect=syn_lists) as mocked:
         yield mocked
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def mock_get_definitions():
     def_lists = [[], ['def1'], ['def1', 'def2']]
     with mock.patch('encoded.commands.generate_ontology.get_synonyms', side_effect=def_lists) as mocked:
@@ -907,8 +917,8 @@ def test_write_outfile_notpretty(simple_terms):
     filename = 'tmp_test_file'
     go.write_outfile(list(simple_terms.values()), filename)
     with open(filename, 'r') as infile:
-        for l in infile:
-            result = json.loads(l)
+        for line in infile:
+            result = json.loads(line)
             for v in simple_terms.values():
                 assert v in result
     os.remove(filename)
@@ -1001,35 +1011,37 @@ def db_terms(ont_terms):
 
 
 def test_id_post_and_patch_filter(ont_terms, db_terms, ontology_list):
+    id2chk = 'NN:t3'
     result = go.id_post_and_patch(ont_terms, db_terms, ontology_list)
-    assert len(result) == 1
-    assert 'NN:t3' == result[0].get('term_id')
-    # assert len(idmap) == 3
-    # for k, v in idmap.items():
-    #     assert k in ['t1', 't2', 't3']
-    #     if k != 't3':  # t1 and t2 already had uuids
-    #         assert v in ['1234', '5678']
+    assert len(result[0]) == 1
+    assert id2chk == result[0][0].get('term_id')
+    assert id2chk in result[1]
 
 
 def test_id_post_and_patch_no_filter(ont_terms, db_terms, ontology_list):
     tids = ['TO:t1', 'TO:t2', 'NN:t3']
     result = go.id_post_and_patch(ont_terms, db_terms, ontology_list, False)
-    assert len(result) == 3
-    for t in result:
-        # assert t.get('term_id') in idmap
+    assert len(result[0]) == 3
+    for t in result[0]:
         assert t.get('term_id') in tids
+    for t in result[1]:
+        assert t in tids
 
 
 def test_id_post_and_patch_id_obs(ont_terms, db_terms, ontology_list):
+    ''' term in db is no longer in ontology - tests that status of term will be set to obsolete'''
     db_terms['TO:t4'] = {
         'term_id': 'TO:t4',
         'source_ontologies': [{'uuid': '1', 'ontology_name': 'ont1', 'ontology_prefix': 'TO'}],
         'uuid': '7890',
         'status': 'released'}
     result = go.id_post_and_patch(ont_terms, db_terms, ontology_list)
-    assert len(result) == 2
-    assert '7890' in [t.get('uuid') for t in result]
-    # assert 't4' in idmap
+    result_terms = result[0]
+    assert len(result_terms) == 2
+    assert '7890' in [tid.get('uuid') for tid in result_terms]
+    for t in result_terms:
+        if t.get('uuid') == '7890':
+            assert t.get('status') == 'obsolete'
 
 
 def test_id_post_and_patch_id_obs_simple(ont_terms, db_terms, ontology_list):
@@ -1039,23 +1051,47 @@ def test_id_post_and_patch_id_obs_simple(ont_terms, db_terms, ontology_list):
         'uuid': '7890',
         'status': 'released'}
     result = go.id_post_and_patch(ont_terms, db_terms, ontology_list, ontarg='1', simple=True)
-    assert len(result) == 2
-    assert '7890' in [t.get('uuid') for t in result]
+    result_terms = result[0]
+    assert len(result_terms) == 2
+    assert '7890' in [tid.get('uuid') for tid in result_terms]
+    for t in result_terms:
+        if t.get('uuid') == '7890':
+            assert t.get('status') == 'obsolete'
 
 
 def test_id_post_and_patch_donot_obs(ont_terms, db_terms, ontology_list):
     db_terms['t4'] = {'term_id': 't4', 'source_ontologies': {'uuid': '1', 'ontology_name': 'ont1'}, 'uuid': '7890'}
     result = go.id_post_and_patch(ont_terms, db_terms, ontology_list, True, False)
-    assert 't4' not in [t.get('term_id') for t in result]
-    # assert 't4' not in idmap
+    assert 't4' not in [t.get('term_id') for t in result[0]]
 
 
-# def test_id_post_and_patch_ignore_4dn(ont_terms, db_terms, ontology_list):
-#     db_terms['t4'] = {'term_id': 't4', 'source_ontologies': {'uuid': '4', 'ontology_name': '4DN ont'}, 'uuid': '7890'}
-#     result = go.id_post_and_patch(ont_terms, db_terms, ontology_list)
-#     print(result)
-#     assert 't4' not in [t.get('term_id') for t in result]
-#     # assert 't4' not in idmap
+def test_order_terms_by_phasing_no_terms():
+    assert not go.order_terms_by_phasing([], [])
+
+
+def test_order_terms_by_phasing_no_new_terms(db_terms):
+    term_list = db_terms.values()
+    res = go.order_terms_by_phasing([], term_list)
+    for r in res:
+        assert r in term_list
+
+
+def test_order_terms_by_phasing_only_new_terms(db_terms):
+    id_list = db_terms.keys()
+    term_list = db_terms.values()
+    res = go.order_terms_by_phasing(id_list, term_list)
+    assert len(res) == 4
+    assert all([v in r for v in ['term_id', 'source_ontologies', 'uuid'] for r in res[:2]])
+    assert all([v in r for v in ['a', 'b', 'c', 'status', 'uuid'] for r in res[2:]])
+
+
+def test_order_terms_by_phasing_both_new_and_existing(db_terms):
+    term_list = db_terms.values()
+    new_id = list(term_list)[0].get('term_id')
+    res = go.order_terms_by_phasing([new_id], term_list)
+    assert len(res) == 3
+    assert all([v in res[0] for v in ['term_id', 'source_ontologies', 'uuid']])
+    assert all([v in r for v in ['a', 'b', 'c', 'status', 'uuid'] for r in res[1:]])
 
 
 def valid_uuid(uid):
@@ -1072,7 +1108,7 @@ def valid_uuid(uid):
 @pytest.fixture
 def embedded_dbterm():
     return {
-         "synonyms": [
+        "synonyms": [
             "renal pelvis uroepithelium",
             "renal pelvis transitional epithelium",
             "pelvis of ureter uroepithelium",
@@ -1088,236 +1124,232 @@ def embedded_dbterm():
             "urothelium of renal pelvis",
             "kidney pelvis transitional epithelium",
             "pelvis of ureter urothelium"
-          ],
-          "preferred_name": "kidney pelvis urothelium",
-          "references": [
-
-          ],
-          "external_references": [
-
-          ],
-          "status": "released",
-          "term_name": "kidney pelvis urothelium",
-          "submitted_by": {
+        ],
+        "preferred_name": "kidney pelvis urothelium",
+        "references": [],
+        "external_references": [],
+        "status": "released",
+        "term_name": "kidney pelvis urothelium",
+        "submitted_by": {
             "principals_allowed": {
-              "edit": [
-                "group.admin",
-                "userid.986b362f-4eb6-4a9c-8173-3ab267307e3a"
-              ],
-              "view": [
-                "group.admin",
-                "group.read-only-admin",
-                "remoteuser.EMBED",
-                "remoteuser.INDEXER",
-                "userid.986b362f-4eb6-4a9c-8173-3ab267307e3a"
-              ]
+                "edit": [
+                    "group.admin",
+                    "userid.986b362f-4eb6-4a9c-8173-3ab267307e3a"
+                ],
+                "view": [
+                    "group.admin",
+                    "group.read-only-admin",
+                    "remoteuser.EMBED",
+                    "remoteuser.INDEXER",
+                    "userid.986b362f-4eb6-4a9c-8173-3ab267307e3a"
+                ]
             },
             "@id": "/users/986b362f-4eb6-4a9c-8173-3ab267307e3a/",
             "@type": [
-              "User",
-              "Item"
+                "User",
+                "Item"
             ],
             "uuid": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
             "display_title": "4dn DCIC"
-          },
-          "display_title": "kidney pelvis urothelium",
-          "schema_version": "1",
-          "@type": [
+        },
+        "display_title": "kidney pelvis urothelium",
+        "schema_version": "1",
+        "@type": [
             "OntologyTerm",
             "Item"
-          ],
-          "parents": [
+        ],
+        "parents": [
             {
-              "principals_allowed": {
-                "edit": [
-                  "group.admin"
+                "principals_allowed": {
+                    "edit": [
+                        "group.admin"
+                    ],
+                    "view": [
+                        "system.Everyone"
+                    ]
+                },
+                "@id": "/ontology-terms/UBERON:0001254/",
+                "@type": [
+                    "OntologyTerm",
+                    "Item"
                 ],
-                "view": [
-                  "system.Everyone"
-                ]
-              },
-              "@id": "/ontology-terms/UBERON:0001254/",
-              "@type": [
-                "OntologyTerm",
-                "Item"
-              ],
-              "uuid": "38dbff69-aac7-46a4-837e-7340c2c5bcd5",
-              "display_title": "urothelium of ureter"
+                "uuid": "38dbff69-aac7-46a4-837e-7340c2c5bcd5",
+                "display_title": "urothelium of ureter"
             },
             {
-              "principals_allowed": {
-                "edit": [
-                  "group.admin"
+                "principals_allowed": {
+                    "edit": [
+                        "group.admin"
+                    ],
+                    "view": [
+                        "system.Everyone"
+                    ]
+                },
+                "@id": "/ontology-terms/UBERON:0004819/",
+                "@type": [
+                    "OntologyTerm",
+                    "Item"
                 ],
-                "view": [
-                  "system.Everyone"
-                ]
-              },
-              "@id": "/ontology-terms/UBERON:0004819/",
-              "@type": [
-                "OntologyTerm",
-                "Item"
-              ],
-              "uuid": "57ac2905-0533-43c9-988b-9add8c225a78",
-              "display_title": "kidney epithelium"
+                "uuid": "57ac2905-0533-43c9-988b-9add8c225a78",
+                "display_title": "kidney epithelium"
             }
-          ],
-          "date_created": "2017-05-11T16:00:51.747446+00:00",
-          "term_id": "UBERON:0004788",
-          "source_ontology": {
+        ],
+        "date_created": "2017-05-11T16:00:51.747446+00:00",
+        "term_id": "UBERON:0004788",
+        "source_ontology": {
             "uuid": "530016bc-8535-4448-903e-854af460b254",
             "display_title": "Uberon",
             "principals_allowed": {
-              "edit": [
-                "group.admin"
-              ],
-              "view": [
-                "system.Everyone"
-              ]
+                "edit": [
+                    "group.admin"
+                ],
+                "view": [
+                    "system.Everyone"
+                ]
             },
             "@id": "/ontologys/530016bc-8535-4448-903e-854af460b254/",
             "@type": [
-              "Ontology",
-              "Item"
+                "Ontology",
+                "Item"
             ],
             "ontology_name": "Uberon"
-          },
-          "uuid": "e5e1690a-1a80-4e50-a3cf-58f2f269abd8",
-          "term_url": "http://purl.obolibrary.org/obo/UBERON_0004788",
-          "last_modified": {
+        },
+        "uuid": "e5e1690a-1a80-4e50-a3cf-58f2f269abd8",
+        "term_url": "http://purl.obolibrary.org/obo/UBERON_0004788",
+        "last_modified": {
             "date_modified": "2018-07-11T05:05:30.826642+00:00",
             "modified_by": {
-              "principals_allowed": {
-                "edit": [
-                  "group.admin",
-                  "userid.986b362f-4eb6-4a9c-8173-3ab267307e3a"
+                "principals_allowed": {
+                    "edit": [
+                        "group.admin",
+                        "userid.986b362f-4eb6-4a9c-8173-3ab267307e3a"
+                    ],
+                    "view": [
+                        "group.admin",
+                        "group.read-only-admin",
+                        "remoteuser.EMBED",
+                        "remoteuser.INDEXER",
+                        "userid.986b362f-4eb6-4a9c-8173-3ab267307e3a"
+                    ]
+                },
+                "@id": "/users/986b362f-4eb6-4a9c-8173-3ab267307e3a/",
+                "@type": [
+                    "User",
+                    "Item"
                 ],
-                "view": [
-                  "group.admin",
-                  "group.read-only-admin",
-                  "remoteuser.EMBED",
-                  "remoteuser.INDEXER",
-                  "userid.986b362f-4eb6-4a9c-8173-3ab267307e3a"
-                ]
-              },
-              "@id": "/users/986b362f-4eb6-4a9c-8173-3ab267307e3a/",
-              "@type": [
-                "User",
-                "Item"
-              ],
-              "uuid": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
-              "display_title": "4dn DCIC"
+                "uuid": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+                "display_title": "4dn DCIC"
             }
-          },
-          "principals_allowed": {
+        },
+        "principals_allowed": {
             "edit": [
-              "group.admin"
+                "group.admin"
             ],
             "view": [
-              "system.Everyone"
+                "system.Everyone"
             ]
-          },
-          "@id": "/ontology-terms/UBERON:0004788/",
-          "slim_terms": [
+        },
+        "@id": "/ontology-terms/UBERON:0004788/",
+        "slim_terms": [
             {
-              "principals_allowed": {
-                "edit": [
-                  "group.admin"
+                "principals_allowed": {
+                    "edit": [
+                        "group.admin"
+                    ],
+                    "view": [
+                        "system.Everyone"
+                    ]
+                },
+                "term_name": "endoderm",
+                "display_title": "endoderm",
+                "is_slim_for": "developmental",
+                "@id": "/ontology-terms/UBERON:0000925/",
+                "@type": [
+                    "OntologyTerm",
+                    "Item"
                 ],
-                "view": [
-                  "system.Everyone"
-                ]
-              },
-              "term_name": "endoderm",
-              "display_title": "endoderm",
-              "is_slim_for": "developmental",
-              "@id": "/ontology-terms/UBERON:0000925/",
-              "@type": [
-                "OntologyTerm",
-                "Item"
-              ],
-              "uuid": "111121bc-8535-4448-903e-854af460a233"
+                "uuid": "111121bc-8535-4448-903e-854af460a233"
             },
             {
-              "principals_allowed": {
-                "edit": [
-                  "group.admin"
+                "principals_allowed": {
+                    "edit": [
+                        "group.admin"
+                    ],
+                    "view": [
+                        "system.Everyone"
+                    ]
+                },
+                "term_name": "kidney",
+                "display_title": "kidney",
+                "is_slim_for": "organ",
+                "@id": "/ontology-terms/UBERON:0002113/",
+                "@type": [
+                    "OntologyTerm",
+                    "Item"
                 ],
-                "view": [
-                  "system.Everyone"
-                ]
-              },
-              "term_name": "kidney",
-              "display_title": "kidney",
-              "is_slim_for": "organ",
-              "@id": "/ontology-terms/UBERON:0002113/",
-              "@type": [
-                "OntologyTerm",
-                "Item"
-              ],
-              "uuid": "111167bc-8535-4448-903e-854af460a233"
+                "uuid": "111167bc-8535-4448-903e-854af460a233"
             },
             {
-              "principals_allowed": {
-                "edit": [
-                  "group.admin"
+                "principals_allowed": {
+                    "edit": [
+                        "group.admin"
+                    ],
+                    "view": [
+                        "system.Everyone"
+                    ]
+                },
+                "term_name": "ureter",
+                "display_title": "ureter",
+                "is_slim_for": "organ",
+                "@id": "/ontology-terms/UBERON:0000056/",
+                "@type": [
+                    "OntologyTerm",
+                    "Item"
                 ],
-                "view": [
-                  "system.Everyone"
-                ]
-              },
-              "term_name": "ureter",
-              "display_title": "ureter",
-              "is_slim_for": "organ",
-              "@id": "/ontology-terms/UBERON:0000056/",
-              "@type": [
-                "OntologyTerm",
-                "Item"
-              ],
-              "uuid": "111148bc-8535-4448-903e-854af460a233"
+                "uuid": "111148bc-8535-4448-903e-854af460a233"
             },
             {
-              "principals_allowed": {
-                "edit": [
-                  "group.admin"
+                "principals_allowed": {
+                    "edit": [
+                        "group.admin"
+                    ],
+                    "view": [
+                        "system.Everyone"
+                    ]
+                },
+                "term_name": "renal system",
+                "display_title": "renal system",
+                "is_slim_for": "system",
+                "@id": "/ontology-terms/UBERON:0001008/",
+                "@type": [
+                    "OntologyTerm",
+                    "Item"
                 ],
-                "view": [
-                  "system.Everyone"
-                ]
-              },
-              "term_name": "renal system",
-              "display_title": "renal system",
-              "is_slim_for": "system",
-              "@id": "/ontology-terms/UBERON:0001008/",
-              "@type": [
-                "OntologyTerm",
-                "Item"
-              ],
-              "uuid": "111130bc-8535-4448-903e-854af460a233"
+                "uuid": "111130bc-8535-4448-903e-854af460a233"
             },
             {
-              "principals_allowed": {
-                "edit": [
-                  "group.admin"
+                "principals_allowed": {
+                    "edit": [
+                        "group.admin"
+                    ],
+                    "view": [
+                        "system.Everyone"
+                    ]
+                },
+                "term_name": "mesoderm",
+                "display_title": "mesoderm",
+                "is_slim_for": "developmental",
+                "@id": "/ontology-terms/UBERON:0000926/",
+                "@type": [
+                    "OntologyTerm",
+                    "Item"
                 ],
-                "view": [
-                  "system.Everyone"
-                ]
-              },
-              "term_name": "mesoderm",
-              "display_title": "mesoderm",
-              "is_slim_for": "developmental",
-              "@id": "/ontology-terms/UBERON:0000926/",
-              "@type": [
-                "OntologyTerm",
-                "Item"
-              ],
-              "uuid": "111120bc-8535-4448-903e-854af460a233"
+                "uuid": "111120bc-8535-4448-903e-854af460a233"
             }
-          ],
-          "namespace": "http://purl.obolibrary.org/obo",
-          "definition": "the epithelial lining of the luminal space of the kidney pelvis"
-        }
+        ],
+        "namespace": "http://purl.obolibrary.org/obo",
+        "definition": "the epithelial lining of the luminal space of the kidney pelvis"
+    }
 
 
 def test_get_raw_form(embedded_dbterm):

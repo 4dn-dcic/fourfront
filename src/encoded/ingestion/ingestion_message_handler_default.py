@@ -71,7 +71,6 @@ def process_submission(*, submission_id, ingestion_type, app, bundles_bucket=Non
         debuglog("Manifest data is missing 'email' field.")
         if DEBUG_SUBMISSIONS:
             pass
-            # import pdb; pdb.set_trace()
     debuglog("processing submission %s with email %s" % (submission_id, email))
     with vapp_for_email(email=email, app=app) as vapp:
         if DEBUG_SUBMISSIONS:

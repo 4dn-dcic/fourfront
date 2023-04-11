@@ -69,15 +69,15 @@ def create_sample_ontology_from_ontology_file(ontology_file: str,
     """
     with io.open(ontology_file, "r") as fp:
         ontology_json = json.load(fp)
-    ontology_terms_by_uuid = {ontology_term["uuid"]: ontology_term for ontology_term in ontology_json["terms"]}
+    ontology_terms_by_uuid = {ontology_term["uuid"]: ontology_term for ontology_term in ontology_json["ontology_term"]}
     ontology_terms_by_term_id = {ontology_term["term_id"]: ontology_term
-                                 for ontology_term in ontology_json["terms"]if ontology_term.get("term_id")}
+                                 for ontology_term in ontology_json["ontology_term"]if ontology_term.get("term_id")}
     sample_ontology_term_uuids = get_unique_sample_ontology_term_uuids(count, uuids, terms,
                                                                        quiet,
                                                                        ontology_terms_by_uuid,
                                                                        ontology_terms_by_term_id)
     sample_ontology_terms = get_ontology_terms(sample_ontology_term_uuids, quiet, ontology_terms_by_uuid)
-    ontology_json["terms"] = sample_ontology_terms
+    ontology_json["ontology_term"] = sample_ontology_terms
     return ontology_json
 
 

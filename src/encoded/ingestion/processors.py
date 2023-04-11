@@ -96,7 +96,6 @@ def handle_ontology_update(submission: SubmissionFolio):
      started.txt, resolution.json (with S3 locations of manifest.json, started.txt, and submission.json),
      and submission.json (with detailed results of ingestion process).
     """
-    use_new_ontology_file_format_from_branch_upd_ont_gen_20230410 = True
     log.warning("Ontology ingestion handler starting.")
     with submission.processing_context():
         # The following get_s3_input_json call downloads from S3 the payload/data file,
@@ -120,19 +119,13 @@ def handle_ontology_update(submission: SubmissionFolio):
             log.error(str(e))
             return 
         log.warning(f"Ontology ingestion handler file loaded: {datafile_bucket}/{datafile_key}")
-        # The loadx module expects to see the terms in the "ontology_term" key.
-        if not use_new_ontology_file_format_from_branch_upd_ont_gen_20230410:
-            ontology_json["ontology_term"] = ontology_json.pop("terms", [])
         # Get the number of ontology terms just for logging purposes.
         ontology_term_count = len(ontology_json["ontology_term"])
         INFO(f"Ontology ingestion handler ontology file term count: {ontology_term_count}")
         # Call into the loadx module to do the actual load of the ontology data;
         # its results are a dictionary itemizing the created (post), updated (patch),
         # skipped (skip), and errored (error) ontology term uuids.
-        if not use_new_ontology_file_format_from_branch_upd_ont_gen_20230410:
-            load_data_results = load_data_via_ingester(vapp=submission.vapp, ontology=ontology_json, itype="ontology_term")
-        else:
-            load_data_results = load_data_via_ingester(vapp=submission.vapp, ontology=ontology_json, itype=["ontology", "ontology_term"])
+        load_data_results = load_data_via_ingester(vapp=submission.vapp, ontology=ontology_json)
         # Note we take special care to ensure the details of the load (i.e. the itemization of all
         # ontology term uuids created, updated, skipped, or errored) are placed in the submission.json
         # file in S3 (s3://{submission.bucket}/{submission.submission_id}/submission.json), but NOT put

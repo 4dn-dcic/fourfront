@@ -71,6 +71,14 @@ Adding ingestion support (from cgap-portal as initial guide):
 * Updated ``encoded/types/file.py`` with new ``FileOther`` type.
 * Updated ``encoded/schemas/ingestion_submission.py`` to remove ``award`` and ``lab`` from ``required``.
 
+From Andy's branch (upd_ont_gen) on 2023-04-10: Update generate_ontology script to:
+
+* fix a bug that obsoleted a term even if it was linked to more than one Ontology
+* change the output json file to use item type names as keys for each section (i.e. ontology and ontology_term) 
+* optionally allow a local .owl file to be specified as input (instead of remote download from source)
+* optionally phase the json (no longer needed for ingest but could be useful for local testing)
+* updated some tests
+
 
 5.2.0
 =====

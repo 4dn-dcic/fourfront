@@ -7,6 +7,7 @@ import mimetypes
 import os
 import re
 import structlog
+from typing import Union
 import webtest
 
 from base64 import b64encode
@@ -82,7 +83,9 @@ class LoadGenWrapper(object):
             logger.error('load_data: failed to load with iter_response', error=self.caught)
 
 
-def load_data_via_ingester(vapp: VirtualApp, ontology: dict, itype: str = "ontology_term") -> dict:
+def load_data_via_ingester(vapp: VirtualApp,
+                           ontology: dict,
+                           itype: Union[str, list] = ["ontology", "ontology_term"]) -> dict:
     """
     Entry point for call from encoded.ingester.processors.handle_ontology_update (2023-03-08).
     Returns dictionary itemizing the created (post), updated (patch), skipped (skip), and

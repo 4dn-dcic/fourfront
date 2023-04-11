@@ -1,31 +1,23 @@
 import argparse
 import ast
 import json
-import pkg_resources
 import re
-import requests
 import sys
-
 from collections import Counter
-from dcicutils.ff_utils import get_authentication_with_server, get_metadata, search_metadata
-from rdflib.collection import Collection
 from uuid import uuid4
-from ..commands.owltools import (
-    Namespace,
-    Owler,
-    OBO,
-    splitNameFromNamespace,
-    convert2URIRef,
-    isURIRef,
-    isBlankNode,
-    getObjectLiteralsOfType,
-    subClassOf,
-    SomeValuesFrom,
-    IntersectionOf,
-    OnProperty,
-    Deprecated
-)
 
+import pkg_resources
+import requests
+from pathlib import Path
+from dcicutils.ff_utils import (get_authentication_with_server, get_metadata,
+                                search_metadata)
+from rdflib.collection import Collection
+
+from ..commands.owltools import (OBO, Deprecated, IntersectionOf, Namespace,
+                                 OnProperty, Owler, SomeValuesFrom,
+                                 convert2URIRef, getObjectLiteralsOfType,
+                                 isBlankNode, isURIRef, splitNameFromNamespace,
+                                 subClassOf)
 
 EPILOG = __doc__
 
@@ -819,14 +811,15 @@ def id_post_and_patch(terms, dbterms, ontologies, rm_unchanged=True, set_obsolet
                 print("PREVIOUS={}; NEW={}".format(tid2uuid[tid], uuid))
             tid2uuid[tid] = uuid
             term['uuid'] = uuid
-
     # all terms have uuid - now add uuids to linked terms
     missing_from_idmap = []
     for term in terms.values():
-        puuids, missing = _get_uuids_for_linked(term, tid2uuid)
+        puuids, ext, missing = _get_uuids_for_linked(term, dbterms, tid2uuid)
+        tid2uuid.update(ext)
         missing_from_idmap.extend(missing)
         for rt, uuids in puuids.items():
-            term[rt] = list(set(uuids))  # to avoid redundant terms
+            uniq_uuids = list(set(uuids))  # to avoid redundant terms
+            term[rt] = uniq_uuids
     for p in set(missing_from_idmap):
         print('WARNING - ', p, ' MISSING FROM IDMAP')
 
@@ -854,8 +847,10 @@ def id_post_and_patch(terms, dbterms, ontologies, rm_unchanged=True, set_obsolet
         for tid, term in use_terms.items():
             if tid not in terms and term['status'] != 'obsolete':
                 source_onts = [so.get('uuid') for so in term['source_ontologies']]
-                if not source_onts or not [o for o in ontids if o in source_onts]:
-                    # don't obsolete terms that aren't in one of the ontologies being processed
+                if not source_onts:
+                    continue  # should not happen
+                elif [o for o in source_onts if o not in ontids]:
+                    # don't obsolete terms that are in an ontology in addition to the ones being processed
                     continue
                 dbuid = term['uuid']
                 # add simple term with only status and uuid to to_patch
@@ -866,11 +861,12 @@ def id_post_and_patch(terms, dbterms, ontologies, rm_unchanged=True, set_obsolet
     print("Will obsolete {} TERMS".format(obsoletes))
     print("{} TERMS ARE NEW".format(len(to_post)))
     print("{} LIVE TERMS WILL BE PATCHED".format(to_patch - obsoletes))
-    return to_update
+    return to_update, to_post
 
 
-def _get_uuids_for_linked(term, idmap):
+def _get_uuids_for_linked(term, dbterms, idmap):
     puuids = {}
+    ext = {}
     missing = []
     for rt in ['parents', 'slim_terms']:
         if term.get(rt):
@@ -878,9 +874,14 @@ def _get_uuids_for_linked(term, idmap):
             for p in term[rt]:
                 if p in idmap:
                     puuids[rt].append(idmap[p])
+                elif p in dbterms:
+                    # term exists linked to anohter ontology
+                    duid = dbterms[p].get('uuid')
+                    puuids[rt].append(duid)
+                    ext[p] = duid
                 else:
                     missing.append(p)
-    return puuids, missing
+    return puuids, ext, missing
 
 
 def add_additional_term_info(terms, data, synonym_terms, definition_terms, prefix='UNK'):
@@ -917,10 +918,14 @@ def _is_deprecated(class_, data):
     return False
 
 
-def download_and_process_owl(ontology, connection, terms, deprecated, simple=False):
+def download_and_process_owl(ontology, terms, deprecated, simple=False, owlfile=None):
     synonym_terms = get_synonym_term_uris(ontology)
     definition_terms = get_definition_term_uris(ontology)
-    data = Owler(ontology['download_url'])
+    input_source = ontology.get('download_url')
+    if owlfile:  # parse terms from provided local file
+        input_source = owlfile
+    data = Owler(input_source)
+    print("have data to process")
     ont_prefix = ontology.get('ontology_prefix')
     if not terms:
         terms = {}
@@ -942,7 +947,8 @@ def download_and_process_owl(ontology, connection, terms, deprecated, simple=Fal
             else:
                 if 'term_name' not in terms[termid] or not terms[termid].get('term_name'):
                     terms[termid]['term_name'] = get_term_name_from_rdf(class_, data)
-                if not terms[termid].get('source_ontologies') or ontology.get('uuid') not in terms[termid]['source_ontologies']:
+                if (not terms[termid].get('source_ontologies') or
+                        ontology.get('uuid') not in terms[termid]['source_ontologies']):
                     terms[termid].setdefault('source_ontologies', []).append(ontology['uuid'])
             # deal with parents
             if ontology.get('ontology_name') != 'Sequence Ontology':
@@ -952,6 +958,32 @@ def download_and_process_owl(ontology, connection, terms, deprecated, simple=Fal
     if ontology.get('ontology_name') == 'Sequence Ontology':
         terms = {k: v for k, v in terms.items() if k in ['SO:0000001', 'SO:0000104', 'SO:0000673', 'SO:0000704']}
     return terms, data.version, list(set(deprecated))
+
+
+def _split_oterm_required_from_other_props(term):
+    '''internal function that assumes we are dealing with OntologyTerm items only'''
+    required_props = ['term_id', 'source_ontologies']
+    tid = term.get('uuid')
+    post_first = {key: value for (key, value) in term.items() if key in required_props}
+    patch_second = {key: value for (key, value) in term.items() if key not in required_props}
+    post_first['uuid'] = patch_second['uuid'] = tid
+    return post_first, patch_second
+
+
+def order_terms_by_phasing(post_ids, terms2upd):
+    """ ensure that required props for new terms are ordered before other props
+        of those terms as well as terms that exist that need patching
+    """
+    phased_info = {'phase1': [], 'phase2': []}
+    for term in terms2upd:
+        tid = term.get('term_id')
+        if tid in post_ids:
+            req_info, other_info = _split_oterm_required_from_other_props(term)
+            phased_info['phase1'].append(req_info)
+            phased_info['phase2'].append(other_info)
+        else:
+            phased_info['phase2'].append(term)
+    return phased_info['phase1'] + phased_info['phase2']
 
 
 def write_outfile(to_write, filename, pretty=False):
@@ -983,6 +1015,10 @@ def parse_args(args):
                         help="Default false - WARNING can only be used if processing a single ontology!!! \
                         - will process only terms that share the prefix ontology"
                              " and skip terms imported from other ontologies")
+    parser.add_argument('--owlfile',
+                        default=None,
+                        help="Path to local owl file to use instead of downloading - can only be used \
+                        to process a single ontology")
     parser.add_argument('--outfile',
                         help="the optional path and file to write output default is src/encoded/ontology_term.json ")
     parser.add_argument('--pretty',
@@ -994,6 +1030,11 @@ def parse_args(args):
                         action='store_true',
                         help="Default False - set True to generate full file to load"
                              " - do not filter out existing unchanged terms")
+    parser.add_argument('--phase',
+                        default=False,
+                        action='store_true',
+                        help="Default False - set True to phase the result into posts of only required fields \
+                                and then patches of all else")
     parser.add_argument('--env',
                         default='data',
                         help="The environment to use i.e. data, webdev, mastertest.\
@@ -1003,7 +1044,7 @@ def parse_args(args):
                         help="An access key dictionary including key, secret and server.\
                         \"{'key': 'ABCDEF', 'secret': 'supersecret', 'server': 'https://data.4dnucleome.org'}\" ")
     parser.add_argument('--keyfile',
-                        default='',
+                        default='{}/keypairs.json'.format(Path.home()),
                         help="A file where access keys are stored.")
     parser.add_argument('--keyname',
                         default='default',
@@ -1035,10 +1076,14 @@ def main():
     print('Writing to %s' % postfile)
 
     # fourfront connection
-    if args.keyfile:
-        with open(args.keyfile, 'r') as keyfile:
-            keys = json.load(keyfile)
-        key = str(keys[args.keyname])
+    if args.keyname:
+        try:
+            with open(args.keyfile, 'r') as keyfile:
+                keys = json.load(keyfile)
+            key = str(keys[args.keyname])
+        except Exception as e:
+            print("Keypairs file '{}' not found or can't be read".format(args.keyfile))
+            sys.exit()
     else:
         key = args.key
     connection = connect2server(args.env, key, args)
@@ -1046,6 +1091,9 @@ def main():
     ontologies = get_ontologies(connection, args.ontology)
     if len(ontologies) > 1 and args.simple:
         print("INVALID USAGE - simple can only be used while processing a single ontology")
+        sys.exit(1)
+    if len(ontologies) > 1 and args.owlfile:
+        print("INVALID USAGE - path to local owlfile can only be used while processing a single ontology")
         sys.exit(1)
     for i, o in enumerate(ontologies):
         if o['ontology_name'].startswith('4DN') or o['ontology_name'].startswith('CGAP'):
@@ -1062,15 +1110,15 @@ def main():
         print('Processing: ', ontology['ontology_name'])
         if ontology.get('download_url', None) is not None:
             # get all the terms for an ontology
-            terms, v, deprecated = download_and_process_owl(ontology, connection, terms, deprecated, simple=args.simple)
+            terms, v, deprecated = download_and_process_owl(
+                    ontology, terms, deprecated, simple=args.simple, owlfile=args.owlfile)
             if not v and ontology.get('ontology_name').upper() == 'UBERON':
                 try:
-                    result = requests.get('http://svn.code.sf.net/p/obo/svn/uberon/releases/')
-                    release = result._content.decode('utf-8').split('</li>\n  <li>')[-1]
-                    v = release[release.index('>') + 1: release.index('</a>')].rstrip('/')
+                    result = requests.get('https://api.github.com/repos/obophenotype/uberon/git/refs/tags')
+                    v = result.json()[-1].get('ref').split('/v')[-1]
                 except Exception:
                     print('Unable to fetch Uberon version')
-            if v and v != ontology.get('current_ontology_version', ''):
+            if (v and v != ontology.get('current_ontology_version', '')) or args.full:
                 prev = []
                 if ontology.get('current_ontology_version'):
                     if not ontology.get('ontology_versions'):
@@ -1094,24 +1142,35 @@ def main():
         filter_unchanged = True
         if args.full:
             filter_unchanged = False
-        updates = id_post_and_patch(terms, db_terms, ontologies, filter_unchanged, ontarg=args.ontology,
-                                    simple=args.simple, connection=connection)
+        print("FINDING TERMS TO UPDATE")
+        updates, post_ids = id_post_and_patch(terms, db_terms, ontologies, filter_unchanged, ontarg=args.ontology,
+                                              simple=args.simple, connection=connection)
         print("DONE FINDING UPDATES")
 
         pretty = False
+        phasing = False
         if args.pretty:
             pretty = True
-        out_dict = {
-            'ontologies': {
-                o['uuid']: {k: o[k] for k in ['current_ontology_version', 'ontology_versions'] if k in o}
-                for o in new_versions
-            },
-            'terms': updates
-        }
+        if args.phase:
+            phasing = True
+        out_dict = {}
+        out_dict.setdefault('ontology', [])
+        for o in new_versions:
+            out_dict['ontology'].append({k: o[k] for k in ['uuid', 'current_ontology_version', 'ontology_versions'] if k in o})
+        if phasing:
+            print("PHASING TERM INFO")
+            phased_terms = order_terms_by_phasing(post_ids, updates)
+            out_dict['ontology_term'] = phased_terms
+        else:
+            print("NOT PHASING")
+            out_dict['ontology_term'] = updates
+        print(out_dict.keys())
+        print("WRITING OUTPUT")
         write_outfile(out_dict, postfile, pretty)
 
         obsoletes = [term for term in updates if term.get('status') == 'obsolete']
         if obsoletes:
+            print("CHECKING OBSOLETES FOR LINKS")
             problems = []
             for obsolete in obsoletes:
                 result = get_metadata(obsolete['uuid'] + '/@@links', connection)
@@ -1125,6 +1184,8 @@ def main():
                 print('term uuid\t\t\t\titem uuid\t\t\t\titem display title')
                 for problem in problems:
                     print('\t'.join(problem))
+            else:
+                print("NO LINKED TERMS FOUND TO BE UPDATED")
 
 
 if __name__ == '__main__':
