@@ -1118,7 +1118,7 @@ def main():
                     v = result.json()[-1].get('ref').split('/v')[-1]
                 except Exception:
                     print('Unable to fetch Uberon version')
-            if (v and v != ontology.get('current_ontology_version', '')) or args.full:
+            if v and v != ontology.get('current_ontology_version', ''):
                 prev = []
                 if ontology.get('current_ontology_version'):
                     if not ontology.get('ontology_versions'):
