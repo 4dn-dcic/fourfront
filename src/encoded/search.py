@@ -1512,8 +1512,9 @@ def format_facets(es_results, facets, total, additional_facets, request, doc_typ
                                 gbt['is_parent'] = True
                                 group_by_keys_found.append(gbt['key'])
                             # always add missing
-                            group_by_keys_missing = list(filter (lambda key: key not in group_by_keys_found, group_by_dict.keys()))
-                            group_by_terms = group_by_terms + [{'key': key, 'doc_count': 0, 'is_parent': True, 'terms': []} for key in group_by_keys_missing]
+                            if len(group_by_terms) < 2:
+                                group_by_keys_missing = list(filter (lambda key: key not in group_by_keys_found, group_by_dict.keys()))
+                                group_by_terms = group_by_terms + [{'key': key, 'doc_count': 0, 'is_parent': True, 'terms': []} for key in group_by_keys_missing]
 
                             result_facet['terms'] = group_by_terms
                         else:
