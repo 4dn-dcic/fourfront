@@ -96,11 +96,12 @@ def load_data_via_ingester(vapp: VirtualApp,
     unique_uuids = set()
     INGESTION_RESPONSE_PATTERN = re.compile(r"^([A-Z]+): ([0-9a-f-]+)$")
     for item in response:
-        # ASSUME each item in the response looks something like one of (string or bytes):
+        # Assume each item in the response looks something like one of (string or bytes):
         # POST: 15425d13-01ce-4e61-be5d-cd04401dff29
         # PATCH: 5b45e66f-7b4f-4923-824b-d0864a689bb
         # SKIP: 4efe24b5-eb17-4406-adb8-060ea2ae2180
         # ERROR: 906c4667-483e-4a08-96b9-3ce85ce8bf8c
+        # Note that SKIP means skip post/insert; still may to patch/update (if overwrite).
         if isinstance(item, bytes):
             item = item.decode("ascii")
         elif not isinstance(item, str):
