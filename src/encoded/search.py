@@ -1031,11 +1031,6 @@ def initialize_facets(request, doc_types, prepared_terms, schemas, additional_fa
                     disabled_facets.append(schema_facet[0])
                     continue  # Skip disabled facets.
                 facets.append(schema_facet)
-                # ensure grouping field facet appended
-                if schema_facet[1].get('group_by') is not None and len(schema_facet[1]['group_by'].get('field', '')) > 0:
-                    group_by_field = schema_facet[1]['group_by']['field']
-                    group_by_title = group_by_field.split('.')[-1]
-                    facets.append((group_by_field, {'title': group_by_title, 'is_for_grouping': True, 'default_hidden': True}))
 
     # Add facets for any non-schema ?field=value filters requested in the search (unless already set)
     used_facets = [facet[0] for facet in facets + append_facets]
@@ -1043,7 +1038,6 @@ def initialize_facets(request, doc_types, prepared_terms, schemas, additional_fa
         facet[1]['title'] for facet in facets + append_facets
         if 'title' in facet[1]
     ]
-    group_by_facets = [facet[0] for facet in facets if facet[1].get('is_for_grouping', False)]
     for field in prepared_terms:
         if field.startswith('embedded'):
             split_field = field.strip().split('.')  # Will become, e.g. ['embedded', 'experiments_in_set', 'files', 'file_size', 'from']
@@ -1067,7 +1061,7 @@ def initialize_facets(request, doc_types, prepared_terms, schemas, additional_fa
             else:
                 is_object_title = False
 
-            if title_field in used_facets or title_field in disabled_facets or use_field in group_by_facets:
+            if title_field in used_facets or title_field in disabled_facets:
                 # Cancel if already in facets or is disabled
                 continue
             used_facets.append(title_field)
@@ -1579,12 +1573,12 @@ def convert_group_by_facet_terms_into_nested(request, aggregations, result_facet
 
     group_by = result_facet['group_by']
     # check required fields
-    if 'field' in group_by and 'item_type' in group_by and 'item_type_key_field' in group_by and 'item_type_value_field' in group_by:
+    if 'item_type' in group_by and 'item_type_key_field' in group_by and 'item_type_value_field' in group_by:
 
         # get [key: value[]] from item_type collection
         group_by_dict = get_facet_group_by_dict(request, group_by['item_type'], group_by['item_type_key_field'], group_by['item_type_value_field'])
         if group_by_dict is not None and len(group_by_dict) > 0:
-            result_facet['group_by'] = group_by['field'] #override
+            result_facet['has_group_by'] = True #override
             transposed_group_by_dict = transpose_dict(group_by_dict)
         
             group_by_terms_dict = dict()
@@ -1598,10 +1592,8 @@ def convert_group_by_facet_terms_into_nested(request, aggregations, result_facet
                 group_by_term['terms'].append(term)
         
             result_facet['terms'] = sorted( list(group_by_terms_dict.values()), key=lambda t: t['doc_count'], reverse=True)
-        else:
-            del result_facet['group_by']
-    else:
-        del result_facet['group_by']
+    
+    del result_facet['group_by']
 
 
 def make_search_subreq(request, path):

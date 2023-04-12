@@ -154,7 +154,6 @@
             "title": "Experiment Type",
             "persist_selected_terms": false,
             "group_by": {
-                "field": "experiments_in_set.experiment_type.assay_subclass_short",
                 "item_type": "ExperimentType",
                 "item_type_key_field": "display_title",
                 "item_type_value_field": "assay_subclass_short"
