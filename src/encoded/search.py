@@ -1493,35 +1493,7 @@ def format_facets(es_results, facets, total, additional_facets, request, doc_typ
                 # Default - terms, range, or histogram buckets. Buckets may not be present
                 result_facet['terms'] = aggregations[full_agg_name]["primary_agg"]["buckets"]
                 
-                if 'group_by' in facet:
-                    group_by = facet['group_by']
-                    # check required fields
-                    if 'field' in group_by and 'item_type' in group_by and 'item_type_key_field' in group_by and 'item_type_value_field' in group_by:
-                        # get [key: value[]] from item_type collection
-                        group_by_dict = get_facet_group_by_dict(request, group_by['item_type'], group_by['item_type_key_field'], group_by['item_type_value_field'])
-                        # ignore grouping if type=item_type returns no value (or none of them are not released for anonymous users) 
-                        if group_by_dict is not None and len(group_by_dict) > 0:
-                            result_facet['group_by'] = group_by['field'] #override
-                            group_by_terms = deepcopy(aggregations['terms:' + group_by['field'].replace('.', '-')]["primary_agg"]["buckets"])
-                            group_by_keys_found = []
-                            for gbt in group_by_terms:
-                                gbt['terms'] = list(filter(lambda term: term['key'] in group_by_dict[gbt['key']], result_facet['terms']))
-                                if len(gbt['terms']) < 1:
-                                    gbt['has_suggested_terms'] = True
-                                    gbt['terms'] = [{'key': v, 'doc_count': 0} for v in group_by_dict[gbt['key']]]
-                                gbt['is_parent'] = True
-                                group_by_keys_found.append(gbt['key'])
-                            # always add missing
-                            if len(group_by_terms) < 2:
-                                group_by_keys_missing = list(filter (lambda key: key not in group_by_keys_found, group_by_dict.keys()))
-                                group_by_terms = group_by_terms + [{'key': key, 'doc_count': 0, 'is_parent': True, 'terms': []} for key in group_by_keys_missing]
-
-                            result_facet['terms'] = group_by_terms
-                        else:
-                            del result_facet['group_by']
-                    else:
-                        del result_facet['group_by']
-                
+                convert_group_by_facet_terms_into_nested(request, aggregations, result_facet)
                 
                 # Choosing to show facets with one term for summary info on search it provides
                 if len(result_facet.get('terms', [])) < 1:
@@ -1589,6 +1561,47 @@ def find_index_by_doc_types(request, doc_types, ignore):
     indexes = list(set(indexes))
     index_string = ','.join(indexes)
     return index_string
+
+
+def convert_group_by_facet_terms_into_nested(request, aggregations, result_facet):
+    if 'group_by' not in result_facet:
+        return
+
+    def transpose_dict(original_dict):
+        transposed_dict = {}
+        for key, values in original_dict.items():
+            for value in values:
+                if value not in transposed_dict:
+                    transposed_dict[value] = [key]
+                else:
+                    transposed_dict[value].append(key)
+        return transposed_dict
+
+    group_by = result_facet['group_by']
+    # check required fields
+    if 'field' in group_by and 'item_type' in group_by and 'item_type_key_field' in group_by and 'item_type_value_field' in group_by:
+
+        # get [key: value[]] from item_type collection
+        group_by_dict = get_facet_group_by_dict(request, group_by['item_type'], group_by['item_type_key_field'], group_by['item_type_value_field'])
+        if group_by_dict is not None and len(group_by_dict) > 0:
+            result_facet['group_by'] = group_by['field'] #override
+            transposed_group_by_dict = transpose_dict(group_by_dict)
+        
+            group_by_terms_dict = dict()
+        
+            for term in result_facet['terms']:
+                group_by_term_key = transposed_group_by_dict[term['key']][0]
+                if group_by_term_key not in group_by_terms_dict:
+                    group_by_terms_dict[group_by_term_key] = {'key': group_by_term_key, 'doc_count': 0, 'is_parent': True, 'terms': []}
+                group_by_term = group_by_terms_dict[group_by_term_key]
+                group_by_term['doc_count'] += term['doc_count']
+                group_by_term['terms'].append(term)
+        
+            result_facet['terms'] = sorted( list(group_by_terms_dict.values()), key=lambda t: t['doc_count'], reverse=True)
+        else:
+            del result_facet['group_by']
+    else:
+        del result_facet['group_by']
 
 
 def make_search_subreq(request, path):
