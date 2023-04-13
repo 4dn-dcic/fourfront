@@ -174,7 +174,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
 
     ### Record total number of hits
     result['total'] = total = es_results['hits']['total']['value']
-    result['facets'] = format_facets(es_results, facets, total, additional_facets, request, doc_types, search_frame)
+    result['facets'] = format_facets(es_results, facets, total, additional_facets, request, result['filters'], search_frame)
     result['aggregations'] = format_extra_aggregations(es_results)
 
     # After ES7 upgrade, 'total' does not return the exact count if it is >10000. This restriction
@@ -1423,7 +1423,7 @@ def execute_search(search):
     return es_results
 
 
-def format_facets(es_results, facets, total, additional_facets, request, doc_types, search_frame='embedded'):
+def format_facets(es_results, facets, total, additional_facets, request, filters, search_frame='embedded'):
     """
     Format the facets for the final results based on the es results.
     Sort based off of the 'order' of the facets
@@ -1487,7 +1487,7 @@ def format_facets(es_results, facets, total, additional_facets, request, doc_typ
                 # Default - terms, range, or histogram buckets. Buckets may not be present
                 result_facet['terms'] = aggregations[full_agg_name]["primary_agg"]["buckets"]
                 
-                convert_group_by_facet_terms_into_nested(request, aggregations, result_facet)
+                convert_group_by_facet_terms_into_nested(request, result_facet, filters)
                 
                 # Choosing to show facets with one term for summary info on search it provides
                 if len(result_facet.get('terms', [])) < 1:
@@ -1557,19 +1557,9 @@ def find_index_by_doc_types(request, doc_types, ignore):
     return index_string
 
 
-def convert_group_by_facet_terms_into_nested(request, aggregations, result_facet):
+def convert_group_by_facet_terms_into_nested(request, result_facet, filters):
     if 'group_by' not in result_facet:
         return
-
-    def transpose_dict(original_dict):
-        transposed_dict = {}
-        for key, values in original_dict.items():
-            for value in values:
-                if value not in transposed_dict:
-                    transposed_dict[value] = [key]
-                else:
-                    transposed_dict[value].append(key)
-        return transposed_dict
 
     group_by = result_facet['group_by']
     # check required fields
@@ -1579,17 +1569,27 @@ def convert_group_by_facet_terms_into_nested(request, aggregations, result_facet
         group_by_dict = get_facet_group_by_dict(request, group_by['item_type'], group_by['item_type_key_field'], group_by['item_type_value_field'])
         if group_by_dict is not None and len(group_by_dict) > 0:
             result_facet['has_group_by'] = True #override
-            transposed_group_by_dict = transpose_dict(group_by_dict)
         
             group_by_terms_dict = dict()
-        
+            already_added_term_keys_dict = dict()
+
             for term in result_facet['terms']:
-                group_by_term_key = transposed_group_by_dict[term['key']][0]
+                group_by_term_key = group_by_dict[term['key']][0]
                 if group_by_term_key not in group_by_terms_dict:
                     group_by_terms_dict[group_by_term_key] = {'key': group_by_term_key, 'doc_count': 0, 'is_parent': True, 'terms': []}
                 group_by_term = group_by_terms_dict[group_by_term_key]
                 group_by_term['doc_count'] += term['doc_count']
                 group_by_term['terms'].append(term)
+                already_added_term_keys_dict[term['key']] = True
+            # add terms not in results but exists in filters
+            for filter in filters:
+                if (filter['field'] != result_facet['field'] or filter['term'] in already_added_term_keys_dict):
+                    continue
+                group_by_term_key = group_by_dict[filter['term']][0]
+                if(group_by_term_key not in group_by_terms_dict):
+                    group_by_terms_dict[group_by_term_key] = {'key': group_by_term_key, 'doc_count': 0, 'is_parent': True, 'terms': []}
+                group_by_term = group_by_terms_dict[group_by_term_key]
+                group_by_term['terms'].append({'key': filter['term'], 'doc_count': 0})
         
             result_facet['terms'] = sorted( list(group_by_terms_dict.values()), key=lambda t: t['doc_count'], reverse=True)
     
@@ -1649,12 +1649,12 @@ def get_facet_group_by_dict(request, item_type, key_field, value_field):
     primary_agg = {
         "field_0" : {
             "terms" : {
-                "field" : "embedded." + value_field + ".raw",
+                "field" : "embedded." + key_field + ".raw",
                 "size" : 100
             },
             "aggs" : { "group_by" : {
                             "terms" : {
-                                "field": "embedded." + key_field + ".raw"
+                                "field": "embedded." + value_field + ".raw"
                             }
                     }
             }
