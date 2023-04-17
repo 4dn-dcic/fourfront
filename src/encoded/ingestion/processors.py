@@ -139,6 +139,7 @@ def handle_ontology_update(submission: SubmissionFolio):
             f"Created: {len(load_data_results['post'])}",
             f"Updated: {len(load_data_results['patch'])}",
             f"Skipped: {len(load_data_results['skip'])}",
+            f"Checked: {len(load_data_results['check'])}",
             f"Errored: {len(load_data_results['error'])}",
             f"Uniques: {load_data_results['unique']}",
             f"Ontology ingestion files:",

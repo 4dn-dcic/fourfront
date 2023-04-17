@@ -94,7 +94,7 @@ def load_data_via_ingester(vapp: VirtualApp,
     """
     response = load_all_gen(vapp, ontology, None, overwrite=True, itype=itype,
                             from_json=True, patch_only=False, validate_only=validate_only)
-    results = {"post": [], "patch": [], "skip": [], "error": []}
+    results = {"post": [], "patch": [], "skip": [], "check": [], "error": []}
     unique_uuids = set()
     INGESTION_RESPONSE_PATTERN = re.compile(r"^([A-Z]+): ([0-9a-f-]+)$")
     for item in response:
@@ -102,6 +102,7 @@ def load_data_via_ingester(vapp: VirtualApp,
         # POST: 15425d13-01ce-4e61-be5d-cd04401dff29
         # PATCH: 5b45e66f-7b4f-4923-824b-d0864a689bb
         # SKIP: 4efe24b5-eb17-4406-adb8-060ea2ae2180
+        # CHECK: deadbeef-eb17-4406-adb8-0eacafebabe
         # ERROR: 906c4667-483e-4a08-96b9-3ce85ce8bf8c
         # Note that SKIP means skip post/insert; still may to patch/update (if overwrite).
         if isinstance(item, bytes):
@@ -459,10 +460,14 @@ def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_jso
                         if validate_only:
                             post_request += '&check_only=true'
                         res = testapp.post_json(post_request, post_first)
-                        assert res.status_code == 201
-                        posted += 1
-                        # yield bytes to work with Response.app_iter
-                        yield str.encode('POST: %s\n' % res.json['@graph'][0]['uuid'])
+                        if not validate_only:
+                            assert res.status_code == 201
+                            posted += 1
+                            # yield bytes to work with Response.app_iter
+                            yield str.encode('POST: %s\n' % res.json['@graph'][0]['uuid'])
+                        else:
+                            assert res.status_code == 200
+                            yield str.encode('CHECK: %s\n' % an_item['uuid'])
                     except Exception as e:
                         print('Posting {} failed. Post body:\n{}\nError Message:{}'
                               ''.format(a_type, str(first_fields), str(e)))
@@ -471,7 +476,10 @@ def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_jso
                         yield str.encode('ERROR: %s\n' % e_str)
                         return
                         # raise StopIteration
-            second_round_items[a_type] = [i for i in store[a_type] if i['uuid'] not in skip_existing_items]
+            if not validate_only:
+                second_round_items[a_type] = [i for i in store[a_type] if i['uuid'] not in skip_existing_items]
+            else:
+                second_round_items[a_type] = []
             logger.info('{} 1st: {} items posted, {} items exists.'.format(a_type, posted, skip_exist))
             logger.info('{} 1st: {} items will be patched in second round'
                         .format(a_type, str(len(second_round_items.get(a_type, [])))))
@@ -495,8 +503,6 @@ def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_jso
             try:
                 add_last_modified(an_item, userid=LOADXL_USER_UUID)
                 patch_request = '/' + an_item['uuid']
-                if validate_only:
-                    patch_request += "?check_only=true"
                 res = testapp.patch_json(patch_request, an_item)
                 assert res.status_code == 200
                 patched += 1
