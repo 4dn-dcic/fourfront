@@ -89,8 +89,9 @@ def load_data_via_ingester(vapp: VirtualApp,
                            validate_only: bool = False) -> dict:
     """
     Entry point for call from encoded.ingester.processors.handle_ontology_update (2023-03-08).
-    Returns dictionary itemizing the created (post), updated (patch), skipped (skip), and
-    errored (error) ontology term uuids; as well as a count of the number of unique uuids processed.
+    Returns dictionary itemizing the created (post), updated (patch), skipped (skip), checked (check),
+    and errored (error) ontology term uuids; as well as a count of the number of unique uuids processed;
+    the checked category is for validate_only;
     """
     response = load_all_gen(vapp, ontology, None, overwrite=True, itype=itype,
                             from_json=True, patch_only=False, validate_only=validate_only)
