@@ -85,13 +85,15 @@ class LoadGenWrapper(object):
 
 def load_data_via_ingester(vapp: VirtualApp,
                            ontology: dict,
-                           itype: Union[str, list] = ["ontology", "ontology_term"]) -> dict:
+                           itype: Union[str, list] = ["ontology", "ontology_term"],
+                           validate_only: bool = False) -> dict:
     """
     Entry point for call from encoded.ingester.processors.handle_ontology_update (2023-03-08).
     Returns dictionary itemizing the created (post), updated (patch), skipped (skip), and
     errored (error) ontology term uuids; as well as a count of the number of unique uuids processed.
     """
-    response = load_all_gen(vapp, ontology, None, overwrite=True, itype=itype, from_json=True, patch_only=False)
+    response = load_all_gen(vapp, ontology, None, overwrite=True, itype=itype,
+                            from_json=True, patch_only=False, validate_only=validate_only)
     results = {"post": [], "patch": [], "skip": [], "error": []}
     unique_uuids = set()
     INGESTION_RESPONSE_PATTERN = re.compile(r"^([A-Z]+): ([0-9a-f-]+)$")
@@ -332,7 +334,7 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
         return Exception(gen.caught)
 
 
-def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=False, patch_only=False):
+def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=False, patch_only=False, validate_only=False):
     """
     Generator function that yields bytes information about each item POSTed/PATCHed.
     Is the base functionality of load_all function.
@@ -453,7 +455,10 @@ def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_jso
                     post_first = {key: value for (key, value) in an_item.items() if key in first_fields}
                     post_first = format_for_attachment(post_first, docsdir)
                     try:
-                        res = testapp.post_json(f'/{a_type}?skip_indexing=true', post_first)
+                        post_request = f'/{a_type}?skip_indexing=true'
+                        if validate_only:
+                            post_request += '&check_only=true'
+                        res = testapp.post_json(post_request, post_first)
                         assert res.status_code == 201
                         posted += 1
                         # yield bytes to work with Response.app_iter
@@ -489,7 +494,10 @@ def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_jso
             an_item = format_for_attachment(an_item, docsdir)
             try:
                 add_last_modified(an_item, userid=LOADXL_USER_UUID)
-                res = testapp.patch_json('/'+an_item['uuid'], an_item)
+                patch_request = '/' + an_item['uuid']
+                if validate_only:
+                    patch_request += "?check_only=true"
+                res = testapp.patch_json(patch_request, an_item)
                 assert res.status_code == 200
                 patched += 1
                 # yield bytes to work with Response.app_iter

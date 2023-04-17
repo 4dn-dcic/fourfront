@@ -1,6 +1,6 @@
 import json
 import structlog
-from dcicutils.misc_utils import PRINT
+from dcicutils.misc_utils import PRINT, str_to_bool
 from ..loadxl import load_data_via_ingester
 from ..types.ingestion import IngestionSubmission, SubmissionFolio
 from .exceptions import UndefinedIngestionProcessorType
@@ -122,10 +122,13 @@ def handle_ontology_update(submission: SubmissionFolio):
         # Get the number of ontology terms just for logging purposes.
         ontology_term_count = len(ontology_json["ontology_term"])
         INFO(f"Ontology ingestion handler ontology file term count: {ontology_term_count}")
+        validate_only = str_to_bool(submission.parameters.get("validate_only"))
+        if validate_only:
+            INFO(f"Ontology ingestion handler is VALIDATE ONLY.")
         # Call into the loadx module to do the actual load of the ontology data;
         # its results are a dictionary itemizing the created (post), updated (patch),
         # skipped (skip), and errored (error) ontology term uuids.
-        load_data_results = load_data_via_ingester(vapp=submission.vapp, ontology=ontology_json)
+        load_data_results = load_data_via_ingester(vapp=submission.vapp, ontology=ontology_json, validate_only=validate_only)
         # Note we take special care to ensure the details of the load (i.e. the itemization of all
         # ontology term uuids created, updated, skipped, or errored) are placed in the submission.json
         # file in S3 (s3://{submission.bucket}/{submission.submission_id}/submission.json), but NOT put
