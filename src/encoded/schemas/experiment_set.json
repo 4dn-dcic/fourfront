@@ -153,6 +153,7 @@
         "experiments_in_set.experiment_type.display_title": {
             "title": "Experiment Type",
             "persist_selected_terms": true,
+            "tooltip_term_substitue": "experiment type",
             "group_by": {
                 "item_type": "ExperimentType",
                 "item_type_key_field": "display_title",
