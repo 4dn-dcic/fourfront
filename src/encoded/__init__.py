@@ -10,7 +10,7 @@ import subprocess
 
 from codeguru_profiler_agent import Profiler
 from dcicutils.ecs_utils import ECSUtils
-from dcicutils.env_utils import EnvUtils, get_mirror_env_from_context, is_stg_or_prd_env
+from dcicutils.env_utils import EnvUtils, get_mirror_env_from_context
 from dcicutils.ff_utils import get_health_page
 from dcicutils.log_utils import set_logging
 from dcicutils.misc_utils import VirtualApp

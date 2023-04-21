@@ -1,7 +1,6 @@
 from collections.abc import Generator
 from typing import Callable, Optional, Union
-from urllib.parse import parse_qs, urlencode, urlparse, urlunsplit
-import uuid
+from urllib.parse import parse_qs, urlparse, urlunsplit
 from dcicutils.ff_utils import get_metadata, search_metadata
 from dcicutils.misc_utils import VirtualApp
 
@@ -145,7 +144,7 @@ class EncodedAPIConnection:
                     response = search_metadata(query, self.connection, page_limit=self._MAX_RESULTS_PER_PAGE, is_generator=True)
                 else:
                     response = self.vapp.get(query).json["@graph"]
-            except Exception as e:
+            except Exception:
                 break
             if not response:
                 break
@@ -226,8 +225,8 @@ class EncodedAPIConnection:
         return self._normalize_query(query)
 
     def _normalize_query(self, query: str) -> str:
-        if (self.vapp and not query.startswith("/")
-            and not query.startswith("http://") and not query.startswith("https://")):
+        if (self.vapp and not query.startswith("/") and
+                not query.startswith("http://") and not query.startswith("https://")):
             query = "/" + query
         return query
 

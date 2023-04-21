@@ -4,9 +4,7 @@ import uptime
 from collections import OrderedDict
 from dcicutils import lang_utils
 from dcicutils.env_utils import infer_foursight_url_from_env
-from collections import OrderedDict
 from dcicutils.s3_utils import HealthPageKey
-from encoded import APP_VERSION_REGISTRY_KEY
 from pyramid.decorator import reify
 from pyramid.security import ALL_PERMISSIONS, Allow, Authenticated, Deny, Everyone
 from snovault import Root, calculated_property, root, COLLECTIONS, STORAGE

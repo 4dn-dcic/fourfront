@@ -1081,7 +1081,7 @@ def main():
             with open(args.keyfile, 'r') as keyfile:
                 keys = json.load(keyfile)
             key = str(keys[args.keyname])
-        except Exception as e:
+        except Exception:
             print("Keypairs file '{}' not found or can't be read".format(args.keyfile))
             sys.exit()
     else:

@@ -1,6 +1,5 @@
-import json
 import structlog
-from dcicutils.misc_utils import PRINT, str_to_bool
+from dcicutils.misc_utils import str_to_bool
 from ..loadxl import load_data_via_ingester
 from ..types.ingestion import IngestionSubmission, SubmissionFolio
 from .exceptions import UndefinedIngestionProcessorType
@@ -13,9 +12,11 @@ INGESTION_UPLOADERS = {}
 def INFO(args):
     if isinstance(args, list):
         for arg in args:
-            print(arg) ; log.info(arg)
+            print(arg)
+            log.info(arg)
     else:
-        print(args) ; log.info(args)
+        print(args)
+        log.info(args)
 
 
 def ingestion_processor(processor_type):

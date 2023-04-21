@@ -1,7 +1,6 @@
 import re
 from rdflib import ConjunctiveGraph, exceptions, Namespace
 from rdflib import RDFS, RDF, BNode, URIRef
-from rdflib.collection import Collection
 
 
 OWLNS = Namespace("http://www.w3.org/2002/07/owl#")

@@ -1,5 +1,4 @@
 from dcicutils.misc_utils import environ_bool
-from ..util import resolve_file_path
 
 STATUS_QUEUED = 'Queued'
 STATUS_INGESTED = 'Ingested'

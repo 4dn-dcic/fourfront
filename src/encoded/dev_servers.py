@@ -14,7 +14,7 @@ import sys
 
 from dcicutils.misc_utils import PRINT
 from pkg_resources import resource_filename
-from pyramid.paster import get_app, get_appsettings
+from pyramid.paster import get_app
 from pyramid.path import DottedNameResolver
 from snovault.elasticsearch import create_mapping
 from snovault.tests import elasticsearch_fixture, postgresql_fixture
@@ -89,7 +89,7 @@ def main():
     logging.getLogger('encoded').setLevel(logging.INFO)
 
     # get the config and see if we want to connect to non-local servers
-    config = get_appsettings(args.config_uri, args.app_name)
+    # config = get_appsettings(args.config_uri, args.app_name)
 
     datadir = os.path.abspath(args.datadir)
     pgdata = os.path.join(datadir, 'pgdata')
@@ -139,7 +139,7 @@ def main():
         load_test_data = DottedNameResolver().resolve(load_test_data)
         load_res = load_test_data(app)
         if load_res:  # None if successful
-            raise(load_res)
+            raise load_res
 
         # now clear the queues and queue items for indexing
         create_mapping.run(app, check_first=True, strict=True, purge_queue=True)
@@ -159,6 +159,7 @@ def main():
                 for line in iter(stdout.readline, b''):
                     sys.stdout.write(line.decode('utf-8'))
             break
+
 
 if __name__ == '__main__':
     main()
