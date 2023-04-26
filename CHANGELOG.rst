@@ -6,6 +6,14 @@ fourfront
 Change Log
 ----------
 
+5.2.1
+=====
+
+`PR 1789: Not facets <https://github.com/4dn-dcic/fourfront/pull/1789>`_
+
+* Removed unused imports from test_file.py
+* added mark to integrated tests that use s3 test bucket
+
 5.2.0
 =====
 
