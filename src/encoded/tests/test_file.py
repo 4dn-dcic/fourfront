@@ -9,7 +9,8 @@ from unittest import mock
 from ..types.file import FileFastq, post_upload, external_creds
 
 
-pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.integrated]
+# adding a mark to a list applies it to every test in the file
+pytestmark = [pytest.mark.setone, pytest.mark.workinG]
 
 
 def test_processed_file_unique_md5(testapp, mcool_file_json):
