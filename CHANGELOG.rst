@@ -79,6 +79,13 @@ From Andy's branch (upd_ont_gen) on 2023-04-10: Update generate_ontology script 
 * optionally phase the json (no longer needed for ingest but could be useful for local testing)
 * updated some tests
 
+5.2.1
+=====
+
+`PR 1796: Test cleanups <https://github.com/4dn-dcic/fourfront/pull/1796>`_
+
+* Removed unused imports from test_file.py
+* added mark to integrated tests that use s3 test bucket
 
 5.2.0
 =====

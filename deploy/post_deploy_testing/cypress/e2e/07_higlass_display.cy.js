@@ -17,7 +17,7 @@ describe("HiGlass Display pages", function(){
             // Visit the page and confirm you can see the table and facet properties.
             cy.visit('/higlass-view-configs').wait(100).end()
                 .get(".search-headers-column-block .column-title").should('have.text', ['Title', 'Creator'].join('')).end()
-                .get(".facets-header .facets-title").should('have.text', 'Properties');
+                .get(".facets-header .facets-title").should('have.text', 'Included Properties');
 
             // All of the higlass displays you can view should have the "released" status.
             cy.request({
