@@ -4,9 +4,7 @@ import uptime
 from collections import OrderedDict
 from dcicutils import lang_utils
 from dcicutils.env_utils import infer_foursight_url_from_env
-from collections import OrderedDict
 from dcicutils.s3_utils import HealthPageKey
-from encoded import APP_VERSION_REGISTRY_KEY
 from pyramid.decorator import reify
 from pyramid.security import ALL_PERMISSIONS, Allow, Authenticated, Deny, Everyone
 from snovault import Root, calculated_property, root, COLLECTIONS, STORAGE
@@ -100,8 +98,7 @@ class SettingsKey:
     INDEXER_NAMESPACE = 'indexer.namespace'
     INDEX_SERVER = 'index_server'
     LOAD_TEST_DATA = 'load_test_data'
-    # cgap-only:
-    # METADATA_BUNDLES_BUCKET = 'metadata_bundles_bucket'
+    METADATA_BUNDLES_BUCKET = 'metadata_bundles_bucket'
     S3_ENCRYPT_KEY_ID = 's3_encrypt_key_id'
     SNOVAULT_VERSION = 'snovault_version'
     SQLALCHEMY_URL = 'sqlalchemy.url'
@@ -164,7 +161,7 @@ def health_check(config):
             h.INDEXER: settings.get(s.INDEXER),
             h.INDEX_SERVER: settings.get(s.INDEX_SERVER),
             h.LOAD_DATA: settings.get(s.LOAD_TEST_DATA),
-            # h.METADATA_BUNDLES_BUCKET: settings.get(s.METADATA_BUNDLES_BUCKET),  # cgap-only
+            h.METADATA_BUNDLES_BUCKET: settings.get(s.METADATA_BUNDLES_BUCKET),
             h.NAMESPACE: settings.get(s.INDEXER_NAMESPACE),
             h.PROCESSED_FILE_BUCKET: settings.get(s.FILE_WFOUT_BUCKET),
             h.PROJECT_VERSION: settings.get(s.ENCODED_VERSION),

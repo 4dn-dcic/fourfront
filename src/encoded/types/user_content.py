@@ -9,6 +9,7 @@ from snovault import (
     load_schema
 )
 import docutils.core
+import markdown
 from snovault.interfaces import STORAGE
 from .base import (
     Item,
@@ -22,6 +23,7 @@ from .base import (
     lab_award_attribution_embed_list
 )
 import os
+import re
 import requests
 
 @abstract_collection(
@@ -135,16 +137,30 @@ class StaticSection(UserContent):
 
     @calculated_property(schema={
         "title": "Content as HTML",
-        "description": "Converted content into HTML (Currently, only RST content is supported)",
+        "description": "Convert RST, HTML and MD content into HTML",
         "type": "string"
     })
     def content_as_html(self, request, body=None, file=None, options=None):
+        content = self.content(request, body, file)
+        if not content:
+            return None
+        
         file_type = self.filetype(request, body, file, options)
+        convert_ext_links = request and request.domain and options and options.get('convert_ext_links', True)
+
         if file_type == 'rst':
-            content = self.content(request, body, file)
-            if content is not None:
-                output = docutils.core.publish_parts(content, writer_name='html')
-                return output["html_body"]
+            output = docutils.core.publish_parts(content, writer_name='html')
+            if convert_ext_links:
+                return convert_external_links(output["html_body"], request.domain)
+            return output["html_body"]
+        elif file_type == 'html':
+            if convert_ext_links:
+                return convert_external_links(content, request.domain)
+        elif file_type == 'md':
+            output = markdown.markdown(content)
+            if output and convert_ext_links:
+                return convert_external_links(output, request.domain)
+            return output
         return None
 
     @calculated_property(schema={
@@ -328,3 +344,21 @@ def get_local_file_contents(filename, contentFilesLocation=None):
 def get_remote_file_contents(uri):
     resp = requests.get(uri)
     return resp.text
+
+
+def convert_external_links(content, reference_domain):
+    """
+    Seeks hyperlinks within string content and adds 'target="_blank"' and 'rel="noopener noreferrer"' attributes for external links.
+    """
+    reference_domain_lower = reference_domain.casefold()
+    matches = re.findall(r"(<a[^>]*href=[\"\']https?://(?P<domain>[\w\-\.]+)(?:\S*)[\"\'][^>]*>[^<]+</a>)", content, re.DOTALL)
+    
+    for match in matches:
+        match_domain_lower = match[1].casefold()
+        # compares the found links with domain (we have a special condition to check staging/data indexing)
+        # todo: replace hard-coded domain names with env. variables etc.
+        if (reference_domain_lower != match_domain_lower) and not (reference_domain_lower == 'staging.4dnucleome.org' and match_domain_lower == 'data.4dnucleome.org'):
+            external_link = re.sub(r'<a(?P<in_a>[^>]+)>(?P<in_link>[^<]+)</a>',r'<a\g<in_a> target="_blank" rel="noopener noreferrer">\g<in_link></a>', match[0])
+            content = content.replace(match[0], external_link)
+    
+    return content

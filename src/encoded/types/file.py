@@ -629,7 +629,7 @@ class File(Item):
             file_formats = []
             for xfile in extra_files:
                 # ensure a file_format (identifier for extra_file) is given and non-null
-                if not('file_format' in xfile and bool(xfile['file_format'])):
+                if not ('file_format' in xfile and bool(xfile['file_format'])):
                     continue
                 eformat = xfile['file_format']
                 if eformat.startswith('/file-formats/'):
@@ -1340,6 +1340,25 @@ class FileMicroscopy(ItemWithAttachment, File):
     name_key = 'accession'
 
 
+@collection(
+    name='files-other',
+    unique_key='accession',
+    properties={
+        'title': 'Other Files',
+        'description': 'Listing of Other Files for Ingestion',
+    })
+class FileOther(File):
+    """Collection for other files for ingestion."""
+    item_type = 'file_other'
+    schema = load_schema('encoded:schemas/file_other.json')
+    embedded_list = File.embedded_list
+    name_key = 'accession'
+
+    @classmethod
+    def get_bucket(cls, registry):
+        return registry.settings['blob_bucket']
+
+
 @view_config(name='upload', context=File, request_method='GET',
              permission='edit')
 @debug_log
@@ -1526,7 +1545,7 @@ def update_google_analytics(context, request, ga_config, filename, file_size_dow
 
     # Catch error here
     try:
-        resp = requests.post(
+        _ = requests.post(
             "https://ssl.google-analytics.com/collect?z=" + str(datetime.datetime.utcnow().timestamp()),
             data=urllib.parse.urlencode(ga_payload),
             timeout=5.0,

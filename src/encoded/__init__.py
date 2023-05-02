@@ -10,7 +10,7 @@ import subprocess
 
 from codeguru_profiler_agent import Profiler
 from dcicutils.ecs_utils import ECSUtils
-from dcicutils.env_utils import EnvUtils, get_mirror_env_from_context, is_stg_or_prd_env
+from dcicutils.env_utils import EnvUtils, get_mirror_env_from_context
 from dcicutils.ff_utils import get_health_page
 from dcicutils.log_utils import set_logging
 from dcicutils.misc_utils import VirtualApp
@@ -232,6 +232,8 @@ def main(global_config, **local_config):
     config.include('.batch_download')
     config.include('.loadxl')
     config.include('.visualization')
+    config.include('.ingestion_listener')
+    config.include('.ingestion.ingestion_message_handler_default')
 
     if 'elasticsearch.server' in config.registry.settings:
         config.include('snovault.elasticsearch')
