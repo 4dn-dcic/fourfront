@@ -6,6 +6,13 @@ fourfront
 Change Log
 ----------
 
+
+5.3.1
+======
+
+* Add QualityMetricChipseqV2 schema and type
+
+
 5.3.0
 =====
 
