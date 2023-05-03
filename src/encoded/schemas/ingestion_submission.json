@@ -1,0 +1,155 @@
+{
+    "title": "Ingestion Submission",
+    "description": "Schema for metadata related to ingestion requests submitted to CGAP.",
+    "id": "/profiles/ingestion_submission.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": [ "ingestion_type" ],
+    "additionalProperties": false,
+    "identifyingProperties": [
+        "uuid",
+        "aliases"
+    ],
+    "mixinProperties": [
+        {
+            "$ref": "mixins.json#/schema_version"
+        },
+        {
+            "$ref": "mixins.json#/aliases"
+        },
+        {
+            "$ref": "mixins.json#/uuid"
+        },
+        {
+            "$ref": "mixins.json#/documents"
+        },
+        {
+            "$ref": "mixins.json#/attribution"
+        },
+        {
+            "$ref": "mixins.json#/status"
+        },
+        {
+            "$ref": "mixins.json#/submitted"
+        },
+        {
+            "$ref": "mixins.json#/modified"
+        },
+        {
+            "$ref": "mixins.json#/static_embeds"
+        }
+    ],
+    "mixinFacets": [
+        {
+            "$ref": "mixins.json#/facets_common"
+        }
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "object_bucket": {
+            "title": "Object Bucket",
+            "description": "The name of the S3 bucket in which the 'object_name' resides.",
+            "type": "string"
+        },
+        "object_name": {
+            "title": "Object Name",
+            "description": "The name of the S3 object corresponding to the submitted document.",
+            "type": "string"
+        },
+        "ingestion_type": {
+            "title": "Ingestion Type",
+            "description": "The type of processing requested for this submission.",
+            "type": "string",
+            "enum": [
+                "data_bundle",
+                "accessioning",
+                "metadata_bundle",
+                "ontology",
+                "simulated_bundle",
+                "vcf",
+                "genelist",
+                "variant_update",
+                "family_history"
+            ]
+        },
+        "submission_id": {
+            "title": "Submission ID",
+            "description": "The name of a folder in the S3 bucket that contains all artifacts related to this submission.",
+            "type": "string"
+        },
+        "parameters": {
+            "title": "Parameters",
+            "description": "A record of explicitly offered form parameters in the submission request.",
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {}
+        },
+        "processing_status": {
+            "title": "Processing Status",
+            "description": "A structured description of what has happened so far as the submission is processed.",
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "state": {
+                    "title": "State",
+                    "description": "A state machine description of how processing is progressing (created, submitted, processed, or done).",
+                    "type": "string",
+                    "enum": [
+                        "created",
+                        "submitted",
+                        "processing",
+                        "done"
+                    ],
+                    "default": "created"
+                },
+                "outcome": {
+                    "title": "Outcome",
+                    "description": "A token describing the nature of the final outcome, if any. Options are unknown, success, failure, or error.",
+                    "type": "string",
+                    "enum": [
+                        "unknown",
+                        "success",
+                        "failure",
+                        "error"
+                    ],
+                    "default": "unknown"
+                },
+                "progress": {
+                    "title": "Progress",
+                    "description": "An adjectival word or phrase assessing progress, such as 'started', 'awaiting prerequisites', '88% done', or 'unavailable'.",
+                    "type": "string",
+                    "default": "unavailable"
+                }
+            }
+        },
+        "result": {
+            "title": "Result",
+            "description": "An object representing a result if processing ran to completion, whether the outcome was success or failure.",
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {},
+            "default": {}
+        },
+        "errors": {
+            "title": "Errors",
+            "description": "A list of error messages if processing was aborted before results were obtained.",
+            "type": "array",
+            "items": {
+                "title": "Error Message",
+                "description": "One of possibly several reasons that processing was not completed.",
+                "type": "string"
+            },
+            "default": []
+        },
+        "additional_data": {
+            "title": "Additional Data",
+            "description": "Additional structured information resulting from processing, the nature of which may vary by ingestion_type and other factors.",
+            "type": "object",
+            "additionalItems": true,
+            "properties": {},
+            "default": {}
+        }
+    }
+}

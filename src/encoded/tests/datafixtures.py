@@ -15,7 +15,7 @@ ORDER = [
     'treatment_rnai', 'treatment_agent',
     'biosample', 'quality_metric_fastqc', 'quality_metric_bamcheck', 'quality_metric_rnaseq',
     'quality_metric_bamqc', 'quality_metric_pairsqc', 'quality_metric_margi',
-    'quality_metric_dedupqc_repliseq', 'quality_metric_chipseq', 'quality_metric_workflowrun',
+    'quality_metric_dedupqc_repliseq', 'quality_metric_chipseq', 'quality_metric_chipseq_v2', 'quality_metric_workflowrun',
     'quality_metric_atacseq', 'quality_metric_rnaseq_madqc',  'quality_metric_qclist',
     'microscope_setting_d1', 'microscope_setting_d2',
     'microscope_setting_a1', 'microscope_setting_a2', 'file_fastq',
@@ -29,7 +29,8 @@ ORDER = [
     'workflow_mapping', 'workflow_run_sbg', 'workflow_run_awsem',
     'tracking_item', 'quality_metric_flag',
     'summary_statistic', 'summary_statistic_hi_c', 'workflow_run',
-    'microscope_configuration', 'image_setting', 'quality_metric_mcool'
+    'microscope_configuration', 'image_setting', 'quality_metric_mcool',
+    'ingestion_submission', 'file_other'
 ]
 
 

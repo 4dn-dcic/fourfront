@@ -44,7 +44,7 @@ RUN apt-get update && apt-get upgrade -y && \
     apt-get install -y --no-install-recommends vim emacs net-tools ca-certificates build-essential \
     gcc zlib1g-dev postgresql-client libpq-dev git make curl libmagic-dev && \
     pip install --upgrade pip && \
-    pip install poetry==1.1.15 && \
+    pip install poetry==1.2.2 && \
     curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/${NVM_VERSION}/install.sh | bash && \
     . "$NVM_DIR/nvm.sh" && nvm install ${NODE_VERSION} && \
     nvm use v${NODE_VERSION} && \
@@ -133,6 +133,7 @@ COPY deploy/docker/production/entrypoint.bash .
 COPY deploy/docker/production/entrypoint_portal.bash .
 COPY deploy/docker/production/entrypoint_deployment.bash .
 COPY deploy/docker/production/entrypoint_indexer.bash .
+COPY deploy/docker/production/entrypoint_ingester.bash .
 COPY deploy/docker/production/supervisord.conf .
 # Note that fourfront does not have an ingester
 # COPY deploy/docker/production/entrypoint_ingester.sh .

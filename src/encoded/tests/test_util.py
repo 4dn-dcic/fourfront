@@ -1,11 +1,14 @@
 import datetime
+import io
+import os
 import pytest
 from pyramid.httpexceptions import HTTPForbidden
 
 from ..util import (
     # compute_set_difference_one, find_other_in_pair,
     delay_rerun,  # utc_today_str,
-    customized_delay_rerun, check_user_is_logged_in
+    customized_delay_rerun, check_user_is_logged_in,
+    temporary_file
 )
 
 
@@ -49,3 +52,17 @@ def test_check_user_is_logged_in(principals, allow):
     else:
         with pytest.raises(HTTPForbidden):
             check_user_is_logged_in(req)
+
+
+def test_temporary_file_context_manager():
+    temporary_filename = None
+    with temporary_file(extension=".json") as filename:
+        assert filename.endswith(".json")
+        temporary_filename = filename
+        sample_content = "Hello, world!"
+        with io.open(filename, "w") as fp:
+            fp.write(sample_content)
+        with io.open(filename, "r") as fp:
+            content = fp.read()
+            assert content == sample_content
+    assert not os.path.exists(temporary_filename)

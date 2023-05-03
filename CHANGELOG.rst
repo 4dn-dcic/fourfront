@@ -6,6 +6,94 @@ fourfront
 Change Log
 ----------
 
+
+5.3.1
+======
+
+* Add QualityMetricChipseqV2 schema and type
+
+
+5.3.0
+=====
+
+Adding ingestion support (from cgap-portal as initial guide):
+* Changed ``deploy/docker/production/entrypoint.bash`` to include ``entrypoint_ingester``.
+* Added ``deploy/docker/production/entrypoint_ingester.bash``.
+* Added ``encoded/submit.py`` (verbatim from cgap-portal).
+* Added ``encoded/ingester/ingestion_listener_base.py`` (verbatim from cgap-portal).
+* Added ``encoded/ingester/ingestion_message.py`` (verbatim from cgap-portal).
+* Added ``encoded/ingester/ingestion_message_handler_decorator.py`` (verbatim from cgap-portal).
+* Added ``encoded/ingester/common.py`` (verbatim from cgap-portal).
+* Added ``encoded/ingester/exceptions.py`` (verbatim from cgap-portal).
+* Added ``encoded/ingester/queue_utils.py`` (verbatim from cgap-portal).
+* Added ``encoded/ingester/processors.py`` (from cgap-portal except
+  removed ``handle_genelist``, ``handle_variant_update``, ``handle_metadata_bundle``,
+  ``handle_simulated_bundle`` ``simulated_processor`` and added ``handle_ontology_update``
+  which (the latter) is from the ``fourfront`` ``ff_ingester`` branch).
+* Added ``encoded/ingestion_listener.py`` (verbatim from cgap-portal).
+* Added ``encoded/types/ingestion.py`` (verbatim from cgap-portal).
+* Changed ``encoded/utils.py``:
+  * Changed ``print`` to ``PRINT`` throughout. Added ``log``.
+  * Changed ``s3_output_stream`` to add arg (and extra kwargs) for ``s3_encrypt_key_id``.
+  * Added ``extra_kwargs_for_s3_encrypt_key_id`` function (verbatim from cgap-portal).
+  * Added ``SettingsKey`` class (verbatim from cgap-portal).
+  * Added ``ExtraArgs`` class (verbatim from cgap-portal).
+  * Changed ``create_empty_s3_file`` to add arg (and extra kwargs) for ``s3_encrypt_key_id``.
+  * Added ``_app_from_clues`` function (verbatim from cgap-portal).
+  * Added ``make_vapp_for_email`` function (verbatim from cgap-portal).
+  * Added ``vapp_for_email`` function (verbatim from cgap-portal).
+  * Added ``make_vapp_for_ingestion`` function (verbatim from cgap-portal).
+  * Added ``vapp_for_ingestion`` function (verbatim from cgap-portal).
+  * Added ``make_s3_client`` function (verbatim from cgap-portal except log.info not log.warning).
+  * Added ``build_s3_presigned_get_url`` function (verbatim from cgap-portal).
+  * Added ``convert_integer_to_comma_string`` function (verbatim from cgap-portal).
+* Changed ``encoded/__init__.py`` to include in ``main``
+  ``config.include('.ingestion_listener')`` and
+  ``config.include('.ingestion.ingestion_message_handler_default')``.
+  * Changed ``encoded/appdefs.py`` to include ``IngestionSubmission`` in ``ITEM_INDEX_ORDER``.
+* Changed ``pyproject.toml`` to
+  add ``ingester = "encoded.ingestion_listener:composite"``
+  to ``[paste.composite_factory]`` section
+  and ``ingestion-listener = "encoded.ingestion_listener:main"``
+  to ``[tool.poetry.scripts]`` section, and added ``generate-ontology``.
+* Changed ``Makefile`` to include in ingestion code (from cgap-portal).
+* Changed ``encoded/dev_servers.py`` to include in ingestion code (from cgap-portal).
+* Added to check for unknown ingestion type for @ingestion_processor decorator in ``encoded/ingestion/processor.py``,
+  via ``IngestionSubmission.supports_type`` defined in ``encoded/types/ingestion.py``.
+* Added ``encoded/schemas/ingestion_submission.json`` (from cgap-portal but
+  deleted ``institution`` and ``project`` from ``required`` list).
+* Added ``ontology`` to ``properties.ingestion_type.enum`` list in ``encoded/schemas/ingestion_submission.json``.
+* Added ``metadata_bundles_bucket = cgap-unit-testing-metadata-bundles`` to ``development.ini.template``
+  and ``deploy/docker/local/docker_development.ini.template``. Actually make that ``metadata-bundles-fourfront-cgaplocal-test``.
+* Added ``encoded/tests/test_ingestion_message_handler_decorator.py`` (verbatim from cgap-portal).
+* Added ``encoded/tests/test_ingestion_processor.py`` (verbatim from cgap-portal).
+* Added ``encoded/ingestion/ingestion_connection.py`` (totally new).
+* Updated ``encoded/commands/generate_ontology.py`` (to use new IngestionConnection).
+* Updated ``download_url`` in ``encoded/tests/data/master-inserts/ontology.json``
+  from ``https://raw.githubusercontent.com/The-Sequence-Ontology/SO-Ontologies/master/so.owl``
+  to ``https://raw.githubusercontent.com/The-Sequence-Ontology/SO-Ontologies/master/Ontology_Files/so.owl``.
+  and from ``https://www.ebi.ac.uk/efo/efo.owl`` to ``https://github.com/EBISPOT/efo/releases/download/current/efo.owl"``.
+* Updated ``groupfinder`` in ``encoded/authorization.py`` to include ``INGESTION`` in ``localname``
+* Added ``encoded/schemas/file_other.json`` (totally new).
+* Updated ``encoded/types/file.py`` with new ``FileOther`` type.
+* Updated ``encoded/schemas/ingestion_submission.py`` to remove ``award`` and ``lab`` from ``required``.
+
+From Andy's branch (upd_ont_gen) on 2023-04-10: Update generate_ontology script to:
+
+* fix a bug that obsoleted a term even if it was linked to more than one Ontology
+* change the output json file to use item type names as keys for each section (i.e. ontology and ontology_term) 
+* optionally allow a local .owl file to be specified as input (instead of remote download from source)
+* optionally phase the json (no longer needed for ingest but could be useful for local testing)
+* updated some tests
+
+5.2.1
+=====
+
+`PR 1796: Test cleanups <https://github.com/4dn-dcic/fourfront/pull/1796>`_
+
+* Removed unused imports from test_file.py
+* added mark to integrated tests that use s3 test bucket
+
 5.2.0
 =====
 
