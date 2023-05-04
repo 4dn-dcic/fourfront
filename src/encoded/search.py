@@ -1576,7 +1576,7 @@ def convert_group_by_facet_terms_into_nested(request, result_facet, filters):
             for term in result_facet['terms']:
                 group_by_term_key = group_by_dict[term['key']][0]
                 if group_by_term_key not in group_by_terms_dict:
-                    group_by_terms_dict[group_by_term_key] = {'key': group_by_term_key, 'doc_count': 0, 'is_parent': True, 'terms': []}
+                    group_by_terms_dict[group_by_term_key] = {'key': group_by_term_key, 'doc_count': 0, 'terms': []}
                 group_by_term = group_by_terms_dict[group_by_term_key]
                 group_by_term['doc_count'] += term['doc_count']
                 group_by_term['terms'].append(term)
@@ -1586,8 +1586,8 @@ def convert_group_by_facet_terms_into_nested(request, result_facet, filters):
                 if (filter['field'] != result_facet['field'] or filter['term'] in already_added_term_keys_dict):
                     continue
                 group_by_term_key = group_by_dict[filter['term']][0]
-                if(group_by_term_key not in group_by_terms_dict):
-                    group_by_terms_dict[group_by_term_key] = {'key': group_by_term_key, 'doc_count': 0, 'is_parent': True, 'terms': []}
+                if group_by_term_key not in group_by_terms_dict:
+                    group_by_terms_dict[group_by_term_key] = {'key': group_by_term_key, 'doc_count': 0, 'terms': []}
                 group_by_term = group_by_terms_dict[group_by_term_key]
                 group_by_term['terms'].append({'key': filter['term'], 'doc_count': 0})
         
