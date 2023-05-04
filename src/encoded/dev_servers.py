@@ -12,8 +12,9 @@ import shutil
 import subprocess
 import sys
 
+from dcicutils.misc_utils import PRINT
 from pkg_resources import resource_filename
-from pyramid.paster import get_app, get_appsettings
+from pyramid.paster import get_app
 from pyramid.path import DottedNameResolver
 from snovault.elasticsearch import create_mapping
 from snovault.tests import elasticsearch_fixture, postgresql_fixture
@@ -41,7 +42,30 @@ def nginx_server_process(prefix='', echo=False):
         process.stdout.close()
 
     if echo:
-        print('Started: http://localhost:8000')
+        PRINT('Started: http://localhost:8000')
+
+    return process
+
+
+def ingestion_listener_compute_command(config_uri, app_name):
+    return [
+        'poetry', 'run', 'ingestion-listener', config_uri, '--app-name', app_name
+    ]
+
+
+def ingestion_listener_process(config_uri, app_name, echo=True):
+    """ Uses Popen to start up the ingestion-listener. """
+    args = ingestion_listener_compute_command(config_uri, app_name)
+
+    process = subprocess.Popen(
+        args,
+        close_fds=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+    )
+
+    if echo:
+        PRINT('Starting Ingestion Listener...')
 
     return process
 
@@ -57,6 +81,7 @@ def main():
     parser.add_argument('--init', action="store_true", help="Init database")
     parser.add_argument('--load', action="store_true", help="Load test set")
     parser.add_argument('--datadir', default='/tmp/snovault', help="path to datadir")
+    parser.add_argument('--no_ingest', action="store_true", default=False, help="Don't start the ingestion process.")
     args = parser.parse_args()
 
     logging.basicConfig(format='')
@@ -64,7 +89,7 @@ def main():
     logging.getLogger('encoded').setLevel(logging.INFO)
 
     # get the config and see if we want to connect to non-local servers
-    config = get_appsettings(args.config_uri, args.app_name)
+    # config = get_appsettings(args.config_uri, args.app_name)
 
     datadir = os.path.abspath(args.datadir)
     pgdata = os.path.join(datadir, 'pgdata')
@@ -98,6 +123,9 @@ def main():
                 pass
             process.wait()
 
+    if not args.no_ingest:
+        ingestion_listener = ingestion_listener_process(args.config_uri, args.app_name)
+        processes.append(ingestion_listener)
 
     app = get_app(args.config_uri, args.app_name)
 
@@ -111,12 +139,12 @@ def main():
         load_test_data = DottedNameResolver().resolve(load_test_data)
         load_res = load_test_data(app)
         if load_res:  # None if successful
-            raise(load_res)
+            raise load_res
 
         # now clear the queues and queue items for indexing
         create_mapping.run(app, check_first=True, strict=True, purge_queue=True)
 
-    print('Started. ^C to exit.')
+    PRINT('Started. ^C to exit.')
 
     stdouts = [p.stdout for p in processes]
 
@@ -131,6 +159,7 @@ def main():
                 for line in iter(stdout.readline, b''):
                     sys.stdout.write(line.decode('utf-8'))
             break
+
 
 if __name__ == '__main__':
     main()

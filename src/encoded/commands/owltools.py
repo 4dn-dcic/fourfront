@@ -1,7 +1,6 @@
 import re
 from rdflib import ConjunctiveGraph, exceptions, Namespace
 from rdflib import RDFS, RDF, BNode, URIRef
-from rdflib.collection import Collection
 
 
 OWLNS = Namespace("http://www.w3.org/2002/07/owl#")
@@ -123,6 +122,15 @@ class Owler(object):
         and retrieving information from it """
 
     def __init__(self, uri, language=""):
+        if uri == "https://www.ebi.ac.uk/efo/efo.owl":
+            #
+            # TODO: Do this some other way (mapping table or something)!
+            # Note that even just via curl (in US east) can take up
+            # to 15+ minutes download https://www.ebi.ac.uk/efo/efo.owl (!)
+            # Downloading from here is MUCH faster: https://github.com/EBISPOT/efo/releases/download/current/efo.owl
+            # See: https://www.ebi.ac.uk/efo/
+            # 
+            uri = "https://github.com/EBISPOT/efo/releases/download/current/efo.owl"
         super(Owler, self).__init__()
         self.rdfGraph = ConjunctiveGraph()
         try:

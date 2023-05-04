@@ -1511,6 +1511,10 @@ $badge-item-min-height: 90px;
 					transition: border-color .5s, background-color .5s, padding-left .5s;
 				}
 
+				h5.qc-grouping-title + .inner {
+					margin-left: 40px;
+				}
+
 				ol.overview-list-elements-container,
 				ul.overview-list-elements-container {
 					margin-bottom: 0;

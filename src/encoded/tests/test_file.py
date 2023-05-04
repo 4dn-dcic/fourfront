@@ -4,14 +4,13 @@ import pytest
 import tempfile
 
 from dcicutils.beanstalk_utils import source_beanstalk_env_vars
-from dcicutils.misc_utils import file_contents
-from dcicutils.qa_utils import MockBoto3, MockBotoS3Client
 from pyramid.httpexceptions import HTTPForbidden
 from unittest import mock
 from ..types.file import FileFastq, post_upload, external_creds
 
 
-pytestmark = [pytest.mark.setone, pytest.mark.working]
+# adding a mark to a list applies it to every test in the file
+pytestmark = [pytest.mark.setone, pytest.mark.workinG]
 
 
 def test_processed_file_unique_md5(testapp, mcool_file_json):
@@ -127,6 +126,7 @@ def test_file_tsv_notes_field(award, lab, file_formats):
     }
 
 
+@pytest.mark.integrated
 def test_restricted_no_download(testapp, fastq_json):
     # check that initial download works
     res = testapp.post_json('/file_fastq', fastq_json, status=201)
@@ -141,6 +141,7 @@ def test_restricted_no_download(testapp, fastq_json):
     s3.delete_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'])
 
 
+@pytest.mark.integrated
 def test_upload_key_updated_on_accession_change(testapp, proc_file_json):
     newacc = '4DNFINNNNNNN'
     fext = 'pairs.gz'
@@ -327,6 +328,7 @@ def test_files_open_data_url_released_and_transferred(testapp, fastq_json_releas
         assert bucket in [i[1] for i in direct_res.headerlist if i[0] == 'Location'][0]
 
 
+@pytest.mark.integrated
 def test_files_get_s3_with_no_filename_posted(testapp, fastq_uploading):
     fastq_uploading.pop('filename')
     res = testapp.post_json('/file_fastq', fastq_uploading, status=201)
@@ -341,6 +343,7 @@ def test_files_get_s3_with_no_filename_posted(testapp, fastq_uploading):
     s3.delete_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'])
 
 
+@pytest.mark.integrated
 def test_files_get_s3_with_no_filename_patched(testapp, fastq_uploading,
                                                fastq_json):
     fastq_uploading.pop('filename')

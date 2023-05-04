@@ -404,10 +404,17 @@ function BrowseTableWithSelectedFilesCheckboxes(props){
 
         // Filtered to exclude type + fields in browse base state.
         const facets = contextFacets.filter(function(facet, index, all){
-            if (facet.hide_from_view) return false;
+            const { field, hide_from_view } = facet;
+            if (hide_from_view) return false;
+
+            // Note: Facets with omitted terms will return a duplicate facet with a field that ends with !
+            // This needs to be cleared (may be worth seeing if response can be changed)
+            const cleanField = field.endsWith('!') ? field.slice(0, -1): field;
+            if (cleanField !== field) { return false; }
+
             if (browseBaseState){
                 const browseBaseParams = globalNavigate.getBrowseBaseParams(browseBaseState);
-                if (typeof browseBaseParams[facet.field] !== 'undefined') return false;
+                if (typeof browseBaseParams[cleanField] !== 'undefined') return false;
             }
             return true;
         });

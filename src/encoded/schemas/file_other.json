@@ -1,0 +1,41 @@
+{
+    "title": "Other file",
+    "description": "Files of a kind other than the ones we've assigned a task-specific File type.",
+    "id": "/profiles/file_other.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["file_format"],
+    "identifyingProperties": ["uuid", "accession", "aliases"],
+    "additionalProperties": false,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/modified" },
+        { "$ref": "mixins.json#/release_dates" },
+        { "$ref": "mixins.json#/aliases" },
+        { "$ref": "mixins.json#/attribution" },
+        { "$ref": "mixins.json#/notes" },
+        { "$ref": "mixins.json#/accession" },
+        { "$ref": "mixins.json#/dbxrefs" },
+        { "$ref": "mixins.json#/tags" },
+        { "$ref": "mixins.json#/static_embeds" },
+        { "$ref": "mixins.json#/higlass_defaults" },
+        { "$ref": "file.json#/properties" }
+    ],
+    "mixinFacets": [
+        { "$ref": "file.json#/facets"}
+    ],
+    "mixinColumns": [
+        { "$ref": "file.json#/columns"}
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "file_type": {
+            "title": "File Type",
+            "description": "The type of file based on the information in the file."
+        }
+    }
+}
