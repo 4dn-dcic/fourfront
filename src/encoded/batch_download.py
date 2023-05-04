@@ -240,8 +240,7 @@ def metadata_tsv(context, request):
     Alternatively, can accept a GET request wherein all files from ExpSets matching search query params are included.
     '''
 
-    search_params = dict(request.GET) # Must use request.GET to get URI query params only (exclude POST params, etc.)
-
+    search_params = request.GET.dict_of_lists() # Must use request.GET to get URI query params only (exclude POST params, etc.)
     # If conditions are met (equal number of accession per Item type), will be a list with tuples: (ExpSetAccession, ExpAccession, FileAccession)
     accession_triples = None
     filename_to_suggest = None
@@ -266,7 +265,7 @@ def metadata_tsv(context, request):
         search_path = '/search/'
     search_params['field'] = []
     search_params['sort'] = ['accession']
-    search_params['type'] = search_params.get('type', 'ExperimentSetReplicate')
+    search_params['type'] = search_params.get('type', ['ExperimentSetReplicate'])[0]
     header = []
 
     def add_field_to_search_params(itemType, field):
@@ -389,8 +388,8 @@ def metadata_tsv(context, request):
 
         for set_accession, exp_accession, file_accession in accession_triples:
             if (
-                (('Experiment Set Accession' in column_vals_dict and set_accession  == column_vals_dict['Experiment Set Accession']) or set_accession  == 'NONE') and
-                (('Experiment Accession' in column_vals_dict and exp_accession  == column_vals_dict['Experiment Accession']) or exp_accession  == 'NONE') and
+                (('Experiment Set Accession' in column_vals_dict and set_accession == column_vals_dict['Experiment Set Accession']) or set_accession == 'NONE') and
+                (('Experiment Accession' in column_vals_dict and exp_accession == column_vals_dict['Experiment Accession']) or exp_accession == 'NONE') and
                 (file_accession == column_vals_dict['File Accession'] or column_vals_dict['Related File Relationship'] == 'reference file for' or file_accession == 'NONE')
             ):
                 # if the file is a raw file (actually if classification is not processed file, then we assume it as a raw file),
