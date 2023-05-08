@@ -1052,6 +1052,7 @@ def initialize_facets(request, doc_types, prepared_terms, schemas, additional_fa
             # TODO: instead of workaround, '!' could be excluded while generating query results
             if title_field.endswith('!'):
                 title_field = title_field[:-1]
+                use_field = use_field[:-1]
 
             # if searching for a display_title, use the title of parent object
             # use `is_object_title` to keep track of this
@@ -1061,7 +1062,7 @@ def initialize_facets(request, doc_types, prepared_terms, schemas, additional_fa
             else:
                 is_object_title = False
 
-            if title_field in used_facets or title_field in disabled_facets:
+            if title_field in used_facets or title_field in disabled_facets or use_field in used_facets:
                 # Cancel if already in facets or is disabled
                 continue
             used_facets.append(title_field)
@@ -1322,13 +1323,31 @@ def set_facets(search, facets, search_filters, string_query, request, doc_types,
         else:
 
             facet['aggregation_type'] = 'terms'
-            term_aggregation = {
-                "terms" : {
-                    'size'    : 100,            # Maximum terms returned (default=10); see https://github.com/10up/ElasticPress/wiki/Working-with-Aggregations
-                    'field'   : query_field,
-                    'missing' : facet.get("missing_value_replacement", "No value")
+            
+            term_aggregation = None
+            if 'group_by_field' not in facet:
+                term_aggregation = {
+                    "terms" : {
+                        'size'    : 100,            # Maximum terms returned (default=10); see https://github.com/10up/ElasticPress/wiki/Working-with-Aggregations
+                        'field'   : query_field,
+                        'missing' : facet.get("missing_value_replacement", "No value")
+                    }
                 }
-            }
+            else:
+                term_aggregation = {
+                    "terms" : {
+                        'size'    : 100,
+                        'field'   : "embedded." + facet['group_by_field'] + ".raw",
+                        'missing' : facet.get("missing_value_replacement", "No value"),
+                        'aggs': {
+                            "sub_terms" : {
+                                "terms" : {
+                                    "field": query_field,
+                                }
+                            }
+                        }
+                    }
+                }
 
             aggs[facet['aggregation_type'] + ":" + agg_name] = {
                 'aggs': {
@@ -1486,9 +1505,15 @@ def format_facets(es_results, facets, total, additional_facets, request, filters
             else:
                 # Default - terms, range, or histogram buckets. Buckets may not be present
                 result_facet['terms'] = aggregations[full_agg_name]["primary_agg"]["buckets"]
-                
-                convert_group_by_facet_terms_into_nested(request, result_facet, filters)
-                
+
+                if 'group_by_field' in result_facet:
+                    for term in result_facet['terms']:
+                        if 'sub_terms' not in term:
+                            continue
+                        term['terms'] = term['sub_terms']['buckets']
+                    del result_facet['group_by_field']
+                    result_facet['has_group_by'] = True
+
                 # Choosing to show facets with one term for summary info on search it provides
                 if len(result_facet.get('terms', [])) < 1:
                     continue
@@ -1557,45 +1582,6 @@ def find_index_by_doc_types(request, doc_types, ignore):
     return index_string
 
 
-def convert_group_by_facet_terms_into_nested(request, result_facet, filters):
-    if 'group_by' not in result_facet:
-        return
-
-    group_by = result_facet['group_by']
-    # check required fields
-    if 'item_type' in group_by and 'item_type_key_field' in group_by and 'item_type_value_field' in group_by:
-
-        # get [key: value[]] from item_type collection
-        group_by_dict = get_facet_group_by_dict(request, group_by['item_type'], group_by['item_type_key_field'], group_by['item_type_value_field'])
-        if group_by_dict is not None and len(group_by_dict) > 0:
-            result_facet['has_group_by'] = True #override
-        
-            group_by_terms_dict = dict()
-            already_added_term_keys_dict = dict()
-
-            for term in result_facet['terms']:
-                group_by_term_key = group_by_dict[term['key']][0]
-                if group_by_term_key not in group_by_terms_dict:
-                    group_by_terms_dict[group_by_term_key] = {'key': group_by_term_key, 'doc_count': 0, 'terms': []}
-                group_by_term = group_by_terms_dict[group_by_term_key]
-                group_by_term['doc_count'] += term['doc_count']
-                group_by_term['terms'].append(term)
-                already_added_term_keys_dict[term['key']] = True
-            # add terms not in results but exists in filters
-            for filter in filters:
-                if (filter['field'] != result_facet['field'] or filter['term'] in already_added_term_keys_dict):
-                    continue
-                group_by_term_key = group_by_dict[filter['term']][0]
-                if group_by_term_key not in group_by_terms_dict:
-                    group_by_terms_dict[group_by_term_key] = {'key': group_by_term_key, 'doc_count': 0, 'terms': []}
-                group_by_term = group_by_terms_dict[group_by_term_key]
-                group_by_term['terms'].append({'key': filter['term'], 'doc_count': 0})
-        
-            result_facet['terms'] = sorted( list(group_by_terms_dict.values()), key=lambda t: t['doc_count'], reverse=True)
-    
-    del result_facet['group_by']
-
-
 def make_search_subreq(request, path):
     subreq = make_subrequest(request, path)
     subreq._stats = getattr(request, "_stats", {})
@@ -1641,36 +1627,6 @@ def get_total_from_facets(facets, total):
     #fallback
     return total
 
-def get_facet_group_by_dict(request, item_type, key_field, value_field):
-
-    # default parameters
-    search_param_lists = {'type': [item_type]}
-
-    primary_agg = {
-        "field_0" : {
-            "terms" : {
-                "field" : "embedded." + key_field + ".raw",
-                "size" : 100
-            },
-            "aggs" : { "group_by" : {
-                            "terms" : {
-                                "field": "embedded." + value_field + ".raw"
-                            }
-                    }
-            }
-        }
-    }
-
-    search_param_lists['limit'] = [0]
-    search_param_lists['from'] = [0]
-    subreq          = make_search_subreq(request, '{}?{}'.format('/search/', urlencode(search_param_lists, True)) )
-    search_result   = search(None, subreq, custom_aggregations=primary_agg)
-
-    ret_result = { }
-    for bucket in search_result['aggregations']['field_0']['buckets']:
-        ret_result[bucket['key']] = [str(item['key']) for item in bucket['group_by']['buckets']]
-
-    return ret_result
 
 # Update? used in ./batch_download.py
 def iter_search_results(context, request, **kwargs):
