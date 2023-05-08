@@ -174,7 +174,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
 
     ### Record total number of hits
     result['total'] = total = es_results['hits']['total']['value']
-    result['facets'] = format_facets(es_results, facets, total, additional_facets, request, result['filters'], search_frame)
+    result['facets'] = format_facets(es_results, facets, total, additional_facets, search_frame)
     result['aggregations'] = format_extra_aggregations(es_results)
 
     # After ES7 upgrade, 'total' does not return the exact count if it is >10000. This restriction
@@ -1442,7 +1442,7 @@ def execute_search(search):
     return es_results
 
 
-def format_facets(es_results, facets, total, additional_facets, request, filters, search_frame='embedded'):
+def format_facets(es_results, facets, total, additional_facets, search_frame='embedded'):
     """
     Format the facets for the final results based on the es results.
     Sort based off of the 'order' of the facets
