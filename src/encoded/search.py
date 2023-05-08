@@ -1324,7 +1324,6 @@ def set_facets(search, facets, search_filters, string_query, request, doc_types,
 
             facet['aggregation_type'] = 'terms'
             
-            term_aggregation = None
             if 'group_by_field' not in facet:
                 term_aggregation = {
                     "terms" : {
