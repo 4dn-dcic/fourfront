@@ -13,6 +13,18 @@ files = [
 ]
 
 [[package]]
+name = "async-timeout"
+version = "4.0.2"
+description = "Timeout context manager for asyncio programs"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "async-timeout-4.0.2.tar.gz", hash = "sha256:2163e1640ddb52b7a8c80d0a67a08587e5d245cc9c553a74a847056bc2976b15"},
+    {file = "async_timeout-4.0.2-py3-none-any.whl", hash = "sha256:8ca1e4fcf50d07413d66d1a5e416e42cfdf5851c981d679a09851a6853383b3c"},
+]
+
+[[package]]
 name = "attrs"
 version = "23.1.0"
 description = "Classes Without Boilerplate"
@@ -65,18 +77,18 @@ wrapt = "*"
 
 [[package]]
 name = "awscli"
-version = "1.27.117"
+version = "1.27.133"
 description = "Universal Command Line Environment for AWS."
 category = "main"
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "awscli-1.27.117-py3-none-any.whl", hash = "sha256:e107db89b8e0e969ff9134fd95d4992d62c188a05406654b00d924ecd3cb6f1b"},
-    {file = "awscli-1.27.117.tar.gz", hash = "sha256:0611ae60aa486dc4661753ff91e42ed9daa43fddc2be13492ff64e52c9f12851"},
+    {file = "awscli-1.27.133-py3-none-any.whl", hash = "sha256:16abef5789ae37b569e367d6f0cd1511c89041e28537bc1d612708ad71d16352"},
+    {file = "awscli-1.27.133.tar.gz", hash = "sha256:17ba1647af4bc63b481b74e4d5a7eba0646d8899c43ba2e93d8d6e897761764d"},
 ]
 
 [package.dependencies]
-botocore = "1.29.117"
+botocore = "1.29.133"
 colorama = ">=0.2.5,<0.4.5"
 docutils = ">=0.10,<0.17"
 PyYAML = ">=3.10,<5.5"
@@ -116,18 +128,18 @@ files = [
 
 [[package]]
 name = "boto3"
-version = "1.26.117"
+version = "1.26.133"
 description = "The AWS SDK for Python"
 category = "main"
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "boto3-1.26.117-py3-none-any.whl", hash = "sha256:84cc8947560d89581ef693895cb36d8c8c70d567900d86c8f7cc612d037fdd17"},
-    {file = "boto3-1.26.117.tar.gz", hash = "sha256:1e9128b7d8a1b8af789ea6a04a46e641d82446e1e15c022c0fef697d3c9aab97"},
+    {file = "boto3-1.26.133-py3-none-any.whl", hash = "sha256:62285ecee7629a4388d55ae369536f759622d68d5b9a0ced7c58a0c1a409c0f7"},
+    {file = "boto3-1.26.133.tar.gz", hash = "sha256:8ff0af0b25266a01616396abc19eb34dc3d44bd867fa4158985924128b9034fb"},
 ]
 
 [package.dependencies]
-botocore = ">=1.29.117,<1.30.0"
+botocore = ">=1.29.133,<1.30.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.6.0,<0.7.0"
 
@@ -501,14 +513,14 @@ xray = ["mypy-boto3-xray (>=1.26.0,<1.27.0)"]
 
 [[package]]
 name = "botocore"
-version = "1.29.117"
+version = "1.29.133"
 description = "Low-level, data-driven core of boto 3."
 category = "main"
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "botocore-1.29.117-py3-none-any.whl", hash = "sha256:2e6f6c9be770ed5737de093cfe8d592be15f8763f7bf2906afba90f19836d72d"},
-    {file = "botocore-1.29.117.tar.gz", hash = "sha256:1fc4469e80daab657d1254518ee44a82e284320c8b24cbfbaaa60570afc33743"},
+    {file = "botocore-1.29.133-py3-none-any.whl", hash = "sha256:b266185d7414a559952569005009a400de50af91fd3da44f05cf05b00946c4a7"},
+    {file = "botocore-1.29.133.tar.gz", hash = "sha256:7b38e540f73c921d8cb0ac72794072000af9e10758c04ba7f53d5629cc52fa87"},
 ]
 
 [package.dependencies]
@@ -915,69 +927,28 @@ tox = ["tox"]
 
 [[package]]
 name = "dcicsnovault"
-version = "7.3.1"
+version = "8.1.0.2b2"
 description = "Storage support for 4DN Data Portals."
 category = "main"
 optional = false
-python-versions = ">=3.8.1,<3.9"
-files = [
-    {file = "dcicsnovault-7.3.1-py3-none-any.whl", hash = "sha256:40499cac8a4a1dceef0a113084afb4a7930c9fdd47d0ad95aa98b65f6646a619"},
-    {file = "dcicsnovault-7.3.1.tar.gz", hash = "sha256:068485eb566e12bf7a4ee9b14e14c73a0f101cf3bacb83615186c0df8a3e10f6"},
-]
+python-versions = "*"
+files = []
+develop = false
 
-[package.dependencies]
-aws_requests_auth = ">=0.4.1,<0.5.0"
-boto3 = ">=1.24.36"
-botocore = ">=1.27.36"
-dcicutils = ">=6.10.0,<7.0.0"
-elasticsearch = "7.13.4"
-elasticsearch_dsl = ">=7.4.0,<8.0.0"
-future = ">=0.15.2,<1"
-html5lib = ">=1.1"
-humanfriendly = ">=1.44.9,<2.0.0"
-jsonschema_serialize_fork = ">=2.1.1,<3.0.0"
-netaddr = ">=0.8.0,<1"
-passlib = ">=1.7.4,<2.0.0"
-psutil = ">=5.9.0,<6.0.0"
-psycopg2-binary = ">=2.9.1,<3.0.0"
-PyBrowserID = ">=0.10.0,<1"
-pyramid = "1.10.4"
-pyramid_localroles = ">=0.1,<1"
-pyramid-multiauth = ">=0.9.0,<1"
-pyramid-retry = ">=1.0,<2.0"
-pyramid-tm = ">=2.5,<3.0"
-pyramid-translogger = ">=0.1,<0.2"
-python-dateutil = ">=2.8.2,<3.0.0"
-python_magic = ">=0.4.27"
-pytz = ">=2021.3"
-rdflib = ">=4.2.2,<5.0.0"
-rdflib-jsonld = ">=0.5.0,<1.0.0"
-rutter = ">=0.3,<1"
-simplejson = ">=3.17.6,<4.0.0"
-SPARQLWrapper = ">=1.8.5,<2.0.0"
-SQLAlchemy = ">=1.4.41,<2.0.0"
-structlog = ">=19.2.0,<20"
-subprocess_middleware = ">=0.3,<1"
-transaction = ">=3.0.1,<4.0.0"
-venusian = ">=1.2.0,<2.0.0"
-WebOb = ">=1.8.7,<2.0.0"
-WebTest = ">=2.0.35,<3.0.0"
-WSGIProxy2 = "0.4.2"
-xlrd = ">=1.0.0,<2.0.0"
-"zope.deprecation" = ">=4.4.0,<5.0.0"
-"zope.interface" = ">=4.7.2,<6"
-"zope.sqlalchemy" = "1.6"
+[package.source]
+type = "directory"
+url = "../snovault"
 
 [[package]]
 name = "dcicutils"
-version = "6.10.1"
+version = "7.4.0"
 description = "Utility package for interacting with the 4DN Data Portal and other 4DN resources"
 category = "main"
 optional = false
 python-versions = ">=3.7,<3.10"
 files = [
-    {file = "dcicutils-6.10.1-py3-none-any.whl", hash = "sha256:50c380912bd29d420d07f0646a9733d52c2a667e55db9d8bc7d2d2cb0f16f9f9"},
-    {file = "dcicutils-6.10.1.tar.gz", hash = "sha256:dcfa5fa38bcc2184a5586034cbd64eb9cc72b93041cdbfd3c6cc1a5bc31a556a"},
+    {file = "dcicutils-7.4.0-py3-none-any.whl", hash = "sha256:633ca2bae03e70d0e3b2e60f49b2d906711e862fb362536b852d9b3f4f06a0d1"},
+    {file = "dcicutils-7.4.0.tar.gz", hash = "sha256:e1c02ee3dbbb2e5065e48407dc214e2476cdb4b18580aacc63cd8ecdedf6a5fb"},
 ]
 
 [package.dependencies]
@@ -988,12 +959,16 @@ docker = ">=4.4.4,<5.0.0"
 elasticsearch = "7.13.4"
 gitpython = ">=3.1.2,<4.0.0"
 opensearch-py = ">=2.0.1,<3.0.0"
+PyJWT = ">=2.6.0,<3.0.0"
+pyOpenSSL = ">=23.1.1,<24.0.0"
 pytz = ">=2020.4"
 PyYAML = ">=5.1,<5.5"
+redis = ">=4.5.1,<5.0.0"
 requests = ">=2.21.0,<3.0.0"
 rfc3986 = ">=1.4.0,<2.0.0"
 structlog = ">=19.2.0,<20.0.0"
 toml = ">=0.10.1,<1"
+tqdm = ">=4.65.0,<5.0.0"
 typing-extensions = ">=3.8"
 urllib3 = ">=1.26.6,<2.0.0"
 webtest = ">=2.0.34,<3.0.0"
@@ -1300,28 +1275,6 @@ files = [
 [package.extras]
 docs = ["Sphinx", "docutils (<0.18)"]
 test = ["objgraph", "psutil"]
-
-[[package]]
-name = "html5lib"
-version = "1.1"
-description = "HTML parser based on the WHATWG HTML specification"
-category = "main"
-optional = false
-python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
-files = [
-    {file = "html5lib-1.1-py2.py3-none-any.whl", hash = "sha256:0d78f8fde1c230e99fe37986a60526d7049ed4bf8a9fadbad5f00e22e58e041d"},
-    {file = "html5lib-1.1.tar.gz", hash = "sha256:b2e5b40261e20f354d198eae92afc10d750afb487ed5e50f9c4eaf07c184146f"},
-]
-
-[package.dependencies]
-six = ">=1.9"
-webencodings = "*"
-
-[package.extras]
-all = ["chardet (>=2.2)", "genshi", "lxml"]
-chardet = ["chardet (>=2.2)"]
-genshi = ["genshi"]
-lxml = ["lxml"]
 
 [[package]]
 name = "humanfriendly"
@@ -2150,20 +2103,40 @@ files = [
 
 [[package]]
 name = "pyjwt"
-version = "1.5.3"
+version = "2.7.0"
 description = "JSON Web Token implementation in Python"
 category = "main"
 optional = false
-python-versions = "*"
+python-versions = ">=3.7"
 files = [
-    {file = "PyJWT-1.5.3-py2.py3-none-any.whl", hash = "sha256:a4e5f1441e3ca7b382fd0c0b416777ced1f97c64ef0c33bfa39daf38505cfd2f"},
-    {file = "PyJWT-1.5.3.tar.gz", hash = "sha256:500be75b17a63f70072416843dc80c8821109030be824f4d14758f114978bae7"},
+    {file = "PyJWT-2.7.0-py3-none-any.whl", hash = "sha256:ba2b425b15ad5ef12f200dc67dd56af4e26de2331f965c5439994dad075876e1"},
+    {file = "PyJWT-2.7.0.tar.gz", hash = "sha256:bd6ca4a3c4285c1a2d4349e5a035fdf8fb94e04ccd0fcbe6ba289dae9cc3e074"},
 ]
 
 [package.extras]
-crypto = ["cryptography (>=1.4)"]
-flake8 = ["flake8", "flake8-import-order", "pep8-naming"]
-test = ["pytest (>3,<4)", "pytest-cov", "pytest-runner"]
+crypto = ["cryptography (>=3.4.0)"]
+dev = ["coverage[toml] (==5.0.4)", "cryptography (>=3.4.0)", "pre-commit", "pytest (>=6.0.0,<7.0.0)", "sphinx (>=4.5.0,<5.0.0)", "sphinx-rtd-theme", "zope.interface"]
+docs = ["sphinx (>=4.5.0,<5.0.0)", "sphinx-rtd-theme", "zope.interface"]
+tests = ["coverage[toml] (==5.0.4)", "pytest (>=6.0.0,<7.0.0)"]
+
+[[package]]
+name = "pyopenssl"
+version = "23.1.1"
+description = "Python wrapper module around the OpenSSL library"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "pyOpenSSL-23.1.1-py3-none-any.whl", hash = "sha256:9e0c526404a210df9d2b18cd33364beadb0dc858a739b885677bc65e105d4a4c"},
+    {file = "pyOpenSSL-23.1.1.tar.gz", hash = "sha256:841498b9bec61623b1b6c47ebbc02367c07d60e0e195f19790817f10cc8db0b7"},
+]
+
+[package.dependencies]
+cryptography = ">=38.0.0,<41"
+
+[package.extras]
+docs = ["sphinx (!=5.2.0,!=5.2.0.post0)", "sphinx-rtd-theme"]
+test = ["flaky", "pretend", "pytest (>=3.0.1)"]
 
 [[package]]
 name = "pyparsing"
@@ -2554,6 +2527,25 @@ files = [
 
 [package.dependencies]
 rdflib = "*"
+
+[[package]]
+name = "redis"
+version = "4.5.5"
+description = "Python client for Redis database and key-value store"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "redis-4.5.5-py3-none-any.whl", hash = "sha256:77929bc7f5dab9adf3acba2d3bb7d7658f1e0c2f1cafe7eb36434e751c471119"},
+    {file = "redis-4.5.5.tar.gz", hash = "sha256:dc87a0bdef6c8bfe1ef1e1c40be7034390c2ae02d92dcd0c7ca1729443899880"},
+]
+
+[package.dependencies]
+async-timeout = {version = ">=4.0.2", markers = "python_full_version <= \"3.11.2\""}
+
+[package.extras]
+hiredis = ["hiredis (>=1.0.0)"]
+ocsp = ["cryptography (>=36.0.1)", "pyopenssl (==20.0.1)", "requests (>=2.26.0)"]
 
 [[package]]
 name = "repoze-debug"
@@ -3092,6 +3084,27 @@ files = [
 ]
 
 [[package]]
+name = "tqdm"
+version = "4.65.0"
+description = "Fast, Extensible Progress Meter"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "tqdm-4.65.0-py3-none-any.whl", hash = "sha256:c4f53a17fe37e132815abceec022631be8ffe1b9381c2e6e30aa70edc99e9671"},
+    {file = "tqdm-4.65.0.tar.gz", hash = "sha256:1871fb68a86b8fb3b59ca4cdd3dcccbc7e6d613eeed31f4c332531977b89beb5"},
+]
+
+[package.dependencies]
+colorama = {version = "*", markers = "platform_system == \"Windows\""}
+
+[package.extras]
+dev = ["py-make (>=0.1.0)", "twine", "wheel"]
+notebook = ["ipywidgets (>=6)"]
+slack = ["slack-sdk"]
+telegram = ["requests"]
+
+[[package]]
 name = "transaction"
 version = "3.1.0"
 description = "Transaction management for Python"
@@ -3233,18 +3246,6 @@ files = [
 [package.extras]
 docs = ["Sphinx (>=1.8.1)", "docutils", "pylons-sphinx-themes (>=1.0.9)"]
 testing = ["coverage (>=5.0)", "pytest", "pytest-cover"]
-
-[[package]]
-name = "webencodings"
-version = "0.5.1"
-description = "Character encoding aliases for legacy web content"
-category = "main"
-optional = false
-python-versions = "*"
-files = [
-    {file = "webencodings-0.5.1-py2.py3-none-any.whl", hash = "sha256:a0af1213f3c2226497a97e2b3aa01a7e4bee4f403f95be16fc9acd2947514a78"},
-    {file = "webencodings-0.5.1.tar.gz", hash = "sha256:b36a1c245f2d304965eb4e0a82848379241dc04b865afcc4aab16748587e1923"},
-]
 
 [[package]]
 name = "webob"
@@ -3585,5 +3586,5 @@ test = ["zope.testing"]
 
 [metadata]
 lock-version = "2.0"
-python-versions = ">=3.8.1,<3.9"
-content-hash = "9de6c2642af236cbe12646a1993f6aa244b6b94f718a4731737d3ace685c31d9"
+python-versions = ">=3.8.1,<3.10"
+content-hash = "7bf5aa141373e9b6c66ae795b7feaca7eea1fc5fc29db1d0f5e42ffdcec6dca8"
