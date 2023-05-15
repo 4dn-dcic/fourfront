@@ -6,6 +6,12 @@ fourfront
 Change Log
 ----------
 
+5.3.3
+=====
+
+* updated suggested_enums for processed files
+* updated assay_subclass_short by making a more general FISH at expense of RNA and DNA FISH
+
 5.3.2
 =====
 
