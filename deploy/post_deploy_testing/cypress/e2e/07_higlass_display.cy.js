@@ -12,6 +12,16 @@ describe("HiGlass Display pages", function(){
 
     context('Higlass Display summary page', function(){
 
+        // testIsolation that is a part of Cypress 12 migration is breaking the current test execution.
+        // Adding "testIsolation: false" into cypress.config.js is the workaround to run tests as it was before, but
+        // it is not a complete solution. So, we added beforeEach to clear cookies and local storage as it is descibed in:
+        // https://docs.cypress.io/guides/references/migration-guide#Simulating-Pre-Test-Isolation-Behavior
+        beforeEach(() => {
+            cy.clearLocalStorage();
+            cy.clearCookies();
+            // other beforeEach logic to restore the expected local storage or cookies needed on the client.
+        });
+
         it('Can visit HiGlass Display collection page without login', function(){
 
             // Visit the page and confirm you can see the table and facet properties.
@@ -58,6 +68,8 @@ describe("HiGlass Display pages", function(){
         var testItemsToDelete = [];
 
         beforeEach(function() {
+            cy.clearLocalStorage();
+            cy.clearCookies();
             // Log in.
             cy.visit('/higlass-view-configs/').login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken' : true }).wait(500);
         });
@@ -119,8 +131,9 @@ describe("HiGlass Display pages", function(){
             cy.visit(draftUrl);
 
             // When the app creates a new HiGlass display, we'll capture the JSON of the POST call.
-            cy.server();
-            cy.route('POST', '/higlass-view-configs/').as('newHiglassDisplay');
+            cy.intercept('POST', '/higlass-view-configs/').as('newHiglassDisplay');
+            // cy.server();
+            // cy.route('POST', '/higlass-view-configs/').as('newHiglassDisplay');
 
             // Ensure HiGlassComponent has loaded (before Clone btn can be clicked w/o errors)
             cy.get('.higlass-instance .react-grid-layout').end()
@@ -131,16 +144,16 @@ describe("HiGlass Display pages", function(){
                 }).end()
                 .get('.alert div').should('contain.text', 'Saved new display.').end()
                 // Inspect POST response.
-                .get('@newHiglassDisplay').then(function (xhr) {
+                .get('@newHiglassDisplay').then(function ({ request, response }) {
 
                     // Expect a 201 response.
-                    expect(xhr.status).to.eq(201);
+                    expect(response.statusCode).to.eq(201);
 
                     // Expect a new uuid.
-                    expect(xhr.responseBody["@graph"][0]["uuid"]).to.not.equal("00000000-1111-0000-1111-000000000002");
+                    expect(response.body["@graph"][0]["uuid"]).to.not.equal("00000000-1111-0000-1111-000000000002");
 
                     // Add the test Item so we can delete it later.
-                    testItemsToDelete.push(xhr.responseBody["@graph"][0]);
+                    testItemsToDelete.push(response.body["@graph"][0]);
                 })
                 .end()
                 // Wait for HiGlass to fully be initialized as well, to avoid __zoom error perhaps.
@@ -159,8 +172,9 @@ describe("HiGlass Display pages", function(){
             cy.visit(draftUrl);
 
             // There will be an AJAX response to a POST for the new Higlass display, so capture it here.
-            cy.server();
-            cy.route('POST', '/higlass-view-configs/').as('newHiglassDisplay');
+            cy.intercept('POST', '/higlass-view-configs/').as('newHiglassDisplay');
+            // cy.server();
+            // cy.route('POST', '/higlass-view-configs/').as('newHiglassDisplay');
 
             // Ensure HiGlassComponent has loaded (before Clone btn can be clicked w/o errors)
             cy.get('.higlass-instance .react-grid-layout').end()
@@ -175,17 +189,17 @@ describe("HiGlass Display pages", function(){
                 .get('.alert div').should('contain.text', 'Saved new display.').end()
 
                 // Inspect the AJAX response so we can capture the new uuid.
-                .get('@newHiglassDisplay').then(function (xhr) {
+                .get('@newHiglassDisplay').then(function ({ request, response }) {
 
                     // Expect a 201 response.
-                    expect(xhr.status).to.eq(201);
+                    expect(response.statusCode).to.eq(201);
 
                     // Expect a new uuid.
-                    expect(xhr.responseBody["@graph"][0]["uuid"]).to.not.equal("00000000-1111-0000-1111-000000000002");
+                    expect(response.body["@graph"][0]["uuid"]).to.not.equal("00000000-1111-0000-1111-000000000002");
 
                     // Add the test uuid so we can delete it later.
-                    testItemsToDelete.push(xhr.responseBody["@graph"][0]);
-                    const newID = xhr.responseBody["@graph"][0]["@id"];
+                    testItemsToDelete.push(response.body["@graph"][0]);
+                    const newID = response.body["@graph"][0]["@id"];
                     expect(newID).to.be.ok;
 
                     // Clicking the SaveAs button should redirect us to the new page
@@ -221,6 +235,12 @@ describe("HiGlass Display pages", function(){
 
 
     context('Sharing on the Individual Higlass display page', function() {
+
+        // https://docs.cypress.io/guides/references/migration-guide#Simulating-Pre-Test-Isolation-Behavior
+        beforeEach(() => {
+            cy.clearLocalStorage();
+            cy.clearCookies();
+        });
 
         after(function(){
 
