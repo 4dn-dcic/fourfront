@@ -61,9 +61,16 @@ describe('Deployment/CI Search View Tests', function () {
             cy.visit('/pages'); // We should get redirected to ?type=Page
         });
 
-        beforeEach(function(){
+        beforeEach(function () {
             // Ensure we preserve search session cookie for proper ordering.
-            Cypress.Cookies.preserveOnce("searchSessionID");
+            cy.session('preserveCookies', () => {
+                // Ensure we preserve search session cookie for proper ordering.
+                cy.getCookie('searchSessionID').then((cookie) => {
+                    if (cookie) {
+                        cy.setCookie('searchSessionID', cookie.value);
+                    }
+                });
+            });
         });
 
         it('Should redirect to /search/?type=Page correctly', function(){
@@ -384,9 +391,16 @@ describe('Deployment/CI Search View Tests', function () {
             cy.visit('/'); // Start at home page
         });
 
-        beforeEach(function(){
+        beforeEach(function () {
             // Ensure we preserve search session cookie for proper ordering.
-            Cypress.Cookies.preserveOnce("searchSessionID");
+            cy.session('preserveCookies', () => {
+                // Ensure we preserve search session cookie for proper ordering.
+                cy.getCookie('searchSessionID').then((cookie) => {
+                    if (cookie) {
+                        cy.setCookie('searchSessionID', cookie.value);
+                    }
+                });
+            });
         });
 
         it('SearchBox input works, goes to /browse/ on submit', function(){
