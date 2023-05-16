@@ -1510,6 +1510,7 @@ def format_facets(es_results, facets, total, additional_facets, search_frame='em
                         if 'sub_terms' not in term:
                             continue
                         term['terms'] = term['sub_terms']['buckets']
+                        del term['sub_terms']
                     del result_facet['group_by_field']
                     result_facet['has_group_by'] = True
 
