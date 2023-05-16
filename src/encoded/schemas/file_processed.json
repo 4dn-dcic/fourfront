@@ -52,6 +52,7 @@
                 "compartments",
                 "contact list",
                 "contact matrix",
+                "contact triplets",
                 "normalized contact matrix",
                 "raw contact matrix",
                 "raw cosegregation matrix",
@@ -86,6 +87,7 @@
                 "loci distances",
                 "long range chromatin interactions",
                 "microscopy summary",
+                "multi-contacts",
                 "multi-contact read clusters",
                 "NADs",
                 "other",
@@ -98,7 +100,8 @@
                 "signal fold change",
                 "imputed signal fold change",
                 "spt results",
-                "stripe calls"
+                "stripe calls",
+                "tri-alignments"
             ],
             "ignored_enum": [
                 "contact list-combined",
