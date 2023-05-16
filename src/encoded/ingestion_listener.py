@@ -81,12 +81,13 @@ def submit_for_ingestion(context, request):
 
     check_true(request.content_type == 'multipart/form-data',  # even though we can't declare we accept this
                "Expected request to have content_type 'multipart/form-data'.", error_class=SubmissionFailure)
+
     bs_env = beanstalk_env_from_request(request)
     bundles_bucket = metadata_bundles_bucket(request.registry)
     datafile = request.POST.get('datafile')
     if datafile is None:
         # S3 protocol; not uploading from here (SubmitCGAP uploads directly).
-        # Added circa March 2023.
+        # Added circa March 2023 for Fourfront ontology ingestion.
         filename = request.POST['datafile_source_filename']
         override_name = None
     elif isinstance(datafile, cgi.FieldStorage):
@@ -585,7 +586,6 @@ def main():
     }
 
     vapp = VirtualApp(app, config)
-
     return run(vapp)
 
 
