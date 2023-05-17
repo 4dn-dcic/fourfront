@@ -36,24 +36,41 @@ describe('Browse Views - Basic Tests', function () {
 
         it('Switch between included and excluded properties in facets, exclude a term and check ExpSet counts', function(){
 
+            let initialExpSetCount, excludeExpSetCount, includeExpSetCount, externalProjectCount;
             cy.visit('/browse').wait(100).end()
                 .getQuickInfoBarCounts().then((initialCounts) => {
-                    let externalProjectCount;
-                    cy.get(".facets-header .facets-title").should('have.text', 'Included Properties').end()
-                        .get(".facets-header button").first().click().end()
-                        .get(".facets-header .facets-title").should('have.text', 'Excluded Properties').end()
-                        .get('.facet.closed[data-field="award.project"] > h5').scrollToCenterElement().click({ force: true }).end()
-                        .get('.facet[data-field="award.project"] .facet-list-element[data-key="External"] a').within(($term) => {
-                            cy.get('span.facet-count').then(function(facetCount){
-                                externalProjectCount = parseInt(facetCount.text());
-                                expect(externalProjectCount).to.be.greaterThan(0);
-                            }).end();
-                            cy.wrap($term).click().wait(1000).end();
-                        }).end()
-                        .getQuickInfoBarCounts().then((nextCounts)=>{
-                            expect(nextCounts.experiment_sets).to.be.equal(initialCounts.experiment_sets - externalProjectCount);
-                        });
-                });
+                    initialExpSetCount = initialCounts.experiment_sets;
+                    expect(initialExpSetCount).to.be.greaterThan(0);
+                }).end()
+                .get(".facets-header .facets-title").should('have.text', 'Included Properties').end()
+                .get(".facets-header button").first().click().end()
+                .get(".facets-header .facets-title").should('have.text', 'Excluded Properties').end()
+                .get('.facet.closed[data-field="award.project"] > h5').scrollToCenterElement().click({ force: true }).end()
+                .get('.facet[data-field="award.project"] .facet-list-element[data-key="External"] a').within(($term) => {
+                    cy.get('span.facet-count').then(function (facetCount) {
+                        externalProjectCount = parseInt(facetCount.text());
+                        expect(externalProjectCount).to.be.greaterThan(0);
+                    }).end();
+                    cy.wrap($term).click().wait(1000).end();
+                }).end()
+                .getQuickInfoBarCounts().then((nextCounts) => {
+                    excludeExpSetCount = nextCounts.experiment_sets;
+                    expect(excludeExpSetCount).to.be.equal(initialExpSetCount - externalProjectCount);
+                })
+                .get(".facets-header button").first().click().end()
+                .get(".facets-header .facets-title").should('have.text', 'Included Properties').end()
+                .get('.facet[data-field="award.project"] .facet-list-element[data-key="External"] a').click().wait(1000).end() //reset
+                .getQuickInfoBarCounts().then((nextCounts) => {
+                    expect(initialExpSetCount).to.be.equal(nextCounts.experiment_sets);
+                }).end()
+                .get('.facet[data-field="award.project"] .facet-list-element[data-key="External"] a').within(($term) => {
+                    cy.wrap($term).click().wait(1000).end();
+                }).end()
+                .getQuickInfoBarCounts().then((nextCounts) => {
+                    includeExpSetCount = nextCounts.experiment_sets;
+                    expect(includeExpSetCount).to.be.equal(externalProjectCount);
+                }).end();
+
         });
 
         it('"/browse/?public_release.to=2017-10-31" redirects to correct URL, includes 100 < x < 150 results.', function(){
