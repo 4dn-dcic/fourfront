@@ -28,14 +28,9 @@ describe('Deployment/CI Search View Tests', function () {
             cy.get('input#field_for_tags.form-control').focus().type('deleted_by_cypress_test').wait(100).end();
 
             // Click Validate button
-            cy.get(".action-buttons-container .btn")
-                .within(function () {
-                    return cy.contains('Validate').click().end().wait(1000);
-                }).end()
-                //Click Submit button
-                .get(".action-buttons-container .btn").within(function () {
-                    return cy.contains('Submit').click().end().wait(1000);
-                }).end();
+            cy.get(".action-buttons-container").as("editButtons");
+            cy.get("@editButtons").find('button.btn').contains('Validate').click().end().wait(1000).end();
+            cy.get("@editButtons").find('button.btn').contains('Submit').click().end().wait(1000).end();
         });
     }
 
@@ -61,9 +56,16 @@ describe('Deployment/CI Search View Tests', function () {
             cy.visit('/pages'); // We should get redirected to ?type=Page
         });
 
-        beforeEach(function(){
+        beforeEach(function () {
             // Ensure we preserve search session cookie for proper ordering.
-            Cypress.Cookies.preserveOnce("searchSessionID");
+            cy.session('preserveCookies', () => {
+                // Ensure we preserve search session cookie for proper ordering.
+                cy.getCookie('searchSessionID').then((cookie) => {
+                    if (cookie) {
+                        cy.setCookie('searchSessionID', cookie.value);
+                    }
+                });
+            });
         });
 
         it('Should redirect to /search/?type=Page correctly', function(){
@@ -384,9 +386,16 @@ describe('Deployment/CI Search View Tests', function () {
             cy.visit('/'); // Start at home page
         });
 
-        beforeEach(function(){
+        beforeEach(function () {
             // Ensure we preserve search session cookie for proper ordering.
-            Cypress.Cookies.preserveOnce("searchSessionID");
+            cy.session('preserveCookies', () => {
+                // Ensure we preserve search session cookie for proper ordering.
+                cy.getCookie('searchSessionID').then((cookie) => {
+                    if (cookie) {
+                        cy.setCookie('searchSessionID', cookie.value);
+                    }
+                });
+            });
         });
 
         it('SearchBox input works, goes to /browse/ on submit', function(){
