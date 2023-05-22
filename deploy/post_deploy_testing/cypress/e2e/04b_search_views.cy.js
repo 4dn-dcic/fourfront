@@ -8,9 +8,16 @@ describe('Post-Deployment Search View Tests', function () {
             cy.visit('/search/');
         });
 
-        beforeEach(function(){
+        beforeEach(function () {
             // Ensure we preserve search session cookie for proper ordering.
-            Cypress.Cookies.preserveOnce("searchSessionID");
+            cy.session('preserveCookies', () => {
+                // Ensure we preserve search session cookie for proper ordering.
+                cy.getCookie('searchSessionID').then((cookie) => {
+                    if (cookie) {
+                        cy.setCookie('searchSessionID', cookie.value);
+                    }
+                });
+            });
         });
 
         it('Load as you scroll works for ?type=Item', function () {
@@ -55,9 +62,16 @@ describe('Post-Deployment Search View Tests', function () {
             cy.visit('/search/');
         });
 
-        beforeEach(function(){
+        beforeEach(function () {
             // Ensure we preserve search session cookie for proper ordering.
-            Cypress.Cookies.preserveOnce("searchSessionID");
+            cy.session('preserveCookies', () => {
+                // Ensure we preserve search session cookie for proper ordering.
+                cy.getCookie('searchSessionID').then((cookie) => {
+                    if (cookie) {
+                        cy.setCookie('searchSessionID', cookie.value);
+                    }
+                });
+            });
         });
 
         it('Starting from /search/, typing "olfactory" into searchbox redirects back to search', function () {
