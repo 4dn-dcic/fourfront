@@ -6,11 +6,33 @@ fourfront
 Change Log
 ----------
 
+5.3.5
+=====
+
+`PR Cypress test for not facet  <https://github.com/4dn-dcic/fourfront/pull/1804>`_
+
+* it toggles between included and excluded properties in facets
+* it excludes a award.project term and compares the exact Exp Set’s before and after counts
+* it removes the excluded item's selection, then includes it, and compares the before and after counts.
+
+
+5.3.4
+=====
+
+`PR Npm Updates Apr-May 2023  <https://github.com/4dn-dcic/fourfront/pull/1803>`_
+
+* jsonwebtoken npm package is replaced with jose
+* cypress 10 to 12 migration completed
+* new cypress test for not facet feature added
+* auth0 client/domain grabbed from /auth0_config in cypress tests (old implementation gets them from env. variables)
+
+
 5.3.3
 =====
 
 * updated suggested_enums for processed files
 * updated assay_subclass_short by making a more general FISH at expense of RNA and DNA FISH
+
 
 5.3.2
 =====

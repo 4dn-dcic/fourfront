@@ -39,20 +39,11 @@ describe('Biosample create page', function () {
             cy.get('input#field_for_tags.form-control').focus().type('deleted_by_cypress_test').wait(100).end();
 
             // Click Validate button
-            cy.get(".action-buttons-container .btn")
-                .within(function () {
-                    return cy.contains('Validate').click().end().wait(1000);
-                }).end()
-                //Click Submit button
-                .get(".action-buttons-container .btn").within(function () {
-                    return cy.contains('Submit').click().end().wait(500);
-                }).end()
-                //Navigate new biosample data page
-                .get(".action-buttons-container .btn").within(function () {
-                    return cy.contains('Skip').click().end();
-                })
-                .end()
-                .get("h1.page-title").contains("Biosample").wait(3000).end(); // Await until are at Biosample page. Then wait 1s to ensure we have new context.
+            cy.get(".action-buttons-container").as("editButtons");
+            cy.get("@editButtons").find('button.btn').contains('Validate').click().end().wait(1000).end();
+            cy.get("@editButtons").find('button.btn').contains('Submit').click().end().wait(500).end();
+            cy.get("@editButtons").find('button.btn').contains('Skip').click().end();
+            cy.get("h1.page-title").contains("Biosample").wait(3000).end(); // Await until are at Biosample page. Then wait 1s to ensure we have new context.
 
             // Queue for deletion in subsequent test.
             cy.get('script[data-prop-name=context]').then(function($context){
