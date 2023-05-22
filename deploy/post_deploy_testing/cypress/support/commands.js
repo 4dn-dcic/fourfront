@@ -116,7 +116,7 @@ Cypress.Commands.add('signJWT', (auth0secret, email, sub) => {
 Cypress.Commands.add('login4DN', function(options = { 'useEnvToken' : true }){
 
     function performLogin(token){
-        return cy.window()/*.should('have.property', 'fourfront')*/.then((w)=>{
+        return cy.window().then((w)=>{
             cy.request({
                 'url' : '/login',
                 'method' : 'POST',
