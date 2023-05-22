@@ -132,8 +132,6 @@ describe("HiGlass Display pages", function(){
 
             // When the app creates a new HiGlass display, we'll capture the JSON of the POST call.
             cy.intercept('POST', '/higlass-view-configs/').as('newHiglassDisplay');
-            // cy.server();
-            // cy.route('POST', '/higlass-view-configs/').as('newHiglassDisplay');
 
             // Ensure HiGlassComponent has loaded (before Clone btn can be clicked w/o errors)
             cy.get('.higlass-instance .react-grid-layout').end()
@@ -173,8 +171,6 @@ describe("HiGlass Display pages", function(){
 
             // There will be an AJAX response to a POST for the new Higlass display, so capture it here.
             cy.intercept('POST', '/higlass-view-configs/').as('newHiglassDisplay');
-            // cy.server();
-            // cy.route('POST', '/higlass-view-configs/').as('newHiglassDisplay');
 
             // Ensure HiGlassComponent has loaded (before Clone btn can be clicked w/o errors)
             cy.get('.higlass-instance .react-grid-layout').end()
