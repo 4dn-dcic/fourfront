@@ -6,6 +6,12 @@ fourfront
 Change Log
 ----------
 
+5.3.4
+=====
+
+* Bump poetry to 1.4.2 in Makefile.
+
+
 5.3.3
 =====
 
