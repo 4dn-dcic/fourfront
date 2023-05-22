@@ -86,18 +86,28 @@ const auth0UserIds = {
 };
 
 
-Cypress.Commands.add('signJWT', (auth0client, auth0secret, email, sub) => {
-    const secret = new TextEncoder().encode(auth0secret);
-    const jwt = new jose.SignJWT({ 'email': email, 'email_verified': true });
-    const token = jwt
-        .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
-        .setIssuedAt()
-        .setIssuer('https://hms-dbmi.auth0.com/')
-        .setExpirationTime('1h')
-        .setAudience(auth0client)
-        .setSubject(sub)
-        .sign(secret);
-    return token;
+Cypress.Commands.add('signJWT', (auth0secret, email, sub) => {
+    cy.request({
+        'url' : '/auth0_config?format=json',
+        'method' : 'GET',
+        'headers' : { 'Accept': "application/json", 'Content-Type': "application/json; charset=UTF-8" },
+        'followRedirect' : true
+    }).then(function (resp) {
+        if (resp.status && resp.status === 200) {
+            const auth0Config = resp.body;
+            const secret = new TextEncoder().encode(auth0secret);
+            const jwt = new jose.SignJWT({ 'email': email, 'email_verified': true });
+            const token = jwt
+                .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
+                .setIssuedAt()
+                .setIssuer(auth0Config.auth0Domain)
+                .setExpirationTime('1h')
+                .setAudience(auth0Config.auth0Client)
+                .setSubject(sub)
+                .sign(secret);
+            return token;
+        }
+    });
 });
 
 /**
@@ -150,21 +160,20 @@ Cypress.Commands.add('login4DN', function(options = { 'useEnvToken' : true }){
     // If no token, we try to generate/impersonate one ourselves
 
     const email = options.email || options.user || Cypress.env('LOGIN_AS_USER') || '4dndcic@gmail.com';
-    const auth0client = Cypress.env('Auth0Client');
     const auth0secret = Cypress.env('Auth0Secret');
 
-    if (!auth0client || !auth0secret) throw new Error('Cannot test login if no Auth0Client & Auth0Secret in ENV vars.');
+    if (!auth0secret) throw new Error('Cannot test login if no Auth0Secret in ENV vars.');
 
     Cypress.log({
         'name' : "Login 4DN",
         'message' : 'Attempting to impersonate-login for ' + email,
         'consoleProps' : ()=>{
-            return { auth0client, auth0secret, email };
+            return { auth0secret, email };
         }
     });
 
     // Generate JWT
-    cy.signJWT(auth0client, auth0secret, email, auth0UserIds[email] || '').then((token) => {
+    cy.signJWT(auth0secret, email, auth0UserIds[email] || '').then((token) => {
         expect(token).to.have.length.greaterThan(0);
         Cypress.log({
             'name': "Login 4DN",
