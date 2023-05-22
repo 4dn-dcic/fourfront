@@ -6,6 +6,16 @@ fourfront
 Change Log
 ----------
 
+5.3.5
+=====
+
+`PR Cypress test for not facet  <https://github.com/4dn-dcic/fourfront/pull/1804>`_
+
+* it toggles between included and excluded properties in facets
+* it excludes a award.project term and compares the exact Exp Set’s before and after counts
+* it removes the excluded item's selection, then includes it, and compares the before and after counts.
+
+
 5.3.4
 =====
 
