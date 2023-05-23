@@ -6,6 +6,12 @@ fourfront
 Change Log
 ----------
 
+5.3.6
+=====
+
+* Bug fix - submission statistics tab in /statistics page throws error
+
+
 5.3.5
 =====
 
