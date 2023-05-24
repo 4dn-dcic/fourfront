@@ -2,7 +2,7 @@ import structlog
 from dcicutils.misc_utils import str_to_bool
 from ..loadxl import load_data_via_ingester
 from ..types.ingestion import IngestionSubmission, SubmissionFolio
-from .exceptions import UndefinedIngestionProcessorType
+from snovault.ingestion.exceptions import UndefinedIngestionProcessorType
 
 log = structlog.getLogger(__name__)
 

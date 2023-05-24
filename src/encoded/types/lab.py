@@ -20,7 +20,7 @@ from .base import (
 )
 
 
-ONLY_ADMIN_VIEW = [
+ONLY_ADMIN_VIEW_ACL = [
     (Allow, 'group.admin', ['view', 'edit']),
     (Allow, 'group.read-only-admin', ['view']),
     (Allow, 'remoteuser.INDEXER', ['view']),
@@ -37,7 +37,7 @@ ALLOW_EVERYONE_VIEW = [
 ALLOW_EVERYONE_VIEW_AND_SUBMITTER_EDIT = [
     (Allow, Everyone, 'view'),
     (Allow, 'role.lab_submitter', 'edit'),
-] + ONLY_ADMIN_VIEW
+] + ONLY_ADMIN_VIEW_ACL
 
 
 def _build_lab_embedded_list():
@@ -70,7 +70,7 @@ class Lab(Item):
 
     STATUS_ACL = {
         'current': ALLOW_EVERYONE_VIEW_AND_SUBMITTER_EDIT,
-        'deleted': ONLY_ADMIN_VIEW,
+        'deleted': ONLY_ADMIN_VIEW_ACL,
         'revoked': ALLOW_EVERYONE_VIEW,
         'inactive': ALLOW_EVERYONE_VIEW,
     }

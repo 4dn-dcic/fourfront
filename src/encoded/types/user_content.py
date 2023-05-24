@@ -17,7 +17,7 @@ from .base import (
     DELETED,
     ALLOW_LAB_SUBMITTER_EDIT,
     ALLOW_VIEWING_GROUP_VIEW,
-    ONLY_ADMIN_VIEW,
+    ONLY_ADMIN_VIEW_ACL,
     ALLOW_OWNER_EDIT,
     ALLOW_ANY_USER_ADD,
     lab_award_attribution_embed_list
@@ -44,7 +44,7 @@ class UserContent(Item):
     STATUS_ACL = {              # Defaults + allow owner to edit (in case owner has no labs or submit_for)
         'released'              : ALLOW_OWNER_EDIT + ALLOW_CURRENT,
         'deleted'               : ALLOW_OWNER_EDIT + DELETED,
-        'draft'                 : ALLOW_OWNER_EDIT + ONLY_ADMIN_VIEW,
+        'draft'                 : ALLOW_OWNER_EDIT + ONLY_ADMIN_VIEW_ACL,
         'released to lab'       : ALLOW_OWNER_EDIT + ALLOW_LAB_SUBMITTER_EDIT,
         'released to project'   : ALLOW_OWNER_EDIT + ALLOW_VIEWING_GROUP_VIEW,
         # 'archived'              : ALLOW_OWNER_EDIT + ALLOW_CURRENT,

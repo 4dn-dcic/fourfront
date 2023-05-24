@@ -26,7 +26,7 @@ from .base import (
     ALLOW_OWNER_EDIT,
     ALLOW_CURRENT,
     DELETED,
-    ONLY_ADMIN_VIEW,
+    ONLY_ADMIN_VIEW_ACL,
     ALLOW_LAB_SUBMITTER_EDIT
 )
 from .dependencies import DependencyEmbedder
@@ -374,7 +374,7 @@ class TrackingItem(Item):
     STATUS_ACL.update({
         'released': ALLOW_OWNER_EDIT + ALLOW_CURRENT,
         'deleted': ALLOW_OWNER_EDIT + DELETED,
-        'draft': ALLOW_OWNER_EDIT + ONLY_ADMIN_VIEW,
+        'draft': ALLOW_OWNER_EDIT + ONLY_ADMIN_VIEW_ACL,
         'in review by lab': ALLOW_OWNER_EDIT + ALLOW_LAB_SUBMITTER_EDIT,
     })
 

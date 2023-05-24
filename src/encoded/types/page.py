@@ -25,7 +25,7 @@ from snovault.validators import (
 )
 from urllib.parse import urlparse, urlencode
 from ..search import get_iterable_search_results
-from .base import Item, ALLOW_CURRENT, DELETED, ALLOW_LAB_SUBMITTER_EDIT, ALLOW_VIEWING_GROUP_VIEW, ONLY_ADMIN_VIEW
+from .base import Item, ALLOW_CURRENT, DELETED, ALLOW_LAB_SUBMITTER_EDIT, ALLOW_VIEWING_GROUP_VIEW, ONLY_ADMIN_VIEW_ACL
 from .user_content import StaticSection
 
 

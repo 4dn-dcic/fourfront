@@ -10,7 +10,17 @@ import structlog
 import tempfile
 from typing import Any, Generator, Optional
 from dcicutils.misc_utils import url_path_join, find_association
-from snovault import resolve_file_path as snovault_resolve_file_path
+from snovault.util import (
+    beanstalk_env_from_registry,
+    check_user_is_logged_in,
+    content_type_allowed,
+    create_empty_s3_file,
+    debuglog,
+    make_vapp_for_ingestion,
+    resolve_file_path as snovault_resolve_file_path,
+    s3_local_file,
+    s3_output_stream,
+)
 
 # These are now moved or reused from snovault.utils (May 2023):
 # - CONTENT_TYPE_SPECIAL_CASES

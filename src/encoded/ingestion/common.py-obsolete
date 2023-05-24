@@ -2,8 +2,8 @@
 common.py - tools common to various parts of ingestion
 """
 
-from .exceptions import MissingParameter, BadParameter
-from ..util import CONTENT_TYPE_SPECIAL_CASES
+from snovault.ingestion.exceptions import MissingParameter, BadParameter
+from snovault.util import CONTENT_TYPE_SPECIAL_CASES
 
 
 def metadata_bundles_bucket(registry):

@@ -29,7 +29,7 @@ from ..util import (
     debuglog, beanstalk_env_from_registry, create_empty_s3_file, s3_local_file, s3_output_stream,  # subrequest_item_creation,
     make_vapp_for_ingestion,  # vapp_for_email,
 )
-from ..ingestion.common import metadata_bundles_bucket  # , get_parameter
+from ..ingestion.common_obsolete import metadata_bundles_bucket  # , get_parameter
 
 
 # ALLOW_SUBMITTER_VIEW_ACL = (

@@ -1,8 +1,5 @@
 """base class creation for all the schemas that exist."""
 from functools import lru_cache
-from pyramid.view import (
-    view_config,
-)
 from pyramid.security import (
     # ALL_PERMISSIONS,
     Allow,
@@ -15,18 +12,10 @@ from pyramid.traversal import find_root
 import snovault
 # from ..schema_formats import is_accession
 # import snovalut default post / patch stuff so we can overwrite it in this file
-from snovault.validators import (
-    validate_item_content_post,
-    validate_item_content_put,
-    validate_item_content_patch
-)
 from snovault.interfaces import CONNECTION
 from ..server_defaults import get_userid, add_last_modified
-from jsonschema_serialize_fork import NO_DEFAULT
 
 from datetime import date
-import string
-import re
 
 
 @lru_cache()
@@ -36,13 +25,7 @@ def _award_viewing_group(award_uuid, root):
 
 
 # Item acls
-ONLY_ADMIN_VIEW = [
-    (Allow, 'group.admin', ['view', 'edit']),
-    (Allow, 'group.read-only-admin', ['view']),
-    (Allow, 'remoteuser.INDEXER', ['view']),
-    (Allow, 'remoteuser.EMBED', ['view']),
-    (Deny, Everyone, ['view', 'edit'])
-]
+from snovault.types.base import ONLY_ADMIN_VIEW_ACL
 
 # This acl allows item creation; it is easily overwritten in lab and user,
 # as these items should not be available for creation
@@ -53,12 +36,12 @@ SUBMITTER_CREATE = [
 
 ALLOW_EVERYONE_VIEW = [
     (Allow, Everyone, 'view'),
-] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
+] + ONLY_ADMIN_VIEW_ACL + SUBMITTER_CREATE
 
 ALLOW_LAB_MEMBER_VIEW = [
     (Allow, 'role.lab_member', 'view'),
     (Allow, 'role.award_member', 'view')
-] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
+] + ONLY_ADMIN_VIEW_ACL + SUBMITTER_CREATE
 
 ALLOW_VIEWING_GROUP_VIEW = [
     (Allow, 'role.viewing_group_member', 'view'),
@@ -73,25 +56,25 @@ ALLOW_LAB_SUBMITTER_EDIT = [
     (Allow, 'role.lab_member', 'view'),
     (Allow, 'role.award_member', 'view'),
     (Allow, 'role.lab_submitter', 'edit'),
-] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
+] + ONLY_ADMIN_VIEW_ACL + SUBMITTER_CREATE
 
 ALLOW_CURRENT_AND_SUBMITTER_EDIT = [
     (Allow, Everyone, 'view'),
     (Allow, 'role.lab_submitter', 'edit'),
-] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
+] + ONLY_ADMIN_VIEW_ACL + SUBMITTER_CREATE
 
 ALLOW_CURRENT = ALLOW_EVERYONE_VIEW
 
 DELETED = [
     (Deny, Everyone, 'visible_for_edit')
-] + ONLY_ADMIN_VIEW
+] + ONLY_ADMIN_VIEW_ACL
 
 # For running pipelines
 ALLOW_LAB_VIEW_ADMIN_EDIT = [
     (Allow, 'role.lab_member', 'view'),
     (Allow, 'role.award_member', 'view'),
     (Allow, 'role.lab_submitter', 'view'),
-] + ONLY_ADMIN_VIEW
+] + ONLY_ADMIN_VIEW_ACL
 
 ALLOW_OWNER_EDIT = [
     (Allow, 'role.owner', ['edit', 'view', 'view_details']),
@@ -106,68 +89,7 @@ ALLOW_ANY_USER_ADD = [
 ] + ALLOW_EVERYONE_VIEW
 
 
-def get_item_or_none(request, value, itype=None, frame='object'):
-    """
-    Return the view of an item with given frame. Can specify different types
-    of `value` for item lookup
-
-    Args:
-        request: the current Request
-        value (str): String item identifier or a dict containing @id/uuid
-        itype (str): Optional string collection name for the item (e.g. /file-formats/)
-        frame (str): Optional frame to return. Defaults to 'object'
-
-    Returns:
-        dict: given view of the item or None on failure
-    """
-    item = None
-
-    if isinstance(value, dict):
-        if 'uuid' in value:
-            value = value['uuid']
-        elif '@id' in value:
-            value = value['@id']
-
-    svalue = str(value)
-
-    # Below case is for UUIDs & unique_keys such as accessions, but not @ids
-    if not svalue.startswith('/') and not svalue.endswith('/'):
-        svalue = '/' + svalue + '/'
-        if itype is not None:
-            svalue = '/' + itype + svalue
-
-    # Request.embed will attempt to get from ES for frame=object/embedded
-    # If that fails, get from DB. Use '@@' syntax instead of 'frame=' because
-    # these paths are cached in indexing
-    try:
-        item = request.embed(svalue, '@@' + frame)
-    except Exception:
-        pass
-
-    # could lead to unexpected errors if == None
-    return item
-
-
-def set_namekey_from_title(properties):
-    name = None
-    if properties.get('title'):
-        exclude = set(string.punctuation.replace('-', ''))
-        name = properties['title'].replace('&', ' n ')
-        name = ''.join(ch if ch not in exclude and ch != ' ' else '-' for ch in name)
-        name = re.sub(r"[-]+", '-', name).strip('-').lower()
-    return name
-
-
-def validate_item_type_of_linkto_field(context, request):
-    """We are doing this case by case on item specific types files,
-    but might want to carry it here if filter is used more often.
-    If any of the submitted fields contain an ff_flag property starting with "filter",
-    the field in the filter is used for validating the type of the linked item.
-    Example: file has field file_format which is a linkTo FileFormat.
-    FileFormat items contain a field called "valid_item_types".
-    We have the ff_flag on file_format field called "filter:valid_item_types"."""
-    pass
-
+from snovault.types.base import get_item_or_none, set_namekey_from_title, validate_item_type_of_linkto_field
 
 ##
 ## Common lists of embeds to be re-used in certain files (similar to schema mixins)
@@ -215,47 +137,7 @@ lab_award_attribution_embed_list = [
 ]
 
 
-class AbstractCollection(snovault.AbstractCollection):
-    """smth."""
-
-    def __init__(self, *args, **kw):
-        try:
-            self.lookup_key = kw.pop('lookup_key')
-        except KeyError:
-            pass
-        super(AbstractCollection, self).__init__(*args, **kw)
-
-    def get(self, name, default=None):
-        '''
-        heres' and example of why this is the way it is:
-        ontology terms have uuid or term_id as unique ID keys
-        and if neither of those are included in post, try to
-        use term_name such that:
-        No - fail load with non-existing term message
-        Multiple - fail load with ‘ambiguous name - more than 1 term with that name exist use ID’
-        Single result - get uuid and use that for post/patch
-        '''
-        resource = super(AbstractCollection, self).get(name, None)
-        if resource is not None:
-            return resource
-        if ':' in name:
-            resource = self.connection.get_by_unique_key('alias', name)
-            if resource is not None:
-                if not self._allow_contained(resource):
-                    return default
-                return resource
-        if getattr(self, 'lookup_key', None) is not None:
-            # lookup key translates to query json by key / value and return if only one of the
-            # item type was found... so for keys that are mostly unique, but do to whatever
-            # reason (bad data mainly..) can be defined as unique keys
-            item_type = self.type_info.item_type
-            resource = self.connection.get_by_json(self.lookup_key, name, item_type)
-            if resource is not None:
-                if not self._allow_contained(resource):
-                    return default
-                return resource
-        return default
-
+from snovault.types.base import AbstractCollection
 
 class Collection(snovault.Collection, AbstractCollection):
     """smth."""
@@ -277,7 +159,7 @@ class Collection(snovault.Collection, AbstractCollection):
         'title': "Item Listing",
         'description': 'Abstract collection of all Items.',
     })
-class Item(snovault.Item):
+class Item(snovault.types.base.Item):
     """
     The abstract base type for all other Items.
     All methods & properties are inherited by
@@ -552,38 +434,17 @@ class SharedItem(Item):
         return roles
 
 
+from snovault.types.base import add as snovault_add, edit as snovault_edit, create as snovault_create
 @snovault.calculated_property(context=Item.AbstractCollection, category='action')
 def add(context, request):
-    """smth."""
-    if request.has_permission('add', context):
-        type_name = context.type_info.name
-        return {
-            'name': 'add',
-            'title': 'Add',
-            'profile': '/profiles/{name}.json'.format(name=type_name),
-            'href': '/search/?type={name}&currentAction=add'.format(name=type_name),
-        }
+    return snovault_add(context, request)
 
 
 @snovault.calculated_property(context=Item, category='action')
 def edit(context, request):
-    """smth."""
-    if request.has_permission('edit'):
-        return {
-            'name': 'edit',
-            'title': 'Edit',
-            'profile': '/profiles/{ti.name}.json'.format(ti=context.type_info),
-            'href': '{item_uri}?currentAction=edit'.format(item_uri=request.resource_path(context)),
-        }
+    return snovault_edit(context, request)
 
 
 @snovault.calculated_property(context=Item, category='action')
 def create(context, request):
-    """If the user submits for any lab, allow them to create"""
-    if request.has_permission('create'):
-        return {
-            'name': 'create',
-            'title': 'Create',
-            'profile': '/profiles/{ti.name}.json'.format(ti=context.type_info),
-            'href': '{item_uri}?currentAction=create'.format(item_uri=request.resource_path(context)),
-        }
+    return snovault_create(context, request)

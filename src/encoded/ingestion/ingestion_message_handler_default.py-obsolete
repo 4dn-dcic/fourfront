@@ -1,10 +1,10 @@
 import json
 import structlog
 from dcicutils.misc_utils import ignored, PRINT
-from ..ingestion_listener import (IngestionListener, DEBUG_SUBMISSIONS)
+from snovault.ingestion.ingestion_listener import (IngestionListener, DEBUG_SUBMISSIONS)
 from ..types.ingestion import SubmissionFolio
 from ..util import (debuglog, vapp_for_email, make_s3_client)
-from .common import metadata_bundles_bucket
+from .common_obsolete import metadata_bundles_bucket
 from .ingestion_message import IngestionMessage
 from .ingestion_message_handler_decorator import ingestion_message_handler
 from .processors import get_ingestion_processor

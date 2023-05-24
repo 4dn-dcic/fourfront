@@ -47,8 +47,8 @@ configure:  # does any pre-requisite installs
 	@#pip install poetry==1.1.9  # this version is known to work. -kmp 11-Mar-2021
 	# Pin to version 1.1.15 for now to avoid this error:
 	#   Because encoded depends on wheel (>=0.29.0) which doesn't match any versions, version solving failed.
-	pip install wheel==0.37.1
-	pip install poetry==1.2.2
+	pip install wheel==0.40.0
+	pip install poetry==1.4.2
 	pip install setuptools==57.5.0 # this version allows 2to3, any later will break -wrr 20-Sept-2021
 	poetry config virtualenvs.create false --local # do not create a virtualenv - the user should have already done this -wrr 20-Sept-2021
 
@@ -106,10 +106,11 @@ build-locust:  # just pip installs locust - may cause instability
 	pip install locust
 
 deploy1:  # starts postgres/ES locally and loads inserts, and also starts ingestion engine
-	@DEBUGLOG=`pwd` SNOVAULT_DB_TEST_PORT=`grep 'sqlalchemy[.]url =' development.ini | sed -E 's|.*:([0-9]+)/.*|\1|'` dev-servers development.ini --app-name app --clear --init --load
+	@DEBUGLOG=`pwd` SNOVAULT_DB_TEST_PORT=`grep 'sqlalchemy[.]url =' development.ini | sed -E 's|.*:([0-9]+)/.*|\1|'` dev-servers-fourfront development.ini --app-name app --clear --init --load
 
 deploy1a:  # starts postgres/ES locally and loads inserts, but does not start the ingestion engine
-	@DEBUGLOG=`pwd` SNOVAULT_DB_TEST_PORT=`grep 'sqlalchemy[.]url =' development.ini | sed -E 's|.*:([0-9]+)/.*|\1|'` dev-servers development.ini --app-name app --clear --init --load --no_ingest
+#	@DEBUGLOG=`pwd` APPLICATION_PYPROJECT_NAME=encoded SNOVAULT_DB_TEST_PORT=`grep 'sqlalchemy[.]url =' development.ini | sed -E 's|.*:([0-9]+)/.*|\1|'` dev-servers-fourfront development.ini --app-name app --clear --init --load --no_ingest
+	@DEBUGLOG=`pwd` APPLICATION_PYPROJECT_NAME=encoded SNOVAULT_DB_TEST_PORT=`grep 'sqlalchemy[.]url =' development.ini | sed -E 's|.*:([0-9]+)/.*|\1|'` dev-servers-fourfront development.ini --app-name app --clear --init --load --no_ingest
 
 deploy1b:  # starts ingestion engine separately so it can be easily stopped and restarted for debugging in foreground
 	@echo "Starting ingestion listener. Press ^C to exit." && DEBUGLOG=`pwd` SNOVAULT_DB_TEST_PORT=`grep 'sqlalchemy[.]url =' development.ini | sed -E 's|.*:([0-9]+)/.*|\1|'` poetry run ingestion-listener development.ini --app-name app

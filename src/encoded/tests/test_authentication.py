@@ -5,7 +5,7 @@ from pyramid.interfaces import IAuthenticationPolicy
 from pyramid.security import Authenticated, Everyone
 from pyramid.testing import DummyRequest
 from zope.interface.verify import verifyClass, verifyObject
-from ..authentication import NamespacedAuthenticationPolicy
+from snovault.authentication import NamespacedAuthenticationPolicy
 
 
 pytestmark = [pytest.mark.setone, pytest.mark.working]

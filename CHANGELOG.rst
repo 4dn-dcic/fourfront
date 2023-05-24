@@ -6,6 +6,18 @@ fourfront
 Change Log
 ----------
 
+5.3.6
+=====
+
+* Migrate/unify ingestion code to snovault.
+
+
+5.3.5
+=====
+
+* Bump poetry to 1.4.2 in Makefile and Dockerfile.
+
+
 5.3.2
 =====
 

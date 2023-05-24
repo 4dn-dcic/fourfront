@@ -1,3 +1,6 @@
+#xyzzynew from .project_start import FourfrontProject  # for initialize_app_project
+print('xyzzy/fourfront/__init__/a')
+from . import project_defs
 import hashlib
 import logging
 import json  # used only in Fourfront, not CGAP
@@ -20,6 +23,7 @@ from pyramid_localroles import LocalRolesAuthorizationPolicy
 from pyramid.settings import asbool
 from sentry_sdk.integrations.pyramid import PyramidIntegration
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+import snovault.ingestion.ingestion_listener
 from snovault.app import (
     session, json_from_path, configure_dbsession, changelogs,
     json_asset, STATIC_MAX_AGE as DEFAULT_STATIC_MAX_AGE
@@ -225,15 +229,15 @@ def main(global_config, **local_config):
     # Render an HTML page to browsers and a JSON document for API clients
     # config.include(add_schemas_to_html_responses)
     config.include('.renderers')
-    config.include('.authentication')
+#   config.include('.authentication')
     config.include('.server_defaults')
     config.include('.root')
     config.include('.types')
     config.include('.batch_download')
     config.include('.loadxl')
     config.include('.visualization')
-    config.include('.ingestion_listener')
-    config.include('.ingestion.ingestion_message_handler_default')
+#   config.include('.ingestion_listener')
+#   config.include('.ingestion.ingestion_message_handler_default')
 
     if 'elasticsearch.server' in config.registry.settings:
         config.include('snovault.elasticsearch')

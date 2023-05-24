@@ -11,7 +11,7 @@ from pyramid.settings import asbool
 from .base import (
     Item,
     DELETED,
-    ONLY_ADMIN_VIEW,
+    ONLY_ADMIN_VIEW_ACL,
 )
 from ..authentication import (
     generate_password,
@@ -56,7 +56,7 @@ class AccessKey(Item):
     embedded_list = []
 
     STATUS_ACL = {
-        'current': [(Allow, 'role.owner', ['view', 'edit'])] + ONLY_ADMIN_VIEW,
+        'current': [(Allow, 'role.owner', ['view', 'edit'])] + ONLY_ADMIN_VIEW_ACL,
         'deleted': DELETED,
     }
 

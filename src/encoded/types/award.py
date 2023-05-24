@@ -38,7 +38,7 @@ class Award(Item):
     ]
 
     # define some customs acls; awards can only be created/edited by admin
-    ONLY_ADMIN_VIEW = [
+    ONLY_ADMIN_VIEW_ACL = [
         (Allow, 'group.admin', ['view', 'edit']),
         (Allow, 'group.read-only-admin', ['view']),
         (Allow, 'remoteuser.INDEXER', ['view']),
@@ -54,11 +54,11 @@ class Award(Item):
 
     ALLOW_EVERYONE_VIEW_AND_ADMIN_EDIT = [
         (Allow, Everyone, 'view'),
-    ] + ONLY_ADMIN_VIEW
+    ] + ONLY_ADMIN_VIEW_ACL
 
     STATUS_ACL = {
         'current': ALLOW_EVERYONE_VIEW_AND_ADMIN_EDIT,
-        'deleted': ONLY_ADMIN_VIEW,
+        'deleted': ONLY_ADMIN_VIEW_ACL,
         'revoked': ALLOW_EVERYONE_VIEW,
         'replaced': ALLOW_EVERYONE_VIEW,
         'inactive': ALLOW_EVERYONE_VIEW

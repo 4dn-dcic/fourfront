@@ -22,7 +22,7 @@ from pyramid import paster
 # from pyramid.response import Response
 from pyramid.view import view_config
 from snovault.util import debug_log
-from .ingestion.common import metadata_bundles_bucket, get_parameter, IngestionReport
+from .ingestion.common_obsolete import metadata_bundles_bucket, get_parameter, IngestionReport
 from .ingestion.exceptions import UnspecifiedFormParameter, SubmissionFailure  # , BadParameter
 from .ingestion.ingestion_listener_base import (
     DEBUG_SUBMISSIONS,
