@@ -1,5 +1,7 @@
 from snovault.authorization import (
-    groupfinder,
+    groupfinder
+)
+from snovault.project.authorization import (
     SnovaultProjectAuthorization
 )
 
