@@ -1,5 +1,3 @@
-#xyzzynew from .project_start import FourfrontProject  # for initialize_app_project
-print('xyzzy/fourfront/__init__/a')
 from . import project_defs
 import hashlib
 import logging
