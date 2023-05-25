@@ -9,7 +9,7 @@ Change Log
 5.3.6
 =====
 
-* Bug fix - submission statistics tab in /statistics page throws error
+* Bump poetry to 1.4.2 in Makefile and Dockerfile.
 
 
 5.3.5
