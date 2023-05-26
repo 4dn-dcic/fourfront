@@ -3,7 +3,7 @@ import pytest
 from past.builtins import basestring
 from pkg_resources import resource_filename
 from unittest import mock
-from .. import loadxl
+from snovault import loadxl
 from ..commands.run_upgrader_on_inserts import get_inserts
 
 

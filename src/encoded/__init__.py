@@ -21,7 +21,7 @@ from pyramid_localroles import LocalRolesAuthorizationPolicy
 from pyramid.settings import asbool
 from sentry_sdk.integrations.pyramid import PyramidIntegration
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
-import snovault.ingestion.ingestion_listener
+#import snovault.ingestion.ingestion_listener
 from snovault.app import (
     session, json_from_path, configure_dbsession, changelogs,
     json_asset, STATIC_MAX_AGE as DEFAULT_STATIC_MAX_AGE
@@ -234,8 +234,8 @@ def main(global_config, **local_config):
     config.include('.batch_download')
     config.include('.loadxl')
     config.include('.visualization')
-#   config.include('.ingestion_listener')
-#   config.include('.ingestion.ingestion_message_handler_default')
+    config.include('snovault.ingestion.ingestion_listener')
+    config.include('snovault.ingestion.ingestion_message_handler_default')
 
     if 'elasticsearch.server' in config.registry.settings:
         config.include('snovault.elasticsearch')
