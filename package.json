@@ -100,7 +100,7 @@
     "string-replace-loader": "^3.1.0",
     "terser-webpack-plugin": "^5.3.6",
     "utf-8-validate": "^5.0.9",
-    "webpack": "5.76.0",
+    "webpack": "5.84.1",
     "webpack-bundle-analyzer": "^4.5.0",
     "webpack-deadcode-plugin": "^0.1.15"
   },
