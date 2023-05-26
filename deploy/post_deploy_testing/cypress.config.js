@@ -17,5 +17,6 @@ module.exports = defineConfig({
         },
         baseUrl: 'https://data.4dnucleome.org',
         specPattern: 'cypress/e2e/**/*.{js,jsx,ts,tsx}',
+        testIsolation: false
     },
 });

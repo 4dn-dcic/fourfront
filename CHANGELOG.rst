@@ -11,6 +11,7 @@ Change Log
 
 * Migrate/unify ingestion code to snovault.
 
+
 5.3.7
 =====
 
@@ -21,6 +22,7 @@ Change Log
 =====
 
 * Bump poetry to 1.4.2 in Makefile and Dockerfile.
+
 
 5.3.5
 =====
