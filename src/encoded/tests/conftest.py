@@ -21,7 +21,7 @@ from snovault.elasticsearch import ELASTIC_SEARCH, create_mapping
 from snovault.util import generate_indexer_namespace_for_testing
 from .conftest_settings import make_app_settings_dictionary
 from .. import main
-from ..loadxl import load_all
+from snovault.loadxl import load_all
 
 
 """

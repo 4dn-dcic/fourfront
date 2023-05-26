@@ -1,4 +1,4 @@
-from . import project_defs
+import encoded.project_defs
 import hashlib
 import logging
 import json  # used only in Fourfront, not CGAP
@@ -30,7 +30,7 @@ from snovault.elasticsearch import APP_FACTORY
 from snovault.elasticsearch.interfaces import INVALIDATION_SCOPE_ENABLED
 
 from .appdefs import APP_VERSION_REGISTRY_KEY
-from .loadxl import load_all
+from snovault.loadxl import load_all
 
 
 # snovault.app.STATIC_MAX_AGE (8 seconds) is WAY too low for /static and /profiles in CGAP - Will March 15 2022

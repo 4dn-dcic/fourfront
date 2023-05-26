@@ -23,21 +23,7 @@ from .server_defaults import add_last_modified
 
 
 
-from snovault.loadxl import ORDER
-from snovault.loadxl import LoadGenWrapper
-from snovault.loadxl import load_data_via_ingester
-from snovault.loadxl import load_data_view as snovault_load_data_view
-
-
 @view_config(route_name='load_data', request_method='POST', permission='add')
 @debug_log
 def load_data_view(context, request):
     return snovault_load_data_view(context, request)
-
-
-from snovault.loadxl import load_all
-from snovault.loadxl import load_all_gen
-from snovault.loadxl import load_data
-from snovault.loadxl import load_test_data
-from snovault.loadxl import load_local_data
-from snovault.loadxl import load_prod_data
