@@ -3,7 +3,7 @@
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { stringify } from 'query-string';
+import queryString from 'query-string';
 import * as d3 from 'd3';
 import { sub, add, startOfMonth, startOfDay, endOfMonth, endOfDay, toDate, format as formatDate } from 'date-fns';
 import DropdownItem from 'react-bootstrap/esm/DropdownItem';
@@ -612,7 +612,7 @@ export class SubmissionStatsViewController extends React.PureComponent {
                     params.group_by = props.currentGroupBy;
                 }
                 //if (props.browseBaseState === 'all') params['group_by'] = ['award.project'];
-                const uri = '/date_histogram_aggregations/?' + stringify(params) + '&limit=0&format=json';
+                const uri = '/date_histogram_aggregations/?' + queryString.stringify(params) + '&limit=0&format=json';
 
                 // For local dev/debugging; don't forget to comment out if using.
                 //uri = 'https://data.4dnucleome.org' + uri;
