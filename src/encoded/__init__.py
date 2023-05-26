@@ -232,7 +232,7 @@ def main(global_config, **local_config):
     config.include('.root')
     config.include('.types')
     config.include('.batch_download')
-    config.include('.loadxl')
+    config.include('snovault.loadxl')
     config.include('.visualization')
     config.include('snovault.ingestion.ingestion_listener')
     config.include('snovault.ingestion.ingestion_message_handler_default')

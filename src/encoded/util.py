@@ -16,6 +16,7 @@ from snovault.util import (
     content_type_allowed,
     create_empty_s3_file,
     debuglog,
+    delay_rerun,
     make_vapp_for_ingestion,
     resolve_file_path as snovault_resolve_file_path,
     s3_local_file,

@@ -6,7 +6,7 @@ import re
 import sys
 import traceback
 
-from ..loadxl import *
+from snovault.loadxl import *
 
 
 class Anonymizer(object):
