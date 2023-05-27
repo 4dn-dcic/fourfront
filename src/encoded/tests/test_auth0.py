@@ -10,7 +10,7 @@ from dcicutils.misc_utils import Retry
 from dcicutils.qa_utils import override_dict
 from http import cookies
 from pyramid.testing import DummyRequest
-from ..authentication import get_jwt
+from snovault.authentication import get_jwt
 from ..edw_hash import EDWHash
 from ..util import get_trusted_email
 

@@ -30,7 +30,7 @@ ORDER = [
     'tracking_item', 'quality_metric_flag',
     'summary_statistic', 'summary_statistic_hi_c', 'workflow_run',
     'microscope_configuration', 'image_setting', 'quality_metric_mcool',
-    'ingestion_submission', 'file_other'
+    'ingestion_submission', 'file_other', 'filter_set'
 ]
 
 

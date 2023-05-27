@@ -1,6 +1,6 @@
 import pytest
-from ..ingestion.processors import ingestion_processor
-from ..types.ingestion import SubmissionFolio
+from snovault.ingestion.ingestion_processor_decorator import ingestion_processor
+from snovault.types.ingestion import SubmissionFolio
 
 
 def test_error_ingestion_processor():

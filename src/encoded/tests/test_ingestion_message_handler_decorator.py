@@ -1,8 +1,8 @@
 import pytest
 import re
-from ..ingestion.ingestion_message import IngestionMessage
+from snovault.ingestion.ingestion_message import IngestionMessage
 from snovault.ingestion.ingestion_listener_base import IngestionListenerBase
-from ..ingestion.ingestion_message_handler_decorator import (
+from snovault.ingestion.ingestion_message_handler_decorator import (
     call_ingestion_message_handler,
     ingestion_message_handler,
     clear_ingestion_message_handlers_for_testing,
