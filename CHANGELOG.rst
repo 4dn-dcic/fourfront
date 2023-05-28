@@ -6,6 +6,18 @@ fourfront
 Change Log
 ----------
 
+5.3.7
+=====
+
+* Bug fix - submission statistics tab in /statistics page throws error
+
+
+5.3.6
+=====
+
+* Bump poetry to 1.4.2 in Makefile and Dockerfile.
+
+
 5.3.5
 =====
 
