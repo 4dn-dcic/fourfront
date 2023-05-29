@@ -159,7 +159,7 @@ class Collection(snovault.Collection, AbstractCollection):
         'title': "Item Listing",
         'description': 'Abstract collection of all Items.',
     })
-class Item(snovault.types.base.Item):
+class Item(snovault.Item):
     """
     The abstract base type for all other Items.
     All methods & properties are inherited by
@@ -283,30 +283,30 @@ class Item(snovault.types.base.Item):
             roles[submitter] = 'role.owner'
         return roles
 
-    def add_accession_to_title(self, title):
-        if self.properties.get('accession') is not None:
-            return title + ' - ' + self.properties.get('accession')
-        return title
+#   def add_accession_to_title(self, title):
+#       if self.properties.get('accession') is not None:
+#           return title + ' - ' + self.properties.get('accession')
+#       return title
 
-    def unique_keys(self, properties):
-        """smth."""
-        keys = super(Item, self).unique_keys(properties)
-        if 'accession' not in self.schema['properties']:
-            return keys
-        keys.setdefault('accession', []).extend(properties.get('alternate_accessions', []))
-        if properties.get('status') != 'replaced' and 'accession' in properties:
-            keys['accession'].append(properties['accession'])
-        return keys
+#   def unique_keys(self, properties):
+#       """smth."""
+#       keys = super(Item, self).unique_keys(properties)
+#       if 'accession' not in self.schema['properties']:
+#           return keys
+#       keys.setdefault('accession', []).extend(properties.get('alternate_accessions', []))
+#       if properties.get('status') != 'replaced' and 'accession' in properties:
+#           keys['accession'].append(properties['accession'])
+#       return keys
 
-    def is_update_by_admin_user(self):
-        # determine if the submitter in the properties is an admin user
-        userid = get_userid()
-        users = self.registry['collections']['User']
-        user = users.get(userid)
-        if 'groups' in user.properties:
-            if 'admin' in user.properties['groups']:
-                return True
-        return False
+#   def is_update_by_admin_user(self):
+#       # determine if the submitter in the properties is an admin user
+#       userid = get_userid()
+#       users = self.registry['collections']['User']
+#       user = users.get(userid)
+#       if 'groups' in user.properties:
+#           if 'admin' in user.properties['groups']:
+#               return True
+#       return False
 
     def _update(self, properties, sheets=None):
         props = {}
@@ -376,48 +376,48 @@ class Item(snovault.types.base.Item):
             return refs
         return []
 
-    @snovault.calculated_property(schema={
-        "title": "Display Title",
-        "description": "A calculated title for every object in 4DN",
-        "type": "string"
-    },)
-    def display_title(self, request=None):
-        """create a display_title field."""
-        display_title = ""
-        look_for = [
-            "title",
-            "name",
-            "location_description",
-            "accession",
-        ]
-        properties = self.upgrade_properties()
-        for field in look_for:
-            # special case for user: concatenate first and last names
-            display_title = properties.get(field, None)
-            if display_title:
-                if field != 'accession':
-                    display_title = self.add_accession_to_title(display_title)
-                return display_title
-        # if none of the existing terms are available, use @type + date_created
-        try:
-            type_date = self.__class__.__name__ + " from " + properties.get("date_created", None)[:10]
-            return type_date
-        # last resort, use uuid
-        except Exception:
-            return properties.get('uuid', None)
+#   @snovault.calculated_property(schema={
+#       "title": "Display Title",
+#       "description": "A calculated title for every object in 4DN",
+#       "type": "string"
+#   },)
+#   def display_title(self, request=None):
+#       """create a display_title field."""
+#       display_title = ""
+#       look_for = [
+#           "title",
+#           "name",
+#           "location_description",
+#           "accession",
+#       ]
+#       properties = self.upgrade_properties()
+#       for field in look_for:
+#           # special case for user: concatenate first and last names
+#           display_title = properties.get(field, None)
+#           if display_title:
+#               if field != 'accession':
+#                   display_title = self.add_accession_to_title(display_title)
+#               return display_title
+#       # if none of the existing terms are available, use @type + date_created
+#       try:
+#           type_date = self.__class__.__name__ + " from " + properties.get("date_created", None)[:10]
+#           return type_date
+#       # last resort, use uuid
+#       except Exception:
+#           return properties.get('uuid', None)
 
-    def rev_link_atids(self, request, rev_name):
-        """
-        Returns the list of reverse linked items given a defined reverse link,
-        which should be formatted like:
-        rev = {
-            '<reverse field name>': ('<reverse item class>', '<reverse field to find>'),
-        }
-
-        """
-        conn = request.registry[CONNECTION]
-        return [request.resource_path(conn[uuid]) for uuid in
-                self.get_filtered_rev_links(request, rev_name)]
+#    def rev_link_atids(self, request, rev_name):
+#        """
+#        Returns the list of reverse linked items given a defined reverse link,
+#        which should be formatted like:
+#        rev = {
+#            '<reverse field name>': ('<reverse item class>', '<reverse field to find>'),
+#        }
+#
+#        """
+#        conn = request.registry[CONNECTION]
+#        return [request.resource_path(conn[uuid]) for uuid in
+#                self.get_filtered_rev_links(request, rev_name)]
 
 
 class SharedItem(Item):
