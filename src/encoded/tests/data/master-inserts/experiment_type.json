@@ -9,6 +9,7 @@
         "uuid": "a17b17cd-544a-3a3b-abc3-17a544544b3c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "other_tags": ["DNA-DNA"],
         "valid_item_types": ["ExperimentHiC"]
     },
@@ -22,6 +23,7 @@
         "uuid": "b17b17cd-544a-3a3b-abc3-17a544544b3c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "other_tags": ["DNA-DNA"],
         "valid_item_types": ["ExperimentHiC"]
     },
@@ -35,6 +37,7 @@
         "uuid": "f99a12ed-544a-3a3b-abc3-17a544544b3c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "other_tags": ["DNA-DNA"],
         "valid_item_types": ["ExperimentHiC"]
     },
@@ -48,6 +51,7 @@
         "uuid": "a66b17bd-544a-3a3b-abc3-17a544744b3c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "other_tags": ["DNA-DNA"],
         "valid_item_types": ["ExperimentHiC"]
     },
@@ -60,6 +64,7 @@
         "raw_file_types": "Reads (fastq) provided by lab",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "uuid": "c17b17cd-544a-3a3b-abc3-17a544544b3c",
         "valid_item_types": ["ExperimentAtacseq"]
     },
@@ -72,6 +77,7 @@
         "raw_file_types": "Reads (fastq) provided by lab",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "uuid": "d17b17cd-544a-3a3b-abc3-17a544544b3c",
         "valid_item_types": ["ExperimentCaptureC"]
     },
@@ -85,6 +91,7 @@
         "uuid": "e17b17cd-544a-3a3b-abc3-17a544544b3c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "other_tags": ["DNA-DNA"],
         "valid_item_types": ["ExperimentChiapet"]
     },
@@ -98,6 +105,7 @@
         "uuid": "f17b17cd-544a-3a3b-abc3-17a544544b3c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "other_tags": ["DNA-DNA"],
         "valid_item_types": ["ExperimentChiapet"]
     },
@@ -110,6 +118,7 @@
         "raw_file_types": "Reads (fastq) provided by lab",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "uuid": "a27b17cd-544a-3a3b-abc3-17a544544b3c",
         "valid_item_types": ["ExperimentDamid"]
     },
@@ -121,6 +130,7 @@
         "assay_subclass_short": "DNA FISH",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "uuid": "b27b17cd-544a-3a3b-abc3-17a544544b3c",
         "valid_item_types": ["ExperimentMic"]
     },
@@ -133,6 +143,7 @@
         "raw_file_types": "Reads (fastq) provided by lab",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "uuid": "c27b17cd-544a-3a3b-abc3-17a544544b3c",
         "valid_item_types": ["ExperimentRepliseq"]
     },
@@ -145,6 +156,7 @@
         "raw_file_types": "Reads (fastq) provided by lab",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "uuid": "c12b17cd-354a-3a7b-abc3-17a544544b3c",
         "valid_item_types": ["ExperimentRepliseq"]
     },
@@ -157,6 +169,7 @@
         "raw_file_types": "Reads (fastq) provided by lab",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "uuid": "d27b17cd-544a-3a3b-abc3-17a544544b3c",
         "valid_item_types": ["ExperimentTsaseq"]
     },
@@ -169,6 +182,7 @@
         "raw_file_types": "Reads (fastq) provided by lab",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "uuid": "e27b17cd-544a-3a3b-abc3-17a544544b3c",
         "valid_item_types": ["ExperimentSeq"]
     },
@@ -181,6 +195,7 @@
         "raw_file_types": "Reads (fastq) provided by lab",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "uuid": "19f848e6-7c52-4b8b-8aa8-e82ea0a968ce",
         "other_tags": ["1D"],
         "valid_item_types": ["ExperimentSeq"]
@@ -198,6 +213,7 @@
         },
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "uuid": "f27b17cd-544a-3a3b-abc3-17a544544b3c",
         "valid_item_types": ["ExperimentSeq"]
     },
@@ -211,6 +227,7 @@
         "uuid": "f17b17cd-544a-3a3b-def3-17a544987b3c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "other_tags": ["DNA-DNA", "Multi-contact"],
         "valid_item_types": ["ExperimentHiC"]
     },
@@ -224,6 +241,7 @@
         "uuid": "a17e17cd-544a-3a3b-fed3-17a666544b3c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "other_tags": ["DNA-DNA", "Multi-contact"],
         "valid_item_types": ["ExperimentSeq"]
     },
@@ -237,6 +255,7 @@
         "uuid": "c17e27cd-544a-9a3b-fed3-17a666544b3c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "other_tags": ["RNA-DNA", "Multi-contact"],
         "valid_item_types": ["ExperimentSeq"]
     },
@@ -250,6 +269,7 @@
         "uuid": "a98e17cd-544a-3a3b-fed3-17a658544f3c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "valid_item_types": ["ExperimentMic"]
     },
     {
@@ -262,6 +282,7 @@
         "uuid": "d88e17cd-544a-3a3b-fed3-17a298544b3c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "other_tags": ["DNA-DNA", "Single cell"],
         "valid_item_types": ["ExperimentHiC"]
     },
@@ -275,6 +296,7 @@
         "uuid": "b97e17cd-544a-3a3b-faa3-17a666544b3c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "other_tags": ["DNA-DNA", "Single cell"],
         "valid_item_types": ["ExperimentHiC"]
     },
@@ -288,6 +310,7 @@
         "uuid": "f44e17ca-544a-3a3b-fed3-17a226544b3c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "other_tags": ["DNA-DNA", "Multi-contact"],
         "valid_item_types": ["ExperimentSeq"]
     },
@@ -301,6 +324,7 @@
         "uuid": "a17e17cd-187d-3a3b-fcc7-17a666544b3c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
+        "status": "released",
         "other_tags": ["RNA-DNA"],
         "valid_item_types": ["ExperimentSeq"]
     }

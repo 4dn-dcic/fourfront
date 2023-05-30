@@ -253,13 +253,16 @@
             "title": "Experiment Category"
         },
         "assay_subclass_short": {
-            "title": "Assay Type"
+            "title": "Experiment Type Grouping"
         },
         "other_tags": {
             "title": "Additional Categories"
         }
     },
     "columns": {
+        "assay_subclass_short": {
+            "title": "Experiment Type Grouping"
+        },
         "experiment_category": {
             "title": "Experiment Category"
         },
