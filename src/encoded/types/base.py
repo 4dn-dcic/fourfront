@@ -283,30 +283,15 @@ class Item(snovault.Item):
             roles[submitter] = 'role.owner'
         return roles
 
-#   def add_accession_to_title(self, title):
-#       if self.properties.get('accession') is not None:
-#           return title + ' - ' + self.properties.get('accession')
-#       return title
-
-#   def unique_keys(self, properties):
-#       """smth."""
-#       keys = super(Item, self).unique_keys(properties)
-#       if 'accession' not in self.schema['properties']:
-#           return keys
-#       keys.setdefault('accession', []).extend(properties.get('alternate_accessions', []))
-#       if properties.get('status') != 'replaced' and 'accession' in properties:
-#           keys['accession'].append(properties['accession'])
-#       return keys
-
-#   def is_update_by_admin_user(self):
-#       # determine if the submitter in the properties is an admin user
-#       userid = get_userid()
-#       users = self.registry['collections']['User']
-#       user = users.get(userid)
-#       if 'groups' in user.properties:
-#           if 'admin' in user.properties['groups']:
-#               return True
-#       return False
+    def unique_keys(self, properties):
+        """smth."""
+        keys = super(Item, self).unique_keys(properties)
+        if 'accession' not in self.schema['properties']:
+            return keys
+        keys.setdefault('accession', []).extend(properties.get('alternate_accessions', []))
+        if properties.get('status') != 'replaced' and 'accession' in properties:
+            keys['accession'].append(properties['accession'])
+        return keys
 
     def _update(self, properties, sheets=None):
         props = {}
