@@ -145,7 +145,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     # TODO: implement BOOST here?
 
     ### Set filters
-    search, query_filters = set_filters(request, search, result, principals, doc_types)
+    search, query_filters, base_field_filters = set_filters(request, search, result, principals, doc_types)
 
     ### Set starting facets
     additional_facets = request.normalized_params.getall('additional_facet')
@@ -153,7 +153,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
 
     ### Adding facets, plus any optional custom aggregations.
     ### Uses 'size' and 'from_' to conditionally skip (no facets if from > 0; no aggs if size > 0).
-    search = set_facets(search, facets, query_filters, string_query, request, doc_types, custom_aggregations, size, from_)
+    search = set_facets(search, facets, query_filters, string_query, request, doc_types, custom_aggregations, base_field_filters, size, from_)
 
     ### Add preference from session, if available
     search_session_id = None
@@ -174,7 +174,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
 
     ### Record total number of hits
     result['total'] = total = es_results['hits']['total']['value']
-    result['facets'] = format_facets(es_results, facets, total, additional_facets, search_frame)
+    result['facets'] = format_facets(es_results, facets, total, additional_facets, result['filters'], search_frame)
     result['aggregations'] = format_extra_aggregations(es_results)
 
     # After ES7 upgrade, 'total' does not return the exact count if it is >10000. This restriction
@@ -798,6 +798,10 @@ def set_filters(request, search, result, principals, doc_types):
     if 'OntologyTerm' not in doc_types:
         field_filters['embedded.@type.raw']['must_not_terms'].append('OntologyTerm')
 
+    # base filters only includes principals, doc_type and excludes some status and item types
+    # it is essentially useful for the group by facet terms aggregation
+    base_field_filters = create_field_filters(deepcopy(field_filters))
+
     for field, term in request.normalized_params.items():
         not_field = False # keep track if query is NOT (!)
         exists_field = False # keep track of null values
@@ -935,7 +939,7 @@ def set_filters(request, search, result, principals, doc_types):
     prev_search['query']['bool']['filter'] = final_filters
     search.update_from_dict(prev_search)
 
-    return search, final_filters
+    return search, final_filters, base_field_filters
 
 
 def initialize_additional_facets(request, doc_types, additional_facets, append_facets, current_type_schema):
@@ -1245,7 +1249,7 @@ def generate_filters_for_terms_agg_from_search_filters(query_field, search_filte
     return facet_filters
 
 
-def set_facets(search, facets, search_filters, string_query, request, doc_types, custom_aggregations=None, size=25, from_=0):
+def set_facets(search, facets, search_filters, string_query, request, doc_types, custom_aggregations=None, base_field_filters=None, size=25, from_=0):
     """
     Sets facets in the query as ElasticSearch aggregations, with each aggregation to be
     filtered by search_filters minus filter affecting facet field in order to get counts
@@ -1324,29 +1328,13 @@ def set_facets(search, facets, search_filters, string_query, request, doc_types,
 
             facet['aggregation_type'] = 'terms'
             
-            if 'group_by_field' not in facet:
-                term_aggregation = {
-                    "terms" : {
-                        'size'    : 100,            # Maximum terms returned (default=10); see https://github.com/10up/ElasticPress/wiki/Working-with-Aggregations
-                        'field'   : query_field,
-                        'missing' : facet.get("missing_value_replacement", "No value")
-                    }
+            term_aggregation = {
+                "terms" : {
+                    'size'    : 100,            # Maximum terms returned (default=10); see https://github.com/10up/ElasticPress/wiki/Working-with-Aggregations
+                    'field'   : query_field,
+                    'missing' : facet.get("missing_value_replacement", "No value")
                 }
-            else:
-                term_aggregation = {
-                    "terms" : {
-                        'size'    : 100,
-                        'field'   : "embedded." + facet['group_by_field'] + ".raw",
-                        'missing' : facet.get("missing_value_replacement", "No value"),
-                        'aggs': {
-                            "sub_terms" : {
-                                "terms" : {
-                                    "field": query_field,
-                                }
-                            }
-                        }
-                    }
-                }
+            }
 
             aggs[facet['aggregation_type'] + ":" + agg_name] = {
                 'aggs': {
@@ -1354,6 +1342,32 @@ def set_facets(search, facets, search_filters, string_query, request, doc_types,
                 },
                 'filter': {'bool': facet_filters},
             }
+
+            # add extra ES sub-query to fetch facet terms and their grouping terms to build
+            # parent - child hierarchy (we always build full map, since the implementation in 
+            # https://github.com/4dn-dcic/fourfront/blob/dc47659487aec88fb0c19145e48ebbd20588eba3/src/encoded/search.py
+            # fails when there are selected terms in filters but not listed in facets)
+            # Note: This aggregation is used in group_facet_terms func.
+            if 'group_by_field' in facet and base_field_filters:
+                aggs[facet['aggregation_type'] + ":" + agg_name + ":group_by"] = {
+                    'aggs': {
+                        "primary_agg" : {
+                            "terms" : {
+                                'size'    : 100,
+                                'field'   : "embedded." + facet['group_by_field'] + ".raw",
+                                'missing' : facet.get("missing_value_replacement", "No value"),
+                                'aggs': {
+                                    "sub_terms" : {
+                                        "terms" : {
+                                            "field": query_field,
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    'filter': {'bool': deepcopy(base_field_filters['bool'])},
+                }
 
         # Update facet with title, description from field_schema, if missing.
         if facet.get('title') is None and field_schema and 'title' in field_schema:
@@ -1441,7 +1455,7 @@ def execute_search(search):
     return es_results
 
 
-def format_facets(es_results, facets, total, additional_facets, search_frame='embedded'):
+def format_facets(es_results, facets, total, additional_facets, filters, search_frame='embedded'):
     """
     Format the facets for the final results based on the es results.
     Sort based off of the 'order' of the facets
@@ -1505,14 +1519,8 @@ def format_facets(es_results, facets, total, additional_facets, search_frame='em
                 # Default - terms, range, or histogram buckets. Buckets may not be present
                 result_facet['terms'] = aggregations[full_agg_name]["primary_agg"]["buckets"]
 
-                if 'group_by_field' in result_facet:
-                    for term in result_facet['terms']:
-                        if 'sub_terms' not in term:
-                            continue
-                        term['terms'] = term['sub_terms']['buckets']
-                        del term['sub_terms']
-                    del result_facet['group_by_field']
-                    result_facet['has_group_by'] = True
+                if 'group_by_field' in result_facet and (full_agg_name + ':group_by') in aggregations:
+                    group_facet_terms(result_facet, aggregations[full_agg_name + ':group_by'], filters)
 
                 # Choosing to show facets with one term for summary info on search it provides
                 if len(result_facet.get('terms', [])) < 1:
@@ -1524,6 +1532,56 @@ def format_facets(es_results, facets, total, additional_facets, search_frame='em
         result.append(result_facet)
 
     return result
+
+
+def group_facet_terms(result_facet, agg, filters):
+    if result_facet is None or agg is None:
+        return
+
+    def transpose_dict(original_dict):
+        transposed_dict = {}
+        for key, values in original_dict.items():
+            for value in values:
+                if value not in transposed_dict:
+                    transposed_dict[value] = [key]
+                else:
+                    transposed_dict[value].append(key)
+        return transposed_dict
+    
+    ret_result = { }
+    for bucket in agg["primary_agg"]["buckets"]:
+        ret_result[bucket['key']] = [str(item['key']) for item in bucket['sub_terms']['buckets']]
+    # transpose {group 1: [term 1_1, term 1_2, ... term 1_n]} to 
+    # {term 1_1: [group1], term 1_2: [group1], .. term 1_n: [group1]} for faster traversing (see below)
+    transposed = transpose_dict(ret_result)
+
+    group_terms_dict = dict()
+    added_keys_dict = dict()
+
+    for term in result_facet['terms']:
+        group_key = transposed[term['key']][0] if term['key'] in transposed else '(Missing group)'
+        if group_key not in group_terms_dict:
+            group_terms_dict[group_key] = {'key': group_key, 'doc_count': 0, 'terms': []}
+        group_term = group_terms_dict[group_key]
+        # calculate total doc_count
+        group_term['doc_count'] += term['doc_count']
+        group_term['terms'].append(term)
+        added_keys_dict[term['key']] = True
+    # add terms not in results but exists in filters
+    # (ui handles it for regular facets, where as it is not possible to build parent-child relation for grouping facet terms)
+    for filter in filters:
+        if (filter['field'] != result_facet['field'] or filter['term'] in added_keys_dict):
+            continue
+        group_key = transposed[filter['term']][0] if filter['term'] in transposed else '(Missing group)'
+        if group_key not in group_terms_dict:
+            group_terms_dict[group_key] = {'key': group_key, 'doc_count': 0, 'terms': []}
+        group_term = group_terms_dict[group_key]
+        group_term['terms'].append({'key': filter['term'], 'doc_count': 0})
+
+    result_facet['terms'] = sorted( list(group_terms_dict.values()), key=lambda t: t['doc_count'], reverse=True)
+    del result_facet['group_by_field']
+    result_facet['has_group_by'] = True
+
 
 def format_extra_aggregations(es_results):
     if 'aggregations' not in es_results:
@@ -1614,6 +1672,7 @@ def get_iterable_search_results(request, search_path='/search/', param_lists=Non
     subreq = make_search_subreq(request, '{}?{}'.format(search_path, urlencode(param_lists, True)) )
     return iter_search_results(None, subreq, **kwargs)
 
+
 def get_total_from_facets(facets, total):
     '''
     Loops through facets, and grabs total count from the term having type=Item
@@ -1628,9 +1687,23 @@ def get_total_from_facets(facets, total):
     return total
 
 
+def create_field_filters(field_filters):
+    must_filters = []
+    must_not_filters = []
+    for query_field, filters in field_filters.items():
+        must_terms = {'terms': {query_field: filters['must_terms']}} if filters['must_terms'] else {}
+        must_not_terms = {'terms': {query_field: filters['must_not_terms']}} if filters['must_not_terms'] else {}
+    final_filters = {'bool': {'must': must_filters, 'must_not': must_not_filters}}
+    
+    if must_terms: must_filters.append(must_terms)
+    if must_not_terms: must_not_filters.append(must_not_terms)
+    
+    return final_filters
+
 # Update? used in ./batch_download.py
 def iter_search_results(context, request, **kwargs):
     return search(context, request, return_generator=True, **kwargs)
+
 
 def build_table_columns(request, schemas, doc_types):
 
