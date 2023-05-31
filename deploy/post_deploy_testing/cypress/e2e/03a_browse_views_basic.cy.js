@@ -31,7 +31,7 @@ describe('Browse Views - Basic Tests', function () {
         });
 
         it('There is at least 100 ExpSets in default browse view.', function(){
-            cy.getQuickInfoBarCounts().its('experiment_sets').should('be.greaterThan', 10);
+            cy.getQuickInfoBarCounts().its('experiment_sets').should('be.greaterThan', 99);
         });
 
         it('Switch between included and excluded properties in facets, exclude a term and check ExpSet counts', function(){
@@ -150,14 +150,14 @@ describe('Browse Views - Basic Tests', function () {
                 }).end();
         });
 
-        it.skip('"/browse/?public_release.to=2017-10-31" redirects to correct URL, includes 100 < x < 150 results.', function(){
+        it('"/browse/?public_release.to=2017-10-31" redirects to correct URL, includes 100 < x < 150 results.', function(){
             cy.visit('/browse/?public_release.to=2017-10-31').end()
                 .location('search').should('include','ExperimentSetReplicate' ).should('include', 'public_release.to=2017-10-31').end()
                 .get('.bar-plot-chart .chart-bar').should('have.length.above', 0).end()
                 .getQuickInfoBarCounts().its('experiment_sets').should('be.greaterThan', 100).should('be.lessThan', 150);
         });
 
-        it.skip('There is at least one Replaced item under the Status facet', function(){
+        it('There is at least one Replaced item under the Status facet', function(){
             cy.get('.facet.closed[data-field="status"] > h5').scrollToCenterElement().click({ force: true }).end()
                 .get('.facet[data-field="status"]').should('have.class', 'open').contains('Replaced');
         });
