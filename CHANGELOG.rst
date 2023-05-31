@@ -6,10 +6,19 @@ fourfront
 Change Log
 ----------
 
-5.3.8
+5.3.9
 =====
 
 * Migrate/unify ingestion code to snovault.
+
+
+5.3.8
+=====
+
+`PR Facet terms grouping  <https://github.com/4dn-dcic/fourfront/pull/1797>`_
+
+* The update allows for a hierarchical display of terms grouped under a grouping term. It also enables searching and selection by group names and individual terms.
+* To use, add the group_by_field property in schema json to define grouping for a facet. The experiment type facet's terms of ExperimentSet are grouped in this PR.
 
 
 5.3.7
