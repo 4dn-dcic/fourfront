@@ -211,6 +211,12 @@ tag-and-push-docker-production:
 	docker push ${AWS_ACCOUNT}.dkr.ecr.us-east-1.amazonaws.com/${ENV_NAME}:latest
 	date
 
+publish:
+	poetry run publish-to-pypi
+
+publish-for-ga:
+	poetry run publish-to-pypi --noconfirm
+
 help:
 	@make info
 
