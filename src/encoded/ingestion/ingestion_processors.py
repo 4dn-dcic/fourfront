@@ -7,6 +7,10 @@ import structlog
 log = structlog.getLogger(__name__)
 
 
+def includeme(config):
+    config.scan(__name__)
+
+
 def INFO(args):
     if isinstance(args, list):
         for arg in args:

@@ -235,6 +235,7 @@ def main(global_config, **local_config):
     config.include('snovault.loadxl')
     config.include('.visualization')
     config.include('snovault.ingestion.ingestion_listener')
+    config.include('.ingestion.ingestion_processors')
     config.include('snovault.ingestion.ingestion_message_handler_default')
 
     if 'elasticsearch.server' in config.registry.settings:
