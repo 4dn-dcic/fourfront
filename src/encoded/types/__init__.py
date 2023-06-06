@@ -43,6 +43,10 @@ from pyramid.httpexceptions import (
 
 def includeme(config):
     """include me method."""
+    # xyzzy
+    # config.include(".encoded.types.access_key")
+    # config.include("snovault.views.access_key")
+    # xyzzy
     config.scan()
 
 

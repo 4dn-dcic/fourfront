@@ -221,12 +221,20 @@ def main(global_config, **local_config):
     config.include('pyramid_retry')
 
     config.include(configure_dbsession)
-    config.include('snovault')
-    config.commit()  # commit so search can override listing
+    # xyzzy
+    # config.include('snovault.calculated')
+    #config.include(".types.access_key")
+    # config.include("snovault.views.access_key") # error: NameError: name 'AccessKey' is not defined
+    #xyzzy config.include('snovault')
+    # import pdb ; pdb.set_trace()
+    include_snovault(config)
+    include_fourfront(config)
+    # import pdb ; pdb.set_trace()
 
     # Render an HTML page to browsers and a JSON document for API clients
     # config.include(add_schemas_to_html_responses)
-    config.include('.renderers')
+    #xyzzy config.include('.renderers')
+    config.include('encoded.renderers')
 #   config.include('.authentication')
     config.include('.server_defaults')
     config.include('.root')
@@ -237,6 +245,7 @@ def main(global_config, **local_config):
     config.include('snovault.ingestion.ingestion_listener')
     config.include('.ingestion.ingestion_processors')
     config.include('snovault.ingestion.ingestion_message_handler_default')
+    config.commit()  # commit so search can override listing
 
     if 'elasticsearch.server' in config.registry.settings:
         config.include('snovault.elasticsearch')
@@ -279,3 +288,61 @@ def main(global_config, **local_config):
         load_workbook(app, workbook_filename, docsdir)
 
     return app
+
+
+# TODO: Took from smaht-portal/src/encodedd/__init__.py (branch: wrr_intial) ...
+def include_snovault(config: Configurator) -> None:
+    """ Implements the selective include mechanism from Snovault
+        Decide here which modules you want to include from snovault
+
+        Note that because of new conflicts from extended modules, you can no longer
+        do config.include('snovault'), as you will get Configurator conflicts when
+        bringing in duplicates of various modules ie: root.py
+    """
+    config.include('snovault.authentication')
+    config.include('snovault.util')
+    config.include('snovault.drs')
+    config.include('snovault.stats')
+    config.include('snovault.batchupgrade')
+    config.include('snovault.calculated')
+    config.include('snovault.config')
+    config.include('snovault.connection')
+    config.include('snovault.custom_embed')
+    config.include('snovault.embed')
+    config.include('snovault.json_renderer')
+    config.include('snovault.validation')
+    config.include('snovault.predicates')
+    config.include('snovault.invalidation')
+    config.include('snovault.upgrader')
+    config.include('snovault.aggregated_items')
+    config.include('snovault.storage')
+    config.include('snovault.typeinfo')
+    config.include('snovault.types')
+    config.include('snovault.resources')
+    config.include('snovault.attachment')
+    config.include('snovault.schema_graph')
+    config.include('snovault.jsonld_context')
+    config.include('snovault.schema_views')
+    config.include('snovault.crud_views')
+    config.include('snovault.indexing_views')
+    config.include('snovault.resource_views')
+    config.include('snovault.settings')
+    config.include('snovault.server_defaults')
+    # Renderers is giving problems at the moment - Will 6/1/23
+    # config.include('snovault.renderers')
+
+#   # make search available if ES is configured
+#   if config.registry.settings.get('elasticsearch.server'):
+#       config.include('snovault.search.search')
+#       config.include('snovault.search.compound_search')
+
+#   # configure redis server in production.ini
+#   if 'redis.server' in config.registry.settings:
+#       config.include('snovault.redis')
+
+    config.commit()
+
+
+def include_fourfront(config: Configurator) -> None:
+    # TODO
+    config.commit()
