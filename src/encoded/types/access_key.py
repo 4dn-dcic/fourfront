@@ -32,10 +32,6 @@ from snovault.validators import (
 )
 from snovault.util import debug_log
 
-def includeme(config):
-    config.include("snovault.views.access_key") # xyzzy
-    config.scan()
-
 
 @collection(
     name='access-keys',
@@ -54,9 +50,6 @@ def includeme(config):
     ])
 #class AccessKey(Item):
 class AccessKey(Item, SnovaultAccessKey):
-    def __new__(cls, *args, **kwargs): # xyzzy
-        pdb.set_trace()
-        return super().__new__(cls, *args, **kwargs)
     """AccessKey class."""
 
     item_type = 'access_key'
@@ -71,6 +64,7 @@ class AccessKey(Item, SnovaultAccessKey):
 
     def __ac_local_roles__(self):
         """grab and return user as owner."""
+        # import pdb ; pdb.set_trace()
         owner = 'userid.%s' % self.properties['user']
         return {owner: 'role.owner'}
 
