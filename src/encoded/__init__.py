@@ -219,6 +219,7 @@ def main(global_config, **local_config):
 
     # must include, as tm.attempts was removed from pyramid_tm
     config.include('pyramid_retry')
+    config.include('pyramid_tm') # xyzzy/fix
 
     config.include(configure_dbsession)
     # xyzzy

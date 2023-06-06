@@ -54,6 +54,9 @@ def includeme(config):
     ])
 #class AccessKey(Item):
 class AccessKey(Item, SnovaultAccessKey):
+    def __new__(cls, *args, **kwargs): # xyzzy
+        pdb.set_trace()
+        return super().__new__(cls, *args, **kwargs)
     """AccessKey class."""
 
     item_type = 'access_key'
