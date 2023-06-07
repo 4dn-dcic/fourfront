@@ -30,6 +30,12 @@ from snovault.validators import (
     validate_item_content_post,
 )
 from snovault.util import debug_log
+from snovault.types.access_key import (
+    AccessKey as SnovaultAccessKey,
+    access_key_add as snovault_access_key_add,
+    access_key_reset_secret as snovault_access_key_reset_secret,
+    access_key_view_raw as snovault_access_key_view_raw
+)
 
 
 @collection(
@@ -47,7 +53,7 @@ from snovault.util import debug_log
         (Allow, 'remoteuser.EMBED', 'list'),
         (Deny, Everyone, 'list'),
     ])
-class AccessKey(Item):
+class AccessKey(Item, SnovaultAccessKey):
     """AccessKey class."""
 
     item_type = 'access_key'
@@ -65,21 +71,6 @@ class AccessKey(Item):
         owner = 'userid.%s' % self.properties['user']
         return {owner: 'role.owner'}
 
-    def __json__(self, request):
-        """delete the secret access key has from the object when used."""
-        properties = super(AccessKey, self).__json__(request)
-        del properties['secret_access_key_hash']
-        return properties
-
-    def update(self, properties, sheets=None):
-        """smth."""
-        # make sure PUTs preserve the secret access key hash
-        if 'secret_access_key_hash' not in properties:
-            new_properties = self.properties.copy()
-            new_properties.update(properties)
-            properties = new_properties
-        self._update(properties, sheets)
-
     class Collection(Item.Collection):
         pass
 
@@ -91,34 +82,7 @@ class AccessKey(Item):
              validators=[validate_item_content_post])
 @debug_log
 def access_key_add(context, request):
-    """smth."""
-    crypt_context = request.registry[CRYPT_CONTEXT]
-
-    if 'access_key_id' not in request.validated:
-        request.validated['access_key_id'] = generate_user()
-
-    if 'user' not in request.validated:
-        request.validated['user'], = [
-            principal.split('.', 1)[1]
-            for principal in request.effective_principals
-            if principal.startswith('userid.')
-        ]
-
-    password = None
-    if 'secret_access_key_hash' not in request.validated:
-        password = generate_password()
-        request.validated['secret_access_key_hash'] = crypt_context.hash(password)
-
-    result = collection_add(context, request)
-
-    if password is None:
-        result['secret_access_key'] = None
-    else:
-        result['secret_access_key'] = password
-
-    result['access_key_id'] = request.validated['access_key_id']
-    result['description'] = request.validated.get('description', "")
-    return result
+    return snovault_access_key_add(context, request)
 
 
 @view_config(name='reset-secret', context=AccessKey,
@@ -126,26 +90,11 @@ def access_key_add(context, request):
              request_method='POST', subpath_segments=0)
 @debug_log
 def access_key_reset_secret(context, request):
-    """smth."""
-    request.validated = context.properties.copy()
-    crypt_context = request.registry[CRYPT_CONTEXT]
-    password = generate_password()
-    new_hash = crypt_context.hash(password)
-    request.validated['secret_access_key_hash'] = new_hash
-    result = item_edit(context, request, render=False)
-    result['access_key_id'] = request.validated['access_key_id']
-    result['secret_access_key'] = password
-    return result
+    return snovault_access_key_reset_secret(context, request)
 
 
 @view_config(context=AccessKey, permission='view_raw', request_method='GET',
              name='raw')
 @debug_log
 def access_key_view_raw(context, request):
-    """smth."""
-    if asbool(request.params.get('upgrade', True)):
-        properties = context.upgrade_properties()
-    else:
-        properties = context.properties.copy()
-    del properties['secret_access_key_hash']
-    return properties
+    return snovault_access_key_view_raw(context, request)
