@@ -1,6 +1,5 @@
 """Access_key types file."""
 
-from snovault.types.access_key import AccessKey as SnovaultAccessKey
 from pyramid.view import view_config
 from pyramid.security import (
     Allow,
@@ -31,6 +30,12 @@ from snovault.validators import (
     validate_item_content_post,
 )
 from snovault.util import debug_log
+from snovault.types.access_key import (
+    AccessKey as SnovaultAccessKey,
+    access_key_add as snovault_access_key_add,
+    access_key_reset_secret as snovault_access_key_reset_secret,
+    access_key_view_raw as snovault_access_key_view_raw
+)
 
 
 @collection(
@@ -48,7 +53,6 @@ from snovault.util import debug_log
         (Allow, 'remoteuser.EMBED', 'list'),
         (Deny, Everyone, 'list'),
     ])
-#class AccessKey(Item):
 class AccessKey(Item, SnovaultAccessKey):
     """AccessKey class."""
 
@@ -64,27 +68,33 @@ class AccessKey(Item, SnovaultAccessKey):
 
     def __ac_local_roles__(self):
         """grab and return user as owner."""
-        # import pdb ; pdb.set_trace()
         owner = 'userid.%s' % self.properties['user']
         return {owner: 'role.owner'}
-
-    def __json__(self, request):
-        """delete the secret access key has from the object when used."""
-        properties = super(AccessKey, self).__json__(request)
-        del properties['secret_access_key_hash']
-        return properties
-
-    def update(self, properties, sheets=None):
-        """smth."""
-        # make sure PUTs preserve the secret access key hash
-        if 'secret_access_key_hash' not in properties:
-            new_properties = self.properties.copy()
-            new_properties.update(properties)
-            properties = new_properties
-        self._update(properties, sheets)
 
     class Collection(Item.Collection):
         pass
 
-# xyzzy
-#from snovault.views.access_key import access_key_add, access_key_reset_secret, access_key_view_raw
+
+# access keys have view permissions for update so readonly admin and the like
+# can create access keys to download files.
+@view_config(context=AccessKey.Collection, request_method='POST',
+             permission='add',
+             validators=[validate_item_content_post])
+@debug_log
+def access_key_add(context, request):
+    return snovault_access_key_add(context, request)
+
+
+@view_config(name='reset-secret', context=AccessKey,
+             permission='add',
+             request_method='POST', subpath_segments=0)
+@debug_log
+def access_key_reset_secret(context, request):
+    return snovault_access_key_reset_secret(context, request)
+
+
+@view_config(context=AccessKey, permission='view_raw', request_method='GET',
+             name='raw')
+@debug_log
+def access_key_view_raw(context, request):
+    return snovault_access_key_view_raw(context, request)

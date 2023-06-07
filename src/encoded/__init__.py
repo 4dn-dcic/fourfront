@@ -230,7 +230,7 @@ def main(global_config, **local_config):
     # import pdb ; pdb.set_trace()
     include_snovault(config)
     include_fourfront(config)
-    config.include("snovault.views.access_key") # xyzzy
+    # config.include("snovault.views.access_key") # xyzzy
     # import pdb ; pdb.set_trace()
 
     # Render an HTML page to browsers and a JSON document for API clients
