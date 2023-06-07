@@ -23,6 +23,7 @@ from snovault import (
     collection,
     load_schema,
 )
+from snovault.types.user import User as SnovaultUser
 
 from snovault.storage import User as AuthUser
 from snovault.schema_utils import validate_request
@@ -89,7 +90,7 @@ def _build_user_embedded_list():
         'description': 'Listing of current 4D Nucleome DCIC users',
     },
     acl=[])
-class User(Item):
+class User(Item, SnovaultUser):
     """The user class."""
 
     item_type = 'user'
