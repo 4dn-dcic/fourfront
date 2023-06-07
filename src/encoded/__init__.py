@@ -222,16 +222,8 @@ def main(global_config, **local_config):
     config.include('pyramid_tm') # xyzzy/fix
 
     config.include(configure_dbsession)
-    # xyzzy
-    # config.include('snovault.calculated')
-    #config.include(".types.access_key")
-    # config.include("snovault.views.access_key") # error: NameError: name 'AccessKey' is not defined
-    #xyzzy config.include('snovault')
-    # import pdb ; pdb.set_trace()
     include_snovault(config)
     include_fourfront(config)
-    # config.include("snovault.views.access_key") # xyzzy
-    # import pdb ; pdb.set_trace()
 
     # Render an HTML page to browsers and a JSON document for API clients
     # config.include(add_schemas_to_html_responses)

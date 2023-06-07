@@ -74,6 +74,17 @@ class AccessKey(Item, SnovaultAccessKey):
     class Collection(Item.Collection):
         pass
 
+# 2023-06-06
+# If these are left to be defined in snovault and not here then we get on access-key creation (via UI):
+#  File "/Users/dmichaels/.pyenv/versions/3.9.16/envs/snovault-new-3.9.16/lib/python3.9/site-packages/pyramid/viewderivers.py", line 320, in permitted
+#    return authz_policy.permits(context, principals, permission)
+#  File "/Users/dmichaels/.pyenv/versions/3.9.16/envs/snovault-new-3.9.16/lib/python3.9/site-packages/pyramid_localroles/__init__.py", line 86, in permits
+#    principals = local_principals(context, principals)
+#  File "/Users/dmichaels/.pyenv/versions/3.9.16/envs/snovault-new-3.9.16/lib/python3.9/site-packages/pyramid_localroles/__init__.py", line 20, in local_principals
+#    local_roles = local_roles()
+#  File "/Users/dmichaels/repos/cgap/fourfront/src/encoded/types/access_key.py", line 71, in __ac_local_roles__
+#    owner = 'userid.%s' % self.properties['user']
+#KeyError: 'user'
 
 # access keys have view permissions for update so readonly admin and the like
 # can create access keys to download files.
