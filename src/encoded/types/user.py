@@ -27,7 +27,14 @@ from snovault import (
     collection,
     load_schema,
 )
-from snovault.types.user import User as SnovaultUser
+from snovault.types.user import (
+    User as SnovaultUser,
+    user_page_view as snovault_user_page_view,
+    user_add as snovault_user_add,
+    #impersonate as snovault_impersonate,
+    #profile as snovault_profile,
+    #submissions as snovault_submissions
+)
 
 from snovault.storage import User as AuthUser
 from snovault.schema_utils import validate_request
@@ -160,9 +167,37 @@ class User(Item, SnovaultUser):
                 log.info('Updating user %s on JupyterHub. Result: %s' % (update_email, res.text))
         super(User, self)._update(properties, sheets)
 
-# XYZZY/TODO/20230608
-# for user_page_view (@view_config) in snovault we have
-# - USER_PAGE_VIEW_ATTRIBUTES = ['@id', '@type', 'uuid', 'title', 'display_title']
-#   for key in USER_PAGE_VIEW_ATTRIBUTES:
-# but in fourfront we have:
-# - for key in ['@id', '@type', 'uuid', 'lab', 'title', 'display_title']:
+
+
+USER_PAGE_VIEW_ATTRIBUTES = ['@id', '@type', 'uuid', 'lab', 'title', 'display_title']
+
+
+@view_config(context=User, permission='view', request_method='GET', name='page')
+@debug_log
+def user_page_view(context, request, user_page_view_attributes = USER_PAGE_VIEW_ATTRIBUTES):
+    return snovault_user_page_view(context, request, user_page_view_attributes)
+
+
+@view_config(context=User.Collection, permission='add', request_method='POST',
+             physical_path="/users")
+@debug_log
+def user_add(context, request):
+    return snovault_user_add(context, request)
+
+
+
+#@calculated_property(context=User, category='user_action')
+#def impersonate(context, request):
+#    return snovault_impersonate(context, request)
+
+
+
+#@calculated_property(context=User, category='user_action')
+#def profile(context, request):
+#    return snovault_profile(context, request)
+
+
+
+#@calculated_property(context=User, category='user_action')
+#def submissions(request):
+#    return snovault_submissions(request)

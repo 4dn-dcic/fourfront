@@ -75,7 +75,7 @@ class AccessKey(Item, SnovaultAccessKey):
         pass
 
 # 2023-06-06
-# If these are left to be defined in snovault and not here then we get on access-key creation (via UI):
+# If these are left to be only defined in snovault and not here then we get on access-key creation (via UI):
 #  File "/Users/dmichaels/.pyenv/versions/3.9.16/envs/snovault-new-3.9.16/lib/python3.9/site-packages/pyramid/viewderivers.py", line 320, in permitted
 #    return authz_policy.permits(context, principals, permission)
 #  File "/Users/dmichaels/.pyenv/versions/3.9.16/envs/snovault-new-3.9.16/lib/python3.9/site-packages/pyramid_localroles/__init__.py", line 86, in permits
