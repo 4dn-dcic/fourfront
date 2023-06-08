@@ -6,10 +6,16 @@ fourfront
 Change Log
 ----------
 
+5.4.0
+=====
+* Migrate/unify ingestion code to snovault.
+
+
 5.3.9
 =====
+`PR Cypress test for facet terms grouping  <https://github.com/4dn-dcic/fourfront/pull/1810>`_
 
-* Migrate/unify ingestion code to snovault.
+* Two tests added for selecting/excluding a grouping term and its sub-terms
 
 
 5.3.8
