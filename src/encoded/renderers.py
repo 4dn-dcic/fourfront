@@ -79,7 +79,7 @@ def includeme(config):
 
     # If this isn't placed under 'pyramid_tm.tm_tween_factory' (e.g. under resp headers or something)
     # then the headers aren't preserved or available in server-side render or response.
-    config.add_tween('.renderers.security_tween_factory', under='pyramid_tm.tm_tween_factory')
+    config.add_tween('encoded.renderers.security_tween_factory', under='pyramid_tm.tm_tween_factory')
 
     config.scan(__name__)
 

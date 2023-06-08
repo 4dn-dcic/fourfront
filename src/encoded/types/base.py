@@ -89,6 +89,7 @@ ALLOW_ANY_USER_ADD = [
 ] + ALLOW_EVERYONE_VIEW
 
 
+from snovault import Item as SnovaultItem
 from snovault.types.base import get_item_or_none, set_namekey_from_title, validate_item_type_of_linkto_field
 
 ##
@@ -159,7 +160,8 @@ class Collection(snovault.Collection, AbstractCollection):
         'title': "Item Listing",
         'description': 'Abstract collection of all Items.',
     })
-class Item(snovault.Item):
+#class Item(snovault.Item):
+class Item(SnovaultItem):
     """
     The abstract base type for all other Items.
     All methods & properties are inherited by
