@@ -10,7 +10,7 @@ from pyramid.security import (
 from pyramid.settings import asbool
 from .base import (
     Item,
-    DELETED,
+    DELETED_ACL,
     ONLY_ADMIN_VIEW_ACL,
 )
 from ..authentication import (
@@ -63,7 +63,7 @@ class AccessKey(Item, SnovaultAccessKey):
 
     STATUS_ACL = {
         'current': [(Allow, 'role.owner', ['view', 'edit'])] + ONLY_ADMIN_VIEW_ACL,
-        'deleted': DELETED,
+        'deleted': DELETED_ACL,
     }
 
     def __ac_local_roles__(self):
@@ -104,8 +104,7 @@ def access_key_reset_secret(context, request):
     return snovault_access_key_reset_secret(context, request)
 
 
-@view_config(context=AccessKey, permission='view_raw', request_method='GET',
-             name='raw')
+@view_config(context=AccessKey, permission='view_raw', request_method='GET', name='raw')
 @debug_log
 def access_key_view_raw(context, request):
     return snovault_access_key_view_raw(context, request)

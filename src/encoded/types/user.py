@@ -51,7 +51,7 @@ from dcicutils.misc_utils import override_environ
 logging.getLogger('boto3').setLevel(logging.WARNING)
 log = structlog.getLogger(__name__)
 
-ONLY_ADMIN_VIEW_DETAILS = [
+ONLY_ADMIN_VIEW_DETAILS_ACL = [
     (Allow, 'group.admin', ['view', 'view_details', 'edit']),
     (Allow, 'group.read-only-admin', ['view', 'view_details']),
     (Allow, 'remoteuser.INDEXER', ['view']),
@@ -59,21 +59,21 @@ ONLY_ADMIN_VIEW_DETAILS = [
     (Deny, Everyone, ['view', 'view_details', 'edit']),
 ]
 
-SUBMITTER_CREATE = []
+SUBMITTER_CREATE_ACL = []
 
-ONLY_OWNER_EDIT = [
+ONLY_OWNER_EDIT_ACL = [
     (Allow, 'role.owner', 'view'),
     (Allow, 'role.owner', 'edit'),
     (Allow, 'role.owner', 'view_details')
-] + ONLY_ADMIN_VIEW_DETAILS
+] + ONLY_ADMIN_VIEW_DETAILS_ACL
 
-USER_ALLOW_CURRENT = [
+USER_ALLOW_CURRENT_ACL = [
     (Allow, Everyone, 'view'),
-] + ONLY_ADMIN_VIEW_DETAILS
+] + ONLY_ADMIN_VIEW_DETAILS_ACL
 
-USER_DELETED = [
+USER_DELETED_ACL = [
     (Deny, Everyone, 'visible_for_edit')
-] + ONLY_ADMIN_VIEW_DETAILS
+] + ONLY_ADMIN_VIEW_DETAILS_ACL
 
 
 def _build_user_embedded_list():
@@ -110,10 +110,10 @@ class User(Item, SnovaultUser):
     embedded_list = _build_user_embedded_list()
 
     STATUS_ACL = {
-        'current': ONLY_OWNER_EDIT,
-        'deleted': USER_DELETED,
-        'replaced': USER_DELETED,
-        'revoked': ONLY_ADMIN_VIEW_DETAILS,
+        'current': ONLY_OWNER_EDIT_ACL,
+        'deleted': USER_DELETED_ACL,
+        'replaced': USER_DELETED_ACL,
+        'revoked': ONLY_ADMIN_VIEW_DETAILS_ACL,
     }
 
     def __ac_local_roles__(self):

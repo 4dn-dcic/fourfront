@@ -8,7 +8,7 @@ from snovault import (
 # from pyramid.security import Authenticated
 from .base import (
     Item,
-    ALLOW_SUBMITTER_ADD,
+    ALLOW_SUBMITTER_ADD_ACL,
     lab_award_attribution_embed_list,
     get_item_or_none
 )
@@ -27,7 +27,7 @@ def _build_treatments_embedded_list():
 
 @abstract_collection(
     name='treatments',
-    acl=ALLOW_SUBMITTER_ADD,
+    acl=ALLOW_SUBMITTER_ADD_ACL,
     properties={
         'title': "Treatments",
         'description': 'Listing of all types of treatments.',

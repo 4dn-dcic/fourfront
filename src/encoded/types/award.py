@@ -46,9 +46,7 @@ class Award(Item):
         (Deny, Everyone, ['view', 'edit'])
     ]
 
-    SUBMITTER_CREATE = []
-
-    ALLOW_EVERYONE_VIEW = [
+    ALLOW_EVERYONE_VIEW_ACL = [
         (Allow, Everyone, 'view'),
     ]
 
@@ -59,9 +57,9 @@ class Award(Item):
     STATUS_ACL = {
         'current': ALLOW_EVERYONE_VIEW_AND_ADMIN_EDIT,
         'deleted': ONLY_ADMIN_VIEW_ACL,
-        'revoked': ALLOW_EVERYONE_VIEW,
-        'replaced': ALLOW_EVERYONE_VIEW,
-        'inactive': ALLOW_EVERYONE_VIEW
+        'revoked': ALLOW_EVERYONE_VIEW_ACL,
+        'replaced': ALLOW_EVERYONE_VIEW_ACL,
+        'inactive': ALLOW_EVERYONE_VIEW_ACL
     }
 
     @calculated_property(schema={

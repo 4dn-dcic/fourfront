@@ -23,11 +23,11 @@ from .base import (
     Item,
     set_namekey_from_title,
     lab_award_attribution_embed_list,
-    ALLOW_OWNER_EDIT,
-    ALLOW_CURRENT,
-    DELETED,
+    ALLOW_OWNER_EDIT_ACL,
+    ALLOW_CURRENT_ACL,
+    DELETED_ACL,
     ONLY_ADMIN_VIEW_ACL,
-    ALLOW_LAB_SUBMITTER_EDIT
+    ALLOW_LAB_SUBMITTER_EDIT_ACL
 )
 from .dependencies import DependencyEmbedder
 from pyramid.view import view_config
@@ -376,10 +376,10 @@ class TrackingItem(Item):
     embedded_list = []
     STATUS_ACL = Item.STATUS_ACL.copy()
     STATUS_ACL.update({
-        'released': ALLOW_OWNER_EDIT + ALLOW_CURRENT,
-        'deleted': ALLOW_OWNER_EDIT + DELETED,
-        'draft': ALLOW_OWNER_EDIT + ONLY_ADMIN_VIEW_ACL,
-        'in review by lab': ALLOW_OWNER_EDIT + ALLOW_LAB_SUBMITTER_EDIT,
+        'released': ALLOW_OWNER_EDIT_ACL + ALLOW_CURRENT_ACL,
+        'deleted': ALLOW_OWNER_EDIT_ACL + DELETED_ACL,
+        'draft': ALLOW_OWNER_EDIT_ACL + ONLY_ADMIN_VIEW_ACL,
+        'in review by lab': ALLOW_OWNER_EDIT_ACL + ALLOW_LAB_SUBMITTER_EDIT_ACL,
     })
 
     @classmethod

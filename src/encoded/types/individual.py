@@ -8,7 +8,7 @@ from snovault import (
 # from pyramid.security import Authenticated
 from .base import (
     Item,
-    ALLOW_SUBMITTER_ADD,
+    ALLOW_SUBMITTER_ADD_ACL,
     get_item_or_none,
     lab_award_attribution_embed_list
 )
@@ -32,7 +32,7 @@ from pyramid.view import view_config
 @abstract_collection(
     name='individuals',
     unique_key='accession',
-    acl=ALLOW_SUBMITTER_ADD,
+    acl=ALLOW_SUBMITTER_ADD_ACL,
     properties={
         'title': "Individuals",
         'description': 'Listing of all types of individuals.',
