@@ -5,7 +5,9 @@ from datetime import datetime
 from jsonschema_serialize_fork import NO_DEFAULT
 from pyramid.path import DottedNameResolver
 from pyramid.threadlocal import get_current_request
+from dcicutils.misc_utils import utc_now_str
 from snovault.schema_utils import server_default
+from snovault.server_defaults import enc_accession, get_now, get_userid, test_accession
 from string import digits, ascii_uppercase
 
 
@@ -29,25 +31,12 @@ def includeme(config):
 
 @server_default
 def userid(instance, subschema):  # args required by jsonschema-serialize-fork
-    return _userid()
-
-
-def _userid():
-    request = get_current_request()
-    for principal in request.effective_principals:
-        if principal.startswith('userid.'):
-            return principal[7:]
-    return NO_DEFAULT
+    return get_userid()
 
 
 @server_default
 def now(instance, subschema):  # args required by jsonschema-serialize-fork
     return utc_now_str()
-
-
-def utc_now_str():
-    # from jsonschema_serialize_fork date-time format requires a timezone
-    return datetime.utcnow().isoformat() + '+00:00'
 
 
 @server_default
@@ -69,16 +58,6 @@ def accession(instance, subschema):
             continue
         return new_accession
     raise AssertionError("Free accession not found in %d attempts" % ATTEMPTS)
-
-
-def get_userid():
-    """ Wrapper for the server_default 'userid' above so it is not called through SERVER_DEFAULTS in our code """
-    return _userid()
-
-
-def get_now():
-    """ Wrapper for the server_default 'now' above so it is not called through SERVER_DEFAULTS in our code """
-    return utc_now_str()
 
 
 def add_last_modified(properties, userid=None):
@@ -103,21 +82,3 @@ def add_last_modified(properties, userid=None):
         # get_userid returns NO_DEFAULT if no userid
         if last_modified['modified_by'] != NO_DEFAULT:
             properties['last_modified'] = last_modified
-
-
-#FDN_ACCESSION_FORMAT = (digits, digits, digits, ascii_uppercase, ascii_uppercase, ascii_uppercase)
-FDN_ACCESSION_FORMAT = ['ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789']*7
-
-def enc_accession(accession_type):
-    random_part = ''.join(random.choice(s) for s in FDN_ACCESSION_FORMAT)
-    return ACCESSION_PREFIX + accession_type + random_part
-
-
-TEST_ACCESSION_FORMAT = (digits, ) * 7
-
-
-def test_accession(accession_type):
-    """ Test accessions are generated on test.encodedcc.org
-    """
-    random_part = ''.join(random.choice(s) for s in TEST_ACCESSION_FORMAT)
-    return 'TST' + accession_type + random_part
