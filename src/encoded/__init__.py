@@ -229,7 +229,7 @@ def main(global_config, **local_config):
     # config.include(add_schemas_to_html_responses)
     config.include('encoded.renderers')
 #   config.include('.authentication')
-    config.include('.server_defaults')
+#   config.include('.server_defaults')
     config.include('.root')
     config.include('.types')
     config.include('.batch_download')
