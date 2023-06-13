@@ -6,6 +6,14 @@ fourfront
 Change Log
 ----------
 
+5.3.10
+=====
+
+`PR Cypress test for statistics page  <https://github.com/4dn-dcic/fourfront/pull/1813>`_
+
+* New 12_statistics test to check submissions and usage tabs loaded correctly
+
+
 5.3.9
 =====
 
