@@ -6,6 +6,18 @@ fourfront
 Change Log
 ----------
 
+
+5.3.11
+======
+
+* Use ``lorem-text`` library instead of ``loremipsum`` for proper license compatibility.
+  This affects only the ``extract-text-data`` script, which was used a long time ago
+  on a one-off basis to set up the system and isn't actually used at runtime, so the
+  impact of this is probably very small. Also, there are no apparent tests of this script,
+  but it's not clear there is a good reason to write any at this time. A manual test
+  was done in creating this patch to make sure the relevant change is plug-compatible.
+
+
 5.3.10
 =====
 
