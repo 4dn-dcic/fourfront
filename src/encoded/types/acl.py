@@ -2,6 +2,10 @@
 from pyramid.security import Allow, Authenticated, Deny, Everyone
 from snovault.types.base import DELETED_ACL, ONLY_ADMIN_VIEW_ACL
 
+AWARD_MEMBER_ROLE = 'role.award_member'
+LAB_MEMBER_ROLE = 'role.lab_member'
+LAB_SUBMITTER_ROLE = 'role.lab_submitter'
+
 # This acl allows item creation; it is easily overwritten in lab and user,
 # as these items should not be available for creation
 SUBMITTER_CREATE_ACL = [
@@ -14,8 +18,8 @@ ALLOW_EVERYONE_VIEW_ACL = [
 ] + ONLY_ADMIN_VIEW_ACL + SUBMITTER_CREATE_ACL
 
 ALLOW_LAB_MEMBER_VIEW_ACL = [
-    (Allow, 'role.lab_member', 'view'),
-    (Allow, 'role.award_member', 'view')
+    (Allow, LAB_MEMBER_ROLE , 'view'),
+    (Allow, AWARD_MEMBER_ROLE , 'view')
 ] + ONLY_ADMIN_VIEW_ACL + SUBMITTER_CREATE_ACL
 
 ALLOW_VIEWING_GROUP_VIEW_ACL = [
@@ -24,27 +28,27 @@ ALLOW_VIEWING_GROUP_VIEW_ACL = [
 
 ALLOW_VIEWING_GROUP_LAB_SUBMITTER_EDIT_ACL = [
     (Allow, 'role.viewing_group_member', 'view'),
-    (Allow, 'role.lab_submitter', 'edit'),
+    (Allow, LAB_SUBMITTER_ROLE, 'edit'),
 ] + ALLOW_LAB_MEMBER_VIEW_ACL
 
 ALLOW_LAB_SUBMITTER_EDIT_ACL = [
-    (Allow, 'role.lab_member', 'view'),
-    (Allow, 'role.award_member', 'view'),
-    (Allow, 'role.lab_submitter', 'edit'),
+    (Allow, LAB_MEMBER_ROLE , 'view'),
+    (Allow, AWARD_MEMBER_ROLE , 'view'),
+    (Allow, LAB_SUBMITTER_ROLE, 'edit'),
 ] + ONLY_ADMIN_VIEW_ACL + SUBMITTER_CREATE_ACL
 
 ALLOW_CURRENT_AND_SUBMITTER_EDIT_ACL = [
     (Allow, Everyone, 'view'),
-    (Allow, 'role.lab_submitter', 'edit'),
+    (Allow, LAB_SUBMITTER_ROLE, 'edit'),
 ] + ONLY_ADMIN_VIEW_ACL + SUBMITTER_CREATE_ACL
 
 ALLOW_CURRENT_ACL = ALLOW_EVERYONE_VIEW_ACL
 
 # For running pipelines
 ALLOW_LAB_VIEW_ADMIN_EDIT_ACL = [
-    (Allow, 'role.lab_member', 'view'),
-    (Allow, 'role.award_member', 'view'),
-    (Allow, 'role.lab_submitter', 'view'),
+    (Allow, LAB_MEMBER_ROLE , 'view'),
+    (Allow, AWARD_MEMBER_ROLE , 'view'),
+    (Allow, LAB_SUBMITTER_ROLE, 'view'),
 ] + ONLY_ADMIN_VIEW_ACL
 
 ALLOW_OWNER_EDIT_ACL = [

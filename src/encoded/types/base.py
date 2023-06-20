@@ -28,7 +28,7 @@ def _award_viewing_group(award_uuid, root):
 from .acl import (
     ALLOW_CURRENT_AND_SUBMITTER_EDIT_ACL, 
     ALLOW_CURRENT_ACL,
-    DELETED_ACL,
+    AWARD_MEMBER_ROLE,
     ALLOW_ANY_USER_ADD_ACL,
     ALLOW_EVERYONE_VIEW_ACL, 
     ALLOW_LAB_MEMBER_VIEW_ACL, 
@@ -38,6 +38,9 @@ from .acl import (
     ALLOW_SUBMITTER_ADD_ACL,
     ALLOW_VIEWING_GROUP_LAB_SUBMITTER_EDIT_ACL, 
     ALLOW_VIEWING_GROUP_VIEW_ACL, 
+    DELETED_ACL,
+    LAB_MEMBER_ROLE,
+    LAB_SUBMITTER_ROLE,
     ONLY_ADMIN_VIEW_ACL,
     SUBMITTER_CREATE_ACL
 )
@@ -191,21 +194,21 @@ class Item(SnovaultItem):
         status = properties.get('status')
         if 'lab' in properties:
             lab_submitters = 'submits_for.%s' % properties['lab']
-            roles[lab_submitters] = 'role.lab_submitter'
+            roles[lab_submitters] = LAB_SUBMITTER_ROLE
             # add lab_member as well
             lab_member = 'lab.%s' % properties['lab']
-            roles[lab_member] = 'role.lab_member'
+            roles[lab_member] = LAB_MEMBER_ROLE
         if 'contributing_labs' in properties:
             for clab in properties['contributing_labs']:
                 clab_member = 'lab.%s' % clab
-                roles[clab_member] = 'role.lab_member'
+                roles[clab_member] = LAB_MEMBER_ROLE
         if 'award' in properties:
             viewing_group = _award_viewing_group(properties['award'], find_root(self))
             if viewing_group is not None:
                 viewing_group_members = 'viewing_group.%s' % viewing_group
                 roles[viewing_group_members] = 'role.viewing_group_member'
                 award_group_members = 'award.%s' % properties['award']
-                roles[award_group_members] = 'role.award_member'
+                roles[award_group_members] = AWARD_MEMBER_ROLE
 
                 # need to add 4DN viewing_group to NOFIC items that are rel2proj
                 # or are JA and planned or in progress
@@ -327,6 +330,6 @@ class SharedItem(Item):
         properties = self.upgrade_properties().copy()
         if 'lab' in properties:
             lab_submitters = 'submits_for.%s' % properties['lab']
-            roles[lab_submitters] = 'role.lab_submitter'
+            roles[lab_submitters] = LAB_SUBMITTER_ROLE
         roles[Authenticated] = 'role.viewing_group_member'
         return roles

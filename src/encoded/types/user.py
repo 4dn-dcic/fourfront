@@ -1,10 +1,6 @@
 """The user collection."""
 # -*- coding: utf-8 -*-
 
-#xyzzy: put somewhere
-AWARD_MEMBER = 'role.award_member'
-LAB_MEMBER = 'role.lab_member'
-
 import os
 import logging
 import requests

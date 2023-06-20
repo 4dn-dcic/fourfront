@@ -14,6 +14,10 @@ from snovault import (
     load_schema,
     calculated_property
 )
+from .acl import (
+    LAB_MEMBER_ROLE,
+    LAB_SUBMITTER_ROLE
+)
 from .base import (
     Item,
     get_item_or_none,
@@ -34,7 +38,7 @@ ALLOW_EVERYONE_VIEW_ACL = [
 
 ALLOW_EVERYONE_VIEW_AND_SUBMITTER_EDIT = [
     (Allow, Everyone, 'view'),
-    (Allow, 'role.lab_submitter', 'edit'),
+    (Allow, LAB_SUBMITTER_ROLE, 'edit'),
 ] + ONLY_ADMIN_VIEW_ACL
 
 
@@ -150,7 +154,7 @@ class Lab(Item):
         """This creates roles that the lab item needs so it can be edited & viewed"""
         roles = {}
         lab_submitters = 'submits_for.%s' % self.uuid
-        roles[lab_submitters] = 'role.lab_submitter'
+        roles[lab_submitters] = LAB_SUBMITTER_ROLE
         lab_member = 'lab.%s' % self.uuid
-        roles[lab_member] = 'role.lab_member'
+        roles[lab_member] = LAB_MEMBER_ROLE
         return roles
