@@ -330,6 +330,7 @@ def test_user_w_vg_cannot_view_item_w_vg_from_award(
         viewed - this tests for an arbitrary viewing_group, there are other tests for the
         special handling of NOFIC and JA items, this test is not for those special cases
     """
+    import pdb ; pdb.set_trace()
     bs_item['award'] = remc_award['@id']  # iwg award has 'not 4DN' vg as does the remc_submitter in the remc app
     res = testapp.post_json('/biosource', bs_item, status=201).json['@graph'][0]
     remc_member_testapp.get(res['@id'], status=403)

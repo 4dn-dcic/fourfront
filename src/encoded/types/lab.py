@@ -14,25 +14,18 @@ from snovault import (
     load_schema,
     calculated_property
 )
+from .acl import ONLY_ADMIN_VIEW_ACL
 from .base import (
     Item,
     get_item_or_none,
 )
 
 
-ONLY_ADMIN_VIEW_ACL = [
-    (Allow, 'group.admin', ['view', 'edit']),
-    (Allow, 'group.read-only-admin', ['view']),
-    (Allow, 'remoteuser.INDEXER', ['view']),
-    (Allow, 'remoteuser.EMBED', ['view']),
-    (Deny, Everyone, ['view', 'edit'])
-]
-
 ALLOW_EVERYONE_VIEW_ACL = [
     (Allow, Everyone, 'view'),
 ]
 
-ALLOW_EVERYONE_VIEW_AND_SUBMITTER_EDIT = [
+ALLOW_EVERYONE_VIEW_AND_SUBMITTER_EDIT_ACL = [
     (Allow, Everyone, 'view'),
     (Allow, 'role.lab_submitter', 'edit'),
 ] + ONLY_ADMIN_VIEW_ACL
@@ -67,11 +60,14 @@ class Lab(Item):
     embedded_list = _build_lab_embedded_list()
 
     STATUS_ACL = {
-        'current': ALLOW_EVERYONE_VIEW_AND_SUBMITTER_EDIT,
+        'current': ALLOW_EVERYONE_VIEW_AND_SUBMITTER_EDIT_ACL,
         'deleted': ONLY_ADMIN_VIEW_ACL,
         'revoked': ALLOW_EVERYONE_VIEW_ACL,
         'inactive': ALLOW_EVERYONE_VIEW_ACL,
     }
+
+    def __acl__(self):
+        return super().__acl__()
 
     @calculated_property(schema={
         "title": "Correspondence",

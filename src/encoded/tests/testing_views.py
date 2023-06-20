@@ -1,6 +1,8 @@
 from pyramid.security import Allow, principals_allowed_by_permission
 from pyramid.view import view_config
-from snovault import Item, calculated_property, collection
+#from snovault import Item, calculated_property, collection
+from snovault import calculated_property, collection
+from encoded.types import Item
 from snovault.attachment import ItemWithAttachment
 from snovault.interfaces import CONNECTION
 from sqlalchemy import inspect
@@ -167,6 +169,7 @@ class TestingLinkTarget(Item):
     ],
 )
 class TestingPostPutPatch(Item):
+#xyzzy class TestingPostPutPatch(FourfrontItem):
     item_type = 'testing_post_put_patch'
     schema = {
         'required': ['required'],

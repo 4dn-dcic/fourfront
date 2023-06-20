@@ -12,6 +12,7 @@ from snovault import (
     collection,
     load_schema,
 )
+from .acl import ONLY_ADMIN_VIEW_ACL
 from .base import (
     Item,
     get_item_or_none,
@@ -38,14 +39,6 @@ class Award(Item):
     ]
 
     # define some customs acls; awards can only be created/edited by admin
-    ONLY_ADMIN_VIEW_ACL = [
-        (Allow, 'group.admin', ['view', 'edit']),
-        (Allow, 'group.read-only-admin', ['view']),
-        (Allow, 'remoteuser.INDEXER', ['view']),
-        (Allow, 'remoteuser.EMBED', ['view']),
-        (Deny, Everyone, ['view', 'edit'])
-    ]
-
     ALLOW_EVERYONE_VIEW_ACL = [
         (Allow, Everyone, 'view'),
     ]
