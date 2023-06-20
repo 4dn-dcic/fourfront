@@ -16,7 +16,8 @@ from pyramid.security import (
     Deny,
     Everyone,
 )
-from .base import Item, ONLY_ADMIN_VIEW_ACL
+from .acl import ONLY_ADMIN_VIEW_ACL, OWNER_ROLE
+from .base import Item
 from snovault import (
     CONNECTION,
     calculated_property,
@@ -58,9 +59,9 @@ ONLY_ADMIN_VIEW_DETAILS_ACL = [
 SUBMITTER_CREATE_ACL = []
 
 ONLY_OWNER_EDIT_ACL = [
-    (Allow, 'role.owner', 'view'),
-    (Allow, 'role.owner', 'edit'),
-    (Allow, 'role.owner', 'view_details')
+    (Allow, OWNER_ROLE, 'view'),
+    (Allow, OWNER_ROLE, 'edit'),
+    (Allow, OWNER_ROLE, 'view_details')
 ] + ONLY_ADMIN_VIEW_DETAILS_ACL
 
 USER_ALLOW_CURRENT_ACL = [
@@ -115,7 +116,7 @@ class User(Item, SnovaultUser):
     def __ac_local_roles__(self):
         """return the owner user."""
         owner = 'userid.%s' % self.uuid
-        return {owner: 'role.owner'}
+        return {owner: OWNER_ROLE}
 
     def _update(self, properties, sheets=None):
         # subscriptions are search queries used on /submissions page

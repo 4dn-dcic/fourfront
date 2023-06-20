@@ -42,7 +42,9 @@ from .acl import (
     LAB_MEMBER_ROLE,
     LAB_SUBMITTER_ROLE,
     ONLY_ADMIN_VIEW_ACL,
-    SUBMITTER_CREATE_ACL
+    OWNER_ROLE,
+    SUBMITTER_CREATE_ACL,
+    VIEWING_GROUP_MEMBER_ROLE
 )
 
 
@@ -206,7 +208,7 @@ class Item(SnovaultItem):
             viewing_group = _award_viewing_group(properties['award'], find_root(self))
             if viewing_group is not None:
                 viewing_group_members = 'viewing_group.%s' % viewing_group
-                roles[viewing_group_members] = 'role.viewing_group_member'
+                roles[viewing_group_members] = VIEWING_GROUP_MEMBER_ROLE
                 award_group_members = 'award.%s' % properties['award']
                 roles[award_group_members] = AWARD_MEMBER_ROLE
 
@@ -214,10 +216,10 @@ class Item(SnovaultItem):
                 # or are JA and planned or in progress
                 if viewing_group == 'NOFIC':
                     if status == 'released to project':
-                        roles['viewing_group.4DN'] = 'role.viewing_group_member'
+                        roles['viewing_group.4DN'] = VIEWING_GROUP_MEMBER_ROLE
                     elif status in ['planned', 'submission in progress']:
                         if _is_joint_analysis(properties):
-                            roles['viewing_group.4DN'] = 'role.viewing_group_member'
+                            roles['viewing_group.4DN'] = VIEWING_GROUP_MEMBER_ROLE
                     # else leave the NOFIC viewing group role in place
                 elif (status in ['planned', 'submission in progress'] and not _is_joint_analysis(properties)) or (status == 'pre-release'):
                     # for these statuses view should be restricted to lab members so all viewing_groups are removed
@@ -225,7 +227,7 @@ class Item(SnovaultItem):
                     # or NOFIC group dealt with in the above if
                     grps = []
                     for group, role in roles.items():
-                        if role == 'role.viewing_group_member':
+                        if role == VIEWING_GROUP_MEMBER_ROLE:
                             grps.append(group)
                     for g in grps:
                         del roles[g]
@@ -234,12 +236,12 @@ class Item(SnovaultItem):
         if 'viewable_by' in properties:
             viewers = properties.get('viewable_by', [])
             for vg in viewers:
-                roles['viewing_group.{}'.format(vg)] = 'role.viewing_group_member'
+                roles['viewing_group.{}'.format(vg)] = VIEWING_GROUP_MEMBER_ROLE
 
         # This emulates __ac_local_roles__ of User.py (role.owner)
         if 'submitted_by' in properties:
             submitter = 'userid.%s' % properties['submitted_by']
-            roles[submitter] = 'role.owner'
+            roles[submitter] = OWNER_ROLE
         return roles
 
     def unique_keys(self, properties):
@@ -331,5 +333,5 @@ class SharedItem(Item):
         if 'lab' in properties:
             lab_submitters = 'submits_for.%s' % properties['lab']
             roles[lab_submitters] = LAB_SUBMITTER_ROLE
-        roles[Authenticated] = 'role.viewing_group_member'
+        roles[Authenticated] = VIEWING_GROUP_MEMBER_ROLE
         return roles

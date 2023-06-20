@@ -5,6 +5,8 @@ from snovault.types.base import DELETED_ACL, ONLY_ADMIN_VIEW_ACL
 AWARD_MEMBER_ROLE = 'role.award_member'
 LAB_MEMBER_ROLE = 'role.lab_member'
 LAB_SUBMITTER_ROLE = 'role.lab_submitter'
+OWNER_ROLE = 'role.owner'
+VIEWING_GROUP_MEMBER_ROLE = 'role.viewing_group_member'
 
 # This acl allows item creation; it is easily overwritten in lab and user,
 # as these items should not be available for creation
@@ -23,11 +25,11 @@ ALLOW_LAB_MEMBER_VIEW_ACL = [
 ] + SUBMITTER_CREATE_ACL + ONLY_ADMIN_VIEW_ACL 
 
 ALLOW_VIEWING_GROUP_VIEW_ACL = [
-    (Allow, 'role.viewing_group_member', 'view'),
+    (Allow, VIEWING_GROUP_MEMBER_ROLE, 'view'),
 ] + ALLOW_LAB_MEMBER_VIEW_ACL
 
 ALLOW_VIEWING_GROUP_LAB_SUBMITTER_EDIT_ACL = [
-    (Allow, 'role.viewing_group_member', 'view'),
+    (Allow, VIEWING_GROUP_MEMBER_ROLE, 'view'),
     (Allow, LAB_SUBMITTER_ROLE, 'edit'),
 ] + ALLOW_LAB_MEMBER_VIEW_ACL
 
@@ -52,7 +54,7 @@ ALLOW_LAB_VIEW_ADMIN_EDIT_ACL = [
 ] + ONLY_ADMIN_VIEW_ACL
 
 ALLOW_OWNER_EDIT_ACL = [
-    (Allow, 'role.owner', ['edit', 'view', 'view_details']),
+    (Allow, OWNER_ROLE, ['edit', 'view', 'view_details']),
 ]
 
 # Collection acls

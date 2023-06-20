@@ -8,10 +8,13 @@ from pyramid.security import (
     Everyone,
 )
 from pyramid.settings import asbool
-from .base import (
-    Item,
+from .acl import (
     DELETED_ACL,
     ONLY_ADMIN_VIEW_ACL,
+    OWNER_ROLE
+)
+from .base import (
+    Item
 )
 from ..authentication import (
     generate_password,
@@ -62,14 +65,14 @@ class AccessKey(Item, SnovaultAccessKey):
     embedded_list = []
 
     STATUS_ACL = {
-        'current': [(Allow, 'role.owner', ['view', 'edit'])] + ONLY_ADMIN_VIEW_ACL,
+        'current': [(Allow, OWNER_ROLE, ['view', 'edit'])] + ONLY_ADMIN_VIEW_ACL,
         'deleted': DELETED_ACL,
     }
 
     def __ac_local_roles__(self):
         """grab and return user as owner."""
         owner = 'userid.%s' % self.properties['user']
-        return {owner: 'role.owner'}
+        return {owner: OWNER_ROLE}
 
     class Collection(Item.Collection):
         pass
