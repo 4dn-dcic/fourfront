@@ -15,6 +15,7 @@ from snovault import (
     calculated_property
 )
 from .acl import (
+    ONLY_ADMIN_VIEW_ACL,
     LAB_MEMBER_ROLE,
     LAB_SUBMITTER_ROLE
 )
@@ -22,15 +23,6 @@ from .base import (
     Item,
     get_item_or_none,
 )
-
-
-ONLY_ADMIN_VIEW_ACL = [
-    (Allow, 'group.admin', ['view', 'edit']),
-    (Allow, 'group.read-only-admin', ['view']),
-    (Allow, 'remoteuser.INDEXER', ['view']),
-    (Allow, 'remoteuser.EMBED', ['view']),
-    (Deny, Everyone, ['view', 'edit'])
-]
 
 ALLOW_EVERYONE_VIEW_ACL = [
     (Allow, Everyone, 'view'),
