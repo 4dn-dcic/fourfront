@@ -347,12 +347,12 @@ export class FormattedInfoBlock extends React.Component {
                 'Detail: ' + (error.detail || 'N/A') + ' | ' +
                 'Description: ' + (error.description || 'N/A'));
             analytics.event('FormattedInfoBlock', 'ERROR', {
-                eventLabel : (
+                event_label : (
                     "AJAX Error: "  + (error.title       || 'N/A') + ' | ' +
                     'Detail: '      + (error.detail      || 'N/A') + ' | ' +
                     'Description: ' + (error.description || 'N/A')
                 ),
-                eventValue : error.code || null
+                event_value : error.code || null
             });
         }.bind(this));
     }

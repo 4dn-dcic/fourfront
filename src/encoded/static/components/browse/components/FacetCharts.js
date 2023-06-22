@@ -159,10 +159,10 @@ export class FacetCharts extends React.PureComponent {
                     // Register 'Set Filter' event for each field:term pair (node) of selected Bar Section.
                     _.forEach(cursorProps.path, function(node){
                         analytics.event('BarPlot', 'Set Filter', {
-                            'eventLabel'        : analytics.eventLabelFromChartNode(node, false),                         // 'New' filter logged here.
+                            'event_label'        : analytics.eventLabelFromChartNode(node, false),                         // 'New' filter logged here.
                             'field'             : node.field,
                             'term'              : node.term,
-                            'currentFilters'    : analytics.getStringifiedCurrentFilters(currExpSetFilters), // 'Existing' filters, or filters at time of action, go here.
+                            'current_filters'    : analytics.getStringifiedCurrentFilters(currExpSetFilters), // 'Existing' filters, or filters at time of action, go here.
                         });
                     });
 

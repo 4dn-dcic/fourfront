@@ -168,8 +168,8 @@ export default class QuickInfoBar extends React.PureComponent {
         const expSetFilters = QuickInfoBar.expSetFilters((context && context.filters) || null, browseBaseParams);
 
         analytics.event('QuickInfoBar', 'Hover over Filters Icon', {
-            'eventLabel' : ( areAnyFiltersSet ? "Some filters are set" : "No filters set" ),
-            'dimension1' : analytics.getStringifiedCurrentFilters(expSetFilters)
+            'event_label' : ( areAnyFiltersSet ? "Some filters are set" : "No filters set" ),
+            'current_filters' : analytics.getStringifiedCurrentFilters(expSetFilters)
         });
     }
 
@@ -195,8 +195,8 @@ export default class QuickInfoBar extends React.PureComponent {
         const expSetFilters = QuickInfoBar.expSetFilters((context && context.filters) || null, browseBaseParams);
         searchFilters.changeFilter(field, term, expSetFilters, null, false, null, browseBaseParams);
         analytics.event('QuickInfoBar', 'Unset Filter', {
-            'eventLabel' : `Field: ${field}, Term: ${term}`,
-            'dimension1' : analytics.getStringifiedCurrentFilters(expSetFilters)
+            'event_label' : `Field: ${field}, Term: ${term}`,
+            'current_filters' : analytics.getStringifiedCurrentFilters(expSetFilters)
         });
     }
 

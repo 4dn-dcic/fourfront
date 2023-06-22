@@ -36,7 +36,7 @@ export const UserRegistrationModal = React.memo(function UserRegistrationModal(p
     const isEmailAGmail = unverifiedUserEmail.slice(-10) === "@gmail.com";
     function onGoogleLinkClick(e){
         e.preventDefault();
-        analytics.event('Authentication', 'CreateGoogleAccountLinkClick', { eventLabel : "None" });
+        analytics.event('Authentication', 'CreateGoogleAccountLinkClick', { event_label : "None" });
         window.open(e.target.href);
     }
     const formHeading = (

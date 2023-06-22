@@ -112,9 +112,9 @@ export class SelectAllFilesButton extends React.PureComponent {
                         "SelectAllFilesButton",
                         "Select All",
                         {
-                            eventLabel: extData.list,
-                            eventValue: totalFilesCount,
-                            currentFilters: analytics.getStringifiedCurrentFilters((context && context.filters) || null)
+                            event_label: extData.list,
+                            event_value: totalFilesCount,
+                            current_filters: analytics.getStringifiedCurrentFilters((context && context.filters) || null)
                         }
                     );
                 });

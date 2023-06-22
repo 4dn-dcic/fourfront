@@ -171,7 +171,7 @@ class SelectedFilesDownloadModal extends React.PureComponent {
         analytics.productsAddToCart(fileList, extData);
         analytics.event("SelectedFilesDownloadModal", "Mounted", {
             ...analytics.eventObjectFromCtx(context),
-            eventValue: fileCountUnique || fileList.length || 0
+            event_value: fileCountUnique || fileList.length || 0
         });
     }
 
@@ -179,7 +179,7 @@ class SelectedFilesDownloadModal extends React.PureComponent {
         const { context, fileCountUnique } = this.props;
         analytics.event("SelectedFilesDownloadModal", "Accepted Disclaimer", {
             ...analytics.eventObjectFromCtx(context),
-            eventValue: fileCountUnique
+            event_value: fileCountUnique
         });
         this.setState({ 'disclaimerAccepted' : true });
     }
@@ -323,8 +323,8 @@ const SelectedFilesDownloadStartButton = React.memo(function SelectedFilesDownlo
                 analytics.productsCheckout(fileList, extData);
                 analytics.event("SelectedFilesDownloadModal", "Download metadata.tsv Button Pressed", {
                     ...analytics.eventObjectFromCtx(context),
-                    eventLabel: JSON.stringify([...filenameAccessions].sort()),
-                    eventValue: filenameAccessions.size || 0
+                    event_label: JSON.stringify([...filenameAccessions].sort()),
+                    event_value: filenameAccessions.size || 0
                 });
             }, 0);
         }

@@ -23,9 +23,9 @@ export function downloadFileButtonClick(fileItem, context = null){
     setTimeout(function(){
         const evtObj = eventObjectFromCtx(context);
         if (!isNaN(fileItem.file_size)){
-            evtObj.eventValue = fileItem.file_size;
+            evtObj.event_value = fileItem.file_size;
         }
-        evtObj.eventLabel = eventObjectFromCtx(fileItem).name;
+        evtObj.event_label = eventObjectFromCtx(fileItem).name;
         // Need 2 sep. events here else will be 2x checkouts.
         productsAddToCart(fileItem);
         event("FileDownloadButton", "Added Item to 'Cart'", evtObj, false);

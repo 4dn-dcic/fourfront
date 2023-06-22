@@ -211,7 +211,7 @@ export class UIControlsWrapper extends React.PureComponent {
         }
         updateBarPlotFields(_.pluck(newFields, 'field'));
         analytics.event('BarPlot', 'Set Aggregation Field', {
-            'eventLabel' : '[' + _.pluck(newFields, 'field').join(', ') + ']',
+            'event_label' : '[' + _.pluck(newFields, 'field').join(', ') + ']',
             'field' : newFieldKey
         });
     }

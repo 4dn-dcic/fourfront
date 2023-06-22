@@ -134,9 +134,9 @@ export class SelectedFilesController extends React.PureComponent {
                     "SelectedFilesController",
                     "Select Files",
                     {
-                        eventLabel: extData.list,
-                        eventValue: existingFileList.length,
-                        currentFilters: analytics.getStringifiedCurrentFilters((context && context.filters) || null)
+                        event_label: extData.list,
+                        event_value: existingFileList.length,
+                        current_filters: analytics.getStringifiedCurrentFilters((context && context.filters) || null)
                     }
                 );
             }, 250);
@@ -193,9 +193,9 @@ export class SelectedFilesController extends React.PureComponent {
                 "SelectedFilesController",
                 "Select Files",
                 {
-                    eventLabel: extData.list,
-                    eventValue: newlyAddedFileItems.length,
-                    currentFilters: analytics.getStringifiedCurrentFilters((context && context.filters) || null)
+                    event_label: extData.list,
+                    event_value: newlyAddedFileItems.length,
+                    current_filters: analytics.getStringifiedCurrentFilters((context && context.filters) || null)
                 }
             );
         });
@@ -246,9 +246,9 @@ export class SelectedFilesController extends React.PureComponent {
                 "SelectedFilesController",
                 "Unselect Files",
                 {
-                    eventLabel: extData.list,
-                    eventValue: newlyRemovedFileItems.length,
-                    currentFilters: analytics.getStringifiedCurrentFilters((context && context.filters) || null)
+                    event_label: extData.list,
+                    event_value: newlyRemovedFileItems.length,
+                    current_filters: analytics.getStringifiedCurrentFilters((context && context.filters) || null)
                 }
             );
         });
@@ -272,9 +272,9 @@ export class SelectedFilesController extends React.PureComponent {
                 "SelectedFilesController",
                 "Unselect All Files",
                 {
-                    eventLabel: extData.list,
-                    eventValue: existingFileList.length,
-                    currentFilters: analytics.getStringifiedCurrentFilters((context && context.filters) || null)
+                    event_label: extData.list,
+                    event_value: existingFileList.length,
+                    current_filters: analytics.getStringifiedCurrentFilters((context && context.filters) || null)
                 }
             );
         });
