@@ -547,10 +547,12 @@ export class RawFilesStackedTable extends React.PureComponent {
         });
 
         setTimeout(function(){ // Wait for analytics initialization to complete.
-            analytics.impressionListOfItems(biosamples, null, "RawFilesStackedTable");
-            analytics.impressionListOfItems(exps, null, "RawFilesStackedTable");
-            analytics.impressionListOfItems(allRawFiles, null, "RawFilesStackedTable");
-            analytics.event("RawFilesStackedTable", "Mounted", { eventLabel: experimentSet ? experimentSet.display_title : propExperiment.display_title });
+            const impressionedItems = [];
+            impressionedItems.push(...analytics.impressionListOfItems(biosamples, null, "RawFilesStackedTable"));
+            impressionedItems.push(...analytics.impressionListOfItems(exps, null, "RawFilesStackedTable"));
+            impressionedItems.push(...analytics.impressionListOfItems(allRawFiles, null, "RawFilesStackedTable"));
+            impressionedItems.forEach((item, index) => item.index = index + 1);
+            analytics.event("view_item_list", "Mounted", { items: impressionedItems, event_category: "RawFilesStackedTable", event_label: experimentSet ? experimentSet.display_title : propExperiment.display_title });
         }, 250);
     }
 
@@ -865,9 +867,10 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
         });
 
         setTimeout(function(){ // Wait for analytics initialization to complete.
-            analytics.impressionListOfItems(exps, null, "ProcessedFilesStackedTable");
-            analytics.impressionListOfItems(resortedFileList, null, "ProcessedFilesStackedTable");
-            analytics.event("ProcessedFilesStackedTable", "Mounted");
+            const impressionedItems = [];
+            impressionedItems.push(...analytics.impressionListOfItems(exps, null, "ProcessedFilesStackedTable"));
+            impressionedItems.push(...analytics.impressionListOfItems(resortedFileList, null, "ProcessedFilesStackedTable"));
+            analytics.event("view_item_list", "Mounted", { items: impressionedItems, event_category: "ProcessedFilesStackedTable" });
         }, 250);
     }
 
