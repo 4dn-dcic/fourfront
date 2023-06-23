@@ -160,13 +160,17 @@ class TestingLinkTarget(Item):
         return self.rev_link_atids(request, rev_name="reverse")
 
 
+TESTING_POST_PUT_PATCH_ACL = [(Allow, 'group.submitter', ['add', 'edit', 'view'])]
+
 @collection(
     'testing-post-put-patch',
-    acl=[
-        (Allow, 'group.submitter', ['add', 'edit', 'view']),
-    ],
+    acl=TESTING_POST_PUT_PATCH_ACL
 )
 class TestingPostPutPatch(Item):
+
+    def __acl__(self):
+        return TESTING_POST_PUT_PATCH_ACL
+
     item_type = 'testing_post_put_patch'
     schema = {
         'required': ['required'],
