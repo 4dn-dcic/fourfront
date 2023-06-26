@@ -6,6 +6,10 @@ fourfront
 Change Log
 ----------
 
+5.3.12
+======
+
+* update to generate-ontology script to break up search query for all existing ontology terms into querying by ontology to get around the 100K result limit now that there are more than 100K terms in the db.
 
 5.3.11
 ======
