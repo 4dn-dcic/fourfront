@@ -252,5 +252,18 @@
         "viewing_groups": ["4DN"],
         "groups": ["admin"],
         "submits_for": ["4dn-dcic-lab"]
+    },
+    {
+        "timezone": "US/Eastern",
+        "email": "cesar_ferreyra-mansilla@hms.harvard.edu",
+        "first_name": "Cesar",
+        "groups": ["submitter", "admin"],
+        "job_title": "Front End Engineer",
+        "lab": "test-4dn-lab",
+        "last_name": "Ferreyra-Mansilla",
+        "status": "current",
+        "submits_for": ["test-4dn-lab","4dn-dcic-lab"],
+        "viewing_groups" : ["4DN"],
+        "uuid": "90a33c84-6b17-4f96-be54-f8cb0458ee67"
     }
 ]

@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
 import memoize from 'memoize-one';
-import queryString from 'querystring';
+import queryString from 'query-string';
 import { get as getSchemas, Term } from './../../../util/Schemas';
 import { object, ajax, layout, isServerSide, schemaTransforms, memoizedUrlParse, logger } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import {

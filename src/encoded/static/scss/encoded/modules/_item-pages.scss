@@ -620,10 +620,10 @@ i.item-status-indicator-dot {
 			display: inline-block;
 			> .link {
 				@include user-select(none);
-				color: #00cca3; // temporary?
+				color: #3F9067;
 				cursor:pointer;
 				&:hover {
-					color: #00cca3;
+					color: #3F9067;
 					text-shadow : 0 0 0;
 				}
 			}
@@ -719,12 +719,15 @@ i.item-status-indicator-dot {
 		.detail-embedded-table-container {
 			overflow-x: auto;
 			max-height: 50vh;
+			margin-bottom: 20px;
+
 			table.detail-embedded-table {
 				min-width: 100%;
 				tr th {
 					white-space: normal;
 					word-break: normal;
 					padding: 7px 4px;
+					text-align: left;
 
 					&.has-children {
 						> .tooltip-info-container {
@@ -749,6 +752,7 @@ i.item-status-indicator-dot {
 				tr td {
 					word-break: normal;
 					padding: 7px 8px;
+					text-align: left;
 					&.child-list-row-container {
 						padding: 0;
 						border-left: 1px dotted #ccc;
