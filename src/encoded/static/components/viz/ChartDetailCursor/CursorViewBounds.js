@@ -267,9 +267,10 @@ export default class CursorViewBounds extends React.PureComponent {
             }, function(){
                 // Track 'BarPlot':'Change Experiment Set Filters':ExpSetFilters event.
                 setTimeout(()=>{
-                    analytics.event(eventCategory || 'CursorViewBounds', 'Select Node', {
-                        event_label : analytics.eventLabelFromChartNode(node),
-                        current_filters : analytics.getStringifiedCurrentFilters(context && context.filters)
+                    //analytics
+                    analytics.event('cursor_detail', eventCategory || 'CursorViewBounds', 'Set Filter', null, {
+                        'name' : analytics.eventLabelFromChartNode(node),
+                        'filters'     : analytics.getStringifiedCurrentFilters((context && context.filters) || null),
                     });
                 }, 10);
             });
