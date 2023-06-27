@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 
 import { onLoginNavItemClick } from './../navigation/components/LoginNavItem';
-import { productsAddToCart, productsCheckout, event, eventObjectFromCtx } from '@hms-dbmi-bgm/shared-portal-components/es/components/util/analytics';
+import { event, eventObjectFromCtx, transformItemsToProducts, getStringifiedCurrentFilters } from '@hms-dbmi-bgm/shared-portal-components/es/components/util/analytics';
 import { patchedConsoleInstance as console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util/patched-console';
 import { FileDownloadButtonAuto as FileDownloadButtonAutoOriginal } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/FileDownloadButton';
 
@@ -21,16 +21,16 @@ import { File } from './typedefs';
  */
 export function downloadFileButtonClick(fileItem, context = null){
     setTimeout(function(){
-        const evtObj = eventObjectFromCtx(context);
-        if (!isNaN(fileItem.file_size)){
-            evtObj.event_value = fileItem.file_size;
-        }
-        evtObj.event_label = eventObjectFromCtx(fileItem).name;
+        //analytics
+        const products = transformItemsToProducts(fileItem, {});
+        const parameters = {
+            items: Array.isArray(products) ? products : null,
+            value: !isNaN(fileItem.file_size) ? fileItem.file_size : 0,
+            filters: getStringifiedCurrentFilters((context && context.filters) || null)
+        };
         // Need 2 sep. events here else will be 2x checkouts.
-        productsAddToCart(fileItem);
-        event("FileDownloadButton", "Added Item to 'Cart'", evtObj, false);
-        productsCheckout(fileItem, { step: 1, option: "File Download Button" });
-        event("FileDownloadButton", "Clicked", evtObj, false);
+        event("add_to_cart", "FileDownloadButton", "Added Item to 'Cart'", null, parameters, false);
+        event("begin_checkout", "FileDownloadButton", "Clicked", null, parameters, false);
     }, 0);
 }
 
