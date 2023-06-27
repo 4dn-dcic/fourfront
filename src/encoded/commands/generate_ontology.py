@@ -1003,7 +1003,7 @@ def write_outfile(to_write, filename, pretty=False):
 
 def filter_ontologies(ontologies):
     for i, o in enumerate(ontologies):
-        if o['ontology_name'].startswith('4DN') or o['ontology_name'].startswith('CGAP'):
+        if o['ontology_name'].startswith('4DN'):
             ontologies.pop(i)
 
 
