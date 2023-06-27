@@ -17,6 +17,7 @@ export const UserRegistrationModal = React.memo(function UserRegistrationModal(p
         e.preventDefault();
         onRegistrationCancel();
         showLock();
+        analytics.event('registration', 'UserRegistrationModal', 'ExitLinkClick');
     }
 
     if (!unverifiedUserEmail){
@@ -36,7 +37,7 @@ export const UserRegistrationModal = React.memo(function UserRegistrationModal(p
     const isEmailAGmail = unverifiedUserEmail.slice(-10) === "@gmail.com";
     function onGoogleLinkClick(e){
         e.preventDefault();
-        analytics.event('Authentication', 'CreateGoogleAccountLinkClick', { event_label : "None" });
+        analytics.event('registration', 'UserRegistrationModal', 'CreateGoogleAccountLinkClick');
         window.open(e.target.href);
     }
     const formHeading = (
