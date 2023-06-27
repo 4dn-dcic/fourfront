@@ -1,11 +1,11 @@
 {
     "hostnameTrackerIDMapping" : {
         "data.4dnucleome.org" : "UA-86655305-1",
-        "mastertest.4dnucleome.org" : "G-KW98FB0NDW",
-        "staging.4dnucleome.org" : "G-KW98FB0NDW",
-        "fourfront-hotseat-1650461284.us-east-1.elb.amazonaws.com" : "G-KW98FB0NDW",
-        "hotseat.4dnucleome.org" : "G-KW98FB0NDW",
-        "localhost:8000" : "G-JWY59WYF4N",
+        "mastertest.4dnucleome.org" : "GTM-3DT6W3Z",
+        "staging.4dnucleome.org" : "GTM-3DT6W3Z",
+        "fourfront-hotseat-1650461284.us-east-1.elb.amazonaws.com" : "GTM-3DT6W3Z",
+        "hotseat.4dnucleome.org" : "GTM-3DT6W3Z",
+        "localhost:8000" : "GTM-WMSVXV3",
         "localhost:6543" : "UA-86655305-3",
         "default" : "UA-86655305-4"
     },
