@@ -119,7 +119,6 @@ class Collection(snovault.Collection, AbstractCollection):
         'title': "Item Listing",
         'description': 'Abstract collection of all Items.',
     })
-#class Item(snovault.Item):
 class Item(SnovaultItem):
     """
     The abstract base type for all other Items.
