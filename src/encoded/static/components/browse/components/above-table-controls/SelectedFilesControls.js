@@ -86,7 +86,7 @@ export class SelectAllFilesButton extends React.PureComponent {
         }
 
         this.setState({ 'selecting' : true }, () => {
-            const extData = { list: analytics.hrefToListName(window && window.location.href) };
+            const extData = { item_list_name: analytics.hrefToListName(window && window.location.href) };
 
             if (!this.isAllSelected()){
                 const currentHrefParts = memoizedUrlParse(href);
@@ -97,7 +97,7 @@ export class SelectAllFilesButton extends React.PureComponent {
                 ajax.load(reqHref, (resp)=>{
                     let allExtendedFiles;
                     let filesToSelect;
-                    if (extData.list === 'browse') {
+                    if (extData.item_list_name === 'browse') {
 
                         allExtendedFiles = _.reduce(resp['@graph'] || [], (m, v) => m.concat(allFilesFromExperimentSet(v, true)), []);
                         filesToSelect = _.zip(filesToAccessionTriples(allExtendedFiles, true, true), allExtendedFiles);
@@ -108,13 +108,19 @@ export class SelectAllFilesButton extends React.PureComponent {
                     selectFile(filesToSelect);
                     this.setState({ 'selecting' : false });
 
+                    //analytics
+                    const products = analytics.transformItemsToProducts(allExtendedFiles, extData);
+                    const productsLength = Array.isArray(products) ? products.length : allExtendedFiles.length;
                     analytics.event(
+                        "add_to_cart",
                         "SelectAllFilesButton",
                         "Select All",
+                        function () { console.info(`Adding ${productsLength} items from cart.`); },
                         {
-                            event_label: extData.list,
-                            event_value: totalFilesCount,
-                            current_filters: analytics.getStringifiedCurrentFilters((context && context.filters) || null)
+                            items: Array.isArray(products) ? products : null,
+                            list_name: extData.item_list_name,
+                            value: productsLength,
+                            filters: analytics.getStringifiedCurrentFilters((context && context.filters) || null)
                         }
                     );
                 });

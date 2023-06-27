@@ -128,15 +128,20 @@ export class SelectedFilesController extends React.PureComponent {
         });
         if (existingFileList.length > 0) {
             setTimeout(function(){
-                const extData = { list: analytics.hrefToListName(window && window.location.href) };
-                analytics.productsAddToCart(existingFileList, extData);
+                //analytics
+                const extData = { item_list_name: analytics.hrefToListName(window && window.location.href) };
+                const products = analytics.transformItemsToProducts(existingFileList, extData);
+                const productsLength = Array.isArray(products) ? products.length : existingFileList.length;
                 analytics.event(
+                    "add_to_cart",
                     "SelectedFilesController",
                     "Select Files",
+                    function() { console.info(`Adding ${productsLength} items to cart.`); },
                     {
-                        event_label: extData.list,
-                        event_value: existingFileList.length,
-                        current_filters: analytics.getStringifiedCurrentFilters((context && context.filters) || null)
+                        items: Array.isArray(products) ? products : null,
+                        list_name: extData.item_list_name,
+                        value: productsLength,
+                        filters: analytics.getStringifiedCurrentFilters((context && context.filters) || null)
                     }
                 );
             }, 250);
@@ -155,9 +160,13 @@ export class SelectedFilesController extends React.PureComponent {
             logger.error("Supplied accessionTriple is not a string or array of strings/arrays:", accessionTriple);
             throw new Error("Supplied accessionTriple is not a string or array of strings/arrays:", accessionTriple);
         }
-        const newlyAddedFileItems = [];
+        //it is initialized inside of setState, since setState is called twice
+        //in strict mode and newlyAddedFileItems would have duplicate items
+        //more info: https://github.com/facebook/react/issues/12856#issuecomment-390206425
+        let newlyAddedFileItems = null;
         this.setState(({ selectedFiles })=>{
-            var newSelectedFiles = _.extend({}, selectedFiles);
+            newlyAddedFileItems = [];
+            const newSelectedFiles = _.extend({}, selectedFiles);
 
             function add(id, fileItemCurr = null){
                 if (typeof newSelectedFiles[id] !== 'undefined'){
@@ -187,15 +196,20 @@ export class SelectedFilesController extends React.PureComponent {
             if (!analyticsAddFilesToCart){
                 return;
             }
-            const extData = { list: analytics.hrefToListName(window && window.location.href) };
-            analytics.productsAddToCart(newlyAddedFileItems, extData);
+            //analytics
+            const extData = { item_list_name: analytics.hrefToListName(window && window.location.href) };
+            const products = analytics.transformItemsToProducts(newlyAddedFileItems, extData);
+            const productsLength = Array.isArray(products) ? products.length : accessionTriple.length;
             analytics.event(
+                "add_to_cart",
                 "SelectedFilesController",
                 "Select Files",
+                function () { console.info(`Adding ${productsLength} items to cart.`); },
                 {
-                    event_label: extData.list,
-                    event_value: newlyAddedFileItems.length,
-                    current_filters: analytics.getStringifiedCurrentFilters((context && context.filters) || null)
+                    items: Array.isArray(products) ? products : null,
+                    list_name: extData.item_list_name,
+                    value: productsLength,
+                    filters: analytics.getStringifiedCurrentFilters((context && context.filters) || null)
                 }
             );
         });
@@ -240,15 +254,20 @@ export class SelectedFilesController extends React.PureComponent {
             if (!analyticsAddFilesToCart){
                 return;
             }
-            const extData = { list: analytics.hrefToListName(window && window.location.href) };
-            analytics.productsRemoveFromCart(newlyRemovedFileItems, extData);
+            //analytics
+            const extData = { item_list_name: analytics.hrefToListName(window && window.location.href) };
+            const products = analytics.transformItemsToProducts(newlyRemovedFileItems, extData);
+            const productsLength = Array.isArray(products) ? products.length : newlyRemovedFileItems.length;
             analytics.event(
+                "remove_from_cart",
                 "SelectedFilesController",
                 "Unselect Files",
+                function () { console.info(`Removing ${productsLength} items from cart.`); },
                 {
-                    event_label: extData.list,
-                    event_value: newlyRemovedFileItems.length,
-                    current_filters: analytics.getStringifiedCurrentFilters((context && context.filters) || null)
+                    items: Array.isArray(products) ? products : null,
+                    list_name: extData.item_list_name,
+                    value: productsLength,
+                    filters: analytics.getStringifiedCurrentFilters((context && context.filters) || null)
                 }
             );
         });
@@ -266,15 +285,20 @@ export class SelectedFilesController extends React.PureComponent {
             if (!analyticsAddFilesToCart || existingFileList.length === 0){
                 return;
             }
-            const extData = { list: analytics.hrefToListName(window && window.location.href) };
-            analytics.productsRemoveFromCart(existingFileList, extData);
+            //analytics
+            const extData = { item_list_name: analytics.hrefToListName(window && window.location.href) };
+            const products = analytics.transformItemsToProducts(existingFileList, extData);
+            const productsLength = Array.isArray(products) ? products.length : existingFileList.length;
             analytics.event(
+                "remove_from_cart",
                 "SelectedFilesController",
                 "Unselect All Files",
+                function () { console.info(`Removing ${productsLength} items from cart.`); },
                 {
-                    event_label: extData.list,
-                    event_value: existingFileList.length,
-                    current_filters: analytics.getStringifiedCurrentFilters((context && context.filters) || null)
+                    items: Array.isArray(products) ? products : null,
+                    list_name: extData.item_list_name,
+                    value: productsLength,
+                    filters: analytics.getStringifiedCurrentFilters((context && context.filters) || null)
                 }
             );
         });

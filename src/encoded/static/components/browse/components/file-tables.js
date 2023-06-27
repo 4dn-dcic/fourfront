@@ -547,12 +547,16 @@ export class RawFilesStackedTable extends React.PureComponent {
         });
 
         setTimeout(function(){ // Wait for analytics initialization to complete.
+            //analytics
             const impressionedItems = [];
             impressionedItems.push(...analytics.impressionListOfItems(biosamples, null, "RawFilesStackedTable"));
             impressionedItems.push(...analytics.impressionListOfItems(exps, null, "RawFilesStackedTable"));
             impressionedItems.push(...analytics.impressionListOfItems(allRawFiles, null, "RawFilesStackedTable"));
             impressionedItems.forEach((item, index) => item.index = index + 1);
-            analytics.event("view_item_list", "Mounted", { items: impressionedItems, event_category: "RawFilesStackedTable", event_label: experimentSet ? experimentSet.display_title : propExperiment.display_title });
+            analytics.event("view_item_list", "RawFilesStackedTable", "Mounted", null, {
+                items: impressionedItems,
+                list_name: experimentSet ? experimentSet.display_title : propExperiment.display_title 
+            });
         }, 250);
     }
 
@@ -867,10 +871,11 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
         });
 
         setTimeout(function(){ // Wait for analytics initialization to complete.
+            //analytics
             const impressionedItems = [];
             impressionedItems.push(...analytics.impressionListOfItems(exps, null, "ProcessedFilesStackedTable"));
             impressionedItems.push(...analytics.impressionListOfItems(resortedFileList, null, "ProcessedFilesStackedTable"));
-            analytics.event("view_item_list", "Mounted", { items: impressionedItems, event_category: "ProcessedFilesStackedTable" });
+            analytics.event("view_item_list", "ProcessedFilesStackedTable", "Mounted", null, { items: impressionedItems });
         }, 250);
     }
 
