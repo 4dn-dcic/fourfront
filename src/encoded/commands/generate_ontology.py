@@ -109,7 +109,11 @@ def get_termid_from_uri(uri):
     """Given a uri - takes the last part (name) and converts _ to :
         eg. http://www.ebi.ac.uk/efo/EFO_0002784 => EFO:0002784
     """
-    return splitNameFromNamespace(uri)[0].replace('_', ':')
+    trans_tbl = str.maketrans('','','%?:#&= ')
+    term_id = splitNameFromNamespace(uri)[0]
+    term_id = term_id.translate(trans_tbl)
+    return term_id.replace('_', ':')
+
 
 
 def get_term_name_from_rdf(class_, data):

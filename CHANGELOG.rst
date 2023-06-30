@@ -6,6 +6,13 @@ fourfront
 Change Log
 ----------
 
+5.3.13
+======
+
+`Another Tweak to generate ontology script  <https://github.com/4dn-dcic/fourfront/pull/1819>`_
+
+* update to generate-ontology script to remove invalid characters in term_id when parsing from URI
+
 5.3.12
 ======
 
