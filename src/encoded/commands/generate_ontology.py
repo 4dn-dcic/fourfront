@@ -109,7 +109,11 @@ def get_termid_from_uri(uri):
     """Given a uri - takes the last part (name) and converts _ to :
         eg. http://www.ebi.ac.uk/efo/EFO_0002784 => EFO:0002784
     """
-    return splitNameFromNamespace(uri)[0].replace('_', ':')
+    trans_tbl = str.maketrans('','','%?:#&= ')
+    term_id = splitNameFromNamespace(uri)[0]
+    term_id = term_id.translate(trans_tbl)
+    return term_id.replace('_', ':')
+
 
 
 def get_term_name_from_rdf(class_, data):
@@ -390,17 +394,21 @@ def get_slim_terms(connection):
     return slim_terms
 
 
-def get_existing_ontology_terms(connection):  # , ontologies=None):
+def get_existing_ontology_terms(connection, ontologies=None):
     """Retrieves all existing ontology terms from the db
     """
     search_suffix = 'search/?type=OntologyTerm&status=released&status=obsolete'  # + ont_list
-    db_terms = search_metadata(search_suffix, connection, page_limit=200, is_generator=True)
+    db_terms = {}
     ignore = [
         "111112bc-8535-4448-903e-854af460a233", "111113bc-8535-4448-903e-854af460a233",
         "111114bc-8535-4448-903e-854af460a233", "111116bc-8535-4448-903e-854af460a233",
         "111117bc-8535-4448-903e-854af460a233"
     ]
-    return {t['term_id']: t for t in db_terms if t['uuid'] not in ignore}
+    for o in ontologies:
+        search_query = f"search/?type=OntologyTerm&status=released&status=obsolete&source_ontologies.uuid={o.get('uuid')}"
+        oterms = search_metadata(search_query, connection, page_limit=200, is_generator=True)
+        db_terms.update({t['term_id']: t for t in oterms if t['uuid'] not in ignore})
+    return db_terms
 
 
 def get_ontologies(connection, ont_list):
@@ -997,6 +1005,11 @@ def write_outfile(to_write, filename, pretty=False):
         else:
             json.dump(to_write, outfile)
 
+def filter_ontologies(ontologies):
+    for i, o in enumerate(ontologies):
+        if o['ontology_name'].startswith('4DN'):
+            ontologies.pop(i)
+
 
 def parse_args(args):
     parser = argparse.ArgumentParser(  # noqa - PyCharm wrongly thinks the formatter_class is specified wrong here.
@@ -1088,6 +1101,8 @@ def main():
         key = args.key
     connection = connect2server(args.env, key, args)
     print("Pre-processing")
+    all_ontologies = get_ontologies(connection, 'all')
+    filter_ontologies(all_ontologies)
     ontologies = get_ontologies(connection, args.ontology)
     if len(ontologies) > 1 and args.simple:
         print("INVALID USAGE - simple can only be used while processing a single ontology")
@@ -1095,13 +1110,11 @@ def main():
     if len(ontologies) > 1 and args.owlfile:
         print("INVALID USAGE - path to local owlfile can only be used while processing a single ontology")
         sys.exit(1)
-    for i, o in enumerate(ontologies):
-        if o['ontology_name'].startswith('4DN') or o['ontology_name'].startswith('CGAP'):
-            ontologies.pop(i)
+    filter_ontologies(ontologies)
     print('HAVE ONTOLOGY INFO')
     slim_terms = get_slim_terms(connection)
     print('HAVE SLIM TERMS')
-    db_terms = get_existing_ontology_terms(connection)
+    db_terms = get_existing_ontology_terms(connection, ontologies=all_ontologies)
     print('HAVE DB TERMS')
     terms = {}
     deprecated = []

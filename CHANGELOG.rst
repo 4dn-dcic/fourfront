@@ -6,6 +6,19 @@ fourfront
 Change Log
 ----------
 
+5.3.13
+======
+
+`Another Tweak to generate ontology script  <https://github.com/4dn-dcic/fourfront/pull/1820>`_
+
+* update to generate-ontology script to remove invalid characters in term_id when parsing from URI
+
+5.3.12
+======
+
+`Tweak to generate ontology script  <https://github.com/4dn-dcic/fourfront/pull/1818>`_
+
+* update to generate-ontology script to break up search query for all existing ontology terms into querying by ontology to get around the 100K result limit now that there are more than 100K terms in the db.
 
 5.3.11
 ======
