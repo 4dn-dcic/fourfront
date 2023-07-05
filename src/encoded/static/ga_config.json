@@ -1,13 +1,13 @@
 {
     "hostnameTrackerIDMapping" : {
-        "data.4dnucleome.org" : "GTM-KZ9JZM2",
-        "mastertest.4dnucleome.org" : "GTM-3DT6W3Z",
-        "staging.4dnucleome.org" : "GTM-3DT6W3Z",
-        "fourfront-hotseat-1650461284.us-east-1.elb.amazonaws.com" : "GTM-3DT6W3Z",
-        "hotseat.4dnucleome.org" : "GTM-3DT6W3Z",
-        "localhost:8000" : "GTM-WMSVXV3",
-        "localhost:6543" : "GTM-WMSVXV3",
-        "default" : "UA-86655305-4"
+        "data.4dnucleome.org" : ["GTM-KZ9JZM2", "G-23BW5XEWGZ"],
+        "mastertest.4dnucleome.org" : ["GTM-3DT6W3Z", "G-KW98FB0NDW"],
+        "staging.4dnucleome.org" : ["GTM-3DT6W3Z", "G-KW98FB0NDW"],
+        "fourfront-hotseat-1650461284.us-east-1.elb.amazonaws.com" : ["GTM-3DT6W3Z", "G-KW98FB0NDW"],
+        "hotseat.4dnucleome.org" : ["GTM-3DT6W3Z", "G-KW98FB0NDW"],
+        "localhost:8000" : ["GTM-WMSVXV3", "G-JWY59WYF4N"],
+        "localhost:6543" : ["GTM-WMSVXV3", "G-JWY59WYF4N"],
+        "default" : []
     },
     "dimensionNameMap" : {
         "currentFilters"    : 1,

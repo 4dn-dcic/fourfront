@@ -191,6 +191,8 @@ def main(global_config, **local_config):
             'github', 'google-oauth2'
         ]
     }
+    # ga4 api secret
+    settings['ga4.secret'] = settings.get('ga4.secret', os.environ.get('GA4Secret'))
     # set google reCAPTCHA keys
     # TODO propagate from GAC
     settings['g.recaptcha.key'] = os.environ.get('reCaptchaKey')

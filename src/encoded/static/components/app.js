@@ -146,7 +146,7 @@ export default class App extends React.PureComponent {
 
         Alerts.setStore(store);
 
-        const analyticsID = getGoogleAnalyticsTrackingID(href) || {};
+        const analyticsID = getGoogleAnalyticsTrackingID(href);
         /**
          * Whether HistoryAPI is supported in current browser.
          * Assigned / determined in constructor.
