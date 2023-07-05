@@ -1515,9 +1515,17 @@ def update_google_analytics(context, request, ga_config, filename, file_size_dow
 
     # Catch error here
     try:
+        def remove_none_fields(obj):
+            if isinstance(obj, dict):
+                return {k: remove_none_fields(v) for k, v in obj.items() if v is not None}
+            elif isinstance(obj, (list, tuple)):
+                return [remove_none_fields(item) for item in obj if item is not None]
+            else:
+                return obj
+
         _ = requests.post(
             url="https://www.google-analytics.com/mp/collect?measurement_id={m_tid}&api_secret={api_secret}".format(m_tid=ga_tid, api_secret=ga4_secret),
-            data=json.dumps(ga_payload),
+            data=json.dumps(remove_none_fields(ga_payload)),
             verify=True)
     except Exception as e:
         log.error('Exception encountered posting to GA: %s' % e)
