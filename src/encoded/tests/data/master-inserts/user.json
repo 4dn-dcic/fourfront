@@ -259,10 +259,10 @@
         "first_name": "Cesar",
         "groups": ["submitter", "admin"],
         "job_title": "Front End Engineer",
-        "lab": "test-4dn-lab",
+        "lab": "4dn-dcic-lab",
         "last_name": "Ferreyra-Mansilla",
         "status": "current",
-        "submits_for": ["test-4dn-lab","4dn-dcic-lab"],
+        "submits_for": ["4dn-dcic-lab"],
         "viewing_groups" : ["4DN"],
         "uuid": "90a33c84-6b17-4f96-be54-f8cb0458ee67"
     }
