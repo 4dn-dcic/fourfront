@@ -1,3 +1,6 @@
 from snovault import dev_servers
 from . import project_defs
-dev_servers.main()
+
+
+if __name__ == "__main__":
+    dev_servers.main()
