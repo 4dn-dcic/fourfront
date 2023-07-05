@@ -2,24 +2,12 @@
     "hostnameTrackerIDMapping" : {
         "data.4dnucleome.org" : ["GTM-KZ9JZM2", "G-23BW5XEWGZ"],
         "mastertest.4dnucleome.org" : ["GTM-3DT6W3Z", "G-KW98FB0NDW"],
-        "staging.4dnucleome.org" : ["GTM-3DT6W3Z", "G-KW98FB0NDW"],
+        "staging.4dnucleome.org" : ["GTM-KZ9JZM2", "G-23BW5XEWGZ"],
         "fourfront-hotseat-1650461284.us-east-1.elb.amazonaws.com" : ["GTM-3DT6W3Z", "G-KW98FB0NDW"],
         "hotseat.4dnucleome.org" : ["GTM-3DT6W3Z", "G-KW98FB0NDW"],
         "localhost:8000" : ["GTM-WMSVXV3", "G-JWY59WYF4N"],
         "localhost:6543" : ["GTM-WMSVXV3", "G-JWY59WYF4N"],
         "default" : []
-    },
-    "dimensionNameMap" : {
-        "currentFilters"    : 1,
-        "name"              : 2,
-        "field"             : 3,
-        "term"              : 4,
-        "experimentType"    : 5,
-        "userGroups"        : 6
-    },
-    "metricNameMap" : {
-        "filesize"          : 1,
-        "downloads"         : 2
     },
     "isAnalyticsScriptOnPage" : true,
     "enhancedEcommercePlugin": true,
