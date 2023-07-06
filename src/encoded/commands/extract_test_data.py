@@ -1,12 +1,12 @@
 import argparse
 import csv
-import loremipsum
 import random
 import re
 import sys
 import traceback
 
 from snovault.loadxl import *
+from lorem_text import lorem
 
 
 class Anonymizer(object):
@@ -15,7 +15,7 @@ class Anonymizer(object):
 
     # From Colander. Not exhaustive, will not match .museum etc.
     email_re = re.compile(r'(?i)[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}')
-    random_words = loremipsum._generator.words
+    random_words = lorem.WORDS
 
     def __init__(self):
         self.mapped_emails = {}

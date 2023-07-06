@@ -11,8 +11,42 @@ Change Log
 * Migrate/unify ingestion code to snovault.
 
 
+5.3.13
+======
+
+`Another Tweak to generate ontology script  <https://github.com/4dn-dcic/fourfront/pull/1820>`_
+
+* update to generate-ontology script to remove invalid characters in term_id when parsing from URI
+
+5.3.12
+======
+
+`Tweak to generate ontology script  <https://github.com/4dn-dcic/fourfront/pull/1818>`_
+
+* update to generate-ontology script to break up search query for all existing ontology terms into querying by ontology to get around the 100K result limit now that there are more than 100K terms in the db.
+
+5.3.11
+======
+
+* Use ``lorem-text`` library instead of ``loremipsum`` for proper license compatibility.
+  This affects only the ``extract-text-data`` script, which was used a long time ago
+  on a one-off basis to set up the system and isn't actually used at runtime, so the
+  impact of this is probably very small. Also, there are no apparent tests of this script,
+  but it's not clear there is a good reason to write any at this time. A manual test
+  was done in creating this patch to make sure the relevant change is plug-compatible.
+
+
+5.3.10
+=====
+
+`PR Cypress test for statistics page  <https://github.com/4dn-dcic/fourfront/pull/1813>`_
+
+* New 12_statistics test to check submissions and usage tabs loaded correctly
+
+
 5.3.9
 =====
+
 `PR Cypress test for facet terms grouping  <https://github.com/4dn-dcic/fourfront/pull/1810>`_
 
 * Two tests added for selecting/excluding a grouping term and its sub-terms
