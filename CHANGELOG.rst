@@ -6,6 +6,13 @@ fourfront
 Change Log
 ----------
 
+5.3.14
+======
+
+`Adding user master inserts  <https://github.com/4dn-dcic/fourfront/pull/>`_
+
+* Added User master inserts for Cesar and Bianca
+
 5.3.13
 ======
 
