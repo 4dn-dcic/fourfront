@@ -28,9 +28,10 @@ export function downloadFileButtonClick(fileItem, context = null){
             value: !isNaN(fileItem.file_size) ? fileItem.file_size : 0,
             filters: getStringifiedCurrentFilters((context && context.filters) || null)
         };
-        // Need 2 sep. events here else will be 2x checkouts.
-        event("add_to_cart", "FileDownloadButton", "Added Item to 'Cart'", null, parameters, false);
-        event("begin_checkout", "FileDownloadButton", "Clicked", null, parameters, false);
+        // add_to_cart-begin_checkout-purchase conversions
+        event("add_to_cart", "FileDownloadButton", "Click", null, parameters, false);
+        event("begin_checkout", "FileDownloadButton", "Select", null, parameters, false);
+        event("purchase", "FileDownloadButton", "Download", null, parameters, false);
     }, 0);
 }
 
