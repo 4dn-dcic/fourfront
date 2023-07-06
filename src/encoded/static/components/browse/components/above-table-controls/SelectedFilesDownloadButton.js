@@ -56,7 +56,7 @@ export const BrowseViewSelectedFilesDownloadButton = React.memo(function BrowseV
 
     return (
         <SelectedFilesDownloadButton {...{ context, session, disabled }} selectedFiles={subSelectedFiles || selectedFiles} filenamePrefix="metadata_"
-            id="browse-view-download-files-btn" data-tip={tooltip} className={cls}>
+            id="browse-view-download-files-btn" data-tip={tooltip} className={cls} analyticsAddFilesToCart>
             <i className="icon icon-download fas icon-fw mr-07"/>
             <span className="d-none d-lg-inline">Download </span>
             <span className="count-to-download-integer">{ countToShow }</span>
@@ -171,7 +171,7 @@ class SelectedFilesDownloadModal extends React.PureComponent {
         const extData = { item_list_name: analytics.hrefToListName(window && window.location.href) };
         const products = analytics.transformItemsToProducts(fileList, extData);
         analytics.event(
-            "add_to_cart",
+            "begin_checkout",
             "SelectedFilesDownloadModal",
             "Mounted",
             function() { console.info(`Will download ${productsLength} items in the cart.`); },
@@ -332,7 +332,7 @@ const SelectedFilesDownloadStartButton = React.memo(function SelectedFilesDownlo
                 };
                 const products = analytics.transformItemsToProducts(fileList, extData);
                 analytics.event(
-                    "begin_checkout",
+                    "purchase",
                     "SelectedFilesDownloadModal",
                     "Download metadata.tsv Button Pressed",
                     function() { console.info(`Will download metadata.tsv having ${productsLength} items in the cart.`); },
