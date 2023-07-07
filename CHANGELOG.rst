@@ -6,6 +6,16 @@ fourfront
 Change Log
 ----------
 
+5.3.15
+======
+
+`Google Analytics - UA to GA4 migration  <https://github.com/4dn-dcic/fourfront/pull/1819>`_
+
+* UA (Universal Analytics) sunsetted on July 1st, 2023
+* UA property and all hit-based functions including enhanced e-commerce plugins are migrated to GA4 property
+* Supports Google Tag Manager (GTM)
+
+
 5.3.14
 ======
 
