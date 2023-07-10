@@ -9,11 +9,7 @@ Change Log
 5.3.15
 ======
 
-`Google Analytics - UA to GA4 migration  <https://github.com/4dn-dcic/fourfront/pull/1819>`_
-
-* UA (Universal Analytics) sunsetted on July 1st, 2023
-* UA property and all hit-based functions including enhanced e-commerce plugins are migrated to GA4 property
-* Supports Google Tag Manager (GTM)
+* Repair Nginx PGP key for Docker build
 
 
 5.3.14
@@ -195,7 +191,7 @@ Adding ingestion support (from cgap-portal as initial guide):
 From Andy's branch (upd_ont_gen) on 2023-04-10: Update generate_ontology script to:
 
 * fix a bug that obsoleted a term even if it was linked to more than one Ontology
-* change the output json file to use item type names as keys for each section (i.e. ontology and ontology_term) 
+* change the output json file to use item type names as keys for each section (i.e. ontology and ontology_term)
 * optionally allow a local .owl file to be specified as input (instead of remote download from source)
 * optionally phase the json (no longer needed for ingest but could be useful for local testing)
 * updated some tests
@@ -356,7 +352,7 @@ which is no longer in source control.
 
 `PR selection popup navigation updates <https://github.com/4dn-dcic/fourfront/pull/1766>`_
 
-* Show footer having "back to selection list" button, even if user navigates other pages in popup  
+* Show footer having "back to selection list" button, even if user navigates other pages in popup
 * Restore selections when returned to selection page in popup
 
 
@@ -475,7 +471,7 @@ which is no longer in source control.
 
 * Miscellaneous vulnerable npm packages - reported by dependabot - are upgraded
 * Webpack is upgraded to 5.74 (has breaking changes that prevent building bundle.js, all fixed)
-* SPC is upgraded to 0.1.56 that has Sentry.js updates that support tree shaking 
+* SPC is upgraded to 0.1.56 that has Sentry.js updates that support tree shaking
 
 
 4.5.21
