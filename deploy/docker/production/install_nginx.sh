@@ -9,18 +9,17 @@ export PKG_RELEASE=1~buster
 # Securely provisions deps, installs Nginx, then removes all artifacts
 set -x \
     && apt-get update \
-    && apt-get install --no-install-recommends --no-install-suggests -y gnupg1 ca-certificates \
-    && \
-    NGINX_GPGKEY=573BFD6B3D8FBC641079A6ABABF5BD827BD9BF62; \
+    && apt-get install --no-install-recommends --no-install-suggests -y gnupg gnupg1 ca-certificates \
+    && gpg --refresh-keys && \
+    NGINX_GPGKEY=ABF5BD827BD9BF62; \
     found=''; \
     for server in \
-        ha.pool.sks-keyservers.net \
         hkp://keyserver.ubuntu.com:80 \
-        hkp://p80.pool.sks-keyservers.net:80 \
-        pgp.mit.edu \
+        pgp.mit.edu:80 \
     ; do \
         echo "Fetching GPG key $NGINX_GPGKEY from $server"; \
-        apt-key adv --keyserver "$server" --keyserver-options timeout=10 --recv-keys "$NGINX_GPGKEY" && found=yes && break; \
+        gpg --keyserver "$server" --keyserver-options timeout=10 --recv-keys "$NGINX_GPGKEY" && found=yes && \
+        gpg --export "$NGINX_GPGKEY" | apt-key add - && break; \
     done; \
     test -z "$found" && echo >&2 "error: failed to fetch GPG key $NGINX_GPGKEY" && exit 1; \
     apt-get remove --purge --auto-remove -y gnupg1 && rm -rf /var/lib/apt/lists/* \
