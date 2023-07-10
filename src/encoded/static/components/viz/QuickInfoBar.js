@@ -6,7 +6,7 @@ import _ from 'underscore';
 import url from 'url';
 import memoize from 'memoize-one';
 import ReactTooltip from 'react-tooltip';
-import { console, searchFilters, analytics, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { console, searchFilters, analytics, memoizedUrlParse,  } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { ActiveFiltersBar } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/ActiveFiltersBar';
 import { Filters, navigate, Schemas } from './../util';
 import { Toggle } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/Toggle';
@@ -165,11 +165,12 @@ export default class QuickInfoBar extends React.PureComponent {
             this.setState({ 'show' : 'activeFilters', 'reallyShow' : true });
         }
 
+        //analytics
         const expSetFilters = QuickInfoBar.expSetFilters((context && context.filters) || null, browseBaseParams);
-
-        analytics.event('QuickInfoBar', 'Hover over Filters Icon', {
-            'eventLabel' : ( areAnyFiltersSet ? "Some filters are set" : "No filters set" ),
-            'dimension1' : analytics.getStringifiedCurrentFilters(expSetFilters)
+        const strFilters = expSetFilters ? JSON.stringify(searchFilters.expSetFiltersToJSON(expSetFilters), _.keys(expSetFilters).sort()) : "{}";
+        analytics.event('navigation_bar', 'QuickInfoBar', 'Hover over Filters Icon', null, {
+            'name' : ( areAnyFiltersSet ? "Some filters are set" : "No filters set" ),
+            'filters' : strFilters
         });
     }
 
@@ -194,9 +195,12 @@ export default class QuickInfoBar extends React.PureComponent {
         const browseBaseParams = navigate.getBrowseBaseParams();
         const expSetFilters = QuickInfoBar.expSetFilters((context && context.filters) || null, browseBaseParams);
         searchFilters.changeFilter(field, term, expSetFilters, null, false, null, browseBaseParams);
-        analytics.event('QuickInfoBar', 'Unset Filter', {
-            'eventLabel' : `Field: ${field}, Term: ${term}`,
-            'dimension1' : analytics.getStringifiedCurrentFilters(expSetFilters)
+
+        //analytics
+        const strFilters = expSetFilters ? JSON.stringify(searchFilters.expSetFiltersToJSON(expSetFilters), _.keys(expSetFilters).sort()) : "{}";
+        analytics.event('navigation_bar', 'QuickInfoBar', 'Unset Filter', null, {
+            'name' : `Field: ${field}, Term: ${term}`,
+            'filters' : strFilters
         });
     }
 

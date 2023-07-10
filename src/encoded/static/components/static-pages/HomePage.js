@@ -249,7 +249,7 @@ class RecentlyReleasedDataSets extends React.PureComponent {
                             }
 
                             return (
-                                <div className="search-result-row">
+                                <div className="search-result-row" key={"dataset-" + datasetName}>
                                     <div className="columns clearfix result-table-row">
                                         <div className="search-result-column-block" data-col="dataset">
                                             <div className="inner">

@@ -1,25 +1,13 @@
 {
     "hostnameTrackerIDMapping" : {
-        "data.4dnucleome.org" : "UA-86655305-1",
-        "mastertest.4dnucleome.org" : "UA-86655305-2",
-        "staging.4dnucleome.org" : "UA-86655305-2",
-        "fourfront-hotseat-1650461284.us-east-1.elb.amazonaws.com" : "UA-86655305-2",
-        "hotseat.4dnucleome.org" : "UA-86655305-2",
-        "localhost:8000" : "UA-86655305-3",
-        "localhost:6543" : "UA-86655305-3",
-        "default" : "UA-86655305-4"
-    },
-    "dimensionNameMap" : {
-        "currentFilters"    : 1,
-        "name"              : 2,
-        "field"             : 3,
-        "term"              : 4,
-        "experimentType"    : 5,
-        "userGroups"        : 6
-    },
-    "metricNameMap" : {
-        "filesize"          : 1,
-        "downloads"         : 2
+        "data.4dnucleome.org" : ["GTM-KZ9JZM2", "G-23BW5XEWGZ"],
+        "mastertest.4dnucleome.org" : ["GTM-3DT6W3Z", "G-KW98FB0NDW"],
+        "staging.4dnucleome.org" : ["GTM-KZ9JZM2", "G-23BW5XEWGZ"],
+        "fourfront-hotseat-1650461284.us-east-1.elb.amazonaws.com" : ["GTM-3DT6W3Z", "G-KW98FB0NDW"],
+        "hotseat.4dnucleome.org" : ["GTM-3DT6W3Z", "G-KW98FB0NDW"],
+        "localhost:8000" : ["GTM-WMSVXV3", "G-JWY59WYF4N"],
+        "localhost:6543" : ["GTM-WMSVXV3", "G-JWY59WYF4N"],
+        "default" : []
     },
     "isAnalyticsScriptOnPage" : true,
     "enhancedEcommercePlugin": true,

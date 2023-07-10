@@ -56,7 +56,7 @@ export const BrowseViewSelectedFilesDownloadButton = React.memo(function BrowseV
 
     return (
         <SelectedFilesDownloadButton {...{ context, session, disabled }} selectedFiles={subSelectedFiles || selectedFiles} filenamePrefix="metadata_"
-            id="browse-view-download-files-btn" data-tip={tooltip} className={cls}>
+            id="browse-view-download-files-btn" data-tip={tooltip} className={cls} analyticsAddFilesToCart>
             <i className="icon icon-download fas icon-fw mr-07"/>
             <span className="d-none d-lg-inline">Download </span>
             <span className="count-to-download-integer">{ countToShow }</span>
@@ -167,20 +167,31 @@ class SelectedFilesDownloadModal extends React.PureComponent {
         const fileList = _.keys(selectedFiles).map(function(accessionTripleString){
             return selectedFiles[accessionTripleString];
         });
-        const extData = { list: analytics.hrefToListName(window && window.location.href) };
-        analytics.productsAddToCart(fileList, extData);
-        analytics.event("SelectedFilesDownloadModal", "Mounted", {
-            ...analytics.eventObjectFromCtx(context),
-            eventValue: fileCountUnique || fileList.length || 0
-        });
+        //analytics
+        const extData = { item_list_name: analytics.hrefToListName(window && window.location.href) };
+        const products = analytics.transformItemsToProducts(fileList, extData);
+        analytics.event(
+            "begin_checkout",
+            "SelectedFilesDownloadModal",
+            "Mounted",
+            function() { console.info(`Will download ${productsLength} items in the cart.`); },
+            {
+                items: Array.isArray(products) ? products : null,
+                list_name: extData.item_list_name,
+                value: fileCountUnique || fileList.length || 0,
+                filters: analytics.getStringifiedCurrentFilters((context && context.filters) || null)
+            }
+        );
     }
 
     handleAcceptDisclaimer(){
         const { context, fileCountUnique } = this.props;
-        analytics.event("SelectedFilesDownloadModal", "Accepted Disclaimer", {
-            ...analytics.eventObjectFromCtx(context),
-            eventValue: fileCountUnique
+        //analytics
+        analytics.event("click_disclaimer", "SelectedFilesDownloadModal", "Accepted Disclaimer", null, {
+            filters: analytics.getStringifiedCurrentFilters((context && context.filters) || null),
+            value: fileCountUnique
         });
+
         this.setState({ 'disclaimerAccepted' : true });
     }
 
@@ -312,20 +323,26 @@ const SelectedFilesDownloadStartButton = React.memo(function SelectedFilesDownlo
          */
         function onClick(evt){
             setTimeout(function(){
+                //analytics
                 const fileList = _.keys(selectedFiles).map(function(accessionTripleString){
                     return selectedFiles[accessionTripleString];
                 });
                 const extData = {
-                    list: analytics.hrefToListName(window && window.location.href),
-                    step: 1,
-                    option: "Metadata.tsv Download"
+                    item_list_name: analytics.hrefToListName(window && window.location.href)
                 };
-                analytics.productsCheckout(fileList, extData);
-                analytics.event("SelectedFilesDownloadModal", "Download metadata.tsv Button Pressed", {
-                    ...analytics.eventObjectFromCtx(context),
-                    eventLabel: JSON.stringify([...filenameAccessions].sort()),
-                    eventValue: filenameAccessions.size || 0
-                });
+                const products = analytics.transformItemsToProducts(fileList, extData);
+                analytics.event(
+                    "purchase",
+                    "SelectedFilesDownloadModal",
+                    "Download metadata.tsv Button Pressed",
+                    function() { console.info(`Will download metadata.tsv having ${productsLength} items in the cart.`); },
+                    {
+                        items: Array.isArray(products) ? products : null,
+                        list_name: extData.item_list_name,
+                        value: filenameAccessions.size || 0,
+                        filters: analytics.getStringifiedCurrentFilters((context && context.filters) || null)
+                    }
+                );
             }, 0);
         }
 

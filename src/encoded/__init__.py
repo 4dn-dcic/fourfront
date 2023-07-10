@@ -14,7 +14,7 @@ from dcicutils.env_utils import EnvUtils, get_mirror_env_from_context
 from dcicutils.ff_utils import get_health_page
 from dcicutils.log_utils import set_logging
 from dcicutils.misc_utils import VirtualApp
-from dcicutils.secrets_utils import assumed_identity, SecretsTable
+from dcicutils.secrets_utils import assume_identity, assumed_identity, SecretsTable
 from pyramid.config import Configurator
 from pyramid_localroles import LocalRolesAuthorizationPolicy
 from pyramid.settings import asbool
@@ -191,6 +191,13 @@ def main(global_config, **local_config):
             'github', 'google-oauth2'
         ]
     }
+    # ga4 api secret
+    if 'IDENTITY' in os.environ:
+        identity = assume_identity()
+        if 'ga4.secret' not in settings:
+            settings['ga4.secret'] = identity.get('GA4_API_SECRET', os.environ.get('GA4Secret'))
+    else:
+        settings['ga4.secret'] = settings.get('ga4.secret', os.environ.get('GA4Secret'))
     # set google reCAPTCHA keys
     # TODO propagate from GAC
     settings['g.recaptcha.key'] = os.environ.get('reCaptchaKey')

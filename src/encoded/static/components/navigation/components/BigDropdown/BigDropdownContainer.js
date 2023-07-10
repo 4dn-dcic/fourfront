@@ -44,9 +44,9 @@ export class BigDropdownContainer extends React.PureComponent {
                 }
             }, 250);
 
-            analytics.event("BigDropdownContainer", "open", { eventLabel: id });
+            analytics.event("navigation_bar", "BigDropdownContainer", "Open", null, { value: id });
         } else if (!open && pastOpen){
-            analytics.event("BigDropdownContainer", "close", { eventLabel: id });
+            analytics.event("navigation_bar", "BigDropdownContainer", "Close", null, { value: id });
         }
     }
 

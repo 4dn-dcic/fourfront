@@ -1459,98 +1459,74 @@ def update_google_analytics(context, request, ga_config, filename, file_size_dow
                             file_at_id, lab, user_uuid, user_groups, file_experiment_type, file_type='other'):
     """ Helper for @@download that updates GA in response to a download.
     """
+    registry = request.registry
+    ga4_secret = registry.settings.get('ga4.secret')
+    if not ga4_secret:
+        raise Exception("No valid GA4 api secret found")
+
     ga_cid = request.cookies.get("clientIdentifier")
     if not ga_cid:  # Fallback, potentially can stop working as GA is updated
         ga_cid = request.cookies.get("_ga")
         if ga_cid:
             ga_cid = ".".join(ga_cid.split(".")[2:])
 
-    ga_tid = ga_config["hostnameTrackerIDMapping"].get(request.host,
+    ga_tid_mapping = ga_config["hostnameTrackerIDMapping"].get(request.host,
                                                        ga_config["hostnameTrackerIDMapping"].get("default"))
+    ga_tid = ga_tid_mapping[1] if isinstance(ga_tid_mapping, list) and len(ga_tid_mapping) > 1 else None
+
     if ga_tid is None:
         raise Exception("No valid tracker id found in ga_config.json > hostnameTrackerIDMapping")
 
-    # We're sending 2 things here, an Event and a Transaction of a Product. (Reason 1 for redundancies)
-    # Some fields/names are re-used for multiple things,
-    # such as filename for event label + item name dimension + product name + page title dimension (unusued) + ...
+    file_extension = file_extension = os.path.splitext(filename)[1][1:]
+
     ga_payload = {
-        "v": 1,
-        "tid": ga_tid,
-        "t": "event",  # Hit type. Could also be event, transaction, pageview, etc.
-        # Override IP address. Else will send detail about EC2 server which not too useful.
-        "uip": request.remote_addr,
-        "ua": request.user_agent,
-        "dl": request.url,
-        "dt": filename,
-
-        # This cid below is a ~ random ID/number (?). Used as fallback, since one is required
-        # if don't provided uid. While we still allow users to not be logged in,
-        # should at least be able to preserve/track their anon downloads..
-
-        # '555' is in examples and seemed to be referred to as example for anonymous sessions in some Google doc.
-        # But not 100% sure and wasn't explicitly stated to be "555 for anonymous sessions" aside from usage in example.
-        # Unsure if groups under 1 session or not.
-        "cid": "555",
-        "an": "4DN Data Portal EC2 Server",  # App name, unsure if used yet
-        "ec": "Serverside File Download",  # Event Category
-        "ea": "Range Query" if request.range else "File Download",  # Event Action
-        "el": filename,  # Event Label
-        "ev": file_size_downloaded,  # Event Value
-        # Product fields
-        "pa": "purchase",
-        "ti": str(uuid4()),  # We need to send a unique transaction id along w. 'transactions' like purchases
-        "pr1id": file_at_id,  # Product ID/SKU
-        "pr1nm": filename,  # Product Name
-        "pr1br": lab.get("display_title"),  # Product Branch
-        "pr1qt": 1,  # Product Quantity
-        # Product Category from @type, e.g. "File/FileProcessed"
-        "pr1ca": "/".join([ty for ty in reversed(context.jsonld_type()[:-1])]),
-        # Product "Variant" (supposed to be like black, gray, etc), we repurpose for filetype for reporting
-        "pr1va": file_type
-        # "other" MATCHES THAT IN `file_type_detaild` calc property,
-        # since file_type_detailed is used on frontend when performing "Select All" files.
+        "client_id": ga_cid,
+        "timestamp_micros": str(int(datetime.datetime.now().timestamp() * 1000000)),
+        "non_personalized_ads": False,
+        # "user_agent": request.user_agent,
+        "events": [
+            {
+                "name": "file_download",
+                "params": {
+                    "name": filename,
+                    "source": "Serverside File Download",
+                    "action": "Range Query" if request.range else "File Download",
+                    "file_name": filename,
+                    "file_extension": file_extension,
+                    "link_url": request.url,
+                    "file_size": file_size_downloaded,
+                    "downloads": 0 if request.range else 1,
+                    "experiment_type": file_experiment_type or None,
+                    "lab": lab.get("display_title"),
+                    # Product Category from @type, e.g. "File/FileProcessed"
+                    "file_classification": "/".join([ty for ty in reversed(context.jsonld_type()[:-1])]),
+                    "file_type": file_type
+                }
+            }
+        ]
     }
 
-    # Custom dimensions
-    # See https://developers.google.com/analytics/devguides/collection/protocol/v1/parameters#pr_cm_
-    if "name" in ga_config["dimensionNameMap"]:
-        ga_payload["dimension" + str(ga_config["dimensionNameMap"]["name"])] = filename
-        ga_payload["pr1cd" + str(ga_config["dimensionNameMap"]["name"])] = filename
-
-    if "experimentType" in ga_config["dimensionNameMap"]:
-        ga_payload["dimension" + str(ga_config["dimensionNameMap"]["experimentType"])] = file_experiment_type or None
-        ga_payload["pr1cd" + str(ga_config["dimensionNameMap"]["experimentType"])] = file_experiment_type or None
-
-    if "filesize" in ga_config["metricNameMap"]:
-        ga_payload["metric" + str(ga_config["metricNameMap"]["filesize"])] = file_size_downloaded
-        ga_payload["pr1cm" + str(ga_config["metricNameMap"]["filesize"])] = file_size_downloaded
-
-    if "downloads" in ga_config["metricNameMap"]:
-        ga_payload["metric" + str(ga_config["metricNameMap"]["downloads"])] = 0 if request.range else 1
-        ga_payload["pr1cm" + str(ga_config["metricNameMap"]["downloads"])] = 0 if request.range else 1
-
-    # client id (`cid`) or user id (`uid`) is required. uid shall be user uuid.
-    # client id might be gotten from Google Analytics cookie,
-    # but not stable to use and won't work on programmatic requests...
     if user_uuid:
-        ga_payload['uid'] = user_uuid
+        ga_payload['events'][0]['params']['user_uuid'] = user_uuid
 
     if user_groups:
         groups_json = json.dumps(user_groups, separators=(',', ':'))  # Compcact JSON; aligns w. what's passed from JS.
-        ga_payload["dimension" + str(ga_config["dimensionNameMap"]["userGroups"])] = groups_json
-        ga_payload["pr1cd" + str(ga_config["dimensionNameMap"]["userGroups"])] = groups_json
-
-    if ga_cid:
-        ga_payload['cid'] = ga_cid
+        ga_payload['events'][0]['params']['user_groups'] = groups_json
 
     # Catch error here
     try:
+        def remove_none_fields(obj):
+            if isinstance(obj, dict):
+                return {k: remove_none_fields(v) for k, v in obj.items() if v is not None}
+            elif isinstance(obj, (list, tuple)):
+                return [remove_none_fields(item) for item in obj if item is not None]
+            else:
+                return obj
+
         _ = requests.post(
-            "https://ssl.google-analytics.com/collect?z=" + str(datetime.datetime.utcnow().timestamp()),
-            data=urllib.parse.urlencode(ga_payload),
-            timeout=5.0,
-            headers={'user-agent': ga_payload['ua']}
-        )
+            url="https://www.google-analytics.com/mp/collect?measurement_id={m_tid}&api_secret={api_secret}".format(m_tid=ga_tid, api_secret=ga4_secret),
+            data=json.dumps(remove_none_fields(ga_payload)),
+            verify=True)
     except Exception as e:
         log.error('Exception encountered posting to GA: %s' % e)
 
