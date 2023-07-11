@@ -6,7 +6,7 @@ fourfront
 Change Log
 ----------
 
-5.3.16
+5.4.0
 ======
 
 `Google Analytics - UA to GA4 migration  <https://github.com/4dn-dcic/fourfront/pull/1819>`_
