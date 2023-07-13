@@ -102,11 +102,6 @@ TESTS_REQUIRE = get_requirements('dev-dependencies')
 VERSION = POETRY_DATA['version']
 
 if __name__ == '__main__':
-    print('---INSTALL_REQUIRES')
-    print(INSTALL_REQUIRES)
-    print('---ENTRY_POINTS')
-    print(ENTRY_POINTS)
-    #INSTALL_REQUIRES.remove('dcicsnovault==8.0.1.3b7')
 
     setup(
         name=PACKAGE_NAME,
