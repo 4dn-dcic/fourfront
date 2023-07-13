@@ -115,8 +115,8 @@ class PublicationSearchResultTitle extends React.PureComponent {
         evt.preventDefault();
         evt.stopPropagation();
         analytics.productClick(result, {
-            'list'      : analytics.hrefToListName(href),
-            'position'  : rowNumber + 1
+            'list_name'   : analytics.hrefToListName(href),
+            'index'  : rowNumber + 1
         }, function(){
             navigate(object.itemUtil.atId(result));
         });

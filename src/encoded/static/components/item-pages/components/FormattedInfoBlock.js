@@ -306,7 +306,7 @@ class FormattedInfoBlockList extends React.Component {
  */
 export class FormattedInfoBlock extends React.Component {
 
-    static List = FormattedInfoBlockList
+    static List = FormattedInfoBlockList;
 
     /**
      * Set a parent component's state to have 'details_' + propertyName data fetched via AJAX.
@@ -346,14 +346,6 @@ export class FormattedInfoBlock extends React.Component {
             logger.error("AJAX Error: " + (error.title || 'N/A') + ' | ' +
                 'Detail: ' + (error.detail || 'N/A') + ' | ' +
                 'Description: ' + (error.description || 'N/A'));
-            analytics.event('FormattedInfoBlock', 'ERROR', {
-                eventLabel : (
-                    "AJAX Error: "  + (error.title       || 'N/A') + ' | ' +
-                    'Detail: '      + (error.detail      || 'N/A') + ' | ' +
-                    'Description: ' + (error.description || 'N/A')
-                ),
-                eventValue : error.code || null
-            });
         }.bind(this));
     }
 

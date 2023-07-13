@@ -45,19 +45,26 @@ const content_views = new Registry();
 const panel_views = new Registry();
 
 
-
-const getGoogleAnalyticsTrackingID = memoize(function(href){
-    if (!href && !isServerSide()){
+/**
+ * gets tracking ID and type (UA or GA4)
+ * @param {string} href     href to get matching Google Analytics property
+ * @return {string}         returns trackingID
+ */
+const getGoogleAnalyticsTrackingID = memoize(function (href){
+    if (!href && !isServerSide()) {
         href = window.location.href;
     }
     const { host } = url.parse(href);
     const hostnames = Object.keys(analyticsConfigurationOptions.hostnameTrackerIDMapping);
-    for (var i = 0; i < hostnames.length; i++){
+    //expected value for trackerIDs is [GTM ID, GA4 ID]
+    let trackerIDs = analyticsConfigurationOptions.hostnameTrackerIDMapping.default || [];
+    for (var i = 0; i < hostnames.length; i++) {
         if (host.indexOf(hostnames[i]) > -1) {
-            return analyticsConfigurationOptions.hostnameTrackerIDMapping[hostnames[i]];
+            trackerIDs = analyticsConfigurationOptions.hostnameTrackerIDMapping[hostnames[i]] || [];
         }
     }
-    return analyticsConfigurationOptions.hostnameTrackerIDMapping.default || null;
+    const [trackerID] = trackerIDs;
+    return trackerID || null;
 });
 
 const sentryDsn = memoize(function (href) {

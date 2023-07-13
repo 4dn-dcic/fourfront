@@ -142,10 +142,11 @@ export default class App extends React.PureComponent {
             'handleClick', 'handleSubmit', 'handlePopState', 'handleBeforeUnload'
         );
 
-        const { context } = props;
+        const { context, href } = props;
 
         Alerts.setStore(store);
 
+        const analyticsID = getGoogleAnalyticsTrackingID(href);
         /**
          * Whether HistoryAPI is supported in current browser.
          * Assigned / determined in constructor.
@@ -175,6 +176,7 @@ export default class App extends React.PureComponent {
          */
         this.state = {
             session,
+            analyticsID,
             'schemas'           : context.schemas || null,
             'isSubmitting'      : false,
             'mounted'           : false
@@ -202,7 +204,7 @@ export default class App extends React.PureComponent {
      */
     componentDidMount() {
         const { href, context } = this.props;
-        // const { session } = this.state;
+        const { analyticsID } = this.state;
 
         ajax.AJAXSettings.addSessionExpiredCallback(this.updateAppSessionState);
         // The href prop we have was from serverside. It would not have a hash in it, and might be shortened.
@@ -214,7 +216,6 @@ export default class App extends React.PureComponent {
 
         // Load up analytics
         // Load up analytics & perform initial pageview track
-        const analyticsID = getGoogleAnalyticsTrackingID(href);
         if (analyticsID){
             analytics.initializeGoogleAnalytics(
                 analyticsID,
@@ -1145,6 +1146,9 @@ export default class App extends React.PureComponent {
             this.historyEnabled = false;
         }
 
+        const { analyticsID } = this.state;
+        const gtag4Script = analyticsID && ("https://www.googletagmanager.com/gtag/js?id=" + analyticsID);
+
         const isLoading = contextRequest && contextRequest.xhr && contextRequest.xhr.readyState < 4;
         const baseDomain = (hrefParts.protocol || '') + '//' + hrefParts.host;
         const bodyElementProps = _.extend({}, this.state, this.props, { // Complete set of own props, own state, + extras.
@@ -1170,11 +1174,11 @@ export default class App extends React.PureComponent {
             "img-src 'self' https://* data: www.google-analytics.com abs.twimg.com https://pbs.twimg.com ton.twimg.com platform.twitter.com https://syndication.twitter.com",
             "child-src blob:",
             "frame-src https://twitter.com platform.twitter.com syndication.twitter.com www.google.com/recaptcha/",
-            "script-src 'self' www.google-analytics.com https://cdn.auth0.com https://hms-dbmi.auth0.com https://secure.gravatar.com https://cdn.syndication.twimg.com platform.twitter.com https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ 'unsafe-eval'", // + (typeof BUILDTYPE === "string" && BUILDTYPE === "quick" ? " 'unsafe-eval'" : ""),
-            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com  https://unpkg.com https://ton.twimg.com platform.twitter.com",
+            "script-src 'self' www.google-analytics.com www.googletagmanager.com https://cdn.auth0.com https://hms-dbmi.auth0.com https://secure.gravatar.com https://cdn.syndication.twimg.com platform.twitter.com https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ 'unsafe-eval'", // + (typeof BUILDTYPE === "string" && BUILDTYPE === "quick" ? " 'unsafe-eval'" : ""),
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com  https://unpkg.com https://ton.twimg.com platform.twitter.com https://www.googletagmanager.com",
             "font-src 'self' https://fonts.gstatic.com",
             "worker-src 'self' blob:",
-            "connect-src 'self' * blob: https://raw.githubusercontent.com https://higlass.4dnucleome.org https://*.s3.amazonaws.com https://s3.amazonaws.com/4dn-dcic-public/ https://www.encodeproject.org https://rest.ensembl.org https://www.google-analytics.com https://o427308.ingest.sentry.io https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ 'unsafe-inline' 'unsafe-eval'"
+            "connect-src 'self' * blob: https://raw.githubusercontent.com https://higlass.4dnucleome.org https://*.s3.amazonaws.com https://s3.amazonaws.com/4dn-dcic-public/ https://www.encodeproject.org https://rest.ensembl.org https://www.google-analytics.com https://www.googletagmanager.com https://o427308.ingest.sentry.io https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ 'unsafe-inline' 'unsafe-eval'"
         ].join("; ");
 
         // `lastCSSBuildTime` is used for both CSS and JS because is most likely they change at the same time on production from recompiling
@@ -1196,10 +1200,11 @@ export default class App extends React.PureComponent {
                     <link rel="preconnect" href="https://unpkg.com" />
                     <link rel="preconnect" href="https://fonts.googleapis.com/" />
                     <link rel="preconnect" href="//www.google-analytics.com" />
+                    <link rel="preconnect" href="//www.googletagmanager.com" />
                     <link rel="stylesheet" href="https://unpkg.com/rc-tabs@9.6.0/dist/rc-tabs.min.css" type="text/css" />
                     <SEO.CurrentContext {...{ context, hrefParts, baseDomain }} />
                     <link href="https://fonts.googleapis.com/css?family=Mada:200,300,400,500,600,700,900|Yrsa|Source+Code+Pro:300,400,500,600" rel="stylesheet" type="text/css"/>
-                    <script defer type="application/javascript" src="//www.google-analytics.com/analytics.js" />
+                    {gtag4Script && <script async type="application/javascript" src={gtag4Script} />}
                     <script defer type="application/javascript" src={"/static/build/bundle.js?build=" + (lastCSSBuildTime || 0)} charSet="utf-8" />
                     <link rel="canonical" href={canonical} />
                     {/* <script data-prop-name="inline" type="application/javascript" charSet="utf-8" dangerouslySetInnerHTML={{__html: this.props.inline}}/> <-- SAVED FOR REFERENCE */}

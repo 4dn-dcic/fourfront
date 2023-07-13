@@ -252,5 +252,25 @@
         "viewing_groups": ["4DN"],
         "groups": ["admin"],
         "submits_for": ["4dn-dcic-lab"]
+    },
+    {
+        "email": "cesar_ferreyra-mansilla@hms.harvard.edu",
+        "first_name": "Cesar",
+        "job_title": "Software Developer",
+        "lab": "4dn-dcic-lab",
+        "last_name": "Ferreyra-Mansilla",
+        "uuid": "0d29a38b-869c-4541-ad5f-9db8e8aa7ba6",
+        "viewing_groups": ["4DN"],
+        "groups": ["admin"]
+    },
+    {
+        "email": "bianca_morris@hms.harvard.edu",
+        "first_name": "Bianca",
+        "job_title": "Software Developer",
+        "lab": "4dn-dcic-lab",
+        "last_name": "Morris",
+        "uuid": "b330d859-4838-4dcc-8ea2-cf2974080ec3",
+        "viewing_groups": ["4DN"],
+        "groups": ["admin"]
     }
 ]
