@@ -5,7 +5,7 @@ import re
 import sys
 import traceback
 
-from snovault.loadxl import *
+from snovault.loadxl import ORDER, read_single_sheet
 from lorem_text import lorem
 
 
