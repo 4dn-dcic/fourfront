@@ -1,10 +1,12 @@
+from dcicutils.misc_utils import ignored
 from pyramid.httpexceptions import HTTPUnauthorized
 from snovault.project.authentication import SnovaultProjectAuthentication
 
 class FourfrontProjectAuthentication(SnovaultProjectAuthentication):
 
     def login(self, context, request, *, samesite):
-        samesite = "lax"  # TODO: maybe make lax = True or False (from Kent)
+        ignored(samesite)
+        samesite = "lax"
         return super().login(context, request, samesite=samesite)
 
     def namespaced_authentication_policy_authenticated_userid(self, namespaced_authentication_policy, request, set_user_info_property):

@@ -9,7 +9,7 @@ import re
 import structlog
 import tempfile
 from typing import Any, Generator, Optional
-from dcicutils.misc_utils import url_path_join, find_association
+from dcicutils.misc_utils import exported, find_association, url_path_join
 from snovault.util import (
     beanstalk_env_from_registry,
     check_user_is_logged_in,
@@ -20,51 +20,30 @@ from snovault.util import (
     delay_rerun,
     get_trusted_email,
     make_vapp_for_ingestion,
-    resolve_file_path as snovault_resolve_file_path,
+    #resolve_file_path as snovault_resolve_file_path,
     s3_local_file,
     s3_output_stream,
 )
-
-# These are now moved or reused from snovault.utils (May 2023):
-# - CONTENT_TYPE_SPECIAL_CASES
-# - register_path_content_type
-# - content_type_allowed
-# - gunzip_content
-# - deduplicate_list
-# - debuglog
-# - make_vapp_for_email
-# - vapp_for_email
-# - make_vapp_for_ingestion
-# - vapp_for_ingestion
-# - _app_from_clues
-# - make_s3_client
-# - build_s3_presigned_get_url
-# - convert_integer_to_comma_string
-# - ENCODED_ROOT_DIR
-# - resolve_file_path
-# - subrequest_object
-# - subrequest_item_creation
-# - s3_output_stream
-# - s3_local_file
-# - s3_input_stream
-# - check_user_is_logged_in
-# - create_empty_s3_file
-# - get_trusted_email
-# - beanstalk_env_from_request
-# - beanstalk_env_from_registry
-# - customized_delay_rerun
-# - delay_rerun
-# - SettingsKey
-# - ExtraArgs
-# - extra_kwargs_for_s3_encrypt_key_id
-
+exported (
+    beanstalk_env_from_registry,
+    check_user_is_logged_in,
+    content_type_allowed,
+    create_empty_s3_file,
+    customized_delay_rerun,
+    debuglog,
+    delay_rerun,
+    get_trusted_email,
+    make_vapp_for_ingestion,
+    s3_local_file,
+    s3_output_stream
+)
 
 log = structlog.getLogger(__name__)
 ENCODED_ROOT_DIR = os.path.dirname(__file__)
 
 
-def resolve_file_path(path, file_loc=None):
-    return snovault_resolve_file_path(path=path, file_loc=file_loc, root_dir=ENCODED_ROOT_DIR)
+#def resolve_file_path(path, file_loc=None):
+#    return snovault_resolve_file_path(path=path, file_loc=file_loc, root_dir=ENCODED_ROOT_DIR)
 
 
 @contextlib.contextmanager
