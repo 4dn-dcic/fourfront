@@ -17,7 +17,7 @@ from dcicutils.log_utils import set_logging
 from dcicutils.misc_utils import VirtualApp
 from dcicutils.secrets_utils import assume_identity, assumed_identity, SecretsTable
 from pyramid.config import Configurator
-from pyramid_localroles import LocalRolesAuthorizationPolicy
+from snovault.local_roles import LocalRolesAuthorizationPolicy
 from pyramid.settings import asbool
 from sentry_sdk.integrations.pyramid import PyramidIntegration
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
