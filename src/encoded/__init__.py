@@ -328,8 +328,6 @@ def include_snovault(config: Configurator) -> None:
     config.include('snovault.resource_views')
     config.include('snovault.settings')
     config.include('snovault.server_defaults')
-    # Renderers is giving problems at the moment - Will 6/1/23
-    # config.include('snovault.renderers')
 
 #   # make search available if ES is configured
 #   if config.registry.settings.get('elasticsearch.server'):

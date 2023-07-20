@@ -24,7 +24,7 @@ from snovault.util import (
     s3_local_file,
     s3_output_stream,
 )
-exported (
+exported(
     beanstalk_env_from_registry,
     check_user_is_logged_in,
     content_type_allowed,
