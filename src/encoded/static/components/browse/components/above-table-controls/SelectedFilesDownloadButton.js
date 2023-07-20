@@ -170,6 +170,7 @@ class SelectedFilesDownloadModal extends React.PureComponent {
         //analytics
         const extData = { item_list_name: analytics.hrefToListName(window && window.location.href) };
         const products = analytics.transformItemsToProducts(fileList, extData);
+        const productsLength = Array.isArray(products) ? products.length : fileList.length;
         analytics.event(
             "begin_checkout",
             "SelectedFilesDownloadModal",

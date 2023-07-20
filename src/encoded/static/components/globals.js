@@ -46,8 +46,8 @@ const panel_views = new Registry();
 
 
 /**
- * gets tracking ID and type (UA or GA4)
- * @param {string} href     href to get matching Google Analytics property
+ * gets tracking ID and type (GTM)
+ * @param {string} href     href to get matching Google Analytics 4 property
  * @return {string}         returns trackingID
  */
 const getGoogleAnalyticsTrackingID = memoize(function (href){
