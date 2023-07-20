@@ -6,8 +6,8 @@ from dcicutils.misc_utils import filtered_warnings
 from dcicutils.qa_utils import MockResponse
 from pyramid.testing import DummyRequest
 from unittest import mock
-from .. import renderers
-from ..renderers import (
+from snovault import renderers
+from snovault.renderers import (
     best_mime_type, should_transform, MIME_TYPES_SUPPORTED, MIME_TYPE_DEFAULT,
     MIME_TYPE_JSON, MIME_TYPE_HTML, MIME_TYPE_LD_JSON, MIME_TYPE_TRIAGE_MODE,
 )
@@ -43,8 +43,8 @@ def test_mime_variables():
     # TODO: I think it's a bug that JSON is at the head of this list (and so the default) in cgap-portal.
     #       cgap-portal needs to be made to match what Fourfront does to dig it out of a bug I introduced.
     #       -kmp 29-Jan-2022
-    assert MIME_TYPES_SUPPORTED == [MIME_TYPE_HTML, MIME_TYPE_JSON, MIME_TYPE_LD_JSON]
-    assert MIME_TYPE_DEFAULT == MIME_TYPE_HTML
+    assert MIME_TYPES_SUPPORTED == [MIME_TYPE_JSON, MIME_TYPE_HTML, MIME_TYPE_LD_JSON]
+    assert MIME_TYPE_DEFAULT == MIME_TYPE_JSON
 
     # Regardless of whether we're using legacy mode or modern mode, we should get the same result.
     assert MIME_TYPE_TRIAGE_MODE in ['legacy', 'modern']

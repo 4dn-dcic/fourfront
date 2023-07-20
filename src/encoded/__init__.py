@@ -234,7 +234,7 @@ def main(global_config, **local_config):
 
     # Render an HTML page to browsers and a JSON document for API clients
     # config.include(add_schemas_to_html_responses)
-    config.include('encoded.renderers')
+    config.include('snovault.renderers')
 #   config.include('.authentication')
 #   config.include('.server_defaults')
     config.include('.root')

@@ -20,10 +20,10 @@ from pyramid.response import Response
 from pyramid.settings import asbool
 from pyramid.threadlocal import manager
 from pyramid.traversal import split_path_info, _join_path_tuple
+from snovault.util import content_type_allowed
 from subprocess_middleware.worker import TransformWorker
 from urllib.parse import urlencode
 from webob.cookies import Cookie
-from .util import content_type_allowed
 
 
 log = logging.getLogger(__name__)
