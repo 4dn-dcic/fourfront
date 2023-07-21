@@ -25,7 +25,7 @@ def _award_viewing_group(award_uuid, root):
 
 
 # Item acls
-from .acl import (
+from ..acl import (
     ALLOW_CURRENT_AND_SUBMITTER_EDIT_ACL, 
     ALLOW_CURRENT_ACL,
     AWARD_MEMBER_ROLE,

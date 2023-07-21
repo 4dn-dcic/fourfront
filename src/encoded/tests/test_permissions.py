@@ -4,7 +4,7 @@ import webtest
 from datetime import date
 from urllib.parse import urlencode
 from ..types.lab import Lab
-from ..types.acl import LAB_MEMBER_ROLE, LAB_SUBMITTER_ROLE
+from ..acl import LAB_MEMBER_ROLE, LAB_SUBMITTER_ROLE
 
 
 pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]

@@ -8,7 +8,7 @@ from pyramid.security import (
     Everyone,
 )
 from pyramid.settings import asbool
-from .acl import (
+from ..acl import (
     DELETED_ACL,
     ONLY_ADMIN_VIEW_ACL,
     OWNER_ROLE

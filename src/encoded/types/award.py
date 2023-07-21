@@ -12,7 +12,7 @@ from snovault import (
     collection,
     load_schema,
 )
-from .acl import ONLY_ADMIN_VIEW_ACL
+from ..acl import ONLY_ADMIN_VIEW_ACL
 from .base import (
     Item,
     get_item_or_none,

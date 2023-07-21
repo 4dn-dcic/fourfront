@@ -14,7 +14,7 @@ from snovault import (
     load_schema,
     calculated_property
 )
-from .acl import (
+from ..acl import (
     ONLY_ADMIN_VIEW_ACL,
     LAB_MEMBER_ROLE,
     LAB_SUBMITTER_ROLE

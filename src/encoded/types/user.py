@@ -16,7 +16,7 @@ from pyramid.security import (
     Deny,
     Everyone,
 )
-from .acl import ONLY_ADMIN_VIEW_ACL, OWNER_ROLE
+from ..acl import ONLY_ADMIN_VIEW_ACL, OWNER_ROLE
 from .base import Item
 from snovault import (
     CONNECTION,
