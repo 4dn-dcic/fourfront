@@ -329,14 +329,16 @@ def include_snovault(config: Configurator) -> None:
     config.include('snovault.settings')
     config.include('snovault.server_defaults')
 
-#   # make search available if ES is configured
-#   if config.registry.settings.get('elasticsearch.server'):
-#       config.include('snovault.search.search')
-#       config.include('snovault.search.compound_search')
+#xyzzy - uncommented
+ #  # make search available if ES is configured
+ #  if config.registry.settings.get('elasticsearch.server'):
+ #      config.include('snovault.search.search')
+ #      config.include('snovault.search.compound_search')
 
-#   # configure redis server in production.ini
-#   if 'redis.server' in config.registry.settings:
-#       config.include('snovault.redis')
+    # configure redis server in production.ini
+    if 'redis.server' in config.registry.settings:
+        config.include('snovault.redis')
+#xyzzy - uncommented
 
     config.commit()
 
