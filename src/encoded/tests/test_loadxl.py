@@ -3,7 +3,7 @@ import pytest
 from past.builtins import basestring
 from pkg_resources import resource_filename
 from unittest import mock
-from .. import loadxl
+from snovault import loadxl
 from ..commands.run_upgrader_on_inserts import get_inserts
 
 
@@ -13,7 +13,7 @@ pytestmark = [pytest.mark.setone, pytest.mark.working]
 def test_load_data_endpoint(testapp):
     data = {'fdn_dir': 'master-inserts',
             'itype': ['award', 'lab', 'user']}
-    with mock.patch('encoded.loadxl.get_app') as mocked_app:
+    with mock.patch(f'snovault.loadxl.get_app') as mocked_app:
         mocked_app.return_value = testapp.app
         res = testapp.post_json('/load_data', data, status=200)
         assert res.json['status'] == 'success'
@@ -22,7 +22,7 @@ def test_load_data_endpoint(testapp):
 def test_load_data_endpoint_returns_error_if_incorrect_keyword(testapp):
     data = {'mdn_dir': 'master-inserts',
             'itype': ['user']}
-    with mock.patch('encoded.loadxl.get_app') as mocked_app:
+    with mock.patch(f'snovault.loadxl.get_app') as mocked_app:
         mocked_app.return_value = testapp.app
         res = testapp.post_json('/load_data', data, status=422)
         assert res.json['status'] == 'error'
@@ -32,7 +32,7 @@ def test_load_data_endpoint_returns_error_if_incorrect_keyword(testapp):
 def test_load_data_endpoint_returns_error_if_incorrect_data(testapp):
     data = {'fdn_dir': 'master-inserts',
             'itype': ['user']}
-    with mock.patch('encoded.loadxl.get_app') as mocked_app:
+    with mock.patch(f'snovault.loadxl.get_app') as mocked_app:
         mocked_app.return_value = testapp.app
         res = testapp.post_json('/load_data', data, status=422)
         assert res.json['status'] == 'error'
@@ -44,7 +44,7 @@ def test_load_data_user_specified_config(testapp):
             'itype': ['user', 'lab', 'award']}
     config_uri = 'test.ini'
     data['config_uri'] = config_uri
-    with mock.patch('encoded.loadxl.get_app') as mocked_app:
+    with mock.patch(f'snovault.loadxl.get_app') as mocked_app:
         mocked_app.return_value = testapp.app
         res = testapp.post_json('/load_data', data, status=200)
         assert res.json['status'] == 'success'
@@ -53,8 +53,8 @@ def test_load_data_user_specified_config(testapp):
 
 def test_load_data_local_dir(testapp):
     expected_dir = resource_filename('encoded', 'tests/data/perf-testing/')
-    with mock.patch('encoded.loadxl.get_app') as mocked_app:
-        with mock.patch('encoded.loadxl.load_all') as load_all:
+    with mock.patch(f'snovault.loadxl.get_app') as mocked_app:
+        with mock.patch(f'snovault.loadxl.load_all') as load_all:
             mocked_app.return_value = testapp.app
             load_all.return_value = None
             res = testapp.post_json('/load_data', {'fdn_dir': 'perf-testing'}, status=200)
@@ -68,7 +68,7 @@ def test_load_data_from_json(testapp):
     award_inserts = list(get_inserts('master-inserts', 'award'))
     data = {'store': {'user': user_inserts, 'lab': lab_inserts, 'award': award_inserts},
             'itype': ['user', 'lab', 'award']}
-    with mock.patch('encoded.loadxl.get_app') as mocked_app:
+    with mock.patch(f'snovault.loadxl.get_app') as mocked_app:
         mocked_app.return_value = testapp.app
         res = testapp.post_json('/load_data', data, status=200)
         assert res.json['status'] == 'success'
@@ -77,7 +77,7 @@ def test_load_data_from_json(testapp):
 def test_load_data_local_path(testapp):
     local_path = resource_filename('encoded', 'tests/data/master-inserts/')
     data = {'local_path': local_path, 'itype': ['user', 'lab', 'award']}
-    with mock.patch('encoded.loadxl.get_app') as mocked_app:
+    with mock.patch(f'snovault.loadxl.get_app') as mocked_app:
         mocked_app.return_value = testapp.app
         res = testapp.post_json('/load_data', data, status=200)
         assert res.json['status'] == 'success'
@@ -96,7 +96,7 @@ def test_load_data_iter_response(testapp):
     expected = len(user_inserts) + len(lab_inserts) + len(award_inserts)
     data = {'store': {'user': user_inserts, 'lab': lab_inserts, 'award': award_inserts},
             'itype': ['user', 'lab', 'award'], 'iter_response': True}
-    with mock.patch('encoded.loadxl.get_app') as mocked_app:
+    with mock.patch(f'snovault.loadxl.get_app') as mocked_app:
         mocked_app.return_value = testapp.app
         res = testapp.post_json('/load_data', data, status=200)
         assert res.content_type == 'text/plain'
@@ -120,7 +120,7 @@ def test_load_data_iter_response_fail(testapp):
     # the total number of items we expect
     expected = len(user_inserts)
     data = {'store': {'user': user_inserts}, 'itype': ['user'], 'iter_response': True}
-    with mock.patch('encoded.loadxl.get_app') as mocked_app:
+    with mock.patch(f'snovault.loadxl.get_app') as mocked_app:
         mocked_app.return_value = testapp.app
         res = testapp.post_json('/load_data', data, status=200)
         assert res.content_type == 'text/plain'
@@ -146,7 +146,7 @@ def test_load_all_gen(testapp):
     expected = len(user_inserts) + len(lab_inserts) + len(award_inserts)
     data = {'store': {'user': user_inserts, 'lab': lab_inserts, 'award': award_inserts},
             'itype': ['user', 'lab', 'award']}
-    with mock.patch('encoded.loadxl.get_app') as mocked_app:
+    with mock.patch(f'snovault.loadxl.get_app') as mocked_app:
         mocked_app.return_value = testapp.app
         # successful load cases
         gen1 = loadxl.load_all_gen(testapp, data['store'], None,

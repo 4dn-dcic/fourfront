@@ -1,3 +1,4 @@
+import encoded.project_defs
 import hashlib
 import logging
 import json  # used only in Fourfront, not CGAP
@@ -16,10 +17,11 @@ from dcicutils.log_utils import set_logging
 from dcicutils.misc_utils import VirtualApp
 from dcicutils.secrets_utils import assume_identity, assumed_identity, SecretsTable
 from pyramid.config import Configurator
-from pyramid_localroles import LocalRolesAuthorizationPolicy
+from snovault.local_roles import LocalRolesAuthorizationPolicy
 from pyramid.settings import asbool
 from sentry_sdk.integrations.pyramid import PyramidIntegration
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+#import snovault.ingestion.ingestion_listener
 from snovault.app import (
     session, json_from_path, configure_dbsession, changelogs,
     json_asset, STATIC_MAX_AGE as DEFAULT_STATIC_MAX_AGE
@@ -28,7 +30,7 @@ from snovault.elasticsearch import APP_FACTORY
 from snovault.elasticsearch.interfaces import INVALIDATION_SCOPE_ENABLED
 
 from .appdefs import APP_VERSION_REGISTRY_KEY
-from .loadxl import load_all
+from snovault.loadxl import load_all
 
 
 # snovault.app.STATIC_MAX_AGE (8 seconds) is WAY too low for /static and /profiles in CGAP - Will March 15 2022
@@ -224,23 +226,26 @@ def main(global_config, **local_config):
 
     # must include, as tm.attempts was removed from pyramid_tm
     config.include('pyramid_retry')
+    config.include('pyramid_tm')
 
     config.include(configure_dbsession)
-    config.include('snovault')
-    config.commit()  # commit so search can override listing
+    include_snovault(config)
+    include_fourfront(config)
 
     # Render an HTML page to browsers and a JSON document for API clients
     # config.include(add_schemas_to_html_responses)
-    config.include('.renderers')
-    config.include('.authentication')
-    config.include('.server_defaults')
+    config.include('snovault.renderers')
+#   config.include('.authentication')
+#   config.include('.server_defaults')
     config.include('.root')
     config.include('.types')
     config.include('.batch_download')
-    config.include('.loadxl')
+    config.include('snovault.loadxl')
     config.include('.visualization')
-    config.include('.ingestion_listener')
-    config.include('.ingestion.ingestion_message_handler_default')
+    config.include('snovault.ingestion.ingestion_listener')
+    config.include('.ingestion.ingestion_processors')
+    config.include('snovault.ingestion.ingestion_message_handler_default')
+    config.commit()  # commit so search can override listing
 
     if 'elasticsearch.server' in config.registry.settings:
         config.include('snovault.elasticsearch')
@@ -283,3 +288,61 @@ def main(global_config, **local_config):
         load_workbook(app, workbook_filename, docsdir)
 
     return app
+
+
+# TODO: Took from smaht-portal/src/encodedd/__init__.py (branch: wrr_intial) ...
+def include_snovault(config: Configurator) -> None:
+    """ Implements the selective include mechanism from Snovault
+        Decide here which modules you want to include from snovault
+
+        Note that because of new conflicts from extended modules, you can no longer
+        do config.include('snovault'), as you will get Configurator conflicts when
+        bringing in duplicates of various modules ie: root.py
+    """
+    config.include('snovault.authentication')
+    config.include('snovault.util')
+    config.include('snovault.drs')
+    config.include('snovault.stats')
+    config.include('snovault.batchupgrade')
+    config.include('snovault.calculated')
+    config.include('snovault.config')
+    config.include('snovault.connection')
+    config.include('snovault.custom_embed')
+    config.include('snovault.embed')
+    config.include('snovault.json_renderer')
+    config.include('snovault.validation')
+    config.include('snovault.predicates')
+    config.include('snovault.invalidation')
+    config.include('snovault.upgrader')
+    config.include('snovault.aggregated_items')
+    config.include('snovault.storage')
+    config.include('snovault.typeinfo')
+    config.include('snovault.types')
+    config.include('snovault.resources')
+    config.include('snovault.attachment')
+    config.include('snovault.schema_graph')
+    config.include('snovault.jsonld_context')
+    config.include('snovault.schema_views')
+    config.include('snovault.crud_views')
+    config.include('snovault.indexing_views')
+    config.include('snovault.resource_views')
+    config.include('snovault.settings')
+    config.include('snovault.server_defaults')
+
+#xyzzy - uncommented
+ #  # make search available if ES is configured
+ #  if config.registry.settings.get('elasticsearch.server'):
+ #      config.include('snovault.search.search')
+ #      config.include('snovault.search.compound_search')
+
+    # configure redis server in production.ini
+    if 'redis.server' in config.registry.settings:
+        config.include('snovault.redis')
+#xyzzy - uncommented
+
+    config.commit()
+
+
+def include_fourfront(config: Configurator) -> None:
+    # TODO
+    config.commit()

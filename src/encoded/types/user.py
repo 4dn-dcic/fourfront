@@ -16,12 +16,21 @@ from pyramid.security import (
     Deny,
     Everyone,
 )
+from ..acl import ONLY_ADMIN_VIEW_ACL, OWNER_ROLE
 from .base import Item
 from snovault import (
     CONNECTION,
     calculated_property,
     collection,
     load_schema,
+)
+from snovault.types.user import (
+    User as SnovaultUser,
+    user_page_view as snovault_user_page_view,
+    user_add as snovault_user_add,
+    #impersonate as snovault_impersonate,
+    #profile as snovault_profile,
+    #submissions as snovault_submissions
 )
 
 from snovault.storage import User as AuthUser
@@ -39,7 +48,7 @@ from dcicutils.misc_utils import override_environ
 logging.getLogger('boto3').setLevel(logging.WARNING)
 log = structlog.getLogger(__name__)
 
-ONLY_ADMIN_VIEW_DETAILS = [
+ONLY_ADMIN_VIEW_DETAILS_ACL = [
     (Allow, 'group.admin', ['view', 'view_details', 'edit']),
     (Allow, 'group.read-only-admin', ['view', 'view_details']),
     (Allow, 'remoteuser.INDEXER', ['view']),
@@ -47,21 +56,21 @@ ONLY_ADMIN_VIEW_DETAILS = [
     (Deny, Everyone, ['view', 'view_details', 'edit']),
 ]
 
-SUBMITTER_CREATE = []
+SUBMITTER_CREATE_ACL = []
 
-ONLY_OWNER_EDIT = [
-    (Allow, 'role.owner', 'view'),
-    (Allow, 'role.owner', 'edit'),
-    (Allow, 'role.owner', 'view_details')
-] + ONLY_ADMIN_VIEW_DETAILS
+ONLY_OWNER_EDIT_ACL = [
+    (Allow, OWNER_ROLE, 'view'),
+    (Allow, OWNER_ROLE, 'edit'),
+    (Allow, OWNER_ROLE, 'view_details')
+] + ONLY_ADMIN_VIEW_DETAILS_ACL
 
-USER_ALLOW_CURRENT = [
+USER_ALLOW_CURRENT_ACL = [
     (Allow, Everyone, 'view'),
-] + ONLY_ADMIN_VIEW_DETAILS
+] + ONLY_ADMIN_VIEW_DETAILS_ACL
 
-USER_DELETED = [
+USER_DELETED_ACL = [
     (Deny, Everyone, 'visible_for_edit')
-] + ONLY_ADMIN_VIEW_DETAILS
+] + ONLY_ADMIN_VIEW_DETAILS_ACL
 
 
 def _build_user_embedded_list():
@@ -80,6 +89,7 @@ def _build_user_embedded_list():
         'submits_for.name',
     ]
 
+# todo - trying putting contents of file 'u' here ...
 
 @collection(
     name='users',
@@ -89,7 +99,7 @@ def _build_user_embedded_list():
         'description': 'Listing of current 4D Nucleome DCIC users',
     },
     acl=[])
-class User(Item):
+class User(Item, SnovaultUser):
     """The user class."""
 
     item_type = 'user'
@@ -97,46 +107,16 @@ class User(Item):
     embedded_list = _build_user_embedded_list()
 
     STATUS_ACL = {
-        'current': ONLY_OWNER_EDIT,
-        'deleted': USER_DELETED,
-        'replaced': USER_DELETED,
-        'revoked': ONLY_ADMIN_VIEW_DETAILS,
+        'current': ONLY_OWNER_EDIT_ACL,
+        'deleted': USER_DELETED_ACL,
+        'replaced': USER_DELETED_ACL,
+        'revoked': ONLY_ADMIN_VIEW_DETAILS_ACL,
     }
-
-    @calculated_property(schema={
-        "title": "Title",
-        "type": "string",
-    })
-    def title(self, first_name, last_name):
-        """return first and last name."""
-        title = u'{} {}'.format(first_name, last_name)
-        return title
-
-    @calculated_property(schema={
-        "title": "Display Title",
-        "description": "A calculated title for every object in 4DN",
-        "type": "string"
-    })
-    def display_title(self, first_name, last_name):
-        return self.title(first_name, last_name)
-
-    @calculated_property(schema={
-        "title": "Contact Email",
-        "description": "E-Mail address by which this person should be contacted.",
-        "type": "string",
-        "format": "email"
-    })
-    def contact_email(self, email, preferred_email=None):
-        """Returns `email` if `preferred_email` is not defined."""
-        if preferred_email:
-            return preferred_email
-        else:
-            return email
 
     def __ac_local_roles__(self):
         """return the owner user."""
         owner = 'userid.%s' % self.uuid
-        return {owner: 'role.owner'}
+        return {owner: OWNER_ROLE}
 
     def _update(self, properties, sheets=None):
         # subscriptions are search queries used on /submissions page
@@ -185,86 +165,36 @@ class User(Item):
         super(User, self)._update(properties, sheets)
 
 
+
+USER_PAGE_VIEW_ATTRIBUTES = ['@id', '@type', 'uuid', 'lab', 'title', 'display_title']
+
+
 @view_config(context=User, permission='view', request_method='GET', name='page')
 @debug_log
-def user_page_view(context, request):
-    """smth."""
-    properties = item_view_page(context, request)
-    if not request.has_permission('view_details'):
-        filtered = {}
-        for key in ['@id', '@type', 'uuid', 'lab', 'title', 'display_title']:
-            try:
-                filtered[key] = properties[key]
-            except KeyError:
-                pass
-        return filtered
-    return properties
+def user_page_view(context, request, user_page_view_attributes = USER_PAGE_VIEW_ATTRIBUTES):
+    return snovault_user_page_view(context, request, user_page_view_attributes)
 
 
 @view_config(context=User.Collection, permission='add', request_method='POST',
              physical_path="/users")
 @debug_log
 def user_add(context, request):
-    '''
-    if we have a password in our request, create and auth entry
-    for the user as well
-    '''
-    # do we have valid data
-    pwd = request.json.get('password', None)
-    pwd_less_data = request.json.copy()
-
-    if pwd is not None:
-        del pwd_less_data['password']
-
-    validate_request(context.type_info.schema, request, pwd_less_data)
-
-    if request.errors:
-        return HTTPUnprocessableEntity(json={'errors': request.errors},
-                                       content_type='application/json')
-
-    result = collection_add(context, request)
-    if result:
-        email = request.json.get('email')
-        pwd = request.json.get('password', None)
-        name = request.json.get('first_name')
-        if pwd is not None:
-            auth_user = AuthUser(email, pwd, name)
-            db = request.registry['dbsession']
-            db.add(auth_user)
-
-            transaction.commit()
-    return result
+    return snovault_user_add(context, request)
 
 
-@calculated_property(context=User, category='user_action')
-def impersonate(context, request):
-    """smth."""
-    # This is assuming the user_action calculated properties
-    # will only be fetched from the current_user view,
-    # which ensures that the user represented by 'context' is also an effective principal
-    if request.has_permission('impersonate'):
-        return {
-            'id': 'impersonate',
-            'title': 'Impersonate User…',
-            'href': request.resource_path(context) + '?currentAction=impersonate-user',
-        }
+
+#@calculated_property(context=User, category='user_action')
+#def impersonate(context, request):
+#    return snovault_impersonate(context, request)
 
 
-@calculated_property(context=User, category='user_action')
-def profile(context, request):
-    """smth."""
-    return {
-        'id': 'profile',
-        'title': 'Profile',
-        'href': request.resource_path(context),
-    }
+
+#@calculated_property(context=User, category='user_action')
+#def profile(context, request):
+#    return snovault_profile(context, request)
 
 
-@calculated_property(context=User, category='user_action')
-def submissions(request):
-    """smth."""
-    return {
-        'id': 'submissions',
-        'title': 'Submissions',
-        'href': '/submissions',
-    }
+
+#@calculated_property(context=User, category='user_action')
+#def submissions(request):
+#    return snovault_submissions(request)

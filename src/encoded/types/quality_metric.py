@@ -8,7 +8,7 @@ from snovault import (
 # from pyramid.security import Authenticated
 from .base import (
     Item,
-    ALLOW_SUBMITTER_ADD,
+    ALLOW_SUBMITTER_ADD_ACL,
     lab_award_attribution_embed_list
 )
 
@@ -86,7 +86,7 @@ class QualityMetricFlag(Item):
 
 @abstract_collection(
     name='quality-metrics',
-    acl=ALLOW_SUBMITTER_ADD,
+    acl=ALLOW_SUBMITTER_ADD_ACL,
     properties={
         'title': 'Quality Metrics',
         'description': 'Listing of quality metrics',

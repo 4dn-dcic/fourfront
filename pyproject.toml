@@ -1,7 +1,7 @@
 [tool.poetry]
 # Note: Various modules refer to this system as "encoded", not "fourfront".
 name = "encoded"
-version = "5.4.0"
+version = "6.0.0"
 description = "4DN-DCIC Fourfront"
 authors = ["4DN-DCIC Team <support@4dnucleome.org>"]
 license = "MIT"
@@ -36,9 +36,9 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.8.1,<3.9"
+python = ">=3.8.1,<3.10"
 awscli = ">=1.25.36"
-boto3 = "^1.24.36"
+boto3 = "^1.26.133"
 botocore = "^1.27.36"
 certifi = ">=2021.5.30"
 chardet = "3.0.4"
@@ -47,8 +47,8 @@ colorama = "0.3.3"
 # we get odd 'pyo3_runtime.PanicException: Python API call failed' error on import
 # of cryptography.hazmat.bindings._rust in cryptography package. 2023-04-21.
 cryptography = "39.0.2"
-dcicsnovault = "^7.1.1"
-dcicutils = "^6.0.0"
+dcicsnovault = "9.0.0"
+dcicutils = "^7.5.0"
 elasticsearch = "7.13.4"
 elasticsearch-dsl = "^7.0.0"  # TODO: port code from cgap-portal to get rid of uses
 execnet = "1.4.1"
@@ -71,10 +71,9 @@ psutil = "^5.9.0"
 psycopg2-binary = "^2.9.3"
 py = ">=1.10.0"  # required for pytest
 PyBrowserID = "^0.10.0"
-PyJWT = "1.5.3"
+PyJWT = "^2.6.0"
 pyparsing = "^2.4.7"
 pyramid = "1.10.4"
-pyramid_localroles = ">=0.1,<1"
 pyramid-multiauth = ">=0.9.0,<1"
 pyramid-retry = "^1.0"
 pyramid-tm = "^2.4"
@@ -112,11 +111,12 @@ WSGIProxy2 = "0.4.2"
 xlrd = "^1.0.0"
 xlwt = "1.2.0"
 "zope.deprecation" = "4.4.0"
-"zope.interface" = "^4.7.2"
+#"zope.interface" = "^4.7.2"
+"zope.interface" = ">=4.7.2,<6"
 "zope.sqlalchemy" = "1.6"
 codeguru-profiler-agent = "^1.2.4"
 supervisor = "^4.2.4"
-wheel = "0.37.1"
+wheel = "0.40.0"
 
 
 [tool.poetry.dev-dependencies]
@@ -188,7 +188,8 @@ export-data = "encoded.commands.export_data:main"
 extract-test-data = "encoded.commands.extract_test_data:main"
 generate-ontology = "encoded.commands.generate_ontology:main"
 import-data = "encoded.commands.import_data:main"
-ingestion-listener = "encoded.ingestion_listener:main"
+#ingestion-listener = "encoded.ingestion.ingestion_listener:main"
+ingestion-listener = "snovault.ingestion.ingestion_listener:main"
 jsonld-rdf = "encoded.commands.jsonld_rdf:main"
 load-access-keys = "encoded.commands.load_access_keys:main"
 load-data = "encoded.commands.load_data:main"
@@ -203,6 +204,7 @@ profile = "encoded.commands.profile:main"
 # https://hms-dbmi.atlassian.net/browse/C4-781
 prepare-docker = "encoded.commands.prepare_template:prepare_docker_main"
 prepare-local-dev = "encoded.commands.prepare_template:prepare_local_dev_main"
+publish-to-pypi = "dcicutils.scripts.publish_to_pypi:main"
 run-upgrade-on-inserts = "encoded.commands.run_upgrader_on_inserts:main"
 spreadsheet-to-json = "encoded.commands.spreadsheet_to_json:main"
 update-inserts-from-server = "encoded.commands.update_inserts_from_server:main"
@@ -213,7 +215,8 @@ main = "encoded:main"
 
 [paste.composite_factory]
 indexer = "snovault.elasticsearch.es_index_listener:composite"
-ingester = "encoded.ingestion_listener:composite"
+#ingester = "encoded.ingestion_listener:composite"
+ingester = "snovault.ingestion.ingestion_listener:composite"
 
 [paste.filter_app_factory]
 memlimit = "encoded.memlimit:filter_app"

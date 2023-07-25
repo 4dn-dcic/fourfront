@@ -59,7 +59,7 @@ from ..search import make_search_subreq
 from ..util import check_user_is_logged_in
 from .base import (
     Item,
-    ALLOW_SUBMITTER_ADD,
+    ALLOW_SUBMITTER_ADD_ACL,
     get_item_or_none,
     lab_award_attribution_embed_list
 )
@@ -252,7 +252,7 @@ class FileSetMicroscopeQc(ItemWithAttachment, FileSet):
 @abstract_collection(
     name='files',
     unique_key='accession',
-    acl=ALLOW_SUBMITTER_ADD,
+    acl=ALLOW_SUBMITTER_ADD_ACL,
     properties={
         'title': 'Files',
         'description': 'Listing of Files',

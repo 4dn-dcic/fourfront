@@ -4,6 +4,7 @@ import webtest
 from datetime import date
 from urllib.parse import urlencode
 from ..types.lab import Lab
+from ..acl import LAB_MEMBER_ROLE, LAB_SUBMITTER_ROLE
 
 
 pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
@@ -949,8 +950,8 @@ def test_ac_local_roles_for_lab(registry):
     }
     test_lab = Lab.create(registry, None, lab_data)
     lab_ac_locals = test_lab.__ac_local_roles__()
-    assert('role.lab_submitter' in lab_ac_locals.values())
-    assert('role.lab_member' in lab_ac_locals.values())
+    assert(LAB_SUBMITTER_ROLE in lab_ac_locals.values())
+    assert(LAB_MEMBER_ROLE in lab_ac_locals.values())
 
 
 def test_last_modified_works_correctly(ind_human_item, submitter, wrangler, submitter_testapp, wrangler_testapp):

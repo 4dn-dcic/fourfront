@@ -21,7 +21,7 @@ from snovault.elasticsearch import ELASTIC_SEARCH, create_mapping
 from snovault.util import generate_indexer_namespace_for_testing
 from .conftest_settings import make_app_settings_dictionary
 from .. import main
-from ..loadxl import load_all
+from snovault.loadxl import load_all
 
 
 """
@@ -392,3 +392,12 @@ def workbook(es_app):
 def mocked_file_system():
     with MockFileSystem(auto_mirror_files_for_read=True).mock_exists_open_remove():
         yield
+
+
+def pytest_configure(config):
+    # Added 2023-06-14 to fix test_auth0.test_jwt_is_stateless_so_doesnt_actually_need_login
+    # which does not want the Auth0Secret environment variable to be set; don't think this
+    # really should be set for any tests; and just for completeness also unset other
+    # related environment variable, Auth0Client.
+    os.environ.pop('Auth0Secret', None)
+    os.environ.pop('Auth0Client', None)

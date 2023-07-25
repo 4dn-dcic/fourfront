@@ -10,7 +10,7 @@ from dcicutils.misc_utils import Retry
 from dcicutils.qa_utils import override_dict
 from http import cookies
 from pyramid.testing import DummyRequest
-from ..authentication import get_jwt
+from snovault.authentication import get_jwt
 from ..edw_hash import EDWHash
 from ..util import get_trusted_email
 
@@ -289,6 +289,10 @@ def test_404_keeps_auth_info(testapp, anontestapp, headers,
 
 def test_jwt_is_stateless_so_doesnt_actually_need_login(testapp, anontestapp, auth0_4dn_user_token,
                                                         auth0_existing_4dn_user_profile, headers):
+
+    # Just FYI: This test was failing for me (dmichaels/2023-06-14) and it turned out to be because
+    # I had, for some reason, my Auth0Secret environment variable set (to whatever); unsetting this
+    # fixed the problem; not sure how it was causing a failure; something someone else may run into.
 
     res2 = anontestapp.get('/users/', headers=headers, status=200)
     assert '@id' in res2.json['@graph'][0]
