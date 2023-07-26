@@ -49,6 +49,10 @@ def test_create_mapping(registry, item_type):
                 else:
                     assert 'properties' in final_mapping or final_mapping.get('type') == 'object'
             else:
+                # TODO/dmichaels/2023-05-27: This fails on item_type = 'filter_set' and is fixed by
+                # removing "institution" and "project" from "attribution" in  snovault/schemas/mixins.json.
+                # Or, it works with the new snovault.schema_utils code to look for $ref schemas in the
+                # app-specific (i.e. here in fourfront/portal) before looking in snovault.
                 assert split_ in mapping_pointer['properties']
                 mapping_pointer = mapping_pointer['properties'][split_]
 

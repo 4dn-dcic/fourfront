@@ -313,7 +313,7 @@ def test_load_and_index_perf_data(setup_and_teardown, es_testapp, indexer_testap
 
     # load -em up
     start = timer()
-    with mock.patch('encoded.loadxl.get_app') as mocked_app:
+    with mock.patch('snovault.loadxl.get_app') as mocked_app:
         mocked_app.return_value = es_testapp.app
         data = {'store': json_inserts}
         res = es_testapp.post_json('/load_data', data)

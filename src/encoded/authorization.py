@@ -1,6 +1,5 @@
 from snovault import COLLECTIONS
 
-
 def groupfinder(login, request):
     if '.' not in login:
         return None

@@ -114,6 +114,8 @@ ITEM_INDEX_ORDER = [
     'FileSetMicroscopeQc',
     'FileVistrack',
 
+    'FilterSet',
+
     'DataReleaseUpdate',
 
     'WorkflowRun',

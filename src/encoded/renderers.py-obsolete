@@ -20,10 +20,10 @@ from pyramid.response import Response
 from pyramid.settings import asbool
 from pyramid.threadlocal import manager
 from pyramid.traversal import split_path_info, _join_path_tuple
+from snovault.util import content_type_allowed
 from subprocess_middleware.worker import TransformWorker
 from urllib.parse import urlencode
 from webob.cookies import Cookie
-from .util import content_type_allowed
 
 
 log = logging.getLogger(__name__)
@@ -79,7 +79,7 @@ def includeme(config):
 
     # If this isn't placed under 'pyramid_tm.tm_tween_factory' (e.g. under resp headers or something)
     # then the headers aren't preserved or available in server-side render or response.
-    config.add_tween('.renderers.security_tween_factory', under='pyramid_tm.tm_tween_factory')
+    config.add_tween('encoded.renderers.security_tween_factory', under='pyramid_tm.tm_tween_factory')
 
     config.scan(__name__)
 

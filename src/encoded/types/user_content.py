@@ -13,13 +13,13 @@ import markdown
 from snovault.interfaces import STORAGE
 from .base import (
     Item,
-    ALLOW_CURRENT,
-    DELETED,
-    ALLOW_LAB_SUBMITTER_EDIT,
-    ALLOW_VIEWING_GROUP_VIEW,
-    ONLY_ADMIN_VIEW,
-    ALLOW_OWNER_EDIT,
-    ALLOW_ANY_USER_ADD,
+    ALLOW_CURRENT_ACL,
+    DELETED_ACL,
+    ALLOW_LAB_SUBMITTER_EDIT_ACL,
+    ALLOW_VIEWING_GROUP_VIEW_ACL,
+    ONLY_ADMIN_VIEW_ACL,
+    ALLOW_OWNER_EDIT_ACL,
+    ALLOW_ANY_USER_ADD_ACL,
     lab_award_attribution_embed_list
 )
 import os
@@ -42,13 +42,13 @@ class UserContent(Item):
     default_diff = ['name']
 
     STATUS_ACL = {              # Defaults + allow owner to edit (in case owner has no labs or submit_for)
-        'released'              : ALLOW_OWNER_EDIT + ALLOW_CURRENT,
-        'deleted'               : ALLOW_OWNER_EDIT + DELETED,
-        'draft'                 : ALLOW_OWNER_EDIT + ONLY_ADMIN_VIEW,
-        'released to lab'       : ALLOW_OWNER_EDIT + ALLOW_LAB_SUBMITTER_EDIT,
-        'released to project'   : ALLOW_OWNER_EDIT + ALLOW_VIEWING_GROUP_VIEW,
-        # 'archived'              : ALLOW_OWNER_EDIT + ALLOW_CURRENT,
-        # 'archived to project'   : ALLOW_OWNER_EDIT + ALLOW_VIEWING_GROUP_VIEW
+        'released'              : ALLOW_OWNER_EDIT_ACL + ALLOW_CURRENT_ACL,
+        'deleted'               : ALLOW_OWNER_EDIT_ACL + DELETED_ACL,
+        'draft'                 : ALLOW_OWNER_EDIT_ACL + ONLY_ADMIN_VIEW_ACL,
+        'released to lab'       : ALLOW_OWNER_EDIT_ACL + ALLOW_LAB_SUBMITTER_EDIT_ACL,
+        'released to project'   : ALLOW_OWNER_EDIT_ACL + ALLOW_VIEWING_GROUP_VIEW_ACL,
+        # 'archived'              : ALLOW_OWNER_EDIT_ACL + ALLOW_CURRENT_ACL,
+        # 'archived to project'   : ALLOW_OWNER_EDIT_ACL + ALLOW_VIEWING_GROUP_VIEW_ACL
     }
 
     @calculated_property(schema={
@@ -247,7 +247,7 @@ class HiglassViewConfig(UserContent):
         '''
         def __init__(self, *args, **kw):
             super(HiglassViewConfig.Collection, self).__init__(*args, **kw)
-            self.__acl__ = ALLOW_ANY_USER_ADD
+            self.__acl__ = ALLOW_ANY_USER_ADD_ACL
 
 
 @collection(
@@ -265,10 +265,10 @@ class MicroscopeConfiguration(UserContent):
     default_diff = ['description']
 
     STATUS_ACL = {
-        'released'              : ALLOW_CURRENT,
-        'deleted'               : DELETED,
-        'draft'                 : ALLOW_OWNER_EDIT + ALLOW_LAB_SUBMITTER_EDIT,
-        'released to project'   : ALLOW_VIEWING_GROUP_VIEW
+        'released'              : ALLOW_CURRENT_ACL,
+        'deleted'               : DELETED_ACL,
+        'draft'                 : ALLOW_OWNER_EDIT_ACL + ALLOW_LAB_SUBMITTER_EDIT_ACL,
+        'released to project'   : ALLOW_VIEWING_GROUP_VIEW_ACL
     }
 
     def _update(self, properties, sheets=None):
@@ -297,7 +297,7 @@ class MicroscopeConfiguration(UserContent):
         '''
         def __init__(self, *args, **kw):
             super(MicroscopeConfiguration.Collection, self).__init__(*args, **kw)
-            self.__acl__ = ALLOW_ANY_USER_ADD
+            self.__acl__ = ALLOW_ANY_USER_ADD_ACL
 
 
 @collection(
@@ -312,10 +312,10 @@ class ImageSetting(UserContent):
     item_type = 'image_setting'
     schema = load_schema('encoded:schemas/image_setting.json')
     STATUS_ACL = {
-        'released'              : ALLOW_CURRENT,
-        'deleted'               : DELETED,
-        'draft'                 : ALLOW_OWNER_EDIT + ALLOW_LAB_SUBMITTER_EDIT,
-        'released to project'   : ALLOW_VIEWING_GROUP_VIEW
+        'released'              : ALLOW_CURRENT_ACL,
+        'deleted'               : DELETED_ACL,
+        'draft'                 : ALLOW_OWNER_EDIT_ACL + ALLOW_LAB_SUBMITTER_EDIT_ACL,
+        'released to project'   : ALLOW_VIEWING_GROUP_VIEW_ACL
     }
 
     class Collection(Item.Collection):
@@ -325,7 +325,7 @@ class ImageSetting(UserContent):
         '''
         def __init__(self, *args, **kw):
             super(ImageSetting.Collection, self).__init__(*args, **kw)
-            self.__acl__ = ALLOW_ANY_USER_ADD
+            self.__acl__ = ALLOW_ANY_USER_ADD_ACL
 
 
 def get_local_file_contents(filename, contentFilesLocation=None):

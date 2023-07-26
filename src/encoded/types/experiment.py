@@ -27,7 +27,7 @@ from snovault.attachment import ItemWithAttachment
 from snovault.util import debug_log
 from .base import (
     Item,
-    ALLOW_SUBMITTER_ADD,
+    ALLOW_SUBMITTER_ADD_ACL,
     get_item_or_none,
     lab_award_attribution_embed_list
 )
@@ -64,7 +64,7 @@ def _build_experiment_embedded_list():
 @abstract_collection(
     name='experiments',
     unique_key='accession',
-    acl=ALLOW_SUBMITTER_ADD,
+    acl=ALLOW_SUBMITTER_ADD_ACL,
     properties={
         'title': "Experiments",
         'description': 'Listing of all types of experiments.',

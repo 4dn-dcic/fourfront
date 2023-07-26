@@ -9,7 +9,6 @@ from snovault import (
     calculated_property
 )
 from snovault.validators import (
-    validate_item_content_post,
     validate_item_content_patch,
     validate_item_content_put,
 )

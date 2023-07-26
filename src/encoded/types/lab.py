@@ -14,30 +14,24 @@ from snovault import (
     load_schema,
     calculated_property
 )
+from ..acl import (
+    ONLY_ADMIN_VIEW_ACL,
+    LAB_MEMBER_ROLE,
+    LAB_SUBMITTER_ROLE
+)
 from .base import (
     Item,
     get_item_or_none,
 )
 
-
-ONLY_ADMIN_VIEW = [
-    (Allow, 'group.admin', ['view', 'edit']),
-    (Allow, 'group.read-only-admin', ['view']),
-    (Allow, 'remoteuser.INDEXER', ['view']),
-    (Allow, 'remoteuser.EMBED', ['view']),
-    (Deny, Everyone, ['view', 'edit'])
-]
-
-SUBMITTER_CREATE = []
-
-ALLOW_EVERYONE_VIEW = [
+ALLOW_EVERYONE_VIEW_ACL = [
     (Allow, Everyone, 'view'),
 ]
 
 ALLOW_EVERYONE_VIEW_AND_SUBMITTER_EDIT = [
     (Allow, Everyone, 'view'),
-    (Allow, 'role.lab_submitter', 'edit'),
-] + ONLY_ADMIN_VIEW
+    (Allow, LAB_SUBMITTER_ROLE, 'edit'),
+] + ONLY_ADMIN_VIEW_ACL
 
 
 def _build_lab_embedded_list():
@@ -70,9 +64,9 @@ class Lab(Item):
 
     STATUS_ACL = {
         'current': ALLOW_EVERYONE_VIEW_AND_SUBMITTER_EDIT,
-        'deleted': ONLY_ADMIN_VIEW,
-        'revoked': ALLOW_EVERYONE_VIEW,
-        'inactive': ALLOW_EVERYONE_VIEW,
+        'deleted': ONLY_ADMIN_VIEW_ACL,
+        'revoked': ALLOW_EVERYONE_VIEW_ACL,
+        'inactive': ALLOW_EVERYONE_VIEW_ACL,
     }
 
     @calculated_property(schema={
@@ -152,7 +146,7 @@ class Lab(Item):
         """This creates roles that the lab item needs so it can be edited & viewed"""
         roles = {}
         lab_submitters = 'submits_for.%s' % self.uuid
-        roles[lab_submitters] = 'role.lab_submitter'
+        roles[lab_submitters] = LAB_SUBMITTER_ROLE
         lab_member = 'lab.%s' % self.uuid
-        roles[lab_member] = 'role.lab_member'
+        roles[lab_member] = LAB_MEMBER_ROLE
         return roles

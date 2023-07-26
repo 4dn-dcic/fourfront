@@ -6,6 +6,11 @@ fourfront
 Change Log
 ----------
 
+6.0.0
+=====
+* Migrate/unify ingestion code (etc) to snovault.
+
+
 5.4.0
 ======
 
