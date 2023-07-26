@@ -6,6 +6,16 @@ fourfront
 Change Log
 ----------
 
+6.0.1
+======
+
+`GA4 post-migration updates  <https://github.com/4dn-dcic/fourfront/pull/1825>`_
+
+* Bug Fix: a typo prevents begin_checkout GA4 event and it also makes Cypress 03d failing
+* New Feature: user_id tracking to track user's cross-session interaction between multiple devices added (this update unlocks various Audience related reports in GA4 property)
+* GTM workspaces updated
+
+
 6.0.0
 =====
 * Migrate/unify ingestion code (etc) to snovault.

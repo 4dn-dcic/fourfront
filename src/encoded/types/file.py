@@ -1508,6 +1508,7 @@ def update_google_analytics(context, request, ga_config, filename, file_size_dow
 
     if user_uuid:
         ga_payload['events'][0]['params']['user_uuid'] = user_uuid
+        ga_payload['user_id'] = user_uuid
 
     if user_groups:
         groups_json = json.dumps(user_groups, separators=(',', ':'))  # Compcact JSON; aligns w. what's passed from JS.

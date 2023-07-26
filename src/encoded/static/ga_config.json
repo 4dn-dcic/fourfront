@@ -10,7 +10,7 @@
         "default" : []
     },
     "isAnalyticsScriptOnPage" : true,
-    "enhancedEcommercePlugin": true,
+    "trackCrossSessions": true,
     "anonymizeTypes" : ["User"],
     "excludeAdminTrackingOnHostnames" : ["data.4dnucleome.org"]
 }
