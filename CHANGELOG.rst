@@ -6,8 +6,12 @@ fourfront
 Change Log
 ----------
 
+6.1.0
+=====
+* Fix for MIME type ordering in renderers.py (differs between cgap and fourfront).
+
 6.0.1
-======
+=====
 
 `GA4 post-migration updates  <https://github.com/4dn-dcic/fourfront/pull/1825>`_
 
