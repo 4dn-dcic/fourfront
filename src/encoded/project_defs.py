@@ -6,6 +6,7 @@ from .project.authentication import FourfrontProjectAuthentication
 from .project.authorization import FourfrontProjectAuthorization
 from .project.ingestion import FourfrontProjectIngestion
 from .project.loadxl import FourfrontProjectLoadxl
+from .project.renderers import FourfrontProjectRenderers
 
 @C4ProjectRegistry.register(APPLICATION_PYPROJECT_NAME)
 class FourfrontProject(FourfrontProjectAccessKey,
@@ -13,6 +14,7 @@ class FourfrontProject(FourfrontProjectAccessKey,
                        FourfrontProjectAuthorization,
                        FourfrontProjectIngestion,
                        FourfrontProjectLoadxl,
+                       FourfrontProjectRenderers,
                        SnovaultProject):
     NAMES = {'NAME': APPLICATION_NAME, 'PYPI_NAME': APPLICATION_PYPROJECT_NAME}
     ACCESSION_PREFIX = "4DN"

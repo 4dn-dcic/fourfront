@@ -1,7 +1,7 @@
 [tool.poetry]
 # Note: Various modules refer to this system as "encoded", not "fourfront".
 name = "encoded"
-version = "6.0.1"
+version = "6.1.0"
 description = "4DN-DCIC Fourfront"
 authors = ["4DN-DCIC Team <support@4dnucleome.org>"]
 license = "MIT"
@@ -47,7 +47,7 @@ colorama = "0.3.3"
 # we get odd 'pyo3_runtime.PanicException: Python API call failed' error on import
 # of cryptography.hazmat.bindings._rust in cryptography package. 2023-04-21.
 cryptography = "39.0.2"
-dcicsnovault = "9.0.0"
+dcicsnovault = "^9.1.0"
 dcicutils = "^7.5.0"
 elasticsearch = "7.13.4"
 elasticsearch-dsl = "^7.0.0"  # TODO: port code from cgap-portal to get rid of uses
