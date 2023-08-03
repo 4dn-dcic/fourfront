@@ -6,6 +6,15 @@ fourfront
 Change Log
 ----------
 
+6.1.1
+=====
+
+`suggested enums and purge fix <https://github.com/4dn-dcic/fourfront/pull/1833>`_
+
+* add muscle cell values to bcc suggested enums
+* Repair user_info resolution bug
+
+
 6.1.0
 =====
 * Fix for MIME type ordering in renderers.py (differs between cgap and fourfront).
