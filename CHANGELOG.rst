@@ -10,6 +10,8 @@ Change Log
 =====
 
 * add muscle cell values to bcc suggested enums
+* Repair user_info resolution bug
+
 
 6.1.0
 =====
