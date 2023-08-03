@@ -9,6 +9,8 @@ Change Log
 6.1.1
 =====
 
+`suggested enums and purge fix <https://github.com/4dn-dcic/fourfront/pull/1833>`_
+
 * add muscle cell values to bcc suggested enums
 * Repair user_info resolution bug
 
