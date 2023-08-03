@@ -6,6 +6,11 @@ fourfront
 Change Log
 ----------
 
+6.1.1
+=====
+
+* add muscle cell values to bcc suggested enums
+
 6.1.0
 =====
 * Fix for MIME type ordering in renderers.py (differs between cgap and fourfront).
