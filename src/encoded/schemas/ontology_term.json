@@ -1,8 +1,8 @@
 {
     "title": "Ontology Term",
     "description": "Schema for submitting an ontology term.",
-    "id": "/profiles/ontology_term.json",
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$id": "/profiles/ontology_term.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "required": ["term_id", "source_ontologies"],
     "identifyingProperties": ["uuid", "term_id", "preferred_name"],

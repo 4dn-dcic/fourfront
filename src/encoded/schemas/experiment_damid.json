@@ -1,8 +1,8 @@
 {
     "title": "DAM-ID Seq Experiment",
     "description": "",
-    "id": "/profiles/experiment_damid.json",
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$id": "/profiles/experiment_damid.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "required": ["experiment_type", "award", "lab", "biosample"],
     "identifyingProperties": ["uuid", "accession", "aliases"],

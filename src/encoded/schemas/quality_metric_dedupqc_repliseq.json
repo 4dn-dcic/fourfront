@@ -1,8 +1,8 @@
 {
     "title" : "Quality Metric for Repli-seq Dedup",
     "description": "Schema for reporting the specific calculation of an quality metrics",
-    "id": "/profiles/quality_metric_dedupqc_repliseq.json",
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$id": "/profiles/quality_metric_dedupqc_repliseq.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "required": ["award", "lab"],
     "additionalProperties": false,

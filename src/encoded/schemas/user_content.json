@@ -1,7 +1,7 @@
 {
     "title": "User Content",
-    "id": "/profiles/user_content.json",
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$id": "/profiles/user_content.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "additionalProperties": false,
     "identifyingProperties": ["uuid", "name"],

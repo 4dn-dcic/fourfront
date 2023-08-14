@@ -1,8 +1,8 @@
 {
     "title": "Microscope QC with PSFj",
     "description": "Stack images for QC with PSFj and final report.",
-    "id": "/profiles/file_set_microscope_qc.json",
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$id": "/profiles/file_set_microscope_qc.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "required": [ "award", "lab"],
     "identifyingProperties": ["uuid", "aliases", "accession"],

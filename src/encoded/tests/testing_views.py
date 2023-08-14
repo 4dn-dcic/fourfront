@@ -153,7 +153,7 @@ class TestingLinkTarget(Item):
         "type": "array",
         "items": {
             "type": ['string', 'object'],
-            "linkTo": "TestingLinkSourceSno",
+            "linkTo": "TestingLinkSource",
         },
     })
     def reverse(self, request):
@@ -257,7 +257,7 @@ class TestingDependencies(Item):
     item_type = 'testing_dependencies'
     schema = {
         'type': 'object',
-        'dependencies': {
+        'dependentRequired': {
             'dep1': ['dep2'],
             'dep2': ['dep1'],
         },

@@ -1,7 +1,7 @@
 {
     "description": "Schema for reporting a flag that indicates something about an associated quality metric",
-    "id": "/profiles/quality_metric_flag.json",
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$id": "/profiles/quality_metric_flag.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "required": ["flag", "award", "lab"],
     "additionalProperties": false,

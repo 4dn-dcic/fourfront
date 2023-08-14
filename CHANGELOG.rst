@@ -6,6 +6,13 @@ fourfront
 Change Log
 ----------
 
+6.2.0
+=====
+
+* Removes ``jsonschema_serialize_fork``, updating schema format version and validation
+* Repairs a bug in user registration
+
+
 6.1.1
 =====
 
