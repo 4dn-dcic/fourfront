@@ -3,7 +3,7 @@
         "uuid": "e6238bd1-7236-40b9-b2f3-80ca73e500e9",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
-        "url": "someurl",
+        "url": "https://www.example.com",
         "Max CPU utilization": 99.8,
         "overall_quality_status": "PASS"
     }
