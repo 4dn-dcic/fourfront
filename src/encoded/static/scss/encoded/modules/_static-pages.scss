@@ -1581,6 +1581,8 @@ $carousel-height : 240px;
 			min-height: 300px;
 			display: flex;
 			flex-direction: column;
+			border: 2px solid #D5E9EB;
+			border-radius: 10px;
 			//margin-top: 29px; // To align twitter header w Introduction header
 
 			> .homepage-section-title {
@@ -1631,6 +1633,53 @@ $carousel-height : 240px;
 			// Twitter timeline feed - correct it to show up as block not inline-block, which adds 7px to bottom
 			iframe[id^="twitter-widget-"] {
 				display: block !important;
+			}
+
+			.social-connections-image {
+				border-radius: 10px;
+				background-color: #EFF7F8;
+
+				img {
+					width: 85%;
+				}
+			}
+
+			.social-connections-block-title {
+				font-size: 2rem;
+				font-weight: 600;
+				color: #34646C;
+
+				@include media-breakpoint-only(lg) {
+					font-size: 1.4rem;
+				}
+
+				@include media-breakpoint-only(md) {
+					font-size: 1.2rem;
+					font-weight: 400;
+				}
+			}
+
+			.social-connections-desc {
+				color: #34646C;
+			}
+
+			a.btn-nature-4dn-article, a.btn-follow-on-social-media {
+				font-size: 1.1rem !important;
+				border-width: 0px;
+				border-radius: 20px !important;
+				background-color: #D5E9EB;
+				color: #34646C;
+
+				&:hover {
+					color: #FFFFFF;
+					background-color: $brand-primary-dark;
+				}
+			}
+
+			a.btn-follow-on-social-media  {
+				background-color: #FFFFFF;
+				border-color: #D5E9EB;
+				border-width: 1px;
 			}
 
 			@include media-breakpoint-down(sm){
