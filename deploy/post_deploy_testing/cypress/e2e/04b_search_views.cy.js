@@ -46,7 +46,7 @@ describe('Post-Deployment Search View Tests', function () {
                     typeTitle = $typeTitle.text().trim();
                 })
                     .get('.search-result-row.detail-closed[data-row-number="' + intervalCount + '"] .search-result-column-block[data-field="@type"] .icon-container .icon').click({ force: true }).end()
-                    .get('.facets-body .facet.open[data-field="type"] .term[data-selected=true] .facet-item').then(function ($selectedTypeTitle) {
+                    .get('.facets-body .facet[data-field="type"] .term[data-selected=true] .facet-item').then(function ($selectedTypeTitle) {
                         const selectedTypeTitle = $selectedTypeTitle.text().trim();
                         cy.expect(typeTitle).equal(selectedTypeTitle);
                     });
