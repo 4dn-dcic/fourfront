@@ -150,72 +150,156 @@
 		} 
 	}
 
-	.recently-released-datasets-section {
-		h2.homepage-section-title {
-			font-size: 30px;
-		}
+	.datasets-and-social-connections-container {
 
-		.search-result-row {
-			min-width: 696px;
-			@include media-breakpoint-down(lg){
-				min-width: 620px;
+		.datasets-and-social-connections-col-datasets {
+			h2.homepage-section-title {
+				font-size: 30px;
 			}
-			@include media-breakpoint-down(md){
-				min-width: 100%;
-			}
-		}
-
-		.search-headers-row {
-			background-color: #EFF7F8;
-
-			/* column sorter not exists, so ignore padding */
-			.search-headers-column-block .inner {
-				padding-right: 0px;
-			}
-		}
 		
-		.search-headers-column-block .inner {
-			color: #34646C !important;
-		}
-
-		.search-result-rows-container {
-			overflow: auto;
-			max-height: 400px;
-		}
-
-		.search-result-column-block {
-			font-size: 14px;
-		}
-
-		.search-headers-column-block[data-col="dataset"],
-		.search-result-column-block[data-col="dataset"] {
-			width: 280px;
-			@include media-breakpoint-down(lg){
-				width: 250px;
+			.recently-released-datasets-container {
+				@include media-breakpoint-up(lg) {
+					min-height: 380px;
+				}
 			}
-		}
-		.search-headers-column-block[data-col="expset_count"],
-		.search-result-column-block[data-col="expset_count"]{
-			width: 200px;
-			@include media-breakpoint-down(lg){
-				width: 170px;
+		
+			.search-result-row {
+				min-width: 696px;
+		
+				@include media-breakpoint-down(lg) {
+					min-width: 620px;
+				}
+		
+				@include media-breakpoint-down(md) {
+					min-width: 100%;
+				}
 			}
-		}
-		.search-headers-column-block[data-col="lab"],
-		.search-result-column-block[data-col="lab"]{
-			width: 240px;
-			@include media-breakpoint-down(lg){
+		
+			.search-headers-row {
+				background-color: #EFF7F8;
+		
+				/* column sorter not exists, so ignore padding */
+				.search-headers-column-block .inner {
+					padding-right: 0px;
+				}
+			}
+		
+			.search-headers-column-block .inner {
+				color: #34646C !important;
+			}
+		
+			.search-result-rows-container {
+				overflow: auto;
+				max-height: 400px;
+			}
+		
+			.search-result-column-block {
+				font-size: 14px;
+			}
+		
+			.search-headers-column-block[data-col="dataset"],
+			.search-result-column-block[data-col="dataset"] {
+				width: 280px;
+		
+				@include media-breakpoint-down(lg) {
+					width: 250px;
+				}
+			}
+		
+			.search-headers-column-block[data-col="expset_count"],
+			.search-result-column-block[data-col="expset_count"] {
 				width: 200px;
+		
+				@include media-breakpoint-down(lg) {
+					width: 170px;
+				}
+			}
+		
+			.search-headers-column-block[data-col="lab"],
+			.search-result-column-block[data-col="lab"] {
+				width: 240px;
+		
+				@include media-breakpoint-down(lg) {
+					width: 200px;
+				}
+			}
+		
+			.search-result-loading {
+				padding-top: 20;
+				padding-bottom: 20;
+				font-size: 2rem;
+				opacity: 0.5;
 			}
 		}
 
-		.search-result-loading {
-			padding-top: 20;
-			padding-bottom: 20;
-			font-size: 2rem;
-			opacity: 0.5;
+		.datasets-and-social-connections-col-social {
+
+			margin-top: 35px;
+			
+			.social-connections-container {
+				position: relative;
+				min-height: 300px;
+				display: flex;
+				flex-direction: column;
+				padding: 15px;
+				border: 2px solid #D5E9EB;
+				border-radius: 15px;
+
+				.social-connections-image {
+					border-radius: 12px;
+					background-color: #EFF7F8;
+
+					img { width: 85%; }
+				}
+
+				.social-connections-block-title {
+					font-size: 2rem;
+					font-weight: 600;
+					color: #34646C;
+
+					@include media-breakpoint-only(lg) {
+						font-size: 1.4rem;
+					}
+
+					@include media-breakpoint-only(md) {
+						font-size: 1.2rem;
+						font-weight: 400;
+					}
+				}
+
+				.social-connections-desc {
+					color: #34646C;
+				}
+
+				a.btn-nature-4dn-article, a.btn-follow-on-social-media {
+					font-size: 1.1rem !important;
+					border-width: 0px;
+					border-radius: 20px !important;
+					background-color: #D5E9EB;
+					color: #34646C;
+
+					&:hover {
+						color: #FFFFFF;
+						background-color: $brand-primary-dark;
+					}
+				}
+
+				a.btn-follow-on-social-media  {
+					background-color: #FFFFFF;
+					border-color: #D5E9EB;
+					border-width: 1px;
+				}
+			}
+			
+
+			@include media-breakpoint-down(sm){
+				// Add top margin for spacing on mobile
+				margin-top: 50px;
+			}
 		}
 	}
+
+	
 
 	.browse-data-collection-fullwidth-container {
 		position: relative;
@@ -397,12 +481,6 @@
 			bottom: 0;
 			right: 0;
 			background-color: #EFF7F8;
-		}
-	}
-
-	.recently-released-datasets-container {
-		@include media-breakpoint-up(lg){
-			min-height: 380px;
 		}
 	}
 
@@ -596,7 +674,7 @@
 		background-color: #EFF7F8;
 		border-radius: 30px;
 
-		>.fourdn-mission-content {
+		.fourdn-mission-content {
 			background-color: #FFFFFF;
 			border-radius: 15px;
 
@@ -646,86 +724,89 @@
 		}
 	}
 
-	.data-use-guidelines-container {
-		background-color: #F5FBF5;
-		border-radius: 20px;
-		border-width: 2px;
-		border-color: #99C79C;
-		border-style: solid;
-		color: #0D4129;
-		font-size: 15px;
-
-		h2.homepage-section-title {
-			border-bottom: none;
+	.guidelines-and-help-container {
+		
+		.guidelines-and-help-col-guidelines {
+			background-color: #F5FBF5;
+			border-radius: 20px;
+			border-width: 2px;
+			border-color: #99C79C;
+			border-style: solid;
 			color: #0D4129;
-			margin-top: 5px;
-			margin-bottom: 0px;
-			padding-bottom: 15px;
-			font-size: 26px;
-			font-weight: 600;
-			line-height: 38px;
-		}
-
-		> p {
-			padding-left: 15px;
-		}
-	}
-
-	.fourdn-help-container {
-
-		@include media-breakpoint-up(lg)
-		{
-			padding-left: 60px;
-		}
-		
-		h2.homepage-section-title {
-			border-bottom: 1px solid #eee;
-			border-bottom-color: rgba(15,70,100,.12);
-			font-weight: 500;
-			font-size: 25px;
-		}
-		
-		a.btn-4dn-help {
-			font-size: 1.3rem;
-			border-width: 0px;
-			border-radius: 15px;
-			background-color: #EFF7F8;
-			color: #34646C;
-			font-weight: 400;
-
-			&:focus {
-				box-shadow: none !important;
+			font-size: 15px;
+	
+			h2.homepage-section-title {
+				border-bottom: none;
+				color: #0D4129;
+				margin-top: 5px;
+				margin-bottom: 0px;
+				padding-bottom: 15px;
+				font-size: 26px;
+				font-weight: 600;
+				line-height: 38px;
 			}
-
-			.btn-4dn-help-icon {
-				font-size: 1.5rem;
-				opacity: 0.9;
-				box-shadow: 0 0 2px #3E8A98;
-				width: 39px;
-				height: 39px;
-				border-radius: 50%;
-				text-align: center;
-				line-height: 42px;
-				vertical-align: middle;
-				padding-left: 1px;
+	
+			> p {
+				padding-left: 15px;
 			}
-
-			.btn-4dn-help-arrow {
-				opacity: 0.3;
+		}
+	
+		.guidelines-and-help-col-help {
+	
+			@include media-breakpoint-up(lg)
+			{
+				padding-left: 60px;
 			}
-
-			&:hover {
-				background-color: $brand-primary-dark !important;
-				color: #FFFFFF !important;
-
+			
+			h2.homepage-section-title {
+				border-bottom: 1px solid #eee;
+				border-bottom-color: rgba(15,70,100,.12);
+				font-weight: 500;
+				font-size: 25px;
+			}
+			
+			a.btn-4dn-help {
+				font-size: 1.3rem;
+				border-width: 0px;
+				border-radius: 15px;
+				background-color: #EFF7F8;
+				color: #34646C;
+				font-weight: 400;
+	
+				&:focus {
+					box-shadow: none !important;
+				}
+	
 				.btn-4dn-help-icon {
-					box-shadow: 0 0 2px #FFFFFF;
+					font-size: 1.5rem;
+					opacity: 0.9;
+					box-shadow: 0 0 2px #3E8A98;
+					width: 39px;
+					height: 39px;
+					border-radius: 50%;
+					text-align: center;
+					line-height: 42px;
+					vertical-align: middle;
+					padding-left: 1px;
+				}
+	
+				.btn-4dn-help-arrow {
+					opacity: 0.3;
+				}
+	
+				&:hover {
+					background-color: $brand-primary-dark !important;
+					color: #FFFFFF !important;
+	
+					.btn-4dn-help-icon {
+						box-shadow: 0 0 2px #FFFFFF;
+					}
 				}
 			}
-		}
-
-		.help-button-text {
-			font-weight: 600;
+	
+			.help-button-text {
+				font-weight: 600;
+			}
 		}
 	}
 
@@ -1575,118 +1656,6 @@ $carousel-height : 240px;
 	.home-content-area {
 
 		margin-top: 15px;
-
-		.social-connections-column {
-			position: relative;
-			min-height: 300px;
-			display: flex;
-			flex-direction: column;
-			border: 2px solid #D5E9EB;
-			border-radius: 10px;
-			//margin-top: 29px; // To align twitter header w Introduction header
-
-			> .homepage-section-title {
-				border-bottom: none; // Twitter container has own.
-				margin-bottom: 0;
-				//font-weight: 100;
-				display: flex;
-				justify-content: space-between;
-				
-				> .privacy-ext {
-					font-size: 1rem;
-					font-weight: 400;
-					line-height: 2;
-					color: $gray-500;
-					align-self: flex-end;
-					&:hover {
-						text-decoration: none;
-						color: $gray-700;
-					}
-				}
-			}
-
-			> .twitter-timeline-container {
-				flex-grow: 1;
-				min-height: 380px;
-			}
-
-			.twitter-loading-placeholder {
-				// Twitter timeline receives an explicit height (in px) upon initialization
-				// This allows us to prevent temporary "jump" in container height.
-				position: absolute;
-				min-height: inherit;
-				// Offset padding left/right
-				left: 10px;
-				right: 10px;
-
-				text-align: center;
-				padding-top: 100px; // Semi-center it
-
-				> i.icon {
-					color: #bbb;
-					animation-name: pulsescale;
-					animation-iteration-count: infinite;
-					animation-duration: 1s;
-				}
-			}
-
-			// Twitter timeline feed - correct it to show up as block not inline-block, which adds 7px to bottom
-			iframe[id^="twitter-widget-"] {
-				display: block !important;
-			}
-
-			.social-connections-image {
-				border-radius: 10px;
-				background-color: #EFF7F8;
-
-				img {
-					width: 85%;
-				}
-			}
-
-			.social-connections-block-title {
-				font-size: 2rem;
-				font-weight: 600;
-				color: #34646C;
-
-				@include media-breakpoint-only(lg) {
-					font-size: 1.4rem;
-				}
-
-				@include media-breakpoint-only(md) {
-					font-size: 1.2rem;
-					font-weight: 400;
-				}
-			}
-
-			.social-connections-desc {
-				color: #34646C;
-			}
-
-			a.btn-nature-4dn-article, a.btn-follow-on-social-media {
-				font-size: 1.1rem !important;
-				border-width: 0px;
-				border-radius: 20px !important;
-				background-color: #D5E9EB;
-				color: #34646C;
-
-				&:hover {
-					color: #FFFFFF;
-					background-color: $brand-primary-dark;
-				}
-			}
-
-			a.btn-follow-on-social-media  {
-				background-color: #FFFFFF;
-				border-color: #D5E9EB;
-				border-width: 1px;
-			}
-
-			@include media-breakpoint-down(sm){
-				// Add top margin for spacing on mobile
-				margin-top: 50px;
-			}
-		}
 
 		a.link-block {
 			
