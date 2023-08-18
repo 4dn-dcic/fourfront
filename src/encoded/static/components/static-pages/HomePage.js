@@ -126,12 +126,12 @@ const DatasetsAndSocialMediaRow = React.memo(function DatasetsAndSocialMediaRow(
                         <div className="d-flex flex-column h-100">
                             <div className="p-0 flex-grow-1">
                                 <a href="https://doi.org/10.1038/s41467-022-29697-4" target="_blank" rel="noreferrer" className="h-100 text-decoration-none">
-                                    <div className="text-center w-100 pt-3 pb-3 social-connections-image"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-nature-communications.png" alt="4DN Paper on Nature Communications" /></div>
-                                    <div className="social-connections-block-title mt-2">4DN Data Portal Paper</div>
-                                    <div className="social-connections-desc mt-2">Learn more about the 4DN data portal on<br/>Nature Communications&apos;s website</div>
+                                    <div className="text-center w-100 pt-2 pb-2 social-connections-image"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-nature-communications.png" alt="4DN Paper on Nature Communications" /></div>
+                                    <div className="social-connections-block-title mt-15">4DN Data Portal Paper</div>
+                                    <div className="social-connections-desc mt-1">Learn more about the 4DN data portal on<br/>Nature Communications&apos;s website</div>
                                 </a>
                             </div>
-                            <div className="mt-1">
+                            <div className="mt-05">
                                 <a href="https://doi.org/10.1038/s41467-022-29697-4" target="_blank" rel="noreferrer" className="btn-nature-4dn-article btn btn-primary w-100 mt-1">
                                     <span className="float-left ml-1">Go to Nature Communications</span><span className="float-right mr-1"><i className="icon icon-arrow-right fas"></i></span>
                                 </a>
