@@ -1,8 +1,8 @@
 {
     "title": "Analysis step",
     "description": "Schema for submitting a computational analysis steps as a part of a workflow.",
-    "id": "/profiles/analysis_step.json",
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$id": "/profiles/analysis_step.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "required": ["name", "version", "lab", "award"],
     "additionalProperties": false,

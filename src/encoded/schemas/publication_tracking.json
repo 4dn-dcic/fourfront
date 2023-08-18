@@ -1,8 +1,8 @@
 {
     "title": "Publication Tracking",
     "description": "Schema for a publication page.",
-    "id": "/profiles/publication_tracking.json",
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$id": "/profiles/publication_tracking.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "required": ["award", "lab"],
     "identifyingProperties": ["uuid", "aliases"],

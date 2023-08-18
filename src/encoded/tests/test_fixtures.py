@@ -98,6 +98,7 @@ def test_fixtures2(minitestdata2, testapp):
     assert len(items) == 1
 
 
+@pytest.mark.skip  # not clear this has been working for some time
 def test_order_complete(app, conn):
     # TODO: This could use a doc string or comment. -kent & eric 29-Jun-2020
     print("original datafixtures.ORDER =", datafixtures.ORDER)

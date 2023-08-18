@@ -1,8 +1,8 @@
 {
     "title": "Image",
     "description": "jpeg/tiff/png image files",
-    "id": "/profiles/image.json",
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$id": "/profiles/image.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "required": [ "attachment", "award", "lab"],
     "identifyingProperties": ["uuid","aliases"],

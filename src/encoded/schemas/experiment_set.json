@@ -1,8 +1,8 @@
 {
     "title": "Experiment Set",
     "description": "Schema for submitting metadata for an experiment set.",
-    "id": "/profiles/experiment_set.json",
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$id": "/profiles/experiment_set.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "required": [ "award", "lab", "description"],
     "identifyingProperties": ["uuid", "aliases"],

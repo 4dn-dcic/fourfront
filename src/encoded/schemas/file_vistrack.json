@@ -1,8 +1,8 @@
 {
     "title": "Visualization Track file",
     "description": "Files used as visualization tracks in HiGlass.",
-    "id": "/profiles/file_vistrack.json",
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$id": "/profiles/file_vistrack.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "required": ["file_format", "award", "lab"],
     "identifyingProperties": ["uuid", "accession", "aliases"],

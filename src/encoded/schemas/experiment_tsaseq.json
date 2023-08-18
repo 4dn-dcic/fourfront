@@ -1,8 +1,8 @@
 {
     "title": "TSA-seq Experiment",
     "description": "Schema for TSA-seq experiments.",
-    "id": "/profiles/experiment_tsaseq.json",
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$id": "/profiles/experiment_tsaseq.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "required": ["experiment_type", "award", "lab", "biosample"],
     "identifyingProperties": ["uuid", "accession", "aliases"],
@@ -29,7 +29,7 @@
         { "$ref": "mixins.json#/static_embeds" },
         { "$ref": "experiment.json#/properties" }
     ],
-    "dependencies": {},
+    "dependentRequired": {},
     "mixinFacets": [
         { "$ref": "experiment.json#/facets"},
         { "$ref": "mixins.json#/facets_common" },

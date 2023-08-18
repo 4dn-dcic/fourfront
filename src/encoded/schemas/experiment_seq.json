@@ -1,8 +1,8 @@
 {
     "title": "Sequencing Experiment",
     "description": "Schema for ChIP-seq, RNA-seq and other related genomics experiments.",
-    "id": "/profiles/experiment_seq.json",
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$id": "/profiles/experiment_seq.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "required": ["experiment_type", "award", "lab", "biosample"],
     "identifyingProperties": ["uuid", "accession", "aliases"],
@@ -32,7 +32,7 @@
         { "$ref": "mixins.json#/static_embeds" },
         { "$ref": "experiment.json#/properties" }
     ],
-    "dependencies": {
+    "dependentRequired": {
       "3p_adenylation_time": ["3p_adenylation_temperature"],
       "3p_adenylation_temperature": ["3p_adenylation_time"]
     },

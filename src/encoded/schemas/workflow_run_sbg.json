@@ -1,8 +1,8 @@
 {
     "title": "Workflow Run SBG",
     "description": "Schema for submitting metadata on the executation of a computational analysis workflow run on SBG.",
-    "id": "/profiles/workflow_run_sbg.json",
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$id": "/profiles/workflow_run_sbg.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "required": ["workflow", "award", "lab"],
     "additionalProperties": false,

@@ -1,8 +1,8 @@
 {
     "title": "Imaging Path",
     "description": "Channel/Probe/Target/Dye information for imaging experiments.",
-    "id": "/profiles/imaging_path.json",
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$id": "/profiles/imaging_path.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "required": ["award", "lab"],
     "identifyingProperties": ["uuid", "aliases"],

@@ -1,8 +1,8 @@
 {
     "title": "Cell culture details for biosample preparation",
     "description": "Cell culture specific parameters and protocols.",
-    "id": "/profiles/biosample_cell_culture.json",
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$id": "/profiles/biosample_cell_culture.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "required": ["culture_start_date", "award", "lab"],
     "identifyingProperties": ["uuid", "aliases"],

@@ -13,7 +13,7 @@
         "sex": "male",
         "status": "in review by lab",
         "submitted_by": "wrangler@wrangler.com",
-        "url": "",
+        "url": "https://www.example.com",
         "uuid": "3cfe2618-368f-45a0-9aa9-a5277f1a56a9"
     },
     {
@@ -25,7 +25,7 @@
         "sex": "male",
         "status": "in review by lab",
         "submitted_by": "wrangler@wrangler.com",
-        "url": "",
+        "url": "https://www.example.com",
         "uuid": "d71711e9-d699-4586-91bd-8aff50cd1e77"
     }
 ]

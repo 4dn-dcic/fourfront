@@ -1,8 +1,8 @@
 {
     "title": "Microscopy Experiment",
     "description": "Imaging Experiments with channel/label/target information.",
-    "id": "/profiles/experiment_mic.json",
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$id": "/profiles/experiment_mic.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "required": ["experiment_type", "award", "lab", "biosample"],
     "identifyingProperties": ["uuid", "accession", "aliases"],

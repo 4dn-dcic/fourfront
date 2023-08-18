@@ -1,8 +1,8 @@
 {
     "title": "Biosample",
     "description": "Biological material used in the experiment with information on modifications, treatments and preparation.",
-    "id": "/profiles/biosample.json",
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$id": "/profiles/biosample.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "required": [ "biosource", "award", "lab"],
     "identifyingProperties": ["uuid","accession","aliases"],
