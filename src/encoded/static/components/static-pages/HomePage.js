@@ -128,7 +128,7 @@ const DatasetsAndSocialMediaRow = React.memo(function DatasetsAndSocialMediaRow(
                                 <a href="https://doi.org/10.1038/s41467-022-29697-4" target="_blank" rel="noreferrer" className="h-100 text-decoration-none">
                                     <div className="text-center w-100 pt-2 pb-2 social-connections-image"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-nature-communications.png" alt="4DN Paper on Nature Communications" /></div>
                                     <div className="social-connections-block-title mt-15">4DN Data Portal Paper</div>
-                                    <div className="social-connections-desc mt-1">Learn more about the 4DN data portal on<br/>Nature Communications&apos;s website</div>
+                                    <div className="social-connections-desc mt-1">Learn more about the 4DN data portal on the<br/>Nature Communications website</div>
                                 </a>
                             </div>
                             <div className="mt-05">
