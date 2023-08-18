@@ -257,18 +257,22 @@
 					font-weight: 600;
 					color: #34646C;
 
-					@include media-breakpoint-only(lg) {
-						font-size: 1.4rem;
-					}
+					// @include media-breakpoint-only(lg) {
+					// 	font-size: 1.4rem;
+					// }
 
-					@include media-breakpoint-only(md) {
-						font-size: 1.2rem;
-						font-weight: 400;
-					}
+					// @include media-breakpoint-only(md) {
+					// 	font-size: 1.2rem;
+					// 	font-weight: 400;
+					// }
 				}
 
 				.social-connections-desc {
 					color: #34646C;
+
+					@include media-breakpoint-only(lg) {
+						font-size: 14px;
+					}
 				}
 
 				a.btn-nature-4dn-article, a.btn-follow-on-social-media {
