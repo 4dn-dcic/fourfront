@@ -1,8 +1,8 @@
 {
     "title": "Replicate Experiments",
     "description": "Experiment Set for technical/biological replicates.",
-    "id": "/profiles/experiment_set_replicate.json",
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$id": "/profiles/experiment_set_replicate.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "required": [ "award", "lab", "description"],
     "identifyingProperties": ["uuid", "aliases"],

@@ -1,8 +1,8 @@
 {
     "title": "File Set",
     "description": "Grouping for files with similar features.",
-    "id": "/profiles/file_set.json",
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$id": "/profiles/file_set.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "required": [ "award", "lab", "fileset_type"],
     "identifyingProperties": ["uuid", "aliases", "accession"],

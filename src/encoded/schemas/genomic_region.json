@@ -1,8 +1,8 @@
 {
     "title": "Genomic Region",
     "description": "Genome Region from a reference genome assembly.",
-    "id": "/profiles/genomic_region.json",
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$id": "/profiles/genomic_region.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "required": ["genome_assembly", "award", "lab"],
     "identifyingProperties": ["uuid","aliases"],

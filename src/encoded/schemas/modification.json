@@ -1,8 +1,8 @@
 {
     "title": "Modification",
     "description": "Stable Genetic Modifications.",
-    "id": "/profiles/modification.json",
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$id": "/profiles/modification.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "required": ["description", "modification_type", "lab", "award"],
     "identifyingProperties": ["uuid","aliases"],

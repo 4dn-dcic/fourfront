@@ -1,7 +1,7 @@
 {
     "title": "Antibody",
-    "id": "/profiles/antibody.json",
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$id": "/profiles/antibody.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "additionalProperties": false,
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },

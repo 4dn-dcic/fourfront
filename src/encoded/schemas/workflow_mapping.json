@@ -1,8 +1,8 @@
 {
     "title": "Workflow Mapping",
     "description": "A mapping table used for creating workflow run from workflow.",
-    "id": "/profiles/workflow_mapping.json",
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$id": "/profiles/workflow_mapping.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
         "required": ["award", "lab"],
     "additionalProperties": false,

@@ -1,8 +1,8 @@
 {
     "title": "Biosource",
     "description": "General description of the biological material, e.g. cell line",
-    "id": "/profiles/biosource.json",
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$id": "/profiles/biosource.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "required": ["biosource_type", "award", "lab"],
     "identifyingProperties": ["uuid", "accession", "aliases"],

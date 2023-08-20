@@ -1,8 +1,8 @@
 {
     "title": "Construct",
     "description": "DNA construct used for modification or treatment",
-    "id": "/profiles/construct.json",
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$id": "/profiles/construct.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "required": ["name", "construct_type", "award", "lab"],
     "identifyingProperties": ["uuid", "aliases", "name"],
