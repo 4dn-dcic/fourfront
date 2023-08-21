@@ -6,6 +6,14 @@ fourfront
 Change Log
 ----------
 
+6.2.1
+=====
+
+`Home page updates <https://github.com/4dn-dcic/fourfront/pull/1837>`_
+
+* Twitter timeline embeds are not working. Until it is available again, we are replacing the section with the 4DN article published on Nature Communications.
+
+
 6.2.0
 =====
 
