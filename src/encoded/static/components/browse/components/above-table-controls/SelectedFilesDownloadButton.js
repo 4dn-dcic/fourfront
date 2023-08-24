@@ -319,7 +319,7 @@ const SelectedFilesDownloadStartButton = React.memo(function SelectedFilesDownlo
         });
 
         /**
-         * We're going to consider download of metadata.tsv file to be akin to adding something to shopping cart.
+         * We're going to consider download of metadata.tsv file to be akin to one step before the purchasing.
          * Something they might download later...
          */
         function onClick(evt){
@@ -333,12 +333,13 @@ const SelectedFilesDownloadStartButton = React.memo(function SelectedFilesDownlo
                 };
                 const products = analytics.transformItemsToProducts(fileList, extData);
                 analytics.event(
-                    "purchase",
+                    "add_payment_info",
                     "SelectedFilesDownloadModal",
                     "Download metadata.tsv Button Pressed",
                     function() { console.info(`Will download metadata.tsv having ${productsLength} items in the cart.`); },
                     {
                         items: Array.isArray(products) ? products : null,
+                        payment_type: "Metadata.tsv Download",
                         list_name: extData.item_list_name,
                         value: filenameAccessions.size || 0,
                         filters: analytics.getStringifiedCurrentFilters((context && context.filters) || null)
