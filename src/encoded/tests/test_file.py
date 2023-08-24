@@ -380,6 +380,7 @@ def pairs_file_json(award, experiment, lab, file_formats, quality_metric_pairsqc
     }
     return item
 
+
 @pytest.fixture
 def mcool_file_json(award, experiment, lab, file_formats):
     item = {
@@ -391,6 +392,7 @@ def mcool_file_json(award, experiment, lab, file_formats):
         'status': 'uploaded',
     }
     return item
+
 
 @pytest.fixture
 def bedGraph_file_json(award, experiment, lab, file_formats):

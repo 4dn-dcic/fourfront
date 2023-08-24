@@ -6,6 +6,11 @@ fourfront
 Change Log
 ----------
 
+6.3.0
+=====
+
+* Implement and enable DRS API on File objects
+
 6.2.1
 =====
 

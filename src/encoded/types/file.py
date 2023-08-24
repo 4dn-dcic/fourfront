@@ -1652,6 +1652,68 @@ def download(context, request):
         raise HTTPTemporaryRedirect(location=location)
 
 
+def build_drs_object_from_props(drs_object_base, props):
+    """ Takes in base properties for a DRS object we expect on all items and expands them if corresponding
+        properties exist
+    """
+    # fields that match exactly in name and structure
+    for exact_field in [
+        'description',
+        'aliases'
+    ]:
+        if exact_field in props:
+            drs_object_base[exact_field] = props[exact_field]
+
+    # size is required by DRS so take it or default to 0
+    drs_object_base['size'] = props.get('file_size', 0)
+
+    # fields that are mapped to different names/structure
+    if 'content_md5sum' in props:
+        drs_object_base['checksums'] = [
+            {
+                'checksum': props['content_md5sum'],
+                'type': 'md5'
+            }
+        ]
+        # use md5sum as version
+        drs_object_base['version'] = props['content_md5sum']
+    if 'filename' in props:
+        drs_object_base['name'] = props['filename']
+    if 'last_modified' in props:
+        drs_object_base['updated_time'] = props['last_modified']['date_modified']
+    return drs_object_base
+
+
+@view_config(name='drs', context=File, request_method='GET',
+             permission='view', subpath_segments=[0, 1])
+def drs(context, request):
+    """ DRS object implementation for file. """
+    rendered_object = request.embed(str(context.uuid), '@@object', as_user=True)
+    drs_object_base = {
+        'id': rendered_object['@id'],
+        'created_time': rendered_object['date_created'],
+        'drs_id': rendered_object['uuid'],
+        'self_uri': f'drs://{request.host}{request.path}',
+        'access_methods': [
+            {
+                # always prefer https
+                'access_url': {
+                    'url': f'https://{request.host}/{context.uuid}/@@download'
+                },
+                'type': 'https'
+            },
+            {
+                # but provide http as well in case we are not on prod
+                'access_url': {
+                    'url': f'http://{request.host}/{context.uuid}/@@download'
+                },
+                'type': 'http'
+            },
+        ]
+    }
+    return build_drs_object_from_props(drs_object_base, rendered_object)
+
+
 def get_file_experiment_type(request, context, properties):
     """
     Get the string experiment_type value given a File context and properties.
