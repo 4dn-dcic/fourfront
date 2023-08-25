@@ -19,7 +19,7 @@ import { uniqueFileCount, SelectedFilesController } from './../SelectedFilesCont
 // eslint-disable-next-line no-unused-vars
 const { Item } = typedefs;
 
-
+const SELECT_ALL_LIMIT = 8000;
 
 export class SelectAllFilesButton extends React.PureComponent {
 
@@ -64,7 +64,7 @@ export class SelectAllFilesButton extends React.PureComponent {
     isEnabled(){
         const { totalFilesCount } = this.props;
         if (!totalFilesCount) return true;
-        if (totalFilesCount > 8000) return false;
+        if (totalFilesCount > SELECT_ALL_LIMIT) return false;
         return true;
     }
 
@@ -140,12 +140,13 @@ export class SelectAllFilesButton extends React.PureComponent {
             "mr-05 icon icon-fw icon-" + (selecting ? 'circle-notch icon-spin fas' : (isAllSelected ? 'square far' : 'check-square far'))
         );
         const cls = "btn " + (isAllSelected ? "btn-outline-primary" : "btn-primary");
+        const tooltip = (!isAllSelected && !isEnabled) ? `"Select All" is disabled since the total file count exceeds the upper limit: ${SELECT_ALL_LIMIT}` : null;
 
         return (
             <div className="pull-left box selection-buttons">
                 <div className="btn-group">
                     <button type="button" id="select-all-files-button" disabled={selecting || (!isAllSelected && !isEnabled)}
-                        className={cls} onClick={this.handleSelectAll}>
+                        className={cls} onClick={this.handleSelectAll} data-tip={tooltip}>
                         <i className={iconClassName}/>
                         <span className="d-none d-md-inline text-400">{ isAllSelected ? 'Deselect' : 'Select' } </span>
                         <span className="text-600">All</span>

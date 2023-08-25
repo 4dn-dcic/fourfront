@@ -11,6 +11,16 @@ Change Log
 
 * Implement and enable DRS API on File objects
 
+
+6.2.2
+=====
+
+`GA4 e-commerce + UI updates <https://github.com/4dn-dcic/fourfront/pull/1838>`_
+
+* metadata.tsv and server side downloads events replaced
+* tooltip added when Select All button get disabled in browse and file view
+
+
 6.2.1
 =====
 
