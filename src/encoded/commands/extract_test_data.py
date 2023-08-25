@@ -122,7 +122,7 @@ def anon_pipeline():
 
 
 def run(pipeline, inpath, outpath):
-    for item_type in ORDER:
+    for item_type in ORDER():
         source = read_single_sheet(inpath, item_type)
         fieldnames = [k for k in source.fieldnames if ':ignore' not in k]
         with open(os.path.join(outpath, item_type + '.tsv'), 'wb') as out:
