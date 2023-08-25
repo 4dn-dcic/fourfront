@@ -1477,16 +1477,16 @@ def update_google_analytics(context, request, ga_config, filename, file_size_dow
     if ga_tid is None:
         raise Exception("No valid tracker id found in ga_config.json > hostnameTrackerIDMapping")
 
-    file_extension = file_extension = os.path.splitext(filename)[1][1:]
+    file_extension =  os.path.splitext(filename)[1][1:]
+    item_types = [ty for ty in reversed(context.jsonld_type()[:-1])]
 
     ga_payload = {
         "client_id": ga_cid,
         "timestamp_micros": str(int(datetime.datetime.now().timestamp() * 1000000)),
         "non_personalized_ads": False,
-        # "user_agent": request.user_agent,
         "events": [
             {
-                "name": "file_download",
+                "name": "purchase",
                 "params": {
                     "name": filename,
                     "source": "Serverside File Download",
@@ -1499,12 +1499,24 @@ def update_google_analytics(context, request, ga_config, filename, file_size_dow
                     "experiment_type": file_experiment_type or None,
                     "lab": lab.get("display_title"),
                     # Product Category from @type, e.g. "File/FileProcessed"
-                    "file_classification": "/".join([ty for ty in reversed(context.jsonld_type()[:-1])]),
-                    "file_type": file_type
+                    "file_classification": "/".join(item_types),
+                    "file_type": file_type,
+                    "items": [
+                        {
+                            "item_id": file_at_id,
+                            "item_name": filename,
+                            "item_category": item_types[0] if len(item_types) >= 1 else "Unknown",
+                            "item_category2": item_types[1] if len(item_types) >= 2 else "Unknown",
+                            "item_brand": lab.get("display_title"),
+                            "item_variant": file_type,
+                            "quantity": 1
+                        }
+                    ]
                 }
             }
         ]
     }
+    # import pdb;pdb.set_trace()
 
     if user_uuid:
         ga_payload['events'][0]['params']['user_uuid'] = user_uuid
