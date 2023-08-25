@@ -42,10 +42,11 @@ def validate_drs_conversion(drs_obj, meta, uri=None):
     """ Validates drs object structure against the metadata in the db """
     assert drs_obj['id'] == meta['@id']
     assert drs_obj['created_time'] == meta['date_created']
-    assert drs_obj['drs_id'] == meta['uuid']
+    assert drs_obj['drs_id'] == meta['accession']
     assert drs_obj['self_uri'] == f'drs://localhost:80{meta["@id"]}@@drs' if not uri else uri
     assert drs_obj['version'] == meta['md5sum']
     assert drs_obj['name'] == meta['filename']
+    assert drs_obj['aliases'] == [meta['uuid']]
 
 
 def test_processed_file_drs_view(testapp, mcool_file_json):

@@ -1659,13 +1659,15 @@ def build_drs_object_from_props(drs_object_base, props):
     # fields that match exactly in name and structure
     for exact_field in [
         'description',
-        'aliases'
     ]:
         if exact_field in props:
             drs_object_base[exact_field] = props[exact_field]
 
     # size is required by DRS so take it or default to 0
     drs_object_base['size'] = props.get('file_size', 0)
+
+    # use system uuid as alias
+    drs_object_base['aliases'] = [props['uuid']]
 
     # fields that are mapped to different names/structure
     if 'content_md5sum' in props:
@@ -1689,23 +1691,24 @@ def build_drs_object_from_props(drs_object_base, props):
 def drs(context, request):
     """ DRS object implementation for file. """
     rendered_object = request.embed(str(context.uuid), '@@object', as_user=True)
+    accession = rendered_object['accession']
     drs_object_base = {
         'id': rendered_object['@id'],
         'created_time': rendered_object['date_created'],
-        'drs_id': rendered_object['uuid'],
+        'drs_id': accession,
         'self_uri': f'drs://{request.host}{request.path}',
         'access_methods': [
             {
                 # always prefer https
                 'access_url': {
-                    'url': f'https://{request.host}/{context.uuid}/@@download'
+                    'url': f'https://{request.host}/{accession}/@@download'
                 },
                 'type': 'https'
             },
             {
                 # but provide http as well in case we are not on prod
                 'access_url': {
-                    'url': f'http://{request.host}/{context.uuid}/@@download'
+                    'url': f'http://{request.host}/{accession}/@@download'
                 },
                 'type': 'http'
             },
