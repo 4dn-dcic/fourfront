@@ -1,8 +1,8 @@
 {
     "title": "Repli-seq Experiment",
     "description": "Genome-wide analysis of replication timing by next-generation sequencing.",
-    "id": "/profiles/experiment_repliseq.json",
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$id": "/profiles/experiment_repliseq.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "required": ["experiment_type", "award", "lab", "biosample"],
     "identifyingProperties": ["uuid", "accession", "aliases"],

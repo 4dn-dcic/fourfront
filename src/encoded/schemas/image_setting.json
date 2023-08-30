@@ -1,8 +1,8 @@
 {
     "title": "Image Settings",
     "description": "Microscopy metadata specific to the image",
-    "id": "/profiles/image_setting.json",
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$id": "/profiles/image_setting.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "required": ["settings"],
     "additionalProperties": false,

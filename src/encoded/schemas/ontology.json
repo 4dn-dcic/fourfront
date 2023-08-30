@@ -1,8 +1,8 @@
 {
     "title": "Ontology",
     "description": "Schema for submitting information about ontology.",
-    "id": "/profiles/ontology.json",
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$id": "/profiles/ontology.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "required": ["ontology_name"],
     "identifyingProperties": ["uuid", "ontology_name", "ontology_url", "ontology_prefix"],

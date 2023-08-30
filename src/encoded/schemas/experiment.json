@@ -1,13 +1,13 @@
 {
     "title": "Experiment",
     "description": "Common metadata for all experiments.",
-    "id": "/profiles/experiment.json",
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$id": "/profiles/experiment.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "required": ["experiment_type", "biosample", "award", "lab"],
     "identifyingProperties": ["uuid", "accession" , "aliases"],
     "additionalProperties": false,
-    "dependencies": {
+    "dependentRequired": {
       "biosample_quantity": ["biosample_quantity_units"],
       "biosample_quantity_units": ["biosample_quantity"]
     },

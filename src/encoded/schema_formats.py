@@ -1,7 +1,7 @@
 import re
 
 from dcicutils.misc_utils import ignored, is_valid_absolute_uri
-from jsonschema_serialize_fork import FormatChecker
+from jsonschema import Draft202012Validator
 from pyramid.threadlocal import get_current_request
 from .server_defaults import (
     ACCESSION_FACTORY,
@@ -23,7 +23,7 @@ test_accession_re = re.compile(r'^%s(%s)[0-9]{4}([0-9][0-9][0-9]|[A-Z][A-Z][A-Z]
 uuid_re = re.compile(r'(?i)[{]?(?:[0-9a-f]{4}-?){8}[}]?')
 
 
-@FormatChecker.cls_checks("uuid")
+@Draft202012Validator.FORMAT_CHECKER.cls_checks("uuid")
 def is_uuid(instance):
     # Python's UUID ignores all dashes, whereas Postgres is more strict
     # http://www.postgresql.org/docs/9.2/static/datatype-uuid.html
@@ -39,7 +39,7 @@ def is_accession(instance):
     )
 
 
-@FormatChecker.cls_checks("accession")
+@Draft202012Validator.FORMAT_CHECKER.cls_checks("accession")
 def is_accession_for_server(instance):
     # Unfortunately we cannot access the accessionType here
     if accession_re.match(instance):
@@ -51,14 +51,14 @@ def is_accession_for_server(instance):
     return False
 
 
-@FormatChecker.cls_checks("gene_name")
+@Draft202012Validator.FORMAT_CHECKER.cls_checks("gene_name")
 def is_gene_name(instance):
     """This SHOULD check a webservice at HGNC/MGI for validation, but for now this just returns True always.."""
     ignored(instance)
     return True
 
 
-@FormatChecker.cls_checks("target_label")
+@Draft202012Validator.FORMAT_CHECKER.cls_checks("target_label")
 def is_target_label(instance):
     if is_gene_name(instance):
         return True
@@ -72,6 +72,6 @@ def is_target_label(instance):
     return True
 
 
-@FormatChecker.cls_checks("uri", raises=ValueError)
+@Draft202012Validator.FORMAT_CHECKER.cls_checks("uri", raises=ValueError)
 def is_uri(instance):
     return is_valid_absolute_uri(instance)

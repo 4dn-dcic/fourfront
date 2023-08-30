@@ -14,7 +14,8 @@ import { File } from './typedefs';
 /**
  * Generate analytics "add product to cart" event.
  * We don't create an actual "download file" event here
- * because this is done server-side.
+ * because this is done server-side. (instead we use add_payment_info that
+ * is the final step just before the purchase in GA4.)
  *
  * `context` and `fileItem` are likely to be same unless is
  * detailpane on another page showing file info.
@@ -26,12 +27,13 @@ export function downloadFileButtonClick(fileItem, context = null){
         const parameters = {
             items: Array.isArray(products) ? products : null,
             value: !isNaN(fileItem.file_size) ? fileItem.file_size : 0,
-            filters: getStringifiedCurrentFilters((context && context.filters) || null)
+            filters: getStringifiedCurrentFilters((context && context.filters) || null),
+            payment_type: 'File Download'
         };
-        // add_to_cart-begin_checkout-purchase conversions
+        // add_to_cart-begin_checkout-add_payment_info conversions
         event("add_to_cart", "FileDownloadButton", "Click", null, parameters, false);
         event("begin_checkout", "FileDownloadButton", "Select", null, parameters, false);
-        event("purchase", "FileDownloadButton", "Download", null, parameters, false);
+        event("add_payment_info", "FileDownloadButton", "Download", null, parameters, false);
     }, 0);
 }
 

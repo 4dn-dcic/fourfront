@@ -1,8 +1,8 @@
 {
     "title": "Microscopy Settings Tier D2",
     "description": "Metadata fields required for Tier Descriptive 2 level microscopy files",
-    "id": "/profiles/microscope_setting_d2.json",
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$id": "/profiles/microscope_setting_d2.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "required": ["award", "lab"],
     "identifyingProperties": ["uuid", "aliases"],

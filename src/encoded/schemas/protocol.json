@@ -1,8 +1,8 @@
 {
     "title": "Protocol",
     "description": "Can hold documents for a generic protocol.",
-    "id": "/profiles/protocol.json",
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$id": "/profiles/protocol.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "required": ["award", "lab", "protocol_type"],
     "identifyingProperties": ["uuid", "aliases"],

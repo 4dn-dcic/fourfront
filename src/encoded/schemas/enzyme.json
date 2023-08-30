@@ -1,8 +1,8 @@
 {
     "title": "Enzyme",
     "description": "DNA digestion enzymes like HindIII or DNaseI",
-    "id": "/profiles/enzyme.json",
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$id": "/profiles/enzyme.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "required": [ "name", "enzyme_source", "award", "lab"],
     "identifyingProperties": ["uuid","aliases","name"],

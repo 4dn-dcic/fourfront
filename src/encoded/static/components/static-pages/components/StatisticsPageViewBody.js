@@ -458,13 +458,13 @@ const aggregationsToChartData = {
             if (!resp || !resp['@graph']) return null;
             const { countBy : { file_downloads : countBy } } = props;
 
-            let useReport = 'file_downloads_by_experiment_type';
-            let groupingKey = "ga:dimension5"; // Experiment Type
+            let useReport = 'file_downloads_by_filetype';
+            let groupingKey = "ga:productVariant"; // File Type
             const countKey = 'ga:metric2'; // Download Count
 
-            if (countBy === 'filetype'){
-                useReport = 'file_downloads_by_filetype';
-                groupingKey = 'ga:productVariant'; // File Type
+            if (countBy === 'experiment_type'){
+                useReport = 'file_downloads_by_experiment_type';
+                groupingKey = 'ga:dimension5'; // Experiment Type
             } else if (countBy === 'geo_country'){
                 useReport = 'file_downloads_by_country';
                 groupingKey = 'ga:country';
@@ -573,7 +573,7 @@ export class UsageStatsViewController extends React.PureComponent {
 
         Object.keys(usageAggsToChartData).forEach(function(k){
             if (k === 'file_downloads'){
-                countBy[k] = 'experiment_type'; // For file_downloads, countBy is treated as 'groupBy'.
+                countBy[k] = 'filetype'; // For file_downloads, countBy is treated as 'groupBy'.
                 // Not high enough priority to spend much time improving this file, albeit much straightforward room for it exists.
             } else {
                 countBy[k] = 'views';

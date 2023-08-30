@@ -1,7 +1,7 @@
 {
     "description": "Base Schema for reporting the summary statistics of an experiment",
-    "id": "/profiles/summary_statistic.json",
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$id": "/profiles/summary_statistic.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "required": ["award", "lab"],
     "additionalProperties": false,

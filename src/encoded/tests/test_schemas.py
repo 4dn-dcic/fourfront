@@ -90,7 +90,7 @@ def test_load_schema(schema, master_mixins, registry):
 
     if schema not in ['namespaces.json', 'mixins.json']:
         # check that schema.id is same as /profiles/schema
-        idtag = loaded_schema['id']
+        idtag = loaded_schema['$id']
         idtag = idtag.replace('/profiles/', '')
         # special case for access_key.json
         if schema == 'access_key.json':

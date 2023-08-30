@@ -1,8 +1,8 @@
 {
     "title": "Experiment Type",
     "description": "Schema for experiment type",
-    "id": "/profiles/experiment_type.json",
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$id": "/profiles/experiment_type.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "required": ["title", "lab", "award"],
     "identifyingProperties": ["experiment_name", "uuid"],

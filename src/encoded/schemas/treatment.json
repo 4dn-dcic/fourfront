@@ -1,8 +1,8 @@
 {
     "title": "Treatment",
     "description": "Abstract Schema for submitting a specific type of treatment.",
-    "id": "/profiles/treatment.json",
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$id": "/profiles/treatment.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "required": ["description", "treatment_type", "lab", "award"],
     "identifyingProperties": ["uuid","aliases"],

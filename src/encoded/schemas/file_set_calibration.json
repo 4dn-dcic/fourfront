@@ -1,8 +1,8 @@
 {
     "title": "Calibration File Set",
     "description": "File set dedicated to imaging calibration files.",
-    "id": "/profiles/file_set_calibration.json",
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$id": "/profiles/file_set_calibration.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "required": [ "award", "lab"],
     "identifyingProperties": ["uuid", "aliases", "accession"],

@@ -1,8 +1,8 @@
 {
     "title": "RNAi Treatment",
     "description": "RNAi treatment used on Biosample.",
-    "id": "/profiles/treatment_rnai.json",
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$id": "/profiles/treatment_rnai.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "required": ["rnai_type", "lab", "award"],
     "identifyingProperties": ["uuid","aliases"],

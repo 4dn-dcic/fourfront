@@ -1,8 +1,8 @@
 {
     "title": "Target",
     "description": "Protein/RNA/DNA or cell structures that define a target.",
-    "id": "/profiles/target.json",
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$id": "/profiles/target.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "required": ["award", "lab"],
     "identifyingProperties": ["uuid", "aliases"],

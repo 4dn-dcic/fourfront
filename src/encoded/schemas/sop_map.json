@@ -1,8 +1,8 @@
 {
     "title": "SOPs with fields",
     "description": "For items with SOPs stores a mapping of the fields and the default values for that SOP.",
-    "id": "/profiles/sop_map.json",
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$id": "/profiles/sop_map.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "required": ["associated_item_type", "award", "lab"],
     "additionalProperties": false,

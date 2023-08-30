@@ -6,6 +6,30 @@ fourfront
 Change Log
 ----------
 
+6.2.2
+=====
+
+`GA4 e-commerce + UI updates <https://github.com/4dn-dcic/fourfront/pull/1838>`_
+
+* metadata.tsv and server side downloads events replaced
+* tooltip added when Select All button get disabled in browse and file view
+
+
+6.2.1
+=====
+
+`Home page updates <https://github.com/4dn-dcic/fourfront/pull/1837>`_
+
+* Twitter timeline embeds are not working. Until it is available again, we are replacing the section with the 4DN article published on Nature Communications.
+
+
+6.2.0
+=====
+
+* Removes ``jsonschema_serialize_fork``, updating schema format version and validation
+* Repairs a bug in user registration
+
+
 6.1.1
 =====
 
