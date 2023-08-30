@@ -218,7 +218,7 @@ export const commonParsingFxn = {
 
         return aggsList;
     },
-    'analytics_to_buckets' : function(resp, reportName, termBucketField, countKey){
+    'analytics_to_buckets' : function(resp, reportName, termBucketField, countKey, topCount = 0){
         const subBucketKeysToDate = new Set();
 
         // De-dupe -- not particularly necessary as D3 handles this, however nice to have well-formatted data.
@@ -256,7 +256,7 @@ export const commonParsingFxn = {
             };
 
             // Unique-fy
-            currItem.children = _.values(_.reduce(currItem.children || [], function(memo, child){
+            currItem.chlidren = _.values(_.reduce(currItem.children || [], function(memo, child){
                 if (memo[child.term]) {
                     memo[child.term].count += child.count;
                     memo[child.term].total += child.total;
@@ -265,6 +265,10 @@ export const commonParsingFxn = {
                 }
                 return memo;
             }, {}));
+
+            if (typeof topCount === 'number' && topCount > 0) {
+                currItem.children = _.sortBy(currItem.children, (item) => -1 * item.total).slice(0, topCount);
+            }
 
             return currItem;
 
@@ -461,10 +465,15 @@ const aggregationsToChartData = {
             let useReport = 'file_downloads_by_filetype';
             let groupingKey = "ga:productVariant"; // File Type
             const countKey = 'ga:metric2'; // Download Count
+            let topCount = 0; //all
 
             if (countBy === 'experiment_type'){
                 useReport = 'file_downloads_by_experiment_type';
                 groupingKey = 'ga:dimension5'; // Experiment Type
+            } else if (countBy === 'top_files'){
+                useReport = 'top_files_downloaded';
+                groupingKey = 'ga:productSku'; // File
+                topCount = 10;
             } else if (countBy === 'geo_country'){
                 useReport = 'file_downloads_by_country';
                 groupingKey = 'ga:country';
@@ -475,7 +484,7 @@ const aggregationsToChartData = {
             //if (props.file_downloads_by_experiment_type_group_by === 'term') groupingKey = 'ga:dimension4';
             //if (props.file_downloads_by_experiment_type_group_by === 'field+term') groupingKey = 'ga:eventLabel';
 
-            return commonParsingFxn.analytics_to_buckets(resp, useReport, groupingKey, countKey);
+            return commonParsingFxn.analytics_to_buckets(resp, useReport, groupingKey, countKey, topCount);
 
             // if (!resp || !resp.aggregations || !props.countBy || !props.countBy.file_downloads) return null;
             // const dateAggBucket = props.currentGroupBy && (props.currentGroupBy + '_interval_date_created');
@@ -533,6 +542,7 @@ export class UsageStatsViewController extends React.PureComponent {
                     "file_downloads_by_experiment_type",
                     "file_downloads_by_filetype",
                     "file_downloads_by_country",
+                    "top_files_downloaded",
                     "views_by_file",
                     "views_by_experiment_set",
                     "for_date"
@@ -689,9 +699,10 @@ class UsageChartsCountByDropdown extends React.PureComponent {
             menuOptions.set('list_views',   <React.Fragment><i className="icon fas icon-fw icon-list mr-1"/>Appearance within first 25 Search Results</React.Fragment>);
             menuOptions.set('clicks',       <React.Fragment><i className="icon far icon-fw icon-hand-point-up mr-1"/>Search Result Click</React.Fragment>);
         } else if (chartID === 'file_downloads'){
-            menuOptions.set('experiment_type', <React.Fragment><i className="icon far icon-fw icon-folder mr-1"/>Experiment Type</React.Fragment>);
-            menuOptions.set('geo_country',     <React.Fragment><i className="icon fas icon-fw icon-globe mr-1"/>Country</React.Fragment>);
             menuOptions.set('filetype',     <React.Fragment><i className="icon far icon-fw icon-file-alt mr-1"/>File Type</React.Fragment>);
+            menuOptions.set('experiment_type', <React.Fragment><i className="icon far icon-fw icon-folder mr-1"/>Experiment Type</React.Fragment>);
+            menuOptions.set('top_files', <React.Fragment><i className="icon far icon-fw icon-folder mr-1"/>Top 10 Files</React.Fragment>);
+            menuOptions.set('geo_country',     <React.Fragment><i className="icon fas icon-fw icon-globe mr-1"/>Country</React.Fragment>);
         } else {
             menuOptions.set('views',    <React.Fragment><i className="icon icon-fw fas icon-eye mr-1"/>View</React.Fragment>);
             menuOptions.set('sessions', <React.Fragment><i className="icon icon-fw fas icon-user mr-1"/>User Session</React.Fragment>);
@@ -780,7 +791,7 @@ export function UsageStatsView(props){
                                 <h4 className="text-500 mt-0 mb-0">File Downloads</h4>
                                 <div className="mb-1">
                                     <small>
-                                        <em>Download tracking started in August 2018 | Re-Implemented in Feb 2020</em>
+                                        <em>Download tracking started in August 2018 | Re-Implemented in Feb 2020 and August 2023</em>
                                     </small>
                                 </div>
                             </div>

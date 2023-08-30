@@ -470,9 +470,13 @@ export class HorizontalD3ScaleLegend extends React.Component {
     render(){
         var { colorScale, colorScaleStore } = this.props;
         if (!colorScale || !colorScaleStore) return null;
+        //do not render if legend has too many items
+        const pairs = _.pairs(colorScaleStore);
+        if(pairs.length > 100) { return null; }
+
         return (
             <div className="legend mb-27">
-                <div className="row">{ _.map(_.sortBy(_.pairs(colorScaleStore), function([term, color]){ return term.toLowerCase(); }), this.renderColorItem) }</div>
+                <div className="row">{ _.map(_.sortBy(pairs, function([term, color]){ return term.toLowerCase(); }), this.renderColorItem) }</div>
             </div>
         );
     }
