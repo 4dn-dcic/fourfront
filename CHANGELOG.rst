@@ -6,10 +6,19 @@ fourfront
 Change Log
 ----------
 
-6.3.0
+6.4.0
 =====
 
 * Implement and enable DRS API on File objects
+
+
+6.3.0
+=====
+
+
+`Node v18 Upgrade <https://github.com/4dn-dcic/fourfront/pull/1835>`_
+
+* Node in Docker make file and GA workflows migrated from v16 to v18
 
 
 6.2.2
