@@ -256,7 +256,7 @@ export const commonParsingFxn = {
             };
 
             // Unique-fy
-            currItem.chlidren = _.values(_.reduce(currItem.children || [], function(memo, child){
+            currItem.children = _.values(_.reduce(currItem.children || [], function(memo, child){
                 if (memo[child.term]) {
                     memo[child.term].count += child.count;
                     memo[child.term].total += child.total;
@@ -446,8 +446,8 @@ const aggregationsToChartData = {
             const termBucketField = 'ga:productBrand';
             let countKey = 'ga:productDetailViews';
 
-            if (props.countBy.experiment_set_views === 'list_views') countKey = 'ga:productListViews';
-            else if (props.countBy.experiment_set_views === 'clicks') countKey = 'ga:productListClicks';
+            if (props.countBy.experiment_set_views === 'expset_list_views') countKey = 'ga:productListViews';
+            else if (props.countBy.experiment_set_views === 'expset_clicks') countKey = 'ga:productListClicks';
 
             return commonParsingFxn.analytics_to_buckets(resp, 'views_by_experiment_set', termBucketField, countKey);
         }
@@ -497,6 +497,28 @@ const aggregationsToChartData = {
             // );
         }
     },
+    'file_views' : {
+        'requires' : 'TrackingItem',
+        'function' : function(resp, props){
+            if (!resp || !resp['@graph']) return null;
+            const { countBy : { file_views : countBy } } = props;
+
+            let useReport = 'metadata_tsv_by_country';
+            let termBucketField = 'ga:country';
+            let countKey = 'ga:uniquePurchases';
+
+            if (countBy !== 'metadata_tsv_by_country') {
+                useReport = 'views_by_file';
+                termBucketField = 'ga:productBrand';
+                countKey = 'ga:productDetailViews';
+
+                if (countBy === 'file_list_views') countKey = 'ga:productListViews';
+                else if (countBy === 'file_clicks') countKey = 'ga:productListClicks';
+            }
+
+            return commonParsingFxn.analytics_to_buckets(resp, useReport, termBucketField, countKey);
+        }
+    },
 };
 
 // I forgot what purpose of all this was, kept because no time to refactor all now.
@@ -507,7 +529,7 @@ export const submissionsAggsToChartData = _.pick(aggregationsToChartData,
 );
 
 export const usageAggsToChartData = _.pick(aggregationsToChartData,
-    'sessions_by_country', 'fields_faceted', 'experiment_set_views', 'file_downloads'
+    'sessions_by_country', 'fields_faceted', 'experiment_set_views', 'file_downloads', 'file_views'
 );
 
 
@@ -543,6 +565,7 @@ export class UsageStatsViewController extends React.PureComponent {
                     "file_downloads_by_filetype",
                     "file_downloads_by_country",
                     "top_files_downloaded",
+                    "metadata_tsv_by_country",
                     "views_by_file",
                     "views_by_experiment_set",
                     "for_date"
@@ -585,6 +608,10 @@ export class UsageStatsViewController extends React.PureComponent {
             if (k === 'file_downloads'){
                 countBy[k] = 'filetype'; // For file_downloads, countBy is treated as 'groupBy'.
                 // Not high enough priority to spend much time improving this file, albeit much straightforward room for it exists.
+            } else if (k === 'file_views'){
+                countBy[k] = 'file_detail_views';
+            } else if (k === 'experiment_set_views'){
+                countBy[k] = 'expset_detail_views';
             } else {
                 countBy[k] = 'views';
             }
@@ -694,15 +721,20 @@ class UsageChartsCountByDropdown extends React.PureComponent {
 
         const menuOptions = new Map();
 
-        if (chartID === 'experiment_set_views' || chartID === 'file_views'){
-            menuOptions.set('views',        <React.Fragment><i className="icon fas icon-fw icon-eye mr-1"/>Detail View</React.Fragment>);
-            menuOptions.set('list_views',   <React.Fragment><i className="icon fas icon-fw icon-list mr-1"/>Appearance within first 25 Search Results</React.Fragment>);
-            menuOptions.set('clicks',       <React.Fragment><i className="icon far icon-fw icon-hand-point-up mr-1"/>Search Result Click</React.Fragment>);
+        if (chartID === 'experiment_set_views'){
+            menuOptions.set('expset_detail_views', <React.Fragment><i className="icon fas icon-fw icon-eye mr-1"/>Detail View</React.Fragment>);
+            menuOptions.set('expset_list_views',   <React.Fragment><i className="icon fas icon-fw icon-list mr-1"/>Appearance in Search Results</React.Fragment>);
+            menuOptions.set('expset_clicks',       <React.Fragment><i className="icon far icon-fw icon-hand-point-up mr-1"/>Search Result Click</React.Fragment>);
         } else if (chartID === 'file_downloads'){
-            menuOptions.set('filetype',     <React.Fragment><i className="icon far icon-fw icon-file-alt mr-1"/>File Type</React.Fragment>);
-            menuOptions.set('experiment_type', <React.Fragment><i className="icon far icon-fw icon-folder mr-1"/>Experiment Type</React.Fragment>);
-            menuOptions.set('top_files', <React.Fragment><i className="icon far icon-fw icon-folder mr-1"/>Top 10 Files</React.Fragment>);
-            menuOptions.set('geo_country',     <React.Fragment><i className="icon fas icon-fw icon-globe mr-1"/>Country</React.Fragment>);
+            menuOptions.set('filetype',         <React.Fragment><i className="icon far icon-fw icon-file-alt mr-1"/>File Type</React.Fragment>);
+            menuOptions.set('experiment_type',  <React.Fragment><i className="icon far icon-fw icon-folder mr-1"/>Experiment Type</React.Fragment>);
+            menuOptions.set('top_files',        <React.Fragment><i className="icon far icon-fw icon-folder mr-1"/>Top 10 Files</React.Fragment>);
+            // menuOptions.set('geo_country',     <React.Fragment><i className="icon fas icon-fw icon-globe mr-1"/>Country</React.Fragment>);
+        } else if (chartID === 'file_views'){
+            menuOptions.set('file_detail_views',        <React.Fragment><i className="icon fas icon-fw icon-globe mr-1"/>Detail View</React.Fragment>);
+            menuOptions.set('file_list_views',          <React.Fragment><i className="icon fas icon-fw icon-globe mr-1"/>Appearance in Search Results</React.Fragment>);
+            menuOptions.set('file_clicks',              <React.Fragment><i className="icon far icon-fw icon-hand-point-up mr-1"/>Search Result Click</React.Fragment>);
+            menuOptions.set('metadata_tsv_by_country',  <React.Fragment><i className="icon fas icon-fw icon-globe mr-1"/>Metadata.tsv Files Count by Country</React.Fragment>);
         } else {
             menuOptions.set('views',    <React.Fragment><i className="icon icon-fw fas icon-eye mr-1"/>View</React.Fragment>);
             menuOptions.set('sessions', <React.Fragment><i className="icon icon-fw fas icon-user mr-1"/>User Session</React.Fragment>);
@@ -730,7 +762,7 @@ export function UsageStatsView(props){
         changeCountByForChart, countBy,
         // Passed in from StatsChartViewAggregator:
         sessions_by_country, chartToggles, fields_faceted, /* fields_faceted_group_by, browse_search_queries, other_search_queries, */
-        experiment_set_views, file_downloads, smoothEdges, onChartToggle, onSmoothEdgeToggle
+        experiment_set_views, file_downloads, file_views, smoothEdges, onChartToggle, onSmoothEdgeToggle
     } = props;
 
     if (loadingStatus === 'failed'){
@@ -808,6 +840,35 @@ export function UsageStatsView(props){
 
                 : null }
 
+            {session && file_views ?
+
+                <ColorScaleProvider resetScalesWhenChange={file_views}>
+
+                    <hr />
+
+                    <AreaChartContainer {...commonContainerProps} id="file_views"
+                        title={
+                            <div>
+                                <h4 className="text-300 mt-0 mb-0">
+                                    <span className="text-500">File Views</span>
+                                    {countBy.file_views === 'metadata_tsv_by_country' ? '- Metadata.tsv Files Count by Country' :
+                                        (countBy.file_views === 'file_list_views' ? '- appearances in search results' :
+                                            countBy.file_views === 'file_clicks' ? '- clicks from search results' : '- file detail views')}
+                                </h4>
+                            </div>
+                        }
+                        extraButtons={
+                            <UsageChartsCountByDropdown {...countByDropdownProps} chartID="file_views" />
+                        }>
+                        <AreaChart {...commonChartProps} data={file_views} />
+                    </AreaChartContainer>
+
+                    <HorizontalD3ScaleLegend {...{ loadingStatus }} />
+
+                </ColorScaleProvider>
+
+                : null}
+
             { sessions_by_country ?
 
                 <ColorScaleProvider resetScaleLegendWhenChange={sessions_by_country}>
@@ -870,9 +931,8 @@ export function UsageStatsView(props){
                         title={
                             <h4 className="text-300 mt-0">
                                 <span className="text-500">Experiment Set Detail Views</span>{' '}
-                                { countBy.experiment_set_views === 'list_views' ? '- appearances within initial 25 browse results' :
-                                    countBy.experiment_set_views === 'clicks' ? '- clicks from browse results' : '- page detail views' }
-                                {' '}for top Items
+                                { countBy.experiment_set_views === 'expset_list_views' ? '- appearances in search results' :
+                                    countBy.experiment_set_views === 'expset_clicks' ? '- clicks from browse results' : '- page detail views' }
                             </h4>
                         }
                         extraButtons={<UsageChartsCountByDropdown {...countByDropdownProps} chartID="experiment_set_views" />}>
