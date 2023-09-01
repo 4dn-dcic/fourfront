@@ -17,7 +17,7 @@ on:
 jobs:
   # This workflow contains a single job called "build"
   build:
-    name: Test Suite for fourfront (Python 3.8, Node 16)
+    name: Test Suite for fourfront (Python 3.8, Node 18)
 
     # The type of runner that the job will run on
     runs-on: ubuntu-20.04
@@ -28,7 +28,7 @@ jobs:
         test_type: ['UNIT', 'NPM', 'Docker']
         # We are really not set up for these next two to be multiplicative, so be careful adding more.
         python_version: ['3.8']
-        node_version: ['16']
+        node_version: ['18']
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -125,8 +125,8 @@ jobs:
           poetry run wipe-test-indices $TEST_JOB_ID search-fourfront-testing-opensearch-kqm7pliix4wgiu4druk2indorq.us-east-1.es.amazonaws.com:443
 
       - name: Docker Build
-        if: ${{ matrix.test_type == 'Docker' && matrix.node_version == '16' && matrix.python_version == '3.8' }}
+        if: ${{ matrix.test_type == 'Docker' && matrix.node_version == '18' && matrix.python_version == '3.8' }}
         run: |
-          # The docker_development.ini has node 16 and Python 3.8 wired into it.
+          # The docker_development.ini has node 18 and Python 3.8 wired into it.
           touch deploy/docker/local/docker_development.ini  # cheap substitute for prepare-docker to make ignored file
           docker build .
