@@ -6,8 +6,15 @@ fourfront
 Change Log
 ----------
 
+6.4.0
+=====
+
+* Implement and enable DRS API on File objects
+
+
 6.3.0
 =====
+
 
 `Node v18 Upgrade <https://github.com/4dn-dcic/fourfront/pull/1835>`_
 
