@@ -10,7 +10,7 @@ import ReactTooltip from 'react-tooltip';
 import DropdownItem from 'react-bootstrap/esm/DropdownItem';
 import DropdownButton from 'react-bootstrap/esm/DropdownButton';
 
-import { console, layout, ajax, memoizedUrlParse, logger } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { console, layout, ajax, memoizedUrlParse, logger, object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { format as formatDateTime } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';
 
 /**
@@ -500,10 +500,10 @@ export class ChartTooltip extends React.PureComponent {
     }
 
     render(){
-        var { margin } = this.props,
-            { leftPosition, visible, contentFxn, topPosition, chartWidth, chartHeight } = this.state;
+        const { margin, showTooltipOnHover = true } = this.props;
+        const { leftPosition, visible, contentFxn, topPosition, chartWidth, chartHeight } = this.state;
         return (
-            <div className="chart-tooltip" style={_.extend(_.pick(margin, 'left', 'top'), {
+            <div className={"chart-tooltip" + (!showTooltipOnHover ? " requires-click" : "")} style={_.extend(_.pick(margin, 'left', 'top'), {
                 'transform' : 'translate(' + Math.min(leftPosition, chartWidth - 5) + 'px, 0px)',
                 'display' : visible ? 'block' : 'none',
                 'bottom' : margin.bottom + 5
@@ -622,6 +622,7 @@ export class AreaChart extends React.PureComponent {
         'transitionDuration'    : 1500,
         'colorScale'            : null, // d3.scaleOrdinal(d3.schemeCategory10)
         'tooltipDataProperty'   : 'total',
+        'showTooltipOnHover'    : true,
         'shouldDrawNewChart'    : function(pastProps, nextProps, pastState, nextState){
             var shouldDrawNewChart = false;
 
@@ -938,9 +939,15 @@ export class AreaChart extends React.PureComponent {
                     newChild[tdp] = totalForRemainder;
                     termChildren.push(newChild);
                 }
+                const hasCloseButton = (tProps.showTooltipOnHover === false && typeof tProps.removeTooltip === 'function');
 
                 return (
-                    <div className={"label-bg" + (isToLeft ? ' to-left' : '')}>
+                    <div className={"label-bg" + (isToLeft ? ' to-left' : '') + (hasCloseButton ? ' has-close-button' : '')}>
+                        {hasCloseButton &&
+                            <button className="close float-left" type="button" onClick={(e) => { e.stopPropagation(); tProps.removeTooltip(); }}>
+                                <span>×</span>
+                            </button>
+                        }
                         <h5 className={"text-500 mt-0 clearfix" + (isEmpty ? ' mb-0' : ' mb-11')}>
                             { dateString }{ total ? <span className="text-700 text-large pull-right" style={{ marginTop: -2 }}>&nbsp;&nbsp; { total }</span> : null }
                         </h5>
@@ -948,12 +955,15 @@ export class AreaChart extends React.PureComponent {
                             <table className="current-legend">
                                 <tbody>
                                     { _.map(termChildren, function(c, i){
+                                        const term =
+                                            object.isValidAtIDFormat(c.term) ?
+                                                (<a key={c.term} href={c.term} target="_blank" rel="noreferrer">{c.term}</a>) : c.term;
                                         return (
                                             <tr key={c.term || i} className={currentTerm === c.term ? 'active' : null}>
                                                 <td className="patch-cell">
                                                     <div className="color-patch" style={{ 'backgroundColor' : c.noColor ? 'transparent' : colorScale(c.term) }}/>
                                                 </td>
-                                                <td className="term-name-cell">{ c.term }</td>
+                                                <td className="term-name-cell">{ term }</td>
                                                 <td className="term-name-total">
                                                     { c[tdp] % 1 > 0 ?  Math.round(c[tdp] * 100) / 100 : c[tdp] }
                                                     { yAxisLabel && yAxisLabel !== 'Count' ? ' ' + yAxisLabel : null }
@@ -1059,17 +1069,24 @@ export class AreaChart extends React.PureComponent {
     }
 
     render(){
-        var { data, width, height, transitionDuration, margin } = this.props;
+        const { data, width, height, transitionDuration, margin, showTooltipOnHover = true } = this.props;
         if (!data || this.state.drawingError) {
             return <div>Error</div>;
         }
+        const passProps = { margin, showTooltipOnHover, removeTooltip: this.removeTooltip };
+        let containerEvents = null;
+        if (showTooltipOnHover) {
+            containerEvents = { onMouseMove: this.updateTooltip, onMouseOut: this.removeTooltip };
+        } else {
+            containerEvents = { onClick: this.updateTooltip };
+        }
         return (
-            <div className="area-chart-inner-container" onMouseMove={this.updateTooltip} onMouseOut={this.removeTooltip}>
+            <div className="area-chart-inner-container" {...containerEvents}>
                 <svg ref={this.svgRef} className="area-chart" width={width || "100%"} height={height || null} style={{
                     height, 'width' : width || '100%',
                     'transition' : 'height ' + (transitionDuration / 1000) + 's' + (height >= 500 ? ' .75s' : ' 1.025s')
                 }} />
-                <ChartTooltip margin={margin} ref={this.tooltipRef} />
+                <ChartTooltip {...passProps} ref={this.tooltipRef} />
             </div>
         );
     }
@@ -1176,7 +1193,7 @@ export class AreaChartContainer extends React.Component {
     }
 
     render(){
-        const { title, children, width, defaultHeight, colorScale, chartMargin, updateColorStore } = this.props;
+        const { title, subTitle, children, width, defaultHeight, colorScale, chartMargin, updateColorStore } = this.props;
 
         const expanded = AreaChartContainer.isExpanded(this.props);
         const useWidth = width || this.getRefWidth();
@@ -1203,6 +1220,7 @@ export class AreaChartContainer extends React.Component {
                     { this.buttonSection() }
                     { title }
                 </div>
+                {subTitle ? <div className="text-center">{subTitle}</div> : null}
                 <div ref={this.elemRef} style={{ 'overflowX' : expanded ? 'scroll' : 'auto', 'overflowY' : 'hidden' }}>
                     { visualToShow }
                 </div>

@@ -800,6 +800,7 @@ export function UsageStatsView(props){
     const commonContainerProps = { 'onToggle' : onChartToggle, chartToggles, windowWidth, 'defaultColSize' : '12', 'defaultHeight' : anyExpandedCharts ? 200 : 250 };
     const commonChartProps = { dateRoundInterval, 'xDomain' : commonXDomain, 'curveFxn' : smoothEdges ? d3.curveMonotoneX : d3.curveStepAfter };
     const countByDropdownProps = { countBy, changeCountByForChart };
+    const fileDownloadClickToTooltip = (countBy.file_downloads === 'top_files');
 
     return (
         <div className="stats-charts-container" key="charts" id="usage">
@@ -817,7 +818,7 @@ export function UsageStatsView(props){
 
                     <hr/>
 
-                    <AreaChartContainer {...commonContainerProps} id="file_downloads"
+                    <AreaChartContainer {...commonContainerProps} id="file_downloads" defaultHeight={fileDownloadClickToTooltip ? 350 : commonContainerProps.defaultHeight}
                         title={
                             <div>
                                 <h4 className="text-500 mt-0 mb-0">File Downloads</h4>
@@ -830,8 +831,11 @@ export function UsageStatsView(props){
                         }
                         extraButtons={
                             <UsageChartsCountByDropdown {...countByDropdownProps} chartID="file_downloads" />
+                        }
+                        subTitle={
+                            fileDownloadClickToTooltip ? <h4 className="font-weight-normal text-secondary">Click bar to view details</h4> : null
                         }>
-                        <AreaChart {...commonChartProps} data={file_downloads} />
+                        <AreaChart {...commonChartProps} data={file_downloads} showTooltipOnHover={!fileDownloadClickToTooltip} />
                     </AreaChartContainer>
 
                     <HorizontalD3ScaleLegend {...{ loadingStatus }} />
