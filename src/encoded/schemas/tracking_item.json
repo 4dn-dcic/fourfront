@@ -377,7 +377,7 @@
 
                         "file_downloads_by_country" : {
                             "type" : "array",
-                            "title" : "File Downloads",
+                            "title" : "File Downloads by Country",
                            "description": "File Downloads segmented by country",
                            "items" : {
                                 "type" : "object",
@@ -419,9 +419,9 @@
 
                         "file_downloads_by_filetype" : {
                             "type" : "array",
-                            "title" : "File Downloads",
-                           "description": "File Downloads segmented by country",
-                           "items" : {
+                            "title" : "File Downloads by File Type",
+                            "description": "File Downloads segmented by file type",
+                            "items" : {
                                 "type" : "object",
                                 "properties": {
                                     "ga:productVariant" : {
@@ -459,9 +459,87 @@
                             }
                         },
 
+                        "top_files_downloaded" : {
+                            "type" : "array",
+                            "title" : "Top File Downloads",
+                            "description": "Top File Downloads segmented by file",
+                            "items" : {
+                                "type" : "object",
+                                "properties": {
+                                    "ga:productName" : {
+                                        "type" : "string",
+                                        "title" : "Item Title"
+                                    },
+                                    "ga:productSku" : {
+                                        "type" : "string",
+                                        "title" : "Item Accession"
+                                    },
+                                    "ga:productBrand" : {
+                                        "type" : "string",
+                                        "title" : "Lab Name"
+                                    },
+                                    "ga:productVariant" : {
+                                        "type" : "string",
+                                        "title" : "File Type"
+                                    },
+                                    "ga:productDetailViews" : {
+                                        "type" : "integer",
+                                        "title" : "Detail Views",
+                                        "description": "Number of times this ExperimentSet has been viewed via its Item page."
+                                    },
+                                    "ga:productListClicks" : {
+                                        "type" : "integer",
+                                        "title" : "Clicks from Browse",
+                                        "description": "Number of times this ExperimentSet has been clicked on from the Browse page."
+                                    },
+                                    "ga:productListViews" : {
+                                        "type" : "integer",
+                                        "title" : "List Views",
+                                        "description": "Number of times this ExperimentSet has been seen present in a Browse or Search results page."
+                                    },
+                                    "ga:metric2" : {
+                                        "type" : "integer",
+                                        "title" : "Downloads"
+                                    },
+                                    "ga:metric1" : {
+                                        "type" : "integer",
+                                        "title" : "Cumalative Filesize"
+                                    },
+                                    "ga:calcMetric_PercentRangeQueries" : {
+                                        "type" : "integer",
+                                        "title" : "Range Query Count"
+                                    }
+                                }
+                            }
+                        },
+
+                        "metadata_tsv_by_country" : {
+                            "type" : "array",
+                            "title" : "Metadata.tsv Download by Country",
+                            "items" : {
+                                "type" : "object",
+                                "properties": {
+                                    "ga:country" : {
+                                        "type" : "string",
+                                        "title" : "Country"
+                                    },
+                                    "ga:itemListName" : {
+                                        "type" : "string",
+                                        "title" : "List Name",
+                                        "description": "The source where the metadata.tsv file is generated"
+                                    },
+                                    "ga:uniquePurchases" : {
+                                        "type" : "integer",
+                                        "title" : "Files Count",
+                                        "description": "Total files count included within the file"
+                                    }
+                                }
+                            }
+                        },
+
                         "file_downloads_by_experiment_type" : {
                             "type" : "array",
-                            "title" : "File Downloads",
+                            "title" : "File Downloads by Experiment Type",
                            "description": "File Downloads segmented by country",
                            "items" : {
                                 "type" : "object",
