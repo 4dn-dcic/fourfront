@@ -140,6 +140,46 @@
                                         "type" : "number",
                                         "title" : "Sessions per User",
                                         "description": "Number of sessions divided by number of unique users."
+                                    },
+                                    "ga:pageviews" : {
+                                        "type" : "integer",
+                                        "title" : "Pageviews"
+                                    }
+                                }
+                            }
+                        },
+
+                        "sessions_by_device_category": {
+                            "type" : "array",
+                            "title" : "User Sessions by Device Category",
+                            "items" : {
+                                "type" : "object",
+                                "properties" : {
+                                    "ga:deviceCategory" : {
+                                        "type" : "string",
+                                        "title" : "Country"
+                                    },
+                                    "ga:sessions" : {
+                                        "type" : "integer",
+                                        "title" : "Session Count",
+                                        "description" : "Number of sessions from ga:deviceCategory for the given start->end date range."
+                                    },
+                                    "ga:avgSessionDuration" : {
+                                        "type" : "number",
+                                        "title" : "Avg. Session Duration"
+                                    },
+                                    "ga:bounceRate" : {
+                                        "type" : "number",
+                                        "title" : "Bounce Rate"
+                                    },
+                                    "ga:sessionsPerUser" : {
+                                        "type" : "number",
+                                        "title" : "Sessions per User",
+                                        "description": "Number of sessions divided by number of unique users."
+                                    },
+                                    "ga:pageviews" : {
+                                        "type" : "integer",
+                                        "title" : "Pageviews"
                                     }
                                 }
                             }
@@ -523,7 +563,7 @@
                                         "type" : "string",
                                         "title" : "Country"
                                     },
-                                    "ga:itemListName" : {
+                                    "ga:productListName" : {
                                         "type" : "string",
                                         "title" : "List Name",
                                         "description": "The source where the metadata.tsv file is generated"

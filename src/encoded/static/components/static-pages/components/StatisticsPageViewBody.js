@@ -407,10 +407,17 @@ const aggregationsToChartData = {
         'function' : function(resp, props){
             if (!resp || !resp['@graph']) return null;
 
-            var countKey = 'ga:pageviews';
-            if (props.countBy.sessions_by_country === 'sessions') countKey = 'ga:sessions';
+            let useReport = 'sessions_by_device_category';
+            let termBucketField = 'ga:deviceCategory';
+            let countKey = 'ga:pageviews';
 
-            return commonParsingFxn.analytics_to_buckets(resp, 'sessions_by_country', 'ga:country', countKey);
+            if (props.countBy.sessions_by_country !== 'device_category') {
+                useReport = 'sessions_by_country';
+                termBucketField = 'ga:country';
+                countKey = (props.countBy.sessions_by_country === 'sessions') ? 'ga:sessions' : 'ga:pageviews';
+            }
+
+            return commonParsingFxn.analytics_to_buckets(resp, useReport, termBucketField, countKey);
         }
     },
     /*
@@ -561,6 +568,7 @@ export class UsageStatsViewController extends React.PureComponent {
                     // Reduce size of response a little bit (dl'd size is in range of 2-3 mb)
                     "fields_faceted",
                     "sessions_by_country",
+                    "sessions_by_device_category",
                     "file_downloads_by_experiment_type",
                     "file_downloads_by_filetype",
                     "file_downloads_by_country",
@@ -736,15 +744,16 @@ class UsageChartsCountByDropdown extends React.PureComponent {
             menuOptions.set('file_clicks',              <React.Fragment><i className="icon far icon-fw icon-hand-point-up mr-1"/>Search Result Click</React.Fragment>);
             menuOptions.set('metadata_tsv_by_country',  <React.Fragment><i className="icon fas icon-fw icon-globe mr-1"/>Metadata.tsv Files Count by Country</React.Fragment>);
         } else {
-            menuOptions.set('views',    <React.Fragment><i className="icon icon-fw fas icon-eye mr-1"/>View</React.Fragment>);
-            menuOptions.set('sessions', <React.Fragment><i className="icon icon-fw fas icon-user mr-1"/>User Session</React.Fragment>);
+            menuOptions.set('views',            <React.Fragment><i className="icon icon-fw fas icon-eye mr-1"/>View</React.Fragment>);
+            menuOptions.set('sessions',         <React.Fragment><i className="icon icon-fw fas icon-user mr-1"/>User Session</React.Fragment>);
+            menuOptions.set('device_category',  <React.Fragment><i className="icon icon-fw fas icon-user mr-1"/>Device Category</React.Fragment>);
         }
 
         const dropdownTitle = menuOptions.get(currCountBy);
 
         return (
             <div className="d-inline-block mr-05">
-                <DropdownButton data-tip="Count By" size="sm" id={"select_count_for_" + chartID}
+                <DropdownButton size="sm" id={"select_count_for_" + chartID}
                     onSelect={this.handleSelection} title={dropdownTitle}>
                     {_.map([ ...menuOptions.entries() ], function([ k, title ]){
                         return <DropdownItem eventKey={k} key={k}>{ title }</DropdownItem>;
@@ -882,7 +891,8 @@ export function UsageStatsView(props){
                     <AreaChartContainer {...commonContainerProps} id="sessions_by_country"
                         title={
                             <h4 className="text-300 mt-0">
-                                <span className="text-500">{ countBy.sessions_by_country === 'sessions' ? 'User Sessions' : 'Page Views' }</span> - by country
+                                <span className="text-500">{countBy.sessions_by_country === 'sessions' ? 'User Sessions' : 'Page Views'}</span>
+                                {countBy.sessions_by_country !== 'device_category' ? ' - by country' : ' - by device categoory'}
                             </h4>
                         }
                         extraButtons={<UsageChartsCountByDropdown {...countByDropdownProps} chartID="sessions_by_country" />}>
