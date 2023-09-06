@@ -955,9 +955,10 @@ export class AreaChart extends React.PureComponent {
                             <table className="current-legend">
                                 <tbody>
                                     { _.map(termChildren, function(c, i){
+                                        const handleOnClick = (e) => { e.stopPropagation(); tProps.removeTooltip(); };
                                         const term =
                                             object.isValidAtIDFormat(c.term) ?
-                                                (<a key={c.term} href={c.term} target="_blank" rel="noreferrer">{c.term}</a>) : c.term;
+                                                <a key={c.term} href={c.term} target="_blank" rel="noreferrer" onClick={handleOnClick}>{c.term}</a> : c.term;
                                         return (
                                             <tr key={c.term || i} className={currentTerm === c.term ? 'active' : null}>
                                                 <td className="patch-cell">
