@@ -746,7 +746,9 @@ class UsageChartsCountByDropdown extends React.PureComponent {
         } else {
             menuOptions.set('views',            <React.Fragment><i className="icon icon-fw fas icon-eye mr-1"/>View</React.Fragment>);
             menuOptions.set('sessions',         <React.Fragment><i className="icon icon-fw fas icon-user mr-1"/>User Session</React.Fragment>);
-            menuOptions.set('device_category',  <React.Fragment><i className="icon icon-fw fas icon-user mr-1"/>Device Category</React.Fragment>);
+            if(chartID === 'sessions_by_country') {
+                menuOptions.set('device_category',  <React.Fragment><i className="icon icon-fw fas icon-user mr-1"/>Device Category</React.Fragment>);
+            }
         }
 
         const dropdownTitle = menuOptions.get(currCountBy);
