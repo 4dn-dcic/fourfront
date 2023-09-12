@@ -1496,7 +1496,7 @@ def update_google_analytics(context, request, ga_config, filename, file_size_dow
                     "link_url": request.url,
                     "file_size": file_size_downloaded,
                     "downloads": 0 if request.range else 1,
-                    "experiment_type": file_experiment_type or None,
+                    "experiment_type": file_experiment_type or "None",
                     "lab": lab.get("display_title"),
                     # Product Category from @type, e.g. "File/FileProcessed"
                     "file_classification": "/".join(item_types),
