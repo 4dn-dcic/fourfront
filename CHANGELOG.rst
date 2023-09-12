@@ -6,6 +6,14 @@ fourfront
 Change Log
 ----------
 
+6.4.1
+=====
+
+`Markdown image links in static sections and pages <https://github.com/4dn-dcic/fourfront/pull/1845>`_
+
+* Bug fix - Markdown formatted static sections with images in hyperlinks are not correctly rendered if embedded in Pages. If the static section is rendered standalone, it works well.
+
+
 6.4.0
 =====
 
