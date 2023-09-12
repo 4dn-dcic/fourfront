@@ -522,6 +522,10 @@
                                         "type" : "string",
                                         "title" : "File Type"
                                     },
+                                    "ga:productCategoryLevel2" : {
+                                        "type" : "string",
+                                        "title" : "Item Type of File"
+                                    },
                                     "ga:productDetailViews" : {
                                         "type" : "integer",
                                         "title" : "Detail Views",
