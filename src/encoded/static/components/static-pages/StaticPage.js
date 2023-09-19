@@ -34,17 +34,28 @@ export const parseSectionsContent = memoize(function(context){
         }))
     };
 
+    const jsxCompilerOptions = {
+        replace: (domNode) => {
+            if (['h1','h2','h3','h4', 'h5', 'h6'].indexOf(domNode.name) >= 0) {
+                const props = object.attributesToProps(domNode.attribs);
+                return <MarkdownHeading {...props} type={domNode.name}>{_.pluck(domNode.children, 'data')}</MarkdownHeading>;
+            }
+        }
+    };
+
     function parse(section){
 
         if (Array.isArray(section['@type']) && section['@type'].indexOf('StaticSection') > -1){
+            const { content, content_as_html, filetype } = section;
             // StaticSection Parsing
-            if (section.filetype === 'md' && typeof section.content === 'string'){
+            if (filetype === 'md' && typeof content === 'string' && !content_as_html){
                 section =  _.extend({}, section, {
-                    'content' : compiler(section.content, markdownCompilerOptions)
+                    'content' : compiler(content, markdownCompilerOptions)
                 });
-            } else if (section.filetype === 'html' && typeof section.content === 'string'){
+            } else if ((filetype === 'html' || filetype === 'rst' || filetype === 'md') && (typeof content_as_html === 'string' || typeof content === 'string')){
+                const contentStr = (filetype === 'md') ? '<div>' + content_as_html + '</div>' : (content_as_html || content);
                 section =  _.extend({}, section, {
-                    'content' : object.htmlToJSX(section.content)
+                    'content' : object.htmlToJSX(contentStr, jsxCompilerOptions)
                 });
             } // else: retain plaintext or HTML representation
         } else if (Array.isArray(section['@type']) && section['@type'].indexOf('HiglassViewConfig') > -1){
@@ -96,8 +107,6 @@ export const StaticEntryContent = React.memo(function StaticEntryContent(props){
     } else if (typeof content === 'string' && filetype === 'txt' && content.slice(0,12) === 'placeholder:'){
         // Deprecated older method - to be removed once data.4dn uses filetype=jsx everywhere w/ placeholder
         renderedContent = replacePlaceholderString(content.slice(12).trim(), _.omit(props, 'className', 'section', 'content'));
-    } else if (content_as_html && typeof content_as_html === 'string' && (filetype === 'rst' || filetype === 'md')){
-        renderedContent = replacePlaceholderString(content_as_html.trim(), _.omit(props, 'className', 'section', 'content', 'content_as_html'));
     } else {
         renderedContent = content;
     }
