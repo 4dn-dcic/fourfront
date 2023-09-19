@@ -158,7 +158,7 @@ class StaticSection(UserContent):
                 return convert_external_links(content, request.domain)
         elif file_type == 'md':
             # remove new line character
-            output = markdown.markdown(content)
+            output = markdown.markdown(content, extensions=['tables'])
             output = output.replace('\n', '')
             if output and convert_ext_links:
                 return convert_external_links(output, request.domain)
