@@ -6,7 +6,7 @@ import _ from 'underscore';
 import memoize from 'memoize-one';
 import { compiler } from 'markdown-to-jsx';
 
-import { MarkdownHeading } from '@hms-dbmi-bgm/shared-portal-components/es/components/static-pages/TableOfContents';
+import { MarkdownHeading, TableOfContents } from '@hms-dbmi-bgm/shared-portal-components/es/components/static-pages/TableOfContents';
 import { console, object, isServerSide } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { StaticPageBase } from '@hms-dbmi-bgm/shared-portal-components/es/components/static-pages/StaticPageBase';
 
@@ -37,8 +37,13 @@ export const parseSectionsContent = memoize(function(context){
     const jsxCompilerOptions = {
         replace: (domNode) => {
             if (['h1','h2','h3','h4', 'h5', 'h6'].indexOf(domNode.name) >= 0) {
+                const children = _.pluck(domNode.children, 'data');
+                const title = TableOfContents.textFromReactChildren(children) || '';
+                if (title.trim().length === 0) {
+                    return domNode;
+                }
                 const props = object.attributesToProps(domNode.attribs);
-                return <MarkdownHeading {...props} type={domNode.name}>{_.pluck(domNode.children, 'data')}</MarkdownHeading>;
+                return <MarkdownHeading {...props} type={domNode.name}>{children}</MarkdownHeading>;
             }
         }
     };
