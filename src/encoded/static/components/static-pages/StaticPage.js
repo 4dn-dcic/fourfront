@@ -39,7 +39,7 @@ export const parseSectionsContent = memoize(function(context){
             if (['h1','h2','h3','h4', 'h5', 'h6'].indexOf(domNode.name) >= 0) {
                 const children = _.pluck(domNode.children, 'data');
                 const title = TableOfContents.textFromReactChildren(children) || '';
-                if (title.trim().length === 0) {
+                if (title.replace('-', '').trim().length === 0) {
                     return domNode;
                 }
                 const props = object.attributesToProps(domNode.attribs);
