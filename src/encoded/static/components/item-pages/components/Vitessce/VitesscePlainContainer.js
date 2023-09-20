@@ -134,7 +134,7 @@ export class VitesscePlainContainer extends React.PureComponent {
 const VitesscePlainContainerBody = React.forwardRef(function VitesscePlainContainerBody(props, ref){
     const { config, theme, hasRuntimeError, disabled, isValidating, mounted, vitessceInitialized, width, height, mountCount, placeholder, style, className, packageLockJson } = props;
     const outerKey = "mount-number-" + mountCount;
-    const { dependencies: { vitessce : { version: vitessceVersionUsed = null } = {} } = {} } = packageLockJson || {};
+    const { packages: { 'node_modules/vitessce' : { version: vitessceVersionUsed = null } = {} } = {} } = packageLockJson || {};
     const { Vitessce } = vitessceDependencies || {};
 
     let vitessceInstance = null;

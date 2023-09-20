@@ -6,6 +6,16 @@ fourfront
 Change Log
 ----------
 
+6.4.3
+=====
+
+`TOC + HealthView + Unpkg updates updates <https://github.com/4dn-dcic/fourfront/pull/1848>`_
+
+* TOC support for Markdown (renewed), HTML and RST
+* Healthview updates due to Node v18 (and npm 9+) transition
+* Unpkg updates for HiGlass and Vitessce due to Node v18 (and npm 9+) transition
+
+
 6.4.2
 =====
 

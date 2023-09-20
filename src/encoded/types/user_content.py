@@ -157,7 +157,9 @@ class StaticSection(UserContent):
             if convert_ext_links:
                 return convert_external_links(content, request.domain)
         elif file_type == 'md':
-            output = markdown.markdown(content)
+            # remove new line character
+            output = convert_markdown_to_html(content)
+            output = output.replace('\n', '')
             if output and convert_ext_links:
                 return convert_external_links(output, request.domain)
             return output
@@ -344,6 +346,18 @@ def get_local_file_contents(filename, contentFilesLocation=None):
 def get_remote_file_contents(uri):
     resp = requests.get(uri)
     return resp.text
+
+
+def convert_markdown_to_html(markdown_text, custom_wrapper = 'div'):
+    # convert markdown to html including tables
+    html_output = markdown.markdown(markdown_text, extensions=['tables'])
+
+    # check content has any header, if yes wrap it with custom tag
+    header_pattern = re.compile(r'<h[1-6]>.*?<\/h[1-6]>', re.IGNORECASE)
+    if header_pattern.search(html_output):
+        html_output = f'<{custom_wrapper}>{html_output}</{custom_wrapper}>'
+
+    return html_output
 
 
 def convert_external_links(content, reference_domain):
