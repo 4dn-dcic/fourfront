@@ -58,7 +58,7 @@ export const parseSectionsContent = memoize(function(context){
                     'content' : compiler(content, markdownCompilerOptions)
                 });
             } else if ((filetype === 'html' || filetype === 'rst' || filetype === 'md') && (typeof content_as_html === 'string' || typeof content === 'string')){
-                const contentStr = (filetype === 'md') ? '<div>' + content_as_html + '</div>' : (content_as_html || content);
+                const contentStr = (filetype === 'md') ? content_as_html : (content_as_html || content);
                 section =  _.extend({}, section, {
                     'content' : object.htmlToJSX(contentStr, jsxCompilerOptions)
                 });
