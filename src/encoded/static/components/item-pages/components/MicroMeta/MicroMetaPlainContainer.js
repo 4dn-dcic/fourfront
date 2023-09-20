@@ -214,7 +214,7 @@ class MMPlainContainerBody extends React.PureComponent {
         const { containerRef, appRef } = forwardRef;
         const { scalingFactor } = this.state;
         const outerKey = "mount-number-" + mountCount;
-        const { dependencies: { "micro-meta-app-react": { version: microMetaVersionUsed = null } = {} } = {} } = packageLockJson || {};
+        const { packages: { 'node_modules/micro-meta-app-react': { version: microMetaVersionUsed = null } = {} } = {} } = packageLockJson || {};
         const { MicroMetaAppReact } = microMetaDependencies || {};
 
         const placeholderStyle = { width: width || null };

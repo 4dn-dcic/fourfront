@@ -226,27 +226,20 @@ export default class HealthView extends React.PureComponent {
         const notYetLoaded = (db_es_compare === null && db_es_total === null);
 
         const width = layout.gridContainerWidth(windowWidth);
-        // extend context to include shared-portal-components version
-        const { dependencies: { '@hms-dbmi-bgm/shared-portal-components': { version: spcVersion, from: spcFrom } = {} } } = installedPackageLockJson;
-        const { packages: { 'node_modules/@hms-dbmi-bgm/shared-portal-components': { version: spcInstallVersion } = {} } } = installedPackageLockJson;
-        let spcVersionUsed;
-        if (spcFrom && spcFrom.indexOf('#') > -1) { //e.g. github:4dn-dcic/shared-portal-components#0.0.2.70
-            [ spcVersionUsed ] = spcFrom.split('#').splice(-1);
-        }
-        // extend context to include micro-meta-app-react version
-        const { dependencies: { 'micro-meta-app-react': { version: microMetaVersion, from: microMetaFrom } = {} } } = installedPackageLockJson;
-        let microMetaVersionUsed;
-        if (microMetaFrom && microMetaFrom.indexOf('#') > -1) {
-            [ microMetaVersionUsed ] = microMetaFrom.split('#').splice(-1);
-        }
-        //extend context to include higlass & vitessce version
-        const { dependencies: { 'higlass': { version: higlassVersion } = {}, 'vitessce': { version: vitessceVersion } } } = installedPackageLockJson;
 
-        const spcVersionDetailed = getDetailedVersion(spcVersionUsed, spcVersion, spcInstallVersion);
+        // extend context to include shared-portal-components and 3rd party integrations
+        // since dependencies is depracated in npm v9, we extract the pkg versions from packages field - see https://docs.npmjs.com/cli/v9/configuring-npm/package-lock-json#dependencies
+        const { packages: {
+            'node_modules/@hms-dbmi-bgm/shared-portal-components': { version: spcVersion } = {},
+            'node_modules/micro-meta-app-react': { version: microMetaVersion } = {},
+            'node_modules/higlass': { version: higlassVersion } = {},
+            'node_modules/vitessce': { version: vitessceVersion = {} }
+        } } = installedPackageLockJson;
+
         const context = {
             ...propContext,
-            'spc_version': spcVersionDetailed,
-            'micro_meta_version': microMetaVersionUsed || microMetaVersion || "-",
+            'spc_version': spcVersion || "-",
+            'micro_meta_version': microMetaVersion || "-",
             'higlass_version': higlassVersion || "-",
             'vitessce_version': vitessceVersion || "-"
         };
@@ -269,14 +262,6 @@ export default class HealthView extends React.PureComponent {
     }
 }
 
-function getDetailedVersion(depUsedVersion, depVersion, depInstallVersion) {
-    if (depUsedVersion === depInstallVersion) {
-        return depUsedVersion || depVersion || "-";
-    } else {
-        const version = depUsedVersion || depVersion || "-";
-        return 'Ambiguous versions found. Dependencies Version: ' + version + ', Installed Version: ' + depInstallVersion;
-    }
-}
 const DatabaseCountsInfo = React.memo(function DatabaseCountsInfo(props){
     const { notYetLoaded, excludedKeys, schemas, db_es_compare, db_es_total, session, mounted, context, width, getCounts, keyTitleDescriptionMapCounts } = props;
     const userGroups = (session && JWT.getUserGroups()) || null;
