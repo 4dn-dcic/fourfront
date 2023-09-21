@@ -27,10 +27,10 @@ describe('Impersonate user JWT, navigate to profile, edit last_name to & back.',
                 .get('#overlays-container .big-dropdown-menu .help-menu-tree .level-1-title-container').contains('a', 'Profile').click().end()
                 .get('.page-container .user-title-row-container h1.user-title').should('contain', "Frontend").end() // Test only for first name as we're editing last name & it may change re: delayed indexing, etc.
                 .get('.page-container .access-keys-container h3').should('contain', "Access Keys").end()
-                .get('.page-container .access-keys-container #add-access-key').scrollToCenterElement().click({ force : true }).wait(100).end()
+                .get('.page-container .access-keys-container #add-access-key').scrollToCenterElement().click({ force : true }).end()
                 .get('.modal-body').should('contain', 'Access Key ID').should('contain', 'Secret Access Key').end()
                 .get('.modal-body div.row:first-of-type code').invoke('text').then(function(accessKeyID){
-                    return cy.get('.fade.show.modal-backdrop').click({ force: true }).wait(500).end()
+                    return cy.get('.fade.show.modal-backdrop').click({ force: true }).end()
                         // Assert we have new access key in table.
                         .get('.page-container .access-keys-container').should('contain', accessKeyID).end()
                         // Now, delete it.
@@ -55,10 +55,10 @@ describe('Impersonate user JWT, navigate to profile, edit last_name to & back.',
                         .get('.page-container .user-title-row-container h1.user-title .last_name .value.saved a.edit-button').click().end()
                         .get('.page-container .user-title-row-container h1.user-title .last_name .value.editing input')
                         .scrollToCenterElement().clear().type('SuperTest').then(function(inputfield){
-                            return cy.wait(100).window().end().get('.page-container .user-title-row-container h1.user-title .last_name .value.editing .save-button').click()
-                                .should('have.length', 0).wait(100).end()
+                            return cy.window().get('.page-container .user-title-row-container h1.user-title .last_name .value.editing .save-button').click()
+                                .should('have.length', 0).end()
                                 .get('.page-container .user-title-row-container h1.user-title .last_name .value.editing .loading-icon').should('have.length', 0).end()
-                                .get('.page-container .user-title-row-container h1.user-title').should('have.text', "Frontend SuperTest").wait(500).end()
+                                .get('.page-container .user-title-row-container h1.user-title').should('have.text', "Frontend SuperTest").end()
                                 // After reloading on datastore=database, last name stays edited. Then change back.
                                 .reload()//.visit(currUrl + '?datastore=database').end()
                                 .get('.page-container .user-title-row-container h1.user-title').should('have.text', "Frontend SuperTest").end()
@@ -66,11 +66,11 @@ describe('Impersonate user JWT, navigate to profile, edit last_name to & back.',
                                 .get('.page-container .user-title-row-container h1.user-title .last_name .value.saved a.edit-button').click().end()
                                 .get('.page-container .user-title-row-container h1.user-title .last_name .value.editing input').should('have.value', 'SuperTest')
                                 .clear({ force : true }).type('Test', { force : true }).then(function(inputfield){
-                                    return cy.wait(100)
+                                    return cy
                                         .get('.page-container .user-title-row-container h1.user-title .last_name .value.editing .save-button').click()
-                                        .should('have.length', 0).wait(100).end()
+                                        .should('have.length', 0).end()
                                         .get('.page-container .user-title-row-container h1.user-title .last_name .value.editing .loading-icon').should('have.length', 0).end()
-                                        .get('.page-container .user-title-row-container h1.user-title').should('have.text', "Frontend Test").wait(500).end()
+                                        .get('.page-container .user-title-row-container h1.user-title').should('have.text', "Frontend Test").end()
                                         .reload()
                                         .get('.page-container .user-title-row-container h1.user-title').should('have.text', "Frontend Test").end();
                                 });
