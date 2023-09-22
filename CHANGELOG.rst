@@ -6,6 +6,12 @@ fourfront
 Change Log
 ----------
 
+6.4.4
+=====
+
+* Added 'fluorophore' as additional ignored_enum label for imaging_path.json schema
+
+
 6.4.3
 =====
 
