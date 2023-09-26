@@ -170,7 +170,7 @@ def test_linkTo_saves_uuid(root, submitter, lab):
 
 
 def test_mixinProperties():
-    schema = load_schema('encoded:schemas/access_key.json')
+    schema = load_schema('snovault:schemas/access_key.json')
     assert schema['properties']['uuid']['type'] == 'string'
 
 
