@@ -1,7 +1,7 @@
 [tool.poetry]
 # Note: Various modules refer to this system as "encoded", not "fourfront".
 name = "encoded"
-version = "6.2.2.1b1"  # TODO: To become 6.3.0
+version = "6.4.4.1b1"  # TODO: To become 7.0.0
 description = "4DN-DCIC Fourfront"
 authors = ["4DN-DCIC Team <support@4dnucleome.org>"]
 license = "MIT"
@@ -32,14 +32,17 @@ classifiers = [
     # that you indicate whether you support Python 2, Python 3 or both.
     'Programming Language :: Python :: 3',
     'Programming Language :: Python :: 3.7',
-    'Programming Language :: Python :: 3.8'
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11'
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.8.1,<3.10"
-awscli = ">=1.25.36"
-boto3 = "^1.26.133"
-botocore = "^1.27.36"
+python = ">=3.8.1,<3.12"
+awscli = ">=1.29.54"
+boto3 = "^1.28.54"
+botocore = "^1.31.54"
 certifi = ">=2021.5.30"
 #chardet = "3.0.4"
 chardet = "^5.2.0"
@@ -48,10 +51,8 @@ colorama = "0.3.3"
 # we get odd 'pyo3_runtime.PanicException: Python API call failed' error on import
 # of cryptography.hazmat.bindings._rust in cryptography package. 2023-04-21.
 cryptography = "39.0.2"
-#dcicsnovault = "10.0.2.1b18"
-dcicsnovault = "10.0.4.1b9"
-#dcicutils = "7.10.0.1b2"
-dcicutils = "7.11.0.1b9"
+dcicsnovault = "10.0.4.1b17"
+dcicutils = "7.12.0.2b6"
 elasticsearch = "7.13.4"
 elasticsearch-dsl = "^7.0.0"  # TODO: port code from cgap-portal to get rid of uses
 execnet = "1.4.1"
@@ -84,7 +85,7 @@ python-dateutil = "^2.8.2"
 # python-magic is presently pinned to 0.4.15 in lockstep with dcicsnovault's requirements. See explanation there.
 python_magic = ">=0.4.24,<1"
 pytz = ">=2021.3"
-PyYAML = "5.3.1"
+PyYAML = "^6.0.1"
 rdflib = "^4.2.2"
 rdflib-jsonld = ">=0.5.0,<1.0.0"
 requests = "^2.26.0"
@@ -124,8 +125,8 @@ wheel = "0.40.0"
 
 [tool.poetry.dev-dependencies]
 # PyCharm says boto3-stubs contains useful type hints
-boto3-stubs = "^1.24.36"
-botocore-stubs = "^1.27.36"
+boto3-stubs = "^1.28.54"
+botocore-stubs = "^1.31.54"
 coverage = ">=6.2"
 codacy-coverage = ">=1.3.11"
 coveralls = ">=3.3.1"

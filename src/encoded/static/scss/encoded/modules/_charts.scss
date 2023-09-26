@@ -1256,6 +1256,9 @@ $workflow-node-color-type-global-context: #ffb3b3;
 
                 &:not(.to-left){
                     left: 10px;
+                    &.has-close-button {
+                        text-align: right !important;
+                    }
                 }
                 &.to-left {
                     right: 9px;
@@ -1267,6 +1270,9 @@ $workflow-node-color-type-global-context: #ffb3b3;
     
             }
 
+            &.requires-click {
+                pointer-events: auto !important;
+            }
         }
     }
 

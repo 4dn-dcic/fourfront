@@ -55,6 +55,8 @@ export default class StatisticsPageView extends React.PureComponent {
     }
 
     componentDidMount(){
+        const { onComplete } = this.props;
+
         this.maybeUpdateCurrentTabFromHref();
 
         if (!dynamicImports.UsageStatsView) {
@@ -73,7 +75,7 @@ export default class StatisticsPageView extends React.PureComponent {
                 });
 
             });
-        } else {
+        } else if (onComplete && typeof onComplete === 'function') {
             onComplete();
         }
     }
