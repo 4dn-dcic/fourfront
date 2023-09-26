@@ -37,7 +37,7 @@ describe('Browse Views - Basic Tests', function () {
         it('Switch between included and excluded properties in facets, exclude a term and check ExpSet counts', function(){
 
             let initialExpSetCount, excludeExpSetCount, includeExpSetCount, externalProjectCount;
-            cy.visit('/browse').end()
+            cy.visit('/browse').get('#slow-load-container').should('not.have.class', 'visible').end()
                 .getQuickInfoBarCounts().then((initialCounts) => {
                     initialExpSetCount = initialCounts.experiment_sets;
                     expect(initialExpSetCount).to.be.greaterThan(0);
@@ -79,7 +79,7 @@ describe('Browse Views - Basic Tests', function () {
 
         it('Select a grouping term in Experiment Type facet, then check whether the sub-terms are also selected', function () {
 
-            cy.visit('/browse').end()
+            cy.visit('/browse').get('#slow-load-container').should('not.have.class', 'visible').end()
                 .get(".facets-header .facets-title").should('have.text', 'Included Properties').end()
                 .get('.facet.closed[data-field="experiments_in_set.experiment_type.display_title"] > h5').scrollToCenterElement().click({ force: true }).end()
                 .get('.facet[data-field="experiments_in_set.experiment_type.display_title"] .facet-list-element[data-is-grouping="true"] a').first().within(($term) => {
@@ -117,7 +117,7 @@ describe('Browse Views - Basic Tests', function () {
 
         it('Exclude a grouping term in Experiment Type facet, then check whether the sub-terms are also excluded', function () {
 
-            cy.visit('/browse').end()
+            cy.visit('/browse').get('#slow-load-container').should('not.have.class', 'visible').end()
                 .get(".facets-header button").first().click().end()
                 .get(".facets-header .facets-title").should('have.text', 'Excluded Properties').end()
                 .get('.facet.closed[data-field="experiments_in_set.experiment_type.display_title"] > h5').scrollToCenterElement().click({ force: true }).end()
@@ -155,7 +155,7 @@ describe('Browse Views - Basic Tests', function () {
         });
 
         it('"/browse/?public_release.to=2017-10-31" redirects to correct URL, includes 100 < x < 150 results.', function(){
-            cy.visit('/browse/?public_release.to=2017-10-31').end()
+            cy.visit('/browse/?public_release.to=2017-10-31').get('#slow-load-container').should('not.have.class', 'visible').end()
                 .location('search').should('include','ExperimentSetReplicate' ).should('include', 'public_release.to=2017-10-31').end()
                 .get('.bar-plot-chart .chart-bar').should('have.length.above', 0).end()
                 .getQuickInfoBarCounts().its('experiment_sets').should('be.greaterThan', 100).should('be.lessThan', 150);
