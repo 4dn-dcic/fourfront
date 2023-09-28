@@ -100,7 +100,7 @@ describe('Browse Views - Basic Tests', function () {
                                 expect(subTerms.length).to.be.greaterThan(0);
                             });
                     }).end();
-                    cy.wrap($term).click().wait(1000).end().then(() => {
+                    cy.wrap($term).click().end().then(() => {
                         cy.document().its('body').find('.facet[data-field="experiments_in_set.experiment_type.display_title"] .facet-list-element[data-grouping-key="' + groupingTermKey + '"].selected a').each(($el) => {
                             cy.wrap($el).find('span.facet-item').then(function (termKey) {
                                 const subTermKey = termKey.text();
@@ -139,7 +139,7 @@ describe('Browse Views - Basic Tests', function () {
                                 expect(subTerms.length).to.be.greaterThan(0);
                             });
                     }).end();
-                    cy.wrap($term).click().wait(1000).end().then(() => {
+                    cy.wrap($term).click().end().then(() => {
                         cy.document().its('body').find('.facet[data-field="experiments_in_set.experiment_type.display_title"] .facet-list-element[data-grouping-key="' + groupingTermKey + '"].omitted a').each(($el) => {
                             cy.wrap($el).find('span.facet-item').then(function (termKey) {
                                 const subTermKey = termKey.text();
