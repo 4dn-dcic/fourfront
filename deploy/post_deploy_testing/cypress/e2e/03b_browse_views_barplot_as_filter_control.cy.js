@@ -29,7 +29,7 @@ describe('Browse Views - BarPlotChart & QuickInfoBar I', function () {
                         .get('.cursor-component-root .details-title .primary-count').should('contain', expectedFilteredResults).end().getQuickInfoBarCounts().then(function(origCount){
                             // `{ force: true }` is used a bunch here to prevent Cypress from attempting to scroll browser up/down during the test -- which may interfere w. mouse hover events.
                             // See https://github.com/cypress-io/cypress/issues/2353#issuecomment-413347535
-                            return cy.window().then((w)=>{ w.scrollTo(0,0); }).end().wrap($barPart, { force: true }).scrollToCenterElement().trigger('mouseover', { force: true }).trigger('mousemove', { force: true }).wait(300).click({ force : true }).wait(200).end()
+                            return cy.window().then((w)=>{ w.scrollTo(0,0); }).end().wrap($barPart, { force: true }).scrollToCenterElement().trigger('mouseover', { force: true }).trigger('mousemove', { force: true }).wait(300).click({ force : true }).end()
                                 .get('.cursor-component-root .actions.buttons-container .btn-primary').should('contain', "Explore").click({ force: true }).end() // Browser will scroll after click itself (e.g. triggered by app)
                                 .location('search')
                                 .should('include', 'experiments_in_set.experiment_type.display_title=2-stage+Repli-seq')
