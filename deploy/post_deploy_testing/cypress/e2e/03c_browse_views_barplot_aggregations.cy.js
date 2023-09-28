@@ -77,7 +77,7 @@ describe('Browse Views - BarPlotChart II', function () {
                         expect(nextCounts.experiment_sets).to.equal(initialCounts.experiment_sets);
                         expect(nextCounts.experiments).to.equal(initialCounts.experiments);
                         expect(nextCounts.files).to.equal(initialCounts.files);
-                        return cy.wait(100).end().get('.bar-plot-chart .chart-bar.transitioning').should('have.length', 0).end().then(()=>{ // Wait until bars have transitioned.
+                        return cy.get('.bar-plot-chart .chart-bar.transitioning').should('have.length', 0).end().then(()=>{ // Wait until bars have transitioned.
                             compareQuickInfoCountsVsBarPlotCounts();
                         });
                     }).end();
