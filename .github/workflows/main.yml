@@ -17,17 +17,17 @@ on:
 jobs:
   # This workflow contains a single job called "build"
   build:
-    name: Test Suite for fourfront (Python 3.8, Node 18)
+    name: Test Suite for fourfront (Python 3.11, Node 18)
 
     # The type of runner that the job will run on
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     # Build matrix
     strategy:
       matrix:
         test_type: ['UNIT', 'NPM', 'Docker']
         # We are really not set up for these next two to be multiplicative, so be careful adding more.
-        python_version: ['3.8']
+        python_version: ['3.11']
         node_version: ['18']
 
     # Steps represent a sequence of tasks that will be executed as part of the job
