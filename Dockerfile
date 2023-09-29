@@ -35,7 +35,7 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 # Note that the ordering of these operations is intentional to minimize package footprint
 WORKDIR /home/nginx/.nvm
 ENV NVM_DIR=/home/nginx/.nvm
-COPY deploy/docker/production/install_nginx.sh /install_nginx.sh
+COPY deploy/docker/production/install_nginx_bullseye.sh /install_nginx.sh
 
 # Temporarily replacing
 #     curl -sSL https://install.python-poetry.org | POETRY_HOME=/opt/venv python - && \
