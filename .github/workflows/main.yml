@@ -125,8 +125,8 @@ jobs:
           poetry run wipe-test-indices $TEST_JOB_ID search-fourfront-testing-opensearch-kqm7pliix4wgiu4druk2indorq.us-east-1.es.amazonaws.com:443
 
       - name: Docker Build
-        if: ${{ matrix.test_type == 'Docker' && matrix.node_version == '18' && matrix.python_version == '3.8' }}
+        if: ${{ matrix.test_type == 'Docker' && matrix.node_version == '18' && matrix.python_version == '3.11' }}
         run: |
-          # The docker_development.ini has node 18 and Python 3.8 wired into it.
+          # The docker_development.ini has node 18 and Python 3.11 wired into it.
           touch deploy/docker/local/docker_development.ini  # cheap substitute for prepare-docker to make ignored file
           docker build .
