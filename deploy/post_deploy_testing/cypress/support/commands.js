@@ -185,9 +185,9 @@ Cypress.Commands.add('login4DN', function(options = { 'useEnvToken' : true }){
 });
 
 Cypress.Commands.add('logout4DN', function(options = { 'useEnvToken' : true }){
-    cy.wait(500).end().get(navUserAcctDropdownBtnSelector).click().wait(300).end()
+    cy.wait(500).end().get(navUserAcctDropdownBtnSelector).click().end()
         .get('#logoutbtn').click().end()
-        .get(navUserAcctLoginBtnSelector).should('contain', 'Log In').wait(300).end()
+        .get(navUserAcctLoginBtnSelector).should('contain', 'Log In').end()
         .get('#slow-load-container').should('not.have.class', 'visible').end();
 });
 
