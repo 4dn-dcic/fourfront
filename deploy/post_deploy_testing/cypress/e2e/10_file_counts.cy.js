@@ -7,7 +7,7 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
         it('Visit experiment set pages and compare file counts on tab header, title and download button (Firstly, ensure that all selected)', function () {
 
             cy.visit('/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&experiments_in_set.files.accession%21=No+value&experiments_in_set.processed_files.accession%21=No+value&other_processed_files.files.accession%21=No+value&other_processed_files.files.status=released').end()
-                .login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).wait(500);
+                .login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).end();
 
             cy.getQuickInfoBarCounts().its('experiment_sets').then((expSetCount) => {
 
@@ -17,7 +17,7 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
                     context('Experiment Set Replicate - #' + (idx + 1) + '/' + countRecentItemsToVisit, function () {
 
                         cy.scrollToBottom().then(() => {
-                            cy.get('.search-results-container .search-result-row[data-row-number="' + (3 * idx) + '"] .search-result-column-block[data-field="display_title"] a').click({ force: true }).wait(500).end();
+                            cy.get('.search-results-container .search-result-row[data-row-number="' + (3 * idx) + '"] .search-result-column-block[data-field="display_title"] a').click({ force: true }).end();
                         }).end();
 
                         cy.window().then(function (w) {
@@ -45,7 +45,6 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
 
                                     if (tabKey === 'raw-files') {
                                         return cy.wrap($tab).click({ 'force': true }).end()
-                                            .wait(200)
                                             .get('.rc-tabs-content .rc-tabs-tabpane-active')
                                             .get(".rc-tabs-tabpane.rc-tabs-tabpane-active  .count-to-download-integer").first().then(function ($downloadCountFile) {
                                                 downloadFileCount = $downloadCountFile.text();
@@ -58,7 +57,6 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
                                     }
                                     else if (tabKey === 'processed-files') {
                                         return cy.wrap($tab).click({ 'force': true }).end()
-                                            .wait(200)
                                             .get('.rc-tabs-content .rc-tabs-tabpane-active')
                                             .get(".rc-tabs-tabpane.rc-tabs-tabpane-active  .count-to-download-integer").first().then(function ($downloadCountFile) {
                                                 downloadFileCount = $downloadCountFile.text();
@@ -72,12 +70,11 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
 
                                 }).end();
                                 cy.wrap($tab).click({ 'force': true }).end()
-                                    .wait(200)
                                     .get('.rc-tabs-content .rc-tabs-tabpane-active');
                             }).end();
                         }).end();
 
-                        cy.go('back').wait(100).end();
+                        cy.go('back').end();
                     });
                 });
             });
@@ -85,8 +82,8 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
 
         it('Visit experiment pages and compare file counts on tab header, title and download button (Firstly, ensure that all selected)', function () {
 
-            cy.visit('/search/?type=Experiment&files.accession%21=No+value&processed_files.accession%21=No+value&other_processed_files.files.accession%21=No+value&other_processed_files.files.status=released').wait(500).end()
-                .login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).wait(500);
+            cy.visit('/search/?type=Experiment&files.accession%21=No+value&processed_files.accession%21=No+value&other_processed_files.files.accession%21=No+value&other_processed_files.files.status=released').end()
+                .login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).end();
 
             cy.searchPageTotalResultCount().then((totalCountExpected) => {
                 const countRecentItemsToVisit = totalCountExpected >= 15 ? 5 : Math.min(1, parseInt(totalCountExpected / 3));
@@ -96,7 +93,7 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
                     context('Experiment - #' + (idx + 1) + '/' + countRecentItemsToVisit, function () {
 
                         cy.scrollToBottom().then(() => {
-                            cy.get('.search-results-container .search-result-row[data-row-number="' + (3 * idx) + '"] .search-result-column-block[data-field="display_title"] a').click({ force: true }).wait(200).end();
+                            cy.get('.search-results-container .search-result-row[data-row-number="' + (3 * idx) + '"] .search-result-column-block[data-field="display_title"] a').click({ force: true }).end();
                         }).end();
 
                         cy.window().then(function (w) {
@@ -123,7 +120,6 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
                                             let tabKeyFileCount = null;
                                             if (tabKey === 'raw-files') {
                                                 return cy.wrap($tab).click({ 'force': true }).end()
-                                                    .wait(200)
                                                     .get('.rc-tabs-content .rc-tabs-tabpane-active')
                                                     .get(".rc-tabs-tabpane.rc-tabs-tabpane-active  .count-to-download-integer").first().then(function ($downloadCountFile) {
                                                         downloadFileCount = $downloadCountFile.text();
@@ -137,7 +133,6 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
                                             }
                                             else if (tabKey === 'processed-files') {
                                                 return cy.wrap($tab).click({ 'force': true }).end()
-                                                    .wait(200)
                                                     .get('.rc-tabs-content .rc-tabs-tabpane-active')
                                                     .get(".rc-tabs-tabpane.rc-tabs-tabpane-active  .count-to-download-integer").first().then(function ($downloadCountFile) {
                                                         downloadFileCount = $downloadCountFile.text();
@@ -152,7 +147,6 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
 
                                         }).end();
                                         cy.wrap($tab).click({ 'force': true }).end()
-                                            .wait(200)
                                             .get('.rc-tabs-content .rc-tabs-tabpane-active')
                                             .should('have.id', "tab:" + tabKey).within(function ($tabPanel) {
                                                 cy.get("h3.tab-section-title, h4.tab-section-title").first().then(function ($tabTitle) {
@@ -168,7 +162,7 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
                                 }).end();
                         }).end();
 
-                        cy.go('back').wait(100).end();
+                        cy.go('back').end();
                     });
                 });
             });
@@ -177,7 +171,7 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
         it('Search files having HiGlass display as static content, then check the HiGlass icon is visible in associated ExpSet file tables', function () {
 
             cy.visit('/search/?type=File&static_content.location=tab:higlass&source_experiments%21=No+value').end()
-                .login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).wait(500);
+                .login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).end();
 
             cy.searchPageTotalResultCount().then((totalCountExpected) => {
                 const countRecentItemsToVisit = totalCountExpected >= 15 ? 5 : Math.min(1, parseInt(totalCountExpected / 3));
@@ -187,8 +181,8 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
                     context('File - #' + (idx + 1) + '/' + countRecentItemsToVisit, function () {
 
                         cy.scrollToBottom().then(() => {
-                            cy.get('.search-results-container .search-result-row[data-row-number="' + (3 * idx) + '"] .search-result-column-block[data-field="display_title"] a').click({ force: true }).wait(500).end();
-                        }).end().wait(200);
+                            cy.get('.search-results-container .search-result-row[data-row-number="' + (3 * idx) + '"] .search-result-column-block[data-field="display_title"] a').click({ force: true }).end();
+                        }).end();
 
                         let accession = null;
                         cy.get('.clickable.copy-wrapper.accession.inline-block[data-tip="Accession: A unique identifier to be used to reference the object."]').then(function ($accesionText) {
@@ -206,7 +200,7 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
                             expect($higlassIcon.length).to.be.greaterThan(0);
                         });
 
-                        cy.go('back').wait(100).end();
+                        cy.go('back').end();
                     });
                 });
             });
@@ -216,7 +210,7 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
         it('Visit experiment set pages, check Warning tab is visible when a biosample in set has a warning badge', function () {
 
             cy.visit('/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&experiments_in_set.biosample.badges.badge.badge_classification=Warning&status=released').end()
-                .login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).wait(500);
+                .login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).end();
 
             cy.getQuickInfoBarCounts().its('experiment_sets').then((expSetCount) => {
                 const countRecentItemsToVisit = expSetCount >= 15 ? 3 : Math.min(1, parseInt(expSetCount / 3));
@@ -226,7 +220,7 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
                     context('Experiment Set Replicate - #' + (idx + 1) + '/' + countRecentItemsToVisit, function () {
 
                         cy.scrollToBottom().then(() => {
-                            cy.get('.search-results-container .search-result-row[data-row-number="' + (3 * idx) + '"] .search-result-column-block[data-field="display_title"] a').click({ force: true }).wait(500).end();
+                            cy.get('.search-results-container .search-result-row[data-row-number="' + (3 * idx) + '"] .search-result-column-block[data-field="display_title"] a').click({ force: true }).end();
                         }).end();
 
                         let biosampleAccesionName;
@@ -240,7 +234,6 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
                                 }).wait(3000).end()
                                 .get('h1.page-title').should('not.be.empty').end()
                                 .get('div.rc-tabs span[data-tab-key="badges"]').click({ 'force': true }).end()
-                                .wait(200)
                                 .get('.badge-classification-group .badge-item').then(function ($badgeItems) {
                                     badgeItemCount = $badgeItems.length;
                                 })
@@ -255,7 +248,7 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
                                 });
                         }).end();
 
-                        cy.go(-2).wait(100).end();
+                        cy.go(-2).end();
                     });
                 });
             });
@@ -264,7 +257,7 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
         it('Visit quality metric tables and check columns whether they are valid and in proper order as it is in Quality Metric Item page', function () {
 
             cy.visit('/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&experiments_in_set.files.quality_metric.display_title%21=No+value').end()
-                .login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).wait(500);
+                .login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).end();
 
             cy.getQuickInfoBarCounts().its('experiment_sets').then((expSetCount) => {
                 const countRecentItemsToVisit = expSetCount >= 15 ? 3 : Math.min(1, parseInt(expSetCount / 3));
@@ -274,7 +267,7 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
                     context('Experiment Set Replicate - #' + (idx + 1) + '/' + countRecentItemsToVisit, function () {
 
                         cy.scrollToBottom().then(() => {
-                            cy.get('.search-results-container .search-result-row[data-row-number="' + (3 * idx) + '"] .search-result-column-block[data-field="display_title"] a').click({ force: true }).wait(500).end();
+                            cy.get('.search-results-container .search-result-row[data-row-number="' + (3 * idx) + '"] .search-result-column-block[data-field="display_title"] a').click({ force: true }).end();
                         }).end();
 
                         //get column headers
@@ -320,7 +313,7 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
                         });
 
                     });
-                    cy.go(-2).wait(500).end();
+                    cy.go(-2).end();
 
                 });
 
