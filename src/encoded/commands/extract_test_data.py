@@ -5,7 +5,7 @@ import re
 import sys
 import traceback
 
-from snovault.loadxl import ORDER, read_single_sheet
+from snovault.loadxl import loadxl_order, read_single_sheet
 from lorem_text import lorem
 
 
@@ -122,7 +122,7 @@ def anon_pipeline():
 
 
 def run(pipeline, inpath, outpath):
-    for item_type in ORDER():
+    for item_type in loadxl_order():
         source = read_single_sheet(inpath, item_type)
         fieldnames = [k for k in source.fieldnames if ':ignore' not in k]
         with open(os.path.join(outpath, item_type + '.tsv'), 'wb') as out:
