@@ -7,7 +7,6 @@ import Nav from 'react-bootstrap/esm/Nav';
 
 import { JWT, isServerSide, object, console, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { LoginController, LogoutController } from '@hms-dbmi-bgm/shared-portal-components/es/components/navigation/components/LoginController';
-
 import { LoginNavItem } from './LoginNavItem';
 import { BigDropdownNavItem, BigDropdownIntroductionWrapper } from './BigDropdown';
 
@@ -51,6 +50,7 @@ const auth0Options = {
 export const AccountNav = React.memo(function AccountNav(props){
     const { session, updateAppSessionState, schemas, ...passProps } = props;
     const { windowWidth, href } = passProps;
+    updateAppSessionState();  // call this in an attempt before rendering the component
     if (!session) { // Render login button
         return (
             <Nav className="navbar-acct">

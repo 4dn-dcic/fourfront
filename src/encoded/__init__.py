@@ -8,6 +8,7 @@ import os
 import pkg_resources
 import sentry_sdk
 import subprocess
+from pyramid.session import SignedCookieSessionFactory
 
 from codeguru_profiler_agent import Profiler
 from dcicutils.ecs_utils import ECSUtils
@@ -182,8 +183,8 @@ def main(global_config, **local_config):
     settings['auth0.options'] = {
         'auth': {
             'sso': False,
-            'redirect': False,
-            'responseType': 'token',
+            'redirect': True,
+            'responseType': 'code',
             'params': {
                 'scope': 'openid email',
                 'prompt': 'select_account'
@@ -202,8 +203,8 @@ def main(global_config, **local_config):
         settings['ga4.secret'] = settings.get('ga4.secret', os.environ.get('GA4Secret'))
     # set google reCAPTCHA keys
     # TODO propagate from GAC
-    settings['g.recaptcha.key'] = os.environ.get('reCaptchaKey')
-    settings['g.recaptcha.secret'] = os.environ.get('reCaptchaSecret')
+    settings['g.recaptcha.key'] = settings.get('g.recaptcha.key', os.environ.get('reCaptchaKey'))
+    settings['g.recaptcha.secret'] = settings.get('g.recaptcha.secret', os.environ.get('reCaptchaSecret'))
     # enable invalidation scope
     settings[INVALIDATION_SCOPE_ENABLED] = True
 
@@ -222,6 +223,8 @@ def main(global_config, **local_config):
     config.include('pyramid_multiauth')  # must be before calling set_authorization_policy
     # Override default authz policy set by pyramid_multiauth
     config.set_authorization_policy(LocalRolesAuthorizationPolicy())
+    
+    # This creates a session factory (from definition in Snovault/app.py)
     config.include(session)
 
     # must include, as tm.attempts was removed from pyramid_tm
@@ -250,6 +253,9 @@ def main(global_config, **local_config):
     if 'elasticsearch.server' in config.registry.settings:
         config.include('snovault.elasticsearch')
         config.include('.search')
+
+    if 'redis.server' in config.registry.settings:
+        config.include('snovault.redis')
 
     # this contains fall back url, so make sure it comes just before static_resoruces
     config.include('.types.page')

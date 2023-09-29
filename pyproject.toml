@@ -1,7 +1,7 @@
 [tool.poetry]
 # Note: Various modules refer to this system as "encoded", not "fourfront".
 name = "encoded"
-version = "6.4.4.2b2"  # TODO: To become 7.0.0
+version = "8.0.0"  # TODO: To become 8.0.0
 description = "4DN-DCIC Fourfront"
 authors = ["4DN-DCIC Team <support@4dnucleome.org>"]
 license = "MIT"
@@ -98,7 +98,7 @@ simplejson = "^3.17.0"
 SPARQLWrapper = "^1.8.5"
 SQLAlchemy = "1.4.41"  # latest stable version we can take - Will Jan 13 2023
 structlog = ">=19.2.0,<20"
-submit4dn = "0.9.7"
+submit4dn = "0.9.7"  # XXX: this version is likely not 3.11 compliant but will allow locking for now
 subprocess_middleware = ">=0.3,<1"
 # Useful for picking apart pyproject.toml
 toml = ">=0.10.1,<1"
@@ -120,6 +120,7 @@ xlwt = "1.2.0"
 codeguru-profiler-agent = "^1.2.4"
 supervisor = "^4.2.4"
 wheel = "0.40.0"
+auth0-python = "^4.0.0"
 
 
 [tool.poetry.dev-dependencies]
@@ -152,6 +153,7 @@ pytest = "^7.2.1"
 pytest-cov = ">=2.2.1"
 pytest-instafail = ">=0.3.0"
 pytest-mock = ">=0.11.0"
+pytest-redis = "^2.0.0"
 pytest-timeout = ">=1.0.0"
 pytest-xdist = ">=1.14"
 "repoze.debug" = ">=1.0.2"
