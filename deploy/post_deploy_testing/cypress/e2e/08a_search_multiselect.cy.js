@@ -36,7 +36,6 @@ describe("Multiselect Search Page (e.g. HiGlass Add File)", function () {
                 .trigger('mousedown', { 'button': 0, 'force': true })
                 .should('have.class', 'faded-out')
                 .trigger('mouseup', { 'force': true })
-                // .wait(1000)
                 .end();
         });
 
