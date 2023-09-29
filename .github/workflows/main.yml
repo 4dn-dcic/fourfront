@@ -20,7 +20,7 @@ jobs:
     name: Test Suite for fourfront (Python 3.11, Node 18)
 
     # The type of runner that the job will run on
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     # Build matrix
     strategy:
