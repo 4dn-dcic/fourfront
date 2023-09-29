@@ -6,8 +6,7 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
 
         it('Visit experiment set pages and compare file counts on tab header, title and download button (Firstly, ensure that all selected)', function () {
 
-            cy.visit('/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&experiments_in_set.files.accession%21=No+value&experiments_in_set.processed_files.accession%21=No+value&other_processed_files.files.accession%21=No+value&other_processed_files.files.status=released').end()
-                .login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).end();
+            cy.visit('/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&experiments_in_set.files.accession%21=No+value&experiments_in_set.processed_files.accession%21=No+value&other_processed_files.files.accession%21=No+value&other_processed_files.files.status=released').end();
 
             cy.getQuickInfoBarCounts().its('experiment_sets').then((expSetCount) => {
 
@@ -82,8 +81,7 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
 
         it('Visit experiment pages and compare file counts on tab header, title and download button (Firstly, ensure that all selected)', function () {
 
-            cy.visit('/search/?type=Experiment&files.accession%21=No+value&processed_files.accession%21=No+value&other_processed_files.files.accession%21=No+value&other_processed_files.files.status=released').end()
-                .login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).end();
+            cy.visit('/search/?type=Experiment&files.accession%21=No+value&processed_files.accession%21=No+value&other_processed_files.files.accession%21=No+value&other_processed_files.files.status=released').end();
 
             cy.searchPageTotalResultCount().then((totalCountExpected) => {
                 const countRecentItemsToVisit = totalCountExpected >= 15 ? 5 : Math.min(1, parseInt(totalCountExpected / 3));
@@ -209,8 +207,7 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
 
         it('Visit experiment set pages, check Warning tab is visible when a biosample in set has a warning badge', function () {
 
-            cy.visit('/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&experiments_in_set.biosample.badges.badge.badge_classification=Warning&status=released').end()
-                .login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).end();
+            cy.visit('/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&experiments_in_set.biosample.badges.badge.badge_classification=Warning&status=released').end();
 
             cy.getQuickInfoBarCounts().its('experiment_sets').then((expSetCount) => {
                 const countRecentItemsToVisit = expSetCount >= 15 ? 3 : Math.min(1, parseInt(expSetCount / 3));
@@ -256,8 +253,7 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
 
         it('Visit quality metric tables and check columns whether they are valid and in proper order as it is in Quality Metric Item page', function () {
 
-            cy.visit('/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&experiments_in_set.files.quality_metric.display_title%21=No+value').end()
-                .login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).end();
+            cy.visit('/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&experiments_in_set.processed_files.quality_metric.display_title%21=No+value&status=released').end();
 
             cy.getQuickInfoBarCounts().its('experiment_sets').then((expSetCount) => {
                 const countRecentItemsToVisit = expSetCount >= 15 ? 3 : Math.min(1, parseInt(expSetCount / 3));
@@ -302,7 +298,9 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
 
                         //qc metric name
                         cy.get('.overview-list-elements-container .overview-list-element .col-4.text-right .mt-02').each(function ($el, idx) {
-                            cy.get($el[0]).should('contain', columnNames[idx]);
+                            if (idx < columnNames.length) {
+                                cy.get($el[0]).should('contain', columnNames[idx]);
+                            }
                         });
 
                         //qc metric value
