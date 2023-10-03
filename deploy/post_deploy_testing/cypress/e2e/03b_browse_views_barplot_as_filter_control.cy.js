@@ -5,7 +5,7 @@ describe('Browse Views - BarPlotChart & QuickInfoBar I', function () {
 
         before(()=>{
             cy.visit('/browse/?experimentset_type=replicate&type=ExperimentSetReplicate')
-                .wait(300).get('#slow-load-container').should('not.have.class', 'visible').wait(300).end();
+                .get('#slow-load-container').should('not.have.class', 'visible').end();
         });
 
         it('Initial UI state shows Experiment Types (x-axis) grouped by Organism', function(){
@@ -21,19 +21,19 @@ describe('Browse Views - BarPlotChart & QuickInfoBar I', function () {
                     const expectedFilteredResults = parseInt($barPart.attr('data-count'));
                     expect(expectedFilteredResults).to.be.greaterThan(25);
                     expect(expectedFilteredResults).to.be.lessThan(40);
-                    return cy.window().scrollTo('top').wait(200).end()
-                        .get('.bar-plot-chart .chart-bar[data-term="Dilution Hi-C"] .bar-part[data-term="human"]').should('have.attr', 'data-count').wait(300).end()
-                        .wrap($barPart).hoverIn().wait(100).end()
+                    return cy.window().scrollTo('top').end()
+                        .get('.bar-plot-chart .chart-bar[data-term="Dilution Hi-C"] .bar-part[data-term="human"]').should('have.attr', 'data-count').end()
+                        .wrap($barPart).hoverIn().end()
                         .get('.cursor-component-root .details-title').should('contain', 'Human').end()
                         .get('.cursor-component-root .detail-crumbs .crumb').should('contain', '2-stage Repli-seq').end()
                         .get('.cursor-component-root .details-title .primary-count').should('contain', expectedFilteredResults).end().getQuickInfoBarCounts().then(function(origCount){
                             // `{ force: true }` is used a bunch here to prevent Cypress from attempting to scroll browser up/down during the test -- which may interfere w. mouse hover events.
                             // See https://github.com/cypress-io/cypress/issues/2353#issuecomment-413347535
-                            return cy.window().then((w)=>{ w.scrollTo(0,0); }).end().wrap($barPart, { force: true }).scrollToCenterElement().wait(200).trigger('mouseover', { force: true }).trigger('mousemove', { force: true }).wait(300).click({ force : true }).wait(200).end()
+                            return cy.window().then((w)=>{ w.scrollTo(0,0); }).end().wrap($barPart, { force: true }).scrollToCenterElement().trigger('mouseover', { force: true }).trigger('mousemove', { force: true }).wait(300).click({ force : true }).end()
                                 .get('.cursor-component-root .actions.buttons-container .btn-primary').should('contain', "Explore").click({ force: true }).end() // Browser will scroll after click itself (e.g. triggered by app)
                                 .location('search')
                                 .should('include', 'experiments_in_set.experiment_type.display_title=2-stage+Repli-seq')
-                                .should('include', 'experiments_in_set.biosample.biosource.organism.name=human').wait(300).end()
+                                .should('include', 'experiments_in_set.biosample.biosource.organism.name=human').end()
                                 .get('#slow-load-container').should('not.have.class', 'visible').end()
                                 .get('.search-results-container .search-result-row[data-row-number]').should('have.length', expectedFilteredResults).end()
                                 .getQuickInfoBarCounts({ 'shouldNotEqual' : '' + origCount.experiment_sets }).its('experiment_sets').should('not.equal', origCount.experiment_sets).should('equal', expectedFilteredResults).end()
@@ -45,15 +45,15 @@ describe('Browse Views - BarPlotChart & QuickInfoBar I', function () {
 
         it("Can unselect currently-selected filters via QuickInfoBar filter panel", function(){
             cy.getQuickInfoBarCounts().then((origCounts)=>{
-                cy.get('#stats .any-filters.glance-label').hoverIn().wait(100).end()
+                cy.get('#stats .any-filters.glance-label').hoverIn().end()
                     .get('#stats .bottom-side .field-group .chart-crumb').should('have.length', 2).end()
-                    .get('#stats .bottom-side .field-group .chart-crumb[data-term="human"] i.icon-times').should('have.length', 1).click().wait(10).end()
+                    .get('#stats .bottom-side .field-group .chart-crumb[data-term="human"] i.icon-times').should('have.length', 1).click().end()
                     .get('#stats .bottom-side .field-group .chart-crumb[data-term="human"] i.icon-times').should('have.length', 0).end()
                     .get('#stats .bottom-side .field-group .chart-crumb').should('have.length', 1).end()
                     .get('.bar-plot-chart .chart-bar .bar-part').should('have.length.greaterThan', 1).then(($allBarParts)=>{
                         const unfilteredOnceBarPartCount = $allBarParts.length;
                         cy.getQuickInfoBarCounts().its('experiment_sets').should('be.greaterThan', origCounts.experiment_sets).then((unfilteredOnceExpSetCount)=>{
-                            cy.get('#stats .bottom-side .field-group .chart-crumb[data-term="2-stage Repli-seq"] i.icon-times').should('have.length', 1).click().wait(10).end()
+                            cy.get('#stats .bottom-side .field-group .chart-crumb[data-term="2-stage Repli-seq"] i.icon-times').should('have.length', 1).click().end()
                                 .get('#stats .bottom-side .field-group .chart-crumb[data-term="2-stage Repli-seq"] i.icon-times').should('have.length', 0).end()
                                 .get('.bar-plot-chart .chart-bar .bar-part').should('have.length.greaterThan', unfilteredOnceBarPartCount)
                                 .getQuickInfoBarCounts().its('experiment_sets').should('be.greaterThan', unfilteredOnceExpSetCount).end()

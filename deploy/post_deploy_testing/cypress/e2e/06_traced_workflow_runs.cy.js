@@ -20,7 +20,7 @@ describe("WorkflowRun traced graphs for selected ExperimentSets", function(){
         const global_input_file_accessions = ['4DNFIUPP7VYD', '4DNFIY7WIH8Y', '4DNFI9QM9KK5', '4DNFIXIJYKZ1', '4DNFI1CIZT87', '4DNFIXKHKJ1E'];
 
         before(function(){
-            cy.visit('/experiment-set-replicates/4DNES18BMU79/').wait(100).end();
+            cy.visit('/experiment-set-replicates/4DNES18BMU79/').get('h1.page-title').should('have.text', 'Replicate Experiments').end();
         });
 
         testGraphTabClick();

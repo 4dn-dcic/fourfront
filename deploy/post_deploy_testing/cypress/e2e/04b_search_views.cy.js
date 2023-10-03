@@ -38,7 +38,7 @@ describe('Post-Deployment Search View Tests', function () {
         });
 
         it('Filter by "Type" filter icon within search results', function () {
-            cy.visit('/search/').wait(1000);
+            cy.visit('/search/');
             let typeTitle;
             cy.searchPageTotalResultCount().then((totalCountExpected) => {
                 const intervalCount = Math.min(5, parseInt(totalCountExpected / 25));
@@ -77,7 +77,7 @@ describe('Post-Deployment Search View Tests', function () {
         it('Starting from /search/, typing "olfactory" into searchbox redirects back to search', function () {
             cy.get("a#search-menu-item").click().end()
                 .searchPageTotalResultCount().should('be.greaterThan', 100).then(function (origResultCount) {
-                    return cy.get('.big-dropdown-menu-background .form-control').focus().clear().type('olfactory').wait(10).end()
+                    return cy.get('.big-dropdown-menu-background .form-control').focus().clear().type('olfactory').end()
                         .get('form.navbar-search-form-container').submit().end()
                         .location('search').should('include', 'q=olfactory').end()
                         .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()

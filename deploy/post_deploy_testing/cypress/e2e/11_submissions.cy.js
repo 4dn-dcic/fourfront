@@ -37,8 +37,8 @@ describe('Submission Page Tests', function () {
                 })
                     .get('.search-result-row.detail-closed[data-row-number="' + intervalCount + '"] .search-result-column-block[data-field="@type"] .icon-container .icon').click({ force: true }).end();
 
-            }).wait(300).end();
-            cy.get('.dropdown .dropdown-toggle').then(function ($selectedTypeTitle) {
+            }).end();
+            cy.get('.dropdown .dropdown-toggle').should('not.have.text', 'All').then(function ($selectedTypeTitle) {
                 const selectedTypeTitle = $selectedTypeTitle.text().trim();
                 cy.expect(typeTitle).equal(selectedTypeTitle);
             });

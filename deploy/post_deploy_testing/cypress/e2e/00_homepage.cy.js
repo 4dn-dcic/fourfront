@@ -3,7 +3,6 @@ import _ from 'underscore';
 describe('Home Page', function () {
 
     it('Has correct title & subtitle', function () {
-
         cy.visit('/').end()
             .title().should('include', '4DN Data Portal').end()
             .get('#page-title-container .page-title').should('contain', '4D Nucleome Data Portal').end()
@@ -69,7 +68,7 @@ describe('Home Page', function () {
                     cy.visit(href).end();
                     cy.location('pathname').should('include', '/labs/').end()
                         .get('h1.page-title').should('contain', labName).end()
-                        .get('div.rc-tabs span[data-tab-key="expsets-table"]').wait(200).click().end().wait(500)
+                        .get('div.rc-tabs span[data-tab-key="expsets-table"]').click()
                         .get('.rc-tabs-tabpane.rc-tabs-tabpane-active .search-results-container .search-result-row[data-row-number]').should('have.length.greaterThan', 0).end();
                 });
             });
@@ -84,16 +83,16 @@ describe('Home Page', function () {
     });
 
     it('"Toggle External Data" affects Chart', function () {
+        cy.visit('/').end();
 
-        cy.window().scrollTo('top').wait(100).end()
-            .getQuickInfoBarCounts().then((initialCounts) =>
-                cy.get('#stats .browse-base-state-toggle-container input[type="checkbox"]').should('be.checked').uncheck({ force: true }).wait(1500).end()
-                    .getQuickInfoBarCounts().then((nextCounts) => {
-                        expect(nextCounts.experiment_sets).to.be.lessThan(initialCounts.experiment_sets);
-                        expect(nextCounts.experiments).to.be.lessThan(initialCounts.experiments);
-                        expect(nextCounts.files).to.be.lessThan(initialCounts.files);
-                    }).end()
-            );
+        cy.getQuickInfoBarCounts().then((initialCounts) =>
+            cy.get('#stats .browse-base-state-toggle-container input[type="checkbox"]').should('be.checked').uncheck({ force: true }).should('not.be.checked').end()
+                .getQuickInfoBarCounts().then((nextCounts) => {
+                    expect(nextCounts.experiment_sets).to.be.lessThan(initialCounts.experiment_sets);
+                    expect(nextCounts.experiments).to.be.lessThan(initialCounts.experiments);
+                    expect(nextCounts.files).to.be.lessThan(initialCounts.files);
+                }).end()
+        );
 
     });
 

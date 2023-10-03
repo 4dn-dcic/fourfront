@@ -6,6 +6,14 @@ fourfront
 Change Log
 ----------
 
+6.4.6
+=====
+
+`Cypress performance improvements <https://github.com/4dn-dcic/fourfront/pull/1854>`_
+
+* Cypress wait() to should() conversion
+
+
 6.4.5
 =====
 

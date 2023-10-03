@@ -23,20 +23,19 @@ describe("Multiselect Search Page (e.g. HiGlass Add File)", function () {
     context('Selected file', function () {
 
         it('Display page', function () {
-            cy.visit(searchUrl).wait(100).end();//Display multiselect file page
+            cy.visit(searchUrl).get('h1.page-title .page-subtitle').should('have.text', 'Select one or more Items and click the Apply button.').end();
 
         });
         it('Can press buttons at right & left to scroll to right side of search results table', function () {
             cy.get('#content div.shadow-border-layer div.edge-scroll-button.right-edge:not(.faded-out)').trigger('mousedown', { 'button': 0, 'force': true })
                 .should('have.class', 'faded-out') // Scroll until scrolling further is disabled.
                 .trigger('mouseup', { 'force': true }) // Might become invisible
-                .wait(1000) // Wait for state changes re: layouting to take effect
+                .wait(1000) // Wait for state changes re: layouting to take effect, since trigger not supports chaining
                 .end()
                 .get('#content div.shadow-border-layer div.edge-scroll-button.left-edge:not(.faded-out)')
                 .trigger('mousedown', { 'button': 0, 'force': true })
                 .should('have.class', 'faded-out')
                 .trigger('mouseup', { 'force': true })
-                .wait(1000)
                 .end();
         });
 
@@ -71,18 +70,18 @@ describe("Multiselect Search Page (e.g. HiGlass Add File)", function () {
                 originalFileText = originalFileText.match(/\d/g);
                 allResultTotalCount = parseInt(originalFileText.join(''));
 
-                cy.get('input[name="q"]').focus().type('mouse').wait(10).end()
+                cy.get('input[name="q"]').focus().type('mouse').end()
                     .get('form.navbar-search-form-container').submit().end()
-                    .wait(1000).get('#slow-load-container').should('not.have.class', 'visible').end()
+                    .get('#slow-load-container').should('not.have.class', 'visible').end()
                     .searchPageTotalResultCount().should('be.greaterThan', 0).should('be.lessThan', allResultTotalCount);
             });
 
         });
 
         it('Search box cleared and submitted, total count matched', function () {
-            cy.get('input[name="q"]').focus().clear().wait(10).end()
+            cy.get('input[name="q"]').focus().clear().end()
                 .get('form.navbar-search-form-container').submit().end()
-                .wait(1000).get('#slow-load-container').should('not.have.class', 'visible').end()
+                .get('#slow-load-container').should('not.have.class', 'visible').end()
                 .searchPageTotalResultCount().should('to.equal', allResultTotalCount);
         });
     });

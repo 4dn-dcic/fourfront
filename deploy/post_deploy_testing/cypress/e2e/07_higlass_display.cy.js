@@ -25,7 +25,7 @@ describe("HiGlass Display pages", function(){
         it('Can visit HiGlass Display collection page without login', function(){
 
             // Visit the page and confirm you can see the table and facet properties.
-            cy.visit('/higlass-view-configs').wait(100).end()
+            cy.visit('/higlass-view-configs').end()
                 .get(".search-headers-column-block .column-title").should('have.text', ['Title', 'Creator'].join('')).end()
                 .get(".facets-header .facets-title").should('have.text', 'Included Properties');
 
@@ -52,7 +52,7 @@ describe("HiGlass Display pages", function(){
             // You should be able to visit the higlass view that is still in "draft" status.
 
             // Log in, visit the page and look for the create button to assert ability to create.
-            cy.login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken' : true }).wait(500).end()
+            cy.login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken' : true }).end()
                 .get(".above-results-table-row a.btn.btn-xs").should('contain', 'Create');
 
             cy.visit(draftUrl).end().logout4DN();
@@ -71,7 +71,7 @@ describe("HiGlass Display pages", function(){
             cy.clearLocalStorage();
             cy.clearCookies();
             // Log in.
-            cy.visit('/higlass-view-configs/').login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken' : true }).wait(500);
+            cy.visit('/higlass-view-configs/').login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken' : true }).end();
         });
 
         after(function(){
@@ -90,7 +90,7 @@ describe("HiGlass Display pages", function(){
             if (testItemsToDeleteIDs.length === 0) return;
 
             // Log in _as admin_.
-            cy.visit('/higlass-view-configs/').login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken' : true }).wait(500);
+            cy.visit('/higlass-view-configs/').login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken' : true }).end();
 
             // Delete all newly created higlass views.
             cy.wrap(testItemsToDeleteIDs).each(function(testItemID){ // Synchronously process async stuff.
@@ -136,7 +136,6 @@ describe("HiGlass Display pages", function(){
             // Ensure HiGlassComponent has loaded (before Clone btn can be clicked w/o errors)
             cy.get('.higlass-instance .react-grid-layout').end()
                 // Click the 'Clone' button.
-                // for mobile size: .get(".tab-section-title button.toggle-open-button").click().wait(3000).end()
                 .get(".tab-section-title .tabview-title-controls-container").within(function($panel){
                     return cy.contains('Clone').click().end();
                 }).end()
@@ -155,7 +154,7 @@ describe("HiGlass Display pages", function(){
                 })
                 .end()
                 // Wait for HiGlass to fully be initialized as well, to avoid __zoom error perhaps.
-                .get(higlassItemViewVizSelector).wait(3000).end();
+                .get(higlassItemViewVizSelector).end();
         });
 
         it('Can edit the title and description', function() {
@@ -176,7 +175,6 @@ describe("HiGlass Display pages", function(){
             cy.get('.higlass-instance .react-grid-layout').end()
 
                 // Click the 'Clone' button.
-                // for mobile size: .get(".tab-section-title button.toggle-open-button").click().wait(3000).end()
                 .get(".tab-section-title .tabview-title-controls-container").within(function($panel){
                     return cy.contains('Clone').click().end();
                 }).end()
@@ -202,18 +200,18 @@ describe("HiGlass Display pages", function(){
                     cy.location('pathname')
                         .should('eq', newID).end()
                         // Wait for HiGlass to fully be initialized as well, to avoid __zoom error perhaps.
-                        .get(higlassItemViewVizSelector).wait(3000).end()
+                        .get(higlassItemViewVizSelector).end()
 
                         // Click on the edit button and wait for the page load.
                         .get(".action-button[data-action='edit'] a").click({ force: true }).end()
                         .get("input#field_for_title").clear().type(newTitle).end()
                         .get('#field_for_description').clear().type(newDescription).end()
-                        .get('input#field_for_tags.form-control').focus().type('deleted_by_cypress_test').wait(100).end()
+                        .get('input#field_for_tags.form-control').focus().type('deleted_by_cypress_test').end()
                         // Click validate then click submit
                         .get(".action-buttons-container button.btn-info").click().end()
                         .get(".action-buttons-container button.btn-success").click().end()
                         // Wait for HiGlass to fully be initialized as well, to avoid __zoom error perhaps.
-                        .get(higlassItemViewVizSelector).wait(3000).end()
+                        .get(higlassItemViewVizSelector).end()
                         // Once the page reloads, look for the updated title/description
                         .request({
                             'url' : newID + "?format=json&datastore=database",
@@ -241,7 +239,7 @@ describe("HiGlass Display pages", function(){
         after(function(){
 
             // Edit the higlass display back to draft status.
-            cy.visit('/higlass-view-configs/').login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken' : true }).wait(500).end()
+            cy.visit('/higlass-view-configs/').login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken' : true }).end()
                 .getCookie('jwtToken')
                 .then((cookie) => {
                     const token = cookie.value;
@@ -264,7 +262,7 @@ describe("HiGlass Display pages", function(){
             // N.B. Cypress had/has some gotchas/issues in terms of preserving cookies between test, so had previously
             // been attempting to login and out in same test.
             // They might have updated/improved their mechanisms and maybe could refactor code later.
-            cy.visit('/higlass-view-configs/').login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken' : true }).wait(500);
+            cy.visit('/higlass-view-configs/').login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken' : true }).end();
 
             // Go to the draft higlass display.
             // Click on the Share button.
@@ -272,19 +270,18 @@ describe("HiGlass Display pages", function(){
 
             // This also tests the mobile menu as well as the share/release dropdown btn functionality.
             cy.visit(draftUrl).get('.item-view-header .indicator-item.item-status').should('have.text', 'draft').end()
-                // for mobile size: .get(".tab-section-title button.toggle-open-button").click().wait(500).end()
-                .get(".tab-section-title .tabview-title-controls-container button.btn-info.dropdown-toggle").click().wait(300).end()
+                .get(".tab-section-title .tabview-title-controls-container button.btn-info.dropdown-toggle").click().end()
                 .get(".tab-section-title .tabview-title-controls-container button.btn-info.dropdown-toggle + .dropdown-menu.show").within(function($menu){
-                    return cy.contains("Visible by Everyone").click().wait(1000).end();
+                    return cy.contains("Visible by Everyone").click().end();
                 }).end()
                 .get('.alert div').should('contain', 'Changed Display status to released.').end()
                 // Wait for HiGlass to fully be initialized as well, to avoid __zoom error perhaps.
-                .get(higlassItemViewVizSelector).wait(3000).end()
+                .get(higlassItemViewVizSelector).end()
 
                 // Download the JSON to see if the higlass display is released
                 .request(draftUrl + "?format=json&datastore=database").then((newJson)=>{
                     expect(newJson.body.status).to.equal("released");
-                }).logout4DN().wait(200).end();
+                }).logout4DN().end();
         });
     });
 });
