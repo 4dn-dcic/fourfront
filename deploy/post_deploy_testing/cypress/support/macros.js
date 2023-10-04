@@ -32,8 +32,8 @@ export function compareQuickInfoCountsVsBarPlotCounts(options = { 'skipLegend' :
 
         // Test ExpSet counts ==
         getBarCounts().then((barCounts)=>{
-            expect(sum(...barCounts)).to.equal(quickInfoBarCounts.experiment_sets);
             console.log('barCounts', barCounts);
+            expect(sum(...barCounts)).to.equal(quickInfoBarCounts.experiment_sets);
         });
 
 

@@ -9,7 +9,7 @@ describe("Individual Item Views", function(){
 
         it('Have at least 35 MCOOL FileProcessed files', function(){
             cy.visit('/search/?type=FileProcessed&file_format.display_title=mcool&workflow_run_outputs.workflow.title!=No+value').end()
-                .wait(300).get('#slow-load-container').should('not.have.class', 'visible').end()
+                .get('#slow-load-container').should('not.have.class', 'visible').end()
                 .searchPageTotalResultCount().should('be.greaterThan', 34);
         });
 
@@ -34,14 +34,14 @@ describe("Individual Item Views", function(){
         context('FileProcessed MCOOL - #' + (idx + 1) + '/' + countRecentItemsToVisit, function(){
 
             after(function(){ // Return to search results
-                cy.go('back').wait(100).end();
+                cy.go('back').end();
             });
 
             // TODO gather list of files from Processed files table and test their presence in graph
 
             it('FileView loads correctly on click from SearchView', function(){
                 cy.get('.search-results-container .search-result-row[data-row-number="' + idx + '"] .search-result-column-block[data-field="display_title"] a')
-                    .should('contain', '.mcool').click({ force: true }).wait(200).end();
+                    .should('contain', '.mcool').click({ force: true }).end();
             });
 
             testGraphTabClick();

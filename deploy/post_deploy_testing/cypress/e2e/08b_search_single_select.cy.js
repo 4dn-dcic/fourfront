@@ -15,14 +15,13 @@ describe("Single Select Search Page (e.g. HiGlass Add File)", function () {
 
     context('Single select data', function () {
 
-        it('Display page', function () {
-
-            cy.visit(searchUrl).wait(100).end(); //Display single select file page
+        it('Display file select page (single selection)', function () {
+            cy.visit(searchUrl).get('h1.page-title .page-subtitle').should('have.text', 'Select an Item and click the Apply button.').end();
         });
-        it('Checkbox checked ', function () {
 
-            cy.get('.search-results-container .search-result-row .search-result-column-block input[type="checkbox"]').first().each(($checkBox, idx) =>
-                checkFileCheckbox($checkBox).wait(2000)
+        it('Select first item', function () {
+            cy.get('.search-results-container .search-result-row .search-result-column-block input[type="checkbox"]').first().then(($checkBox) =>
+                checkFileCheckbox($checkBox).get('.selection-controls-footer h4').first().should('contain', '4DNFI').end()
             );
         });
 
@@ -58,18 +57,18 @@ describe("Single Select Search Page (e.g. HiGlass Add File)", function () {
                 originalFileText = originalFileText.match(/\d/g);
                 allResultTotalCount = parseInt(originalFileText.join(''));
 
-                cy.get('input[name="q"]').focus().type('mouse').wait(10).end()
+                cy.get('input[name="q"]').focus().type('mouse').end()
                     .get('form.navbar-search-form-container').submit().end()
-                    .wait(1000).get('#slow-load-container').should('not.have.class', 'visible').end()
+                    .get('#slow-load-container').should('not.have.class', 'visible').end()
                     .searchPageTotalResultCount().should('be.greaterThan', 0).should('be.lessThan', allResultTotalCount);
             });
 
         });
 
         it('Search box cleared and submitted, total count matched', function () {
-            cy.get('input[name="q"]').focus().clear().wait(10).end()
+            cy.get('input[name="q"]').focus().clear().end()
                 .get('form.navbar-search-form-container').submit().end()
-                .wait(1000).get('#slow-load-container').should('not.have.class', 'visible').end()
+                .get('#slow-load-container').should('not.have.class', 'visible').end()
                 .searchPageTotalResultCount().should('to.equal', allResultTotalCount);
         });
 

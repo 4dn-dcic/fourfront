@@ -6,7 +6,7 @@ describe('Deployment/CI Search View Tests', function () {
     var testItemsToDelete = [];
 
     function addAtIdToDeletedItems() {
-        cy.get('script[data-prop-name=context]').wait(1000).then(function ($context) {
+        cy.get('script[data-prop-name=context]').then(function ($context) {
             const context = $context.text();
             const contextData = JSON.parse(context);
             const atId = contextData['@id'];
@@ -19,18 +19,18 @@ describe('Deployment/CI Search View Tests', function () {
 
     function editMicroscopeConfiguration() {
         it('Edit microscope configuration - add deleted_by_cypress_test tag', function () {
-            cy.login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).wait(1000);
+            cy.login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true });
 
             //Edit click
             cy.get(".action-button[data-action='edit'] a").click({ force: true }).end();
 
             // Add tag
-            cy.get('input#field_for_tags.form-control').focus().type('deleted_by_cypress_test').wait(100).end();
+            cy.get('input#field_for_tags.form-control').focus().type('deleted_by_cypress_test').end();
 
             // Click Validate button
             cy.get(".action-buttons-container").as("editButtons");
-            cy.get("@editButtons").find('button.btn').contains('Validate').click().end().wait(1000).end();
-            cy.get("@editButtons").find('button.btn').contains('Submit').click().end().wait(1000).end();
+            cy.get("@editButtons").find('button.btn').contains('Validate').click().end().end();
+            cy.get("@editButtons").find('button.btn').contains('Submit').click().end().end();
         });
     }
 
@@ -133,23 +133,23 @@ describe('Deployment/CI Search View Tests', function () {
                 .get('.search-results-container .search-result-row').then(($searchResultElems)=>{
                     expect($searchResultElems.length).to.be.greaterThan(0);
                 }).end()
-                .get('.above-results-table-row .results-count.box button.btn-xs').contains("Create New").click().end().wait(1000)
+                .get('.above-results-table-row .results-count.box button.btn-xs').contains("Create New").click().end()
                 .get('a.dropdown-item').contains('Tier 1').click().end();
 
             // set microscope conf. name
             const identifier = ("mc-test-" + new Date().getTime());
-            cy.get('.modal-dialog input#microscope_name.form-control').focus().type(identifier).wait(100).end();
+            cy.get('.modal-dialog input#microscope_name.form-control').focus().type(identifier).end();
 
             // set microscope conf. description
             microscopeDescription = "tier-1 microscope conf. description";
-            cy.get('.modal-dialog input#microscope_description.form-control').focus().type(microscopeDescription).wait(100).end();
+            cy.get('.modal-dialog input#microscope_description.form-control').focus().type(microscopeDescription).end();
 
             // set microscope conf. stand type
-            cy.get('button#validation_tier.dropdown-toggle.btn.btn-primary').contains('Select Stand Type').click().end().wait(1000)
-                .get('a.dropdown-item').contains(standType).click().end().wait(1000);
+            cy.get('button#validation_tier.dropdown-toggle.btn.btn-primary').contains('Select Stand Type').click().end()
+                .get('a.dropdown-item').contains(standType).click().end();
 
             // submit new microscope conf. creation
-            cy.get('button.btn.btn-success').contains('Submit').click().end().wait(1000);
+            cy.get('button.btn.btn-success').contains('Submit').click().end();
 
             // get response and store atId (to delete item at the end of test)
             addAtIdToDeletedItems();
@@ -157,7 +157,7 @@ describe('Deployment/CI Search View Tests', function () {
 
         it('Verify created microscope configuration\'s tier number and stand matches', function (){
             //Click edit buttton
-            cy.get('div.micro-meta-app-container #microscopy-app-container .btn.btn-primary.btn-lg').should('contain', 'Edit microscope').first().click().end().wait(1000);
+            cy.get('div.micro-meta-app-container #microscopy-app-container .btn.btn-primary.btn-lg').should('contain', 'Edit microscope').first().click().end();
 
             //Verify tier is 1
             cy.get('div.form-group div.mb-0.form-group input#rjsfPrefix_Tier').should('have.value', '1');
@@ -173,23 +173,24 @@ describe('Deployment/CI Search View Tests', function () {
         editMicroscopeConfiguration();
 
         it('Can save as microscope configuration', function () {
-            cy.login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).wait(1000);
+            cy.login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).end();
 
             //Clone microscope data
-            cy.get("div.dropup button#dropdown-basic-button.dropdown-toggle.btn.btn-dark.btn-lg div").contains('Save').click().wait(1000).end()
+            cy.get("div.dropup button#dropdown-basic-button.dropdown-toggle.btn.btn-dark.btn-lg div").contains('Save').click().end()
                 //Clone success save message
                 // eslint-disable-next-line no-useless-escape
-                .get("a#Save\\ as\\ new\\ microscope.dropdown-item").click().wait(1000).get('h4.alert-heading.mt-0.mb-05').should('contain.text', "'s copy").end().wait(1000);
+                .get("a#Save\\ as\\ new\\ microscope.dropdown-item").click().end()
+                .get('h4.alert-heading.mt-0.mb-05').should('contain.text', "'s copy").end();
 
             // get response and store atId (to delete item at the end of test)
             addAtIdToDeletedItems();
         });
 
         it('Contains App and Model version in "About" popup ', function(){
-            cy.login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).wait(1000);
+            cy.login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).end();
 
             //Click info buttton
-            cy.get('div.micro-meta-app-container #microscopy-app-container button.btn.btn-primary.btn-lg img[alt*="about-solid.svg"]').first().click().end().wait(1000);
+            cy.get('div.micro-meta-app-container #microscopy-app-container button.btn.btn-primary.btn-lg img[alt*="about-solid.svg"]').first().click().end();
 
             const appModelRegEx = /App version: (?<app>\S*)Model version: (?<model>\S*)\(c\)/;
             //Verify app version
@@ -221,7 +222,7 @@ describe('Deployment/CI Search View Tests', function () {
         it('Delete microscope configuration', function () {
 
             // Log in _as admin_.
-            cy.login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).wait(1000);
+            cy.login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).end();
 
             // Delete microscope configuration
             cy.wrap(testItemsToDelete).each(function (testItemURL) { // Synchronously process async stuff.
@@ -264,7 +265,7 @@ describe('Deployment/CI Search View Tests', function () {
             });
 
             cy.scrollToBottom().then(() => {
-                cy.get('.search-results-container .search-result-row[data-row-number="' + intervalCount + '"] .search-result-column-block[data-field="display_title"] a').click({ force: true }).wait(500).end();
+                cy.get('.search-results-container .search-result-row[data-row-number="' + intervalCount + '"] .search-result-column-block[data-field="display_title"] a').click({ force: true }).end();
             }).end();
 
             cy.window().then(function (w) {
@@ -273,7 +274,7 @@ describe('Deployment/CI Search View Tests', function () {
                     .then(function (pathName) {
                         currPagePath = pathName;
                         console.log(currPagePath);
-                    }).wait(3000).end()
+                    }).end()
                     .get('h1.page-title').should('not.be.empty').end()
                     .get('div.rc-tabs span[data-tab-key="hardware-summary"]').should('contain', 'Hardware Summary');
 
@@ -289,8 +290,7 @@ describe('Deployment/CI Search View Tests', function () {
                         const nextButtonItems = [];
                         const backButtonItems = [];
                         if (tabKey === 'hardware-summary') {
-                            cy.wrap($tab).click({ 'force': true }).end()
-                                .wait(2000);
+                            cy.wrap($tab).click({ 'force': true }).end();
                             let facetItemIndex = 1;
                             cy.get(".facets-body div.facet:not([data-field=''])").then(function ($facetTotalCount) {
                                 facetTotalCount = $facetTotalCount.length;
@@ -320,7 +320,7 @@ describe('Deployment/CI Search View Tests', function () {
                                             });
                                             const totalCount = (termCount - nextButtonItems.length);
                                             for (let i = 0; i <= totalCount; i++) {
-                                                cy.get('.prev-next-button-container [data-tip="Show next component"]').parent().click().end().wait(2000);
+                                                cy.get('.prev-next-button-container [data-tip="Show next component"]').parent().click().end();
                                                 cy.get('.row.summary-sub-header .summary-title-column.text-truncate').then(function ($totalHeader) {
                                                     Cypress._.forEach($totalHeader, function (block) {
                                                         const item = (Cypress.$(block).text());
@@ -345,7 +345,7 @@ describe('Deployment/CI Search View Tests', function () {
                                             });
                                             const totalCount = (termCount - backButtonItems.length);
                                             for (let i = 0; i <= totalCount; i++) {
-                                                cy.get('.prev-next-button-container [data-tip="Show previous component"]').parent().click().end().wait(2000);
+                                                cy.get('.prev-next-button-container [data-tip="Show previous component"]').parent().click().end();
                                                 cy.get('.row.summary-sub-header .summary-title-column.text-truncate').then(function ($totalHeader) {
                                                     Cypress._.forEach($totalHeader, function (block) {
                                                         const item = (Cypress.$(block).text());
@@ -372,7 +372,6 @@ describe('Deployment/CI Search View Tests', function () {
 
                     }).end();
                     cy.wrap($tab).click({ 'force': true }).end()
-                        .wait(200)
                         .get('.rc-tabs-content .rc-tabs-tabpane-active');
 
                 }).end();
@@ -400,11 +399,11 @@ describe('Deployment/CI Search View Tests', function () {
 
         it('SearchBox input works, goes to /browse/ on submit', function(){
             cy.get("a#search-menu-item").click().end()
-                .get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end()
+                .get('form.navbar-search-form-container button#search-item-type-selector').click().end()
                 .get('form.navbar-search-form-container div.dropdown-menu a[data-key="ExperimentSetReplicate"]').click().end()
-                .get('input[name="q"]').focus().type('mouse').wait(10).end()
+                .get('input[name="q"]').focus().type('mouse').end()
                 .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()
-                .wait(300).get('#slow-load-container').should('not.have.class', 'visible').end()
+                .get('#slow-load-container').should('not.have.class', 'visible').end()
                 .get('#page-title-container .page-title').should('contain', 'Data Browser').end() // Make sure we got redirected to /browse/. We may or may not have results here depending on if on local and logged out or not.
                 .location('search')
                 .should('include', 'ExperimentSetReplicate')
@@ -413,7 +412,7 @@ describe('Deployment/CI Search View Tests', function () {
 
         it('"General (All Item Types)" option works, takes us to search page', function(){
             cy.get("a#search-menu-item").click().end()
-                .get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end()
+                .get('form.navbar-search-form-container button#search-item-type-selector').click().end()
                 .get('form.navbar-search-form-container div.dropdown-menu a[data-key="Item"]').click().end()
                 .get('form.navbar-search-form-container').submit().end()
                 .get('#page-title-container .page-title').should('contain', 'Search').end()
@@ -424,9 +423,9 @@ describe('Deployment/CI Search View Tests', function () {
 
         it('Clear search works ==> more results', function () {
             cy.searchPageTotalResultCount().then((origTotalResults) => {
-                cy.get('.big-dropdown-menu .form-control').focus().type('*').wait(10).end()
+                cy.get('.big-dropdown-menu .form-control').focus().type('*').end()
                     .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()
-                    .wait(1200).get('#slow-load-container').should('not.have.class', 'visible').end()
+                    .get('#slow-load-container').should('not.have.class', 'visible').end()
                     .searchPageTotalResultCount().should('be.greaterThan', origTotalResults);
             });
         });
@@ -434,10 +433,10 @@ describe('Deployment/CI Search View Tests', function () {
         it('Wildcard query string returns all results.', function(){
             cy.window().screenshot('Before text search "*"').end().searchPageTotalResultCount().then((origTotalResults)=>{
                 cy.get("a#search-menu-item").click().end()
-                    .get('.big-dropdown-menu-background .form-control').focus().clear().type('*').wait(10).end()
+                    .get('.big-dropdown-menu-background .form-control').focus().clear().type('*').end()
                     .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()
                     // handle url encoding
-                    .location('search').should('include', '%2A').wait(300).end()
+                    .location('search').should('include', '%2A').end()
                     .get('#slow-load-container').should('not.have.class', 'visible').end()
                     .searchPageTotalResultCount().should('be.greaterThan', 1).should('equal', origTotalResults).end().window().screenshot('After text search "*"').end();
             });
@@ -446,7 +445,7 @@ describe('Deployment/CI Search View Tests', function () {
         it('Change search type, and check SearchBox placeholder', function () {
             cy.visit('/').get("a#search-menu-item").click().end();
             for (let interval = 1; interval < 7; interval++) {
-                cy.get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end();
+                cy.get('form.navbar-search-form-container button#search-item-type-selector').click().end();
                 cy.get('a.w-100.dropdown-item:nth-child(' + interval + ')').click().then(($dataKey) => {
                     const dataKey = $dataKey.attr("data-key");
                     switch (dataKey) {
@@ -479,9 +478,9 @@ describe('Deployment/CI Search View Tests', function () {
                 .get(".title-block.text-truncate.text-monospace.text-small").first().then(($accesion) => {
                     const accesion = $accesion.text();
                     cy.get("a#search-menu-item").click().end()
-                        .get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end()
+                        .get('form.navbar-search-form-container button#search-item-type-selector').click().end()
                         .get('form.navbar-search-form-container div.dropdown-menu a[data-key="ByAccession"]').click().end()
-                        .get('input[name="q"]').focus().type(accesion).wait(10).end()
+                        .get('input[name="q"]').focus().type(accesion).end()
                         .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()
                         .get('.clickable.copy-wrapper.accession.inline-block').should('contain', accesion).end();
                 });
@@ -498,11 +497,11 @@ describe('Deployment/CI Search View Tests', function () {
                 .get(".facets-body div.facet:not([data-field='']):nth-child(" + facetItemIndex + ") > h5").scrollToCenterElement().click({ force: true }).end()
                 .get(".facet.open .facet-list-element a.term .facet-item").first().click({ force: true }).end()
                 .get("a#search-menu-item").click().end()
-                .get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end()
+                .get('form.navbar-search-form-container button#search-item-type-selector').click().end()
                 .get('form.navbar-search-form-container div.dropdown-menu a[data-key="Within"]').click().end()
-                .get('input[name="q"]').focus().type('gene').wait(10).end()
+                .get('input[name="q"]').focus().type('gene').end()
                 .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()
-                .wait(300).get('#slow-load-container').should('not.have.class', 'visible').end()
+                .get('#slow-load-container').should('not.have.class', 'visible').end()
                 .get('#page-title-container .page-title').should('contain', 'Search').end()
                 .get(".facet-list-element.selected .facet-item").then(function ($selectedFacet) {
                     expect($selectedFacet.length).to.be.greaterThan(0);
@@ -519,13 +518,13 @@ describe('Deployment/CI Search View Tests', function () {
                     facetItemIndex = Math.min(1, parseInt(facetTotalCount / 3));
                 })
                 .get(".facets-body div.facet:not([data-field='']):nth-child(" + facetItemIndex + ") > h5").scrollToCenterElement().click({ force: true }).end()
-                .get(".facet.open .facet-list-element a.term .facet-item").first().click({ force: true }).end().wait(300)
+                .get(".facet.open .facet-list-element a.term .facet-item").first().click({ force: true }).end()
                 .get("a#search-menu-item").click().end()
-                .get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end()
+                .get('form.navbar-search-form-container button#search-item-type-selector').click().end()
                 .get('form.navbar-search-form-container div.dropdown-menu a[data-key="Within"]').click().end()
-                .get('input[name="q"]').focus().type('human').wait(10).end()
+                .get('input[name="q"]').focus().type('human').end()
                 .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()
-                .wait(300).get('#slow-load-container').should('not.have.class', 'visible').end()
+                .get('#slow-load-container').should('not.have.class', 'visible').end()
                 .get(".facet-list-element.selected .facet-item").then(function ($selectedFacet) {
                     expect($selectedFacet.length).to.be.greaterThan(0);
                 });
@@ -534,32 +533,32 @@ describe('Deployment/CI Search View Tests', function () {
         it('"Biosource" option works, takes us to biosource search results', function () {
             cy.visit('/')
                 .get("a#search-menu-item").click().end()
-                .get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end()
+                .get('form.navbar-search-form-container button#search-item-type-selector').click().end()
                 .get('form.navbar-search-form-container div.dropdown-menu a[data-key="Item"]').click().end()
-                .get('input[name="q"]').focus().type('hamster').wait(10).end()
+                .get('input[name="q"]').focus().type('hamster').end()
                 .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()
-                .wait(300).get('#slow-load-container').should('not.have.class', 'visible').end()
+                .get('#slow-load-container').should('not.have.class', 'visible').end()
                 .get('#page-title-container .page-title').should('contain', 'Search').end();
         });
 
         it('"Publication" option works, takes us to publication search results', function () {
             cy.visit('/')
                 .get("a#search-menu-item").click().end()
-                .get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end()
+                .get('form.navbar-search-form-container button#search-item-type-selector').click().end()
                 .get('form.navbar-search-form-container div.dropdown-menu a[data-key="Publication"]').click().end()
-                .get('input[name="q"]').focus().type('nature').wait(10).end()
+                .get('input[name="q"]').focus().type('nature').end()
                 .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()
-                .wait(300).get('#slow-load-container').should('not.have.class', 'visible').end()
+                .get('#slow-load-container').should('not.have.class', 'visible').end()
                 .get('#page-title-container .page-title').should('contain', 'Publications').end();
         });
 
         it('SearchBox input works, goes to /search', function () {
             cy.get("a#search-menu-item").click().end()
-                .get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end()
+                .get('form.navbar-search-form-container button#search-item-type-selector').click().end()
                 .get('form.navbar-search-form-container div.dropdown-menu a[data-key="Item"]').click().end()
-                .get('input[name="q"]').focus().type('mouse').wait(10).end()
+                .get('input[name="q"]').focus().type('mouse').end()
                 .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()
-                .wait(300).get('#slow-load-container').should('not.have.class', 'visible').end()
+                .get('#slow-load-container').should('not.have.class', 'visible').end()
                 .get('#page-title-container .page-title').should('contain', 'Search').end();
 
         });

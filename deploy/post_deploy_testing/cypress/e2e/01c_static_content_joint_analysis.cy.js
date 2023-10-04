@@ -1,13 +1,7 @@
 describe('Joint Analysis Page', function () {
 
     before(function(){
-        //cy.visit('/joint-analysis-plans').wait(100).end();
-        cy.visit('/joint-analysis').wait(100).end();
-    });
-
-    // temporarily skip redirect test to workaround the timeout issue
-    it.skip('Redirected to /joint-analysis from /joint-analysis-plans', function(){
-        cy.location('pathname').should('equal', '/joint-analysis').wait(5000).end();
+        cy.visit('/joint-analysis');
     });
 
     context("Expandable Matrix Section", function(){
@@ -42,14 +36,6 @@ describe('Joint Analysis Page', function () {
                         expect(seenX.size).to.equal(xAxisTerms.length);
                         expect(seenY.size).to.equal(yAxisTerms.length);
                     });
-                /* Deprecated because labels might slightly change and below tests exactness.
-                Cypress._.forEach(yAxisTerms, function(term){
-                    cy.contains(term);
-                });
-                Cypress._.forEach(xAxisTerms, function(term){
-                    cy.contains(term);
-                });
-                */
             });
         });
 
@@ -104,7 +90,7 @@ describe('Joint Analysis Page', function () {
                         origTotalCount += parseInt(Cypress.$(block).text());
                     });
                 }).end();
-            }).end().login4DN({ 'email' : 'ud4dntest@gmail.com', 'useEnvToken' : false }).end().wait(5000);
+            }).end().login4DN({ 'email' : 'ud4dntest@gmail.com', 'useEnvToken' : false }).get('#account-menu-item').scrollIntoView().should('be.visible');
 
             cy.get('.stacked-block-viz-container').first().within(($firstMatrix)=>{
                 let nextTotalCount = 0;
@@ -115,7 +101,7 @@ describe('Joint Analysis Page', function () {
                     expect(nextTotalCount).to.be.greaterThan(origTotalCount);
                     expect(nextTotalCount).to.be.greaterThan(49);
                 });
-            }).wait(250).end().logout4DN();
+            }).end().logout4DN();
         });
 
     });
@@ -123,8 +109,8 @@ describe('Joint Analysis Page', function () {
     context("HiGlass Static Section(s)", function(){
 
         it("HiGlass initializes (very basic)", function(){
-            cy.window().scrollTo('bottom').end()
-                .wait(2000).end().get('div.tiled-plot-div div.track-renderer-div div.center-track-container', { 'timeout' : (10 * 60 * 1000) }).wait(500);
+            cy.window().scrollTo('bottom')
+                .get('div.tiled-plot-div div.track-renderer-div div.center-track-container', { 'timeout' : (10 * 60 * 1000) }).should('be.visible');
         });
 
     });

@@ -17,6 +17,22 @@ Change Log
   create an access-key normally using the UI; but generally useful/convenient.
 
 
+6.4.6
+=====
+
+`Cypress performance improvements <https://github.com/4dn-dcic/fourfront/pull/1854>`_
+
+* Cypress wait() to should() conversion
+
+
+6.4.5
+=====
+
+`Bug fix - markdown json content in static sections <https://github.com/4dn-dcic/fourfront/pull/1853>`_
+
+* Json code sections in markdowns static content is not correctly rendered
+
+
 6.4.4
 =====
 

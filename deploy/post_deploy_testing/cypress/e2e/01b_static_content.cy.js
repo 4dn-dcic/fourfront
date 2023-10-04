@@ -25,7 +25,7 @@ describe('Static Page & Content Tests', function () {
 
         // Wait until help menu has loaded via AJAX and is a dropdown.
         // todo: Ensure we're selecting right 1 incase later add more -- test for `a.id-help-menu-item` once in place upstream.
-        cy.get(helpNavBarItemSelectorStr).should('have.class', 'dropdown-toggle').wait(100).click().wait(500).then(()=>{
+        cy.get(helpNavBarItemSelectorStr).should('have.class', 'dropdown-toggle').click().should('have.class', 'dropdown-open-for').then(()=>{
             cy.get('div.big-dropdown-menu div.level-1-title-container a, div.big-dropdown-menu a.level-2-title').then(($listItems)=>{
                 console.log($listItems);
 
@@ -49,7 +49,7 @@ describe('Static Page & Content Tests', function () {
                                 'message' : 'Visited page with title "' + titleText + '".'
                             });
                             if (count < $listItems.length){
-                                cy.get(helpNavBarItemSelectorStr).click().wait(500).then(()=>{
+                                cy.get(helpNavBarItemSelectorStr).click().should('have.class', 'dropdown-open-for').then(()=>{
                                     cy.get('div.big-dropdown-menu a#' + allLinkElementIDs[count]).click().then(($nextListItem)=>{
                                         const linkHref = $nextListItem.attr('href');
                                         cy.location('pathname').should('equal', linkHref);
@@ -70,10 +70,15 @@ describe('Static Page & Content Tests', function () {
                                     if (w.document.querySelectorAll('div.table-of-contents li.table-content-entry a').length > 0){
                                         haveWeSeenPageWithTableOfContents = true;
                                         const origScrollTop = w.scrollY;
-                                        cy.wrap(w).scrollTo('top').end().get('div.table-of-contents li.table-content-entry a').last().click({ force: true }).end().wait(1500).then(()=>{
-                                            expect(w.scrollY).to.not.equal(origScrollTop);
-                                            finish(titleText);
-                                        });
+                                        cy.wrap(w).scrollTo('top', { ensureScrollable: false })
+                                            .get('div.table-of-contents li.table-content-entry a').last().then(($linkItem) => {
+                                                const linkHref = $linkItem.attr('href');
+                                                cy.wrap($linkItem).click({ force: true });
+                                                cy.get(linkHref).should('be.visible').then(() => {
+                                                    expect(w.scrollY).to.not.equal(origScrollTop);
+                                                    finish(titleText);
+                                                });
+                                            });
                                     } else {
                                         finish(titleText);
                                     }
@@ -141,7 +146,7 @@ describe('Static Page & Content Tests', function () {
 
                             if (itemIndicesToVisit.length > 0){
                                 const nextIndexToVisit = itemIndicesToVisit.shift();
-                                cy.get(helpNavBarItemSelectorStr).click().wait(100).then(()=>{
+                                cy.get(helpNavBarItemSelectorStr).click().should('have.class', 'dropdown-open-for').then(()=>{
                                     cy.get('.big-dropdown-menu.is-open a.level-2-title').eq(nextIndexToVisit).click().then(function($linkElem){
                                         const linkHref = $linkElem.attr('href');
                                         cy.location('pathname').should('equal', linkHref);
