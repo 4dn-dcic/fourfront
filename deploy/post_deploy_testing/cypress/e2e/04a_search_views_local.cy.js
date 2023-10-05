@@ -10,27 +10,10 @@ describe('Deployment/CI Search View Tests', function () {
             const context = $context.text();
             const contextData = JSON.parse(context);
             const atId = contextData['@id'];
-            console.log('DELETING atId', atId);
+            cy.log('DELETING atId', atId);
             if (atId !== '/search/?type=MicroscopeConfiguration') {
                 testItemsToDelete.push(atId);
             }
-        });
-    }
-
-    function editMicroscopeConfiguration() {
-        it('Edit microscope configuration - add deleted_by_cypress_test tag', function () {
-            cy.login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true });
-
-            //Edit click
-            cy.get(".action-button[data-action='edit'] a").click({ force: true }).end();
-
-            // Add tag
-            cy.get('input#field_for_tags.form-control').focus().type('deleted_by_cypress_test').end();
-
-            // Click Validate button
-            cy.get(".action-buttons-container").as("editButtons");
-            cy.get("@editButtons").find('button.btn').contains('Validate').click().end().end();
-            cy.get("@editButtons").find('button.btn').contains('Submit').click().end().end();
         });
     }
 
@@ -81,7 +64,7 @@ describe('Deployment/CI Search View Tests', function () {
 
     });
 
-    context('Publications, Files, Microscope Configurations Collections', function(){
+    context('Publications, Files', function(){
         // These are similarly implemently to the BrowseView, we should have specific tests for these
 
         it('/publications/ should redirect to /search/?type=Publication', function(){
@@ -116,13 +99,10 @@ describe('Deployment/CI Search View Tests', function () {
             cy.get('.headers-columns-overflow-container .columns .search-headers-column-block[data-field="file_type"]').contains("File Type");
             cy.get('.headers-columns-overflow-container .columns .search-headers-column-block[data-field="file_format.file_format"]').contains("File Format");
         });
+    });
 
-        // TODO test facets
+    context('Microscope Configurations Collections', function(){
 
-        // it('/microscope-configurations/ should redirect to /search/?type=MicroscopeConfiguration', function(){
-        //     cy.visit('/microscope-configurations/').location('search').should('include', 'type=MicroscopeConfiguration').end()
-        //         .location('pathname').should('include', '/search/');
-        // });
         let microscopeDescription;
         const standType = "Inverted";
 
@@ -149,7 +129,8 @@ describe('Deployment/CI Search View Tests', function () {
                 .get('a.dropdown-item').contains(standType).click().end();
 
             // submit new microscope conf. creation
-            cy.get('button.btn.btn-success').contains('Submit').click().end();
+            cy.get('button.btn.btn-success').contains('Submit').click().end()
+                .get('#page-title-container div.mb-0').should('contain', 'Created new microscope configuration.').end();
 
             // get response and store atId (to delete item at the end of test)
             addAtIdToDeletedItems();
@@ -169,8 +150,6 @@ describe('Deployment/CI Search View Tests', function () {
             cy.get('div.form-group div.mb-0.form-group input#rjsfPrefix_Description').should('have.value', microscopeDescription)
                 .get('div#microscopy-app-overlays-container div div div div button.btn.btn.btn-primary.btn-lg').contains('Cancel').click().end();
         });
-
-        editMicroscopeConfiguration();
 
         it('Can save as microscope configuration', function () {
             cy.login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).end();
@@ -216,29 +195,18 @@ describe('Deployment/CI Search View Tests', function () {
                 .should('have.length.least', 3);
         });
 
-        //Edit clonned microscope configuration
-        editMicroscopeConfiguration();
-
         it('Delete microscope configuration', function () {
 
             // Log in _as admin_.
             cy.login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).end();
 
+            cy.log('testItemsToDelete:', JSON.stringify(testItemsToDelete));
             // Delete microscope configuration
             cy.wrap(testItemsToDelete).each(function (testItemURL) { // Synchronously process async stuff.
                 console.log('DELETING', testItemURL);
                 cy.getCookie('jwtToken')
                     .then((cookie) => {
                         const token = cookie.value;
-                        // cy.request({
-                        //     method: "DELETE",
-                        //     url: testItemURL,
-                        //     headers: {
-                        //         'Authorization': 'Bearer ' + token,
-                        //         "Content-Type": "application/json",
-                        //         "Accept": "application/json"
-                        //     }
-                        // }).end().request({
                         cy.request({
                             method: "PATCH",
                             url: testItemURL,
@@ -377,6 +345,7 @@ describe('Deployment/CI Search View Tests', function () {
                 }).end();
             }).end();
         });
+
     });
 
     context('Search Box in Navigation', function(){
