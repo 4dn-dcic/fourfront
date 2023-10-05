@@ -2,6 +2,11 @@
 // todo: Ensure we're selecting right 1 incase later add more -- test for `a.id-help-menu-item` once in place upstream.
 const helpNavBarItemSelectorStr = '#top-nav div.navbar-collapse .navbar-nav a.id-help-menu-item';
 
+// we need to escape header id's starts with numeric character (like 4dn-xyz), otherwise css query selectors not work properly
+const escapeElementWithNumericId = function (selector) {
+    return /^#\d/.test(selector) ? `[id="${selector.substring(1)}"]` : selector;
+};
+
 describe('Static Page & Content Tests', function () {
 
     before(function(){
@@ -50,7 +55,7 @@ describe('Static Page & Content Tests', function () {
                             });
                             if (count < $listItems.length){
                                 cy.get(helpNavBarItemSelectorStr).click().should('have.class', 'dropdown-open-for').then(()=>{
-                                    cy.get('div.big-dropdown-menu a#' + allLinkElementIDs[count]).click().then(($nextListItem)=>{
+                                    cy.get('div.big-dropdown-menu a#' + escapeElementWithNumericId(allLinkElementIDs[count])).scrollIntoView().click().then(($nextListItem)=>{
                                         const linkHref = $nextListItem.attr('href');
                                         cy.location('pathname').should('equal', linkHref);
                                         testVisit();
@@ -70,11 +75,11 @@ describe('Static Page & Content Tests', function () {
                                     if (w.document.querySelectorAll('div.table-of-contents li.table-content-entry a').length > 0){
                                         haveWeSeenPageWithTableOfContents = true;
                                         const origScrollTop = w.scrollY;
-                                        cy.wrap(w).scrollTo('top', { ensureScrollable: false })
+                                        cy.wrap(w).scrollTo('top', { ensureScrollable: false }).end()
                                             .get('div.table-of-contents li.table-content-entry a').last().then(($linkItem) => {
                                                 const linkHref = $linkItem.attr('href');
-                                                cy.wrap($linkItem).click({ force: true });
-                                                cy.get(linkHref).should('be.visible').then(() => {
+                                                cy.wrap($linkItem).scrollIntoView().click({ force: true }).end();
+                                                cy.get(escapeElementWithNumericId(linkHref)).should('be.visible').then(() => {
                                                     expect(w.scrollY).to.not.equal(origScrollTop);
                                                     finish(titleText);
                                                 });
@@ -105,7 +110,7 @@ describe('Static Page & Content Tests', function () {
 
     it('Every help page has links which return success status codes - SAMPLING', function(){
 
-        cy.get(helpNavBarItemSelectorStr).click().then(()=>{
+        cy.get(helpNavBarItemSelectorStr).should('have.class', 'dropdown-toggle').click().should('have.class', 'dropdown-open-for').then(()=>{
 
             // Get all links to _level 2_ static pages. Exclude directory pages for now. Do directory pages in later test.
             // Randomly selects 5 links out of all items listed from the Help dropdown menu. If one of those randomly selected links is
@@ -146,7 +151,7 @@ describe('Static Page & Content Tests', function () {
 
                             if (itemIndicesToVisit.length > 0){
                                 const nextIndexToVisit = itemIndicesToVisit.shift();
-                                cy.get(helpNavBarItemSelectorStr).click().should('have.class', 'dropdown-open-for').then(()=>{
+                                cy.get(helpNavBarItemSelectorStr).should('have.class', 'dropdown-toggle').click().should('have.class', 'dropdown-open-for').then(()=>{
                                     cy.get('.big-dropdown-menu.is-open a.level-2-title').eq(nextIndexToVisit).click().then(function($linkElem){
                                         const linkHref = $linkElem.attr('href');
                                         cy.location('pathname').should('equal', linkHref);
