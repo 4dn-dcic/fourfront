@@ -38,18 +38,22 @@ describe('Post-Deployment Search View Tests', function () {
         });
 
         it('Filter by "Type" filter icon within search results', function () {
-            cy.visit('/search/');
+            cy.visit('/search/?type=Item');
             let typeTitle;
             cy.searchPageTotalResultCount().then((totalCountExpected) => {
-                const intervalCount = Math.min(5, parseInt(totalCountExpected / 25));
+                const intervalCount = Math.floor(Math.random() * 5);//Math.min(5, parseInt(totalCountExpected / 25));
                 cy.get('.search-result-row.detail-closed[data-row-number="' + intervalCount + '"] .search-result-column-block[data-field="@type"] .item-type-title').then(function ($typeTitle) {
-                    typeTitle = $typeTitle.text().trim();
-                })
-                    .get('.search-result-row.detail-closed[data-row-number="' + intervalCount + '"] .search-result-column-block[data-field="@type"] .icon-container .icon').click({ force: true }).end()
-                    .get('.facets-body .facet[data-field="type"] .term[data-selected=true] .facet-item').then(function ($selectedTypeTitle) {
-                        const selectedTypeTitle = $selectedTypeTitle.text().trim();
-                        cy.expect(typeTitle).equal(selectedTypeTitle);
-                    });
+                    typeTitle = $typeTitle.text().replace(/\s/g,'').replace(/([A-Z])/g, ' $1').trim();
+                    cy.log('typeTitle:' + typeTitle);
+
+                    cy.get('.search-result-row.detail-closed[data-row-number="' + intervalCount + '"] .search-result-column-block[data-field="@type"] .icon-container .icon').click({ force: true }).end();
+                    cy.get('#page-title-container .page-title').should('contain', typeTitle)
+                        .get('.facets-body .facet[data-field="type"] .term[data-selected=true] .facet-item').then(function ($selectedTypeTitle) {
+                            const selectedTypeTitle = $selectedTypeTitle.text().trim();
+                            cy.expect(typeTitle).equal(selectedTypeTitle);
+                        });
+                }).end();
+
             });
         });
 
