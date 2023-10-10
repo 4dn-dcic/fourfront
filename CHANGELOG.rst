@@ -6,6 +6,17 @@ fourfront
 Change Log
 ----------
 
+7.0.0
+=====
+
+* Upgrade to Python 3.11.
+* Changed pyyaml version to ^6.0.1.
+* Removed types/access_key.py and schemas/access_key.json as the ones in snovault are sufficient.
+* Added generate-local-access-key script (from snovault) to pyproject.toml;
+  orignally created for smaht-portal since early in development no way to
+  create an access-key normally using the UI; but generally useful/convenient.
+
+
 6.4.6
 =====
 

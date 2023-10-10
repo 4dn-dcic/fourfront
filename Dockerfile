@@ -1,8 +1,10 @@
 # Fourfront (Production) Dockerfile
 # Based off of the cgap-portal Dockerfile
 
-# Debian Buster with Python 3.8.13
-FROM python:3.8.13-slim-buster
+# Bullseye with Python 3.11.5
+# 2023-09-28: Update docker image to a Python 3.11 version;
+# this was previously: FROM python:3.8.13-slim-buster
+FROM python:3.11.5-slim-bullseye
 
 MAINTAINER William Ronchetti "william_ronchetti@hms.harvard.edu"
 
@@ -33,7 +35,7 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 # Note that the ordering of these operations is intentional to minimize package footprint
 WORKDIR /home/nginx/.nvm
 ENV NVM_DIR=/home/nginx/.nvm
-COPY deploy/docker/production/install_nginx.sh /install_nginx.sh
+COPY deploy/docker/production/install_nginx_bullseye.sh /install_nginx.sh
 
 # Temporarily replacing
 #     curl -sSL https://install.python-poetry.org | POETRY_HOME=/opt/venv python - && \
