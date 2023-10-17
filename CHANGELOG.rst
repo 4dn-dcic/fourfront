@@ -6,6 +6,15 @@ fourfront
 Change Log
 ----------
 
+
+7.0.1
+=====
+
+`Collecting experiment_type for server-side file fownloads <https://github.com/4dn-dcic/fourfront/pull/1857>`_
+
+* Fix - even if experiment_type exists in file item, it is not collected in some cases
+
+
 7.0.0
 =====
 
