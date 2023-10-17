@@ -1734,6 +1734,16 @@ def get_file_experiment_type(request, context, properties):
     Get the string experiment_type value given a File context and properties.
     Checks the source_experiments, rev_linked experiments and experiment_sets
     """
+
+    # first, try to find exp type in track_and_facet_info
+    # if track_and_facet_info is missing, the context is possibly in 'raw' frame which lacks track_and_facet_info,
+    # so retrieve file item in 'object' frame
+    if properties.get('track_and_facet_info') is None:
+        file_item = get_item_or_none(request, context.uuid)
+        if file_item is not None and file_item.get('track_and_facet_info') and file_item['track_and_facet_info'].get('experiment_type'):
+            return file_item['track_and_facet_info']['experiment_type']
+
+    # legacy code to find experiment_type when calc prop track_and_facet_info is missing
     # identify which experiments to use
     experiments_using_file = []
     if properties.get('source_experiments'):
