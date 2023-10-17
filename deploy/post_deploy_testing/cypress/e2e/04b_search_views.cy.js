@@ -38,18 +38,22 @@ describe('Post-Deployment Search View Tests', function () {
         });
 
         it('Filter by "Type" filter icon within search results', function () {
-            cy.visit('/search/').wait(1000);
+            cy.visit('/search/?type=Item');
             let typeTitle;
             cy.searchPageTotalResultCount().then((totalCountExpected) => {
-                const intervalCount = Math.min(5, parseInt(totalCountExpected / 25));
+                const intervalCount = Math.floor(Math.random() * 5);//Math.min(5, parseInt(totalCountExpected / 25));
                 cy.get('.search-result-row.detail-closed[data-row-number="' + intervalCount + '"] .search-result-column-block[data-field="@type"] .item-type-title').then(function ($typeTitle) {
-                    typeTitle = $typeTitle.text().trim();
-                })
-                    .get('.search-result-row.detail-closed[data-row-number="' + intervalCount + '"] .search-result-column-block[data-field="@type"] .icon-container .icon').click({ force: true }).end()
-                    .get('.facets-body .facet[data-field="type"] .term[data-selected=true] .facet-item').then(function ($selectedTypeTitle) {
-                        const selectedTypeTitle = $selectedTypeTitle.text().trim();
-                        cy.expect(typeTitle).equal(selectedTypeTitle);
-                    });
+                    typeTitle = $typeTitle.text().replace(/\s/g,'').replace(/([A-Z])/g, ' $1').trim();
+                    cy.log('typeTitle:' + typeTitle);
+
+                    cy.get('.search-result-row.detail-closed[data-row-number="' + intervalCount + '"] .search-result-column-block[data-field="@type"] .icon-container .icon').click({ force: true }).end();
+                    cy.get('#page-title-container .page-title').should('contain', typeTitle)
+                        .get('.facets-body .facet[data-field="type"] .term[data-selected=true] .facet-item').then(function ($selectedTypeTitle) {
+                            const selectedTypeTitle = $selectedTypeTitle.text().trim();
+                            cy.expect(typeTitle).equal(selectedTypeTitle);
+                        });
+                }).end();
+
             });
         });
 
@@ -77,7 +81,7 @@ describe('Post-Deployment Search View Tests', function () {
         it('Starting from /search/, typing "olfactory" into searchbox redirects back to search', function () {
             cy.get("a#search-menu-item").click().end()
                 .searchPageTotalResultCount().should('be.greaterThan', 100).then(function (origResultCount) {
-                    return cy.get('.big-dropdown-menu-background .form-control').focus().clear().type('olfactory').wait(10).end()
+                    return cy.get('.big-dropdown-menu-background .form-control').focus().clear().type('olfactory').end()
                         .get('form.navbar-search-form-container').submit().end()
                         .location('search').should('include', 'q=olfactory').end()
                         .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()

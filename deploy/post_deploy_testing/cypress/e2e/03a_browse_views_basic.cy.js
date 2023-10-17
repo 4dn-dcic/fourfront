@@ -6,7 +6,7 @@ describe('Browse Views - Basic Tests', function () {
 
         it('If start from home page, clicking on Browse All nav menu item gets us to Browse page.', function(){
             cy.visit('/');
-            cy.get('#top-nav div.navbar-collapse .navbar-nav a.id-data-menu-item').click().wait(500).then(()=>{
+            cy.get('#top-nav div.navbar-collapse .navbar-nav a.id-data-menu-item').click().then(()=>{
             }).get(navBrowseBtnSelector).click().then(()=>{
                 cy.get('#page-title-container .page-title').should('contain', 'Data Browser');
             });
@@ -37,7 +37,7 @@ describe('Browse Views - Basic Tests', function () {
         it('Switch between included and excluded properties in facets, exclude a term and check ExpSet counts', function(){
 
             let initialExpSetCount, excludeExpSetCount, includeExpSetCount, externalProjectCount;
-            cy.visit('/browse').wait(100).end()
+            cy.visit('/browse').get('#slow-load-container').should('not.have.class', 'visible').end()
                 .getQuickInfoBarCounts().then((initialCounts) => {
                     initialExpSetCount = initialCounts.experiment_sets;
                     expect(initialExpSetCount).to.be.greaterThan(0);
@@ -51,23 +51,27 @@ describe('Browse Views - Basic Tests', function () {
                         externalProjectCount = parseInt(facetCount.text());
                         expect(externalProjectCount).to.be.greaterThan(0);
                     }).end();
-                    cy.wrap($term).click().wait(1000).end();
+                    cy.wrap($term).click().get('span.facet-selector i.icon').should('have.class', 'icon-minus-square').end();
                 }).end()
-                .getQuickInfoBarCounts().then((nextCounts) => {
-                    excludeExpSetCount = nextCounts.experiment_sets;
+                .get('#stats-stat-expsets').should('contain', '/').end()
+                .getQuickInfoBarCounts().then((nextCounts1) => {
+                    excludeExpSetCount = nextCounts1.experiment_sets;
                     expect(excludeExpSetCount).to.be.equal(initialExpSetCount - externalProjectCount);
                 })
                 .get(".facets-header button").first().click().end()
                 .get(".facets-header .facets-title").should('have.text', 'Included Properties').end()
-                .get('.facet[data-field="award.project"] .facet-list-element[data-key="External"] a').click().wait(1000).end() //reset
-                .getQuickInfoBarCounts().then((nextCounts) => {
-                    expect(initialExpSetCount).to.be.equal(nextCounts.experiment_sets);
+                .get('.facet[data-field="award.project"] .facet-list-element[data-key="External"] a').within(($term) => {
+                    cy.wrap($term).click().get('span.facet-selector i.icon').should('have.class', 'icon-square').end();
+                }).end() //reset
+                .getQuickInfoBarCounts().then((nextCounts2) => {
+                    expect(initialExpSetCount).to.be.equal(nextCounts2.experiment_sets);
                 }).end()
                 .get('.facet[data-field="award.project"] .facet-list-element[data-key="External"] a').within(($term) => {
-                    cy.wrap($term).click().wait(1000).end();
+                    cy.wrap($term).click().get('span.facet-selector i.icon').should('have.class', 'icon-check-square').end();
                 }).end()
-                .getQuickInfoBarCounts().then((nextCounts) => {
-                    includeExpSetCount = nextCounts.experiment_sets;
+                .get('#stats-stat-expsets').should('contain', '/').end()
+                .getQuickInfoBarCounts().then((nextCounts3) => {
+                    includeExpSetCount = nextCounts3.experiment_sets;
                     expect(includeExpSetCount).to.be.equal(externalProjectCount);
                 }).end();
 
@@ -75,7 +79,7 @@ describe('Browse Views - Basic Tests', function () {
 
         it('Select a grouping term in Experiment Type facet, then check whether the sub-terms are also selected', function () {
 
-            cy.visit('/browse').wait(100).end()
+            cy.visit('/browse').get('#slow-load-container').should('not.have.class', 'visible').end()
                 .get(".facets-header .facets-title").should('have.text', 'Included Properties').end()
                 .get('.facet.closed[data-field="experiments_in_set.experiment_type.display_title"] > h5').scrollToCenterElement().click({ force: true }).end()
                 .get('.facet[data-field="experiments_in_set.experiment_type.display_title"] .facet-list-element[data-is-grouping="true"] a').first().within(($term) => {
@@ -96,7 +100,7 @@ describe('Browse Views - Basic Tests', function () {
                                 expect(subTerms.length).to.be.greaterThan(0);
                             });
                     }).end();
-                    cy.wrap($term).click().wait(1000).end().then(() => {
+                    cy.wrap($term).click().end().then(() => {
                         cy.document().its('body').find('.facet[data-field="experiments_in_set.experiment_type.display_title"] .facet-list-element[data-grouping-key="' + groupingTermKey + '"].selected a').each(($el) => {
                             cy.wrap($el).find('span.facet-item').then(function (termKey) {
                                 const subTermKey = termKey.text();
@@ -113,7 +117,7 @@ describe('Browse Views - Basic Tests', function () {
 
         it('Exclude a grouping term in Experiment Type facet, then check whether the sub-terms are also excluded', function () {
 
-            cy.visit('/browse').wait(100).end()
+            cy.visit('/browse').get('#slow-load-container').should('not.have.class', 'visible').end()
                 .get(".facets-header button").first().click().end()
                 .get(".facets-header .facets-title").should('have.text', 'Excluded Properties').end()
                 .get('.facet.closed[data-field="experiments_in_set.experiment_type.display_title"] > h5').scrollToCenterElement().click({ force: true }).end()
@@ -135,7 +139,7 @@ describe('Browse Views - Basic Tests', function () {
                                 expect(subTerms.length).to.be.greaterThan(0);
                             });
                     }).end();
-                    cy.wrap($term).click().wait(1000).end().then(() => {
+                    cy.wrap($term).click().end().then(() => {
                         cy.document().its('body').find('.facet[data-field="experiments_in_set.experiment_type.display_title"] .facet-list-element[data-grouping-key="' + groupingTermKey + '"].omitted a').each(($el) => {
                             cy.wrap($el).find('span.facet-item').then(function (termKey) {
                                 const subTermKey = termKey.text();
@@ -151,7 +155,7 @@ describe('Browse Views - Basic Tests', function () {
         });
 
         it('"/browse/?public_release.to=2017-10-31" redirects to correct URL, includes 100 < x < 150 results.', function(){
-            cy.visit('/browse/?public_release.to=2017-10-31').end()
+            cy.visit('/browse/?public_release.to=2017-10-31').get('#slow-load-container').should('not.have.class', 'visible').end()
                 .location('search').should('include','ExperimentSetReplicate' ).should('include', 'public_release.to=2017-10-31').end()
                 .get('.bar-plot-chart .chart-bar').should('have.length.above', 0).end()
                 .getQuickInfoBarCounts().its('experiment_sets').should('be.greaterThan', 100).should('be.lessThan', 150);

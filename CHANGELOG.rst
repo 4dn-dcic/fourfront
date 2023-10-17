@@ -14,7 +14,23 @@ Change Log
 * Removed types/access_key.py and schemas/access_key.json as the ones in snovault are sufficient.
 * Added generate-local-access-key script (from snovault) to pyproject.toml;
   orignally created for smaht-portal since early in development no way to
-  create an access-key normally using the UI; but generall useful/convenient.
+  create an access-key normally using the UI; but generally useful/convenient.
+
+
+6.4.6
+=====
+
+`Cypress performance improvements <https://github.com/4dn-dcic/fourfront/pull/1854>`_
+
+* Cypress wait() to should() conversion
+
+
+6.4.5
+=====
+
+`Bug fix - markdown json content in static sections <https://github.com/4dn-dcic/fourfront/pull/1853>`_
+
+* Json code sections in markdowns static content is not correctly rendered
 
 
 6.4.4

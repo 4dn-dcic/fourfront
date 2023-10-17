@@ -129,10 +129,10 @@ describe('Browse Views - Files Selection', function () {
         });
         it('File Type selected all file can click download button, get modal with proper contents', function () {
 
-            cy.getDownloadButton().click().wait(100).end()
+            cy.getDownloadButton().click().end()
                 .get('div.modal-dialog .modal-body button.btn-info').should('have.length', 1).should('contain', 'I have read').click().end()
                 .get('div.modal-dialog .modal-body form[method="POST"] input[type="hidden"][name="accession_triples"]').should('have.length', 1).end()
-                .get('div.modal-dialog .modal-header button.close').click().wait(100).end();
+                .get('div.modal-dialog .modal-header button.close').click().end();
 
         });
 
@@ -160,13 +160,13 @@ describe('Browse Views - Files Selection', function () {
                             .get('.search-results-container .search-result-row.detail-open').then(function ($resultRow) {
                                 return cy.get('.search-results-container .search-result-row.detail-open .result-table-detail-container.detail-open .files-tables-container h4 i.toggle-open-icon')
                                     .each(($toggleFilesOpenButton, idx) => { // Raw Files (0), Processed Files (1)
-                                        cy.wrap($toggleFilesOpenButton).scrollToCenterElement().click({ 'force': true }).wait(300).end() // Open
+                                        cy.wrap($toggleFilesOpenButton).scrollToCenterElement().click({ 'force': true }).end() // Open
                                             .get('.search-results-container .search-result-row.detail-open .result-table-detail-container.detail-open .files-tables-container .stacked-block-table input[type="checkbox"]')
                                             .each(function ($checkBox, checkBoxIdx) {
                                                 if (checkBoxIdx >= 3) return; // Only do for first few files
                                                 checkUncheckFileCheckbox(origSelectedCount, $checkBox);
                                             }).end()
-                                            .wrap($toggleFilesOpenButton).scrollToCenterElement().click({ 'force': true }).wait(300).end(); // Close
+                                            .wrap($toggleFilesOpenButton).scrollToCenterElement().click({ 'force': true }).end(); // Close
                                     });
                             }).end().wrap($toggleDetailButton).scrollToCenterElement().click({ 'force': true }).end();
                     });
@@ -175,10 +175,10 @@ describe('Browse Views - Files Selection', function () {
 
         it('Can click Download button, get modal with proper contents', function () {
 
-            cy.getDownloadButton().click().wait(100).end()
+            cy.getDownloadButton().click().end()
                 .get('div.modal-dialog .modal-body button.btn-info').should('have.length', 1).should('contain', 'I have read').click().end()
                 .get('div.modal-dialog .modal-body form[method="POST"] input[type="hidden"][name="accession_triples"]').should('have.length', 1).end()
-                .get('div.modal-dialog .modal-header button.close').click().wait(100).end();
+                .get('div.modal-dialog .modal-header button.close').click().end();
         });
 
         it('"Deselect All Files" button works; checkboxes unchecked.', function () {
