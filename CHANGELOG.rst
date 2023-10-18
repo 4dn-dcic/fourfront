@@ -6,6 +6,23 @@ fourfront
 Change Log
 ----------
 
+7.1.0
+=====
+
+`PR1860: Adding 4C-seq properties to ExperimentCaptureC<https://github.com/4dn-dcic/fourfront/pull/1860>`_
+
+* Add fiels/properties to experiment_capture_c schema to support 4C-seq experiments
+* Added an insert using these fields to data/inserts
+
+
+7.0.1
+=====
+
+`Collecting experiment_type for server-side file downloads <https://github.com/4dn-dcic/fourfront/pull/1857>`_
+
+* Fix - even if experiment_type exists in file item, it is not collected in some cases
+
+
 7.0.0
 =====
 
