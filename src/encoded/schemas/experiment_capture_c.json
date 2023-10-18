@@ -62,7 +62,6 @@
             "items": {
                 "description": "A region targeted for capture.",
                 "title": "Target Region",
-                "required": ["target"],
                 "type": "object",
                 "additionalProperties": false,
                 "properties": {
@@ -83,9 +82,20 @@
                         "type": "string",
                         "lookup": 311,
                         "linkTo": "File"
+                    },
+                    "target_primer": {
+                        "title": "Viewpoint/target primer",
+                        "desccription": "Oligonucleotide primer specific for the viewpoint/target region",
+                        "type": "string",
+                        "pattern": "^[ATGCYRWSKMDVHBN]+$"
                     }
                 }
             }
+        },
+         "round2_enzyme": {
+            "title": "Second round enzyme",
+            "type": "string",
+            "linkTo": "Enzyme"
         }
     },
     "columns": {
