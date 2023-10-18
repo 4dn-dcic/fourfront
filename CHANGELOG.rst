@@ -6,6 +6,14 @@ fourfront
 Change Log
 ----------
 
+7.1.0
+=====
+
+`PR1860: Adding 4C-seq properties to ExperimentCaptureC<https://github.com/4dn-dcic/fourfront/pull/1860>`_
+
+* Add fiels/properties to experiment_capture_c schema to support 4C-seq experiments
+* Added an insert using these fields to data/inserts
+
 
 7.0.1
 =====
