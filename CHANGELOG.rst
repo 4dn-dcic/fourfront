@@ -6,6 +6,14 @@ fourfront
 Change Log
 ----------
 
+7.1.0
+=====
+
+`<>`_
+
+* Add fiels/properties to experiment_capture_c schema to support 4C-seq experiments
+* Added an insert using these fields to data/inserts
+
 
 7.0.1
 =====
