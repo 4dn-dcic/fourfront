@@ -72,7 +72,6 @@
         "files": ["4DNFIN232JJ4", "4DNFIN232JJ5"],
         "targeted_regions": [
             {
-                "target": ["67c54a0d-f27c-43c7-b36c-d51dd52f7073"],
                 "oligo_file": "4DNFIO67APA1"
             },
             {
