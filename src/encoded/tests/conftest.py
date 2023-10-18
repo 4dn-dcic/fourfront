@@ -78,6 +78,17 @@ def app_settings(request, wsgi_server_host_port, conn, DBSession):  # noQA - We 
     return settings
 
 
+@pytest.fixture(scope='session')
+def ras_app_settings(request, wsgi_server_host_port, conn, DBSession):  # noQA - We didn't choose the fixture name.
+    notice_pytest_fixtures(request, wsgi_server_host_port, conn, DBSession)
+    settings = make_app_settings_dictionary()
+    settings['auth0.audiences'] = 'http://%s:%s' % wsgi_server_host_port
+    settings['auth0.domain'] = 'https://stsstg.nih.gov/auth/oauth/v2/authorize'
+    settings['auth0.client'] = 'dummy-client-id'
+    settings[DBSESSION] = DBSession
+    return settings
+
+
 INDEXER_NAMESPACE_FOR_TESTING = generate_indexer_namespace_for_testing('fourfront')
 
 
@@ -176,6 +187,11 @@ def dummy_request(root, registry, app):
 def app(app_settings):
     """ WSGI application level functional testing. """
     return main({}, **app_settings)
+
+
+@pytest.fixture(scope='session')
+def ras_app(ras_app_settings):
+    return main({}, **ras_app_settings)
 
 
 @pytest.fixture(scope='session')
@@ -319,6 +335,16 @@ def redis_testapp(redis_app):
         'REMOTE_USER': 'TEST',
     }
     return webtest.TestApp(redis_app, environ)
+
+
+@pytest.fixture(scope='session')
+def ras_testapp(ras_app):
+    """ Testapp for use with RAS """
+    environ = {
+        'HTTP_ACCEPT': 'application/json',
+        'REMOTE_USER': 'TEST',
+    }
+    return webtest.TestApp(ras_app, environ)
 
 
 @pytest.fixture
