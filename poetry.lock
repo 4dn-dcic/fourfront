@@ -999,14 +999,14 @@ tox = ["tox"]
 
 [[package]]
 name = "dcicsnovault"
-version = "11.0.0"
+version = "11.0.0.1b0"
 description = "Storage support for 4DN Data Portals."
 category = "main"
 optional = false
 python-versions = ">=3.8.1,<3.12"
 files = [
-    {file = "dcicsnovault-11.0.0-py3-none-any.whl", hash = "sha256:cf21483e155fffe9db42f7aee824e32533700f7f63983ec9e930bc865c13e71e"},
-    {file = "dcicsnovault-11.0.0.tar.gz", hash = "sha256:909a8ddf8c406a1a6fc5e86f6dff830e1a5519fc1077a7a8e52ac3d0da039dd2"},
+    {file = "dcicsnovault-11.0.0.1b0-py3-none-any.whl", hash = "sha256:5b0680ee37d8094e5ffe88107d0047747a03f3f0390b141915fa655d61550a96"},
+    {file = "dcicsnovault-11.0.0.1b0.tar.gz", hash = "sha256:af9eb9c7876ab348902aaed52c7df58d24b3aff14f26bed57b43e788ceb98750"},
 ]
 
 [package.dependencies]
@@ -4151,4 +4151,4 @@ test = ["zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8.1,<3.12"
-content-hash = "bdbd044ce6cb1eb642c49d5541e1edceb42360992490ba724e1d4f1853c4c177"
+content-hash = "f3dc08d7479e6ba631b790147628590be4dbca1b280f31d144b600de879b05f6"
