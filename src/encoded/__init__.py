@@ -180,19 +180,24 @@ def main(global_config, **local_config):
     settings['auth0.domain'] = settings.get('auth0.domain', os.environ.get('Auth0Domain', DEFAULT_AUTH0_DOMAIN))
     settings['auth0.client'] = settings.get('auth0.client', os.environ.get('Auth0Client'))
     settings['auth0.secret'] = settings.get('auth0.secret', os.environ.get('Auth0Secret'))
+    if 'auth0' in settings['auth0.domain']:
+        scope = 'openid email'
+        allowed_conn = ['github', 'google-oauth2']
+    else:
+        # RAS
+        scope = 'openid profile email ga4gh_passport_v1'
+        allowed_conn = ['google-oauth2']
     settings['auth0.options'] = {
         'auth': {
             'sso': False,
             'redirect': True,
             'responseType': 'code',
             'params': {
-                'scope': 'openid email',
+                'scope': scope,
                 'prompt': 'select_account'
             }
         },
-        'allowedConnections': [  # TODO: make at least this part configurable
-            'github', 'google-oauth2'
-        ]
+        'allowedConnections': allowed_conn # TODO: make at least this part configurable
     }
     # ga4 api secret
     if 'IDENTITY' in os.environ:
