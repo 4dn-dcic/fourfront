@@ -237,6 +237,35 @@ class NamespacedAuthenticationPolicy(object):
         if userid is not None:
             userid = self._namespace_prefix + userid
         return userid
+    
+    def authenticated_userid(self, request):
+        """
+        Adds `request.user_info` for all authentication types.
+        Fetches and returns some user details if called.
+        """
+        namespaced_userid = super().authenticated_userid(request)
+
+        if namespaced_userid is not None:
+            # userid, if present, may be in form of UUID (if remoteuser) or an email (if Auth0).
+            namespace, userid = namespaced_userid.split(".", 1)
+
+            # Allow access basic user credentials from request obj after authenticating & saving request
+            def get_user_info(request):
+                user_props = request.embed('/session-properties', as_user=userid)  # Performs an authentication against DB for user.
+                if not user_props.get('details'):
+                    raise HTTPUnauthorized(
+                        title="Could not find user info for {}".format(userid),
+                        headers={
+                            'WWW-Authenticate':
+                                "Bearer realm=\"{}\"; Basic realm=\"{}\"".format(request.domain, request.domain)
+                        }
+                    )
+                return user_props
+
+            # If not authenticated (not in our DB), request.user_info will throw an HTTPUnauthorized error.
+            request.set_property(get_user_info, "user_info", True)
+
+        return namespaced_userid
 
     def remember(self, request, principal, **kw):
         if not principal.startswith(self._namespace_prefix):
@@ -299,8 +328,13 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
                 return None
             jwt_info = session_token.decode_jwt(
                 audience=request.registry.settings['auth0.client'],
-                secret=request.registry.settings['auth0.secret']
+                secret=request.registry.settings['auth0.secret'],
+                algorithms=JWT_DECODING_ALGORITHMS if 'auth0' in request.registry.settings['auth0.domain'] else ['RS256']
             )
+            if jwt_info.get('email') is None:
+                jwt_info['email'] = session_token.get_email()
+            if session_token.get_email() is not None:
+                request.set_property(lambda r: False, 'auth0_expired')
         else:
             jwt_info = self.get_token_info(id_token, request)
         if not jwt_info:
@@ -612,9 +646,10 @@ def impersonate_user(context, request):
     user_properties['user_actions'] = [x for x in user_properties['user_actions'] if (x['id'] and x['id'] != 'impersonate')]
     # make a key
     registry = request.registry
+    auth0_domain = registry.settings.get('auth0.domain')
     auth0_client = registry.settings.get('auth0.client')
     auth0_secret = registry.settings.get('auth0.secret')
-    if not(auth0_client and auth0_secret):
+    if not(auth0_domain and auth0_client and auth0_secret):
         raise HTTPForbidden(title="No keys to impersonate user")
 
     jwt_contents = {
@@ -626,7 +661,7 @@ def impersonate_user(context, request):
     id_token = jwt.encode(
         jwt_contents,
         auth0_secret,
-        algorithm=JWT_ENCODING_ALGORITHM
+        algorithm= JWT_ENCODING_ALGORITHM if 'auth0' in auth0_domain else 'RS256'
 	)
 
     if redis_is_active(request):
@@ -722,7 +757,8 @@ def create_unauthorized_user(context, request):
         )
         jwt_info = redis_session_token.decode_jwt(
                 audience=request.registry.settings['auth0.client'],
-                secret=request.registry.settings['auth0.secret']
+                secret=request.registry.settings['auth0.secret'],
+                algorithms=JWT_DECODING_ALGORITHMS if 'auth0' in request.registry.settings['auth0.domain'] else ['RS256']
         )
         email = jwt_info.get('email', '<no e-mail supplied>').lower()
 

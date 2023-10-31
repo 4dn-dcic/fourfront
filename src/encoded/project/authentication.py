@@ -16,7 +16,7 @@ class FourfrontProjectAuthentication(SnovaultProjectAuthentication):
             ras_client_id = request.registry.settings['auth0.client']
             redir_url = f"{domain}" \
                         f"?client_id={ras_client_id}&prompt=login+consent&" \
-                        f"redirect_uri={request.scheme}/{request.host}&response_type=code" \
+                        f"redirect_uri={request.scheme}://{request.host}/callback&response_type=code" \
                         f"&scope=openid+profile+email+ga4gh_passport_v1"
             raise HTTPTemporaryRedirect(location=redir_url)
 
