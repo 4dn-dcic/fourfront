@@ -1516,7 +1516,6 @@ def update_google_analytics(context, request, ga_config, filename, file_size_dow
             }
         ]
     }
-    # import pdb;pdb.set_trace()
 
     if user_uuid:
         ga_payload['events'][0]['params']['user_uuid'] = user_uuid
