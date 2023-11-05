@@ -5,6 +5,9 @@ import jwt
 import json
 import logging
 
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.backends import default_backend
 from passlib.context import CryptContext
 from urllib.parse import urlencode
 from pyramid.authentication import (
@@ -101,6 +104,29 @@ def redis_is_active(request):
     """ Quick helper to standardize detecting whether redis is in use """
     return 'redis.server' in request.registry.settings
 
+def jwk_to_pem(jwk):
+    """ Converts JSON Web Key to PEM format """
+    if 'kty' not in jwk:
+        raise ValueError("JWK must have a 'kty' field")
+    kty = jwk['kty']
+
+    if kty == 'RSA':
+        if 'n' not in jwk or 'e' not in jwk:
+            raise ValueError("JWK RSA key must have 'n' and 'e' fields")
+
+        n = int.from_bytes(base64.urlsafe_b64decode(jwk['n'] + '=='), byteorder='big')
+        e = int.from_bytes(base64.urlsafe_b64decode(jwk['e'] + '=='), byteorder='big')
+
+        public_key = rsa.RSAPublicNumbers(e, n).public_key(default_backend())
+        pem = public_key.public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo
+        )
+
+        return pem
+
+    # You can add more cases for other key types (e.g., 'EC' for elliptic curve keys)
+    raise ValueError("Unsupported 'kty': {}".format(kty))
 
 @view_config(route_name='callback', request_method='GET', permission=NO_PERMISSION_REQUIRED)
 def callback(context, request):
@@ -326,10 +352,26 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
             )
             if not session_token:
                 return None
+            
+            auth0_domain = request.registry.settings['auth0.domain']
+            if 'auth0' in auth0_domain:
+                secret = request.registry.settings['auth0.secret']
+                algorithms = JWT_DECODING_ALGORITHMS
+            else:
+                # RAS
+                # get public key from jwks uri
+                response = requests.get(url= auth0_domain + "/openid/connect/jwks.json")
+
+                # gives the set of jwks keys.the keys has to be passed as it is to jwt.decode() for signature verification.
+                jwks = response.json()
+                secret = jwk = jwk_to_pem(jwks['keys'][0])
+                algorithms = ['RS256']
+
+
             jwt_info = session_token.decode_jwt(
                 audience=request.registry.settings['auth0.client'],
-                secret=request.registry.settings['auth0.secret'],
-                algorithms=JWT_DECODING_ALGORITHMS if 'auth0' in request.registry.settings['auth0.domain'] else ['RS256']
+                secret=secret,
+                algorithms=algorithms
             )
             if jwt_info.get('email') is None:
                 jwt_info['email'] = session_token.get_email()
