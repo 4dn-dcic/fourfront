@@ -1,4 +1,5 @@
 import encoded.project_defs
+import base64
 import hashlib
 import logging
 import json  # used only in Fourfront, not CGAP
@@ -6,8 +7,12 @@ import mimetypes
 import netaddr
 import os
 import pkg_resources
+import requests
 import sentry_sdk
 import subprocess
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.backends import default_backend
 from pyramid.session import SignedCookieSessionFactory
 
 from codeguru_profiler_agent import Profiler
@@ -148,6 +153,30 @@ def init_code_guru(*, group_name, region=ECSUtils.REGION):
     Profiler(profiling_group_name=group_name, region_name=region).start()
 
 
+def jwk_to_pem(jwk):
+    """ Converts JSON Web Key to PEM format """
+    if 'kty' not in jwk:
+        raise ValueError("JWK must have a 'kty' field")
+    kty = jwk['kty']
+
+    if kty == 'RSA':
+        if 'n' not in jwk or 'e' not in jwk:
+            raise ValueError("JWK RSA key must have 'n' and 'e' fields")
+
+        n = int.from_bytes(base64.urlsafe_b64decode(jwk['n'] + '=='), byteorder='big')
+        e = int.from_bytes(base64.urlsafe_b64decode(jwk['e'] + '=='), byteorder='big')
+
+        public_key = rsa.RSAPublicNumbers(e, n).public_key(default_backend())
+        pem = public_key.public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo
+        )
+
+        return pem
+
+    # You can add more cases for other key types (e.g., 'EC' for elliptic curve keys)
+    raise ValueError("Unsupported 'kty': {}".format(kty))
+
 def main(global_config, **local_config):
     """
     This function returns a Pyramid WSGI application.
@@ -187,6 +216,12 @@ def main(global_config, **local_config):
         # RAS
         scope = 'openid profile email ga4gh_passport_v1'
         allowed_conn = ['google-oauth2']
+         # get public key from jwks uri
+        response = requests.get(url= settings['auth0.domain'] + "/openid/connect/jwks.json")
+        # gives the set of jwks keys.the keys has to be passed as it is to jwt.decode() for signature verification.
+        jwks = response.json()
+        settings['auth0.public.key'] = jwk_to_pem(jwks['keys'][0])
+
     settings['auth0.options'] = {
         'auth': {
             'sso': False,

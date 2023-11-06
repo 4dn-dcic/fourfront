@@ -22,10 +22,10 @@ export default class UserRegistrationView extends React.PureComponent {
             unverifiedUserEmail: props.context['@graph'][0],
             showLock: false,
             isLoading: false
-        }
+        };
     }
 
     render() {
-        return <UserRegistrationModal {... this.state} />
+        return <UserRegistrationModal {... this.state} />;
     }
 }
