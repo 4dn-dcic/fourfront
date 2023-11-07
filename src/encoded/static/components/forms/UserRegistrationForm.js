@@ -175,7 +175,9 @@ export default class UserRegistrationForm extends React.PureComponent {
             ajax.load(
                 endpoint,
                 (resp) => {
-                    onComplete(); // <- Do request to login, then hide/unmount this component.
+                    if (onComplete && typeof onComplete === 'function') {
+                        onComplete(); // <- Do request to login, then hide/unmount this component.
+                    }
                 },
                 'POST',
                 (err) => {
