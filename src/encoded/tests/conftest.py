@@ -83,7 +83,7 @@ def ras_app_settings(request, wsgi_server_host_port, conn, DBSession):  # noQA -
     notice_pytest_fixtures(request, wsgi_server_host_port, conn, DBSession)
     settings = make_app_settings_dictionary()
     settings['auth0.audiences'] = 'http://%s:%s' % wsgi_server_host_port
-    settings['auth0.domain'] = 'https://stsstg.nih.gov/auth/oauth/v2/authorize'
+    settings['auth0.domain'] = 'https://stsstg.nih.gov'
     settings['auth0.client'] = 'dummy-client-id'
     settings[DBSESSION] = DBSession
     return settings
