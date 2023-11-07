@@ -13,8 +13,7 @@ import subprocess
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
-from pyramid.session import SignedCookieSessionFactory
-
+from dcicutils.misc_utils import PRINT
 from codeguru_profiler_agent import Profiler
 from dcicutils.ecs_utils import ECSUtils
 from dcicutils.env_utils import EnvUtils, get_mirror_env_from_context
@@ -206,6 +205,8 @@ def main(global_config, **local_config):
     settings['snovault.jsonld.terms_namespace'] = 'https://www.encodeproject.org/terms/'
     settings['snovault.jsonld.terms_prefix'] = 'encode'
     # set auth0 keys
+    PRINT(f'auth0_domain in settings: {settings.get("auth0.domain")}')
+    PRINT(f'auth0_domain in env: {os.environ.get("Auth0Domain")}')
     settings['auth0.domain'] = settings.get('auth0.domain', os.environ.get('Auth0Domain', DEFAULT_AUTH0_DOMAIN))
     settings['auth0.client'] = settings.get('auth0.client', os.environ.get('Auth0Client'))
     settings['auth0.secret'] = settings.get('auth0.secret', os.environ.get('Auth0Secret'))
@@ -217,7 +218,7 @@ def main(global_config, **local_config):
         scope = 'openid profile email ga4gh_passport_v1'
         allowed_conn = ['google-oauth2']
          # get public key from jwks uri
-        response = requests.get(url= settings['auth0.domain'] + "/openid/connect/jwks.json")
+        response = requests.get(url=settings['auth0.domain'] + "/openid/connect/jwks.json")
         # gives the set of jwks keys.the keys has to be passed as it is to jwt.decode() for signature verification.
         jwks = response.json()
         settings['auth0.public.key'] = jwk_to_pem(jwks['keys'][0])
@@ -263,7 +264,7 @@ def main(global_config, **local_config):
     config.include('pyramid_multiauth')  # must be before calling set_authorization_policy
     # Override default authz policy set by pyramid_multiauth
     config.set_authorization_policy(LocalRolesAuthorizationPolicy())
-    
+
     # This creates a session factory (from definition in Snovault/app.py)
     config.include(session)
 
