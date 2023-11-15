@@ -32,8 +32,7 @@ const auth0Options = {
     languageDictionary : {
         title: "Log In",
         unrecoverableError:'Something went wrong.<br />Please <a href="mailto:support@4dnucleome.org">contact</a> technical support.'
-    },
-    popupOptions: { width: "450px", height: "450px" }
+    }
 };
 
 /**
