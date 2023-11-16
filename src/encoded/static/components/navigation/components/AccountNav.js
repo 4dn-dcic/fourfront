@@ -53,7 +53,7 @@ export const AccountNav = React.memo(function AccountNav(props){
     if (!session) { // Render login button
 
         //TODO remove custom info after RAS transition completed
-        const auth0CustomInfo = '<p><span class="text-danger font-weight-bold">WARNING</span> - support for login to the portal via <b>GitHub</b> is ending in <b>early 2024</b>.</p><p>If you currently use your Github credentials to log in to the data portal you will need to transition to using a Google account or NIH credentials - eRA, <a href="https://login.gov">login.gov</a> or NIH passport.  More info and a guide to setting up a linked Google account can be found at <a href="https://data.4dnucleome.org/help/user-guide/account-creation" target="_blank">here</a>.<p>';
+        const auth0CustomInfo = '<p><span class="text-danger font-weight-bold">WARNING</span> - support for login to the portal via <b>GitHub</b> is ending in <b>early 2024</b>.</p><p>If you currently use your Github credentials to log in to the data portal you will need to transition to using a Google account or NIH credentials - eRA, <a href="https://login.gov">login.gov</a> or NIH passport.  More info and a guide to setting up a linked Google account can be found <a href="https://data.4dnucleome.org/help/user-guide/account-creation" target="_blank">here</a>.<p>';
 
         return (
             <Nav className="navbar-acct">
