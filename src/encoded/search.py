@@ -1526,6 +1526,17 @@ def format_facets(es_results, facets, total, additional_facets, filters, search_
                 if len(result_facet.get('terms', [])) < 1:
                     continue
 
+                # 'type' facet does not include not-faceted(!=) terms (it works well for other facets)
+                # We manually add the missing ones by traversing filters
+                # TODO: doc_count is missing
+                if field == 'type' and not result_facet.get('has_group_by', False):
+                    added_missing_type_terms = dict()
+                    for filter in filters:
+                        if filter['field'] == 'type!' and filter['term'] and not filter['term'] in added_missing_type_terms:
+                            result_facet['terms'].append({'key': filter['term'], 'doc_count': 0})
+                            added_missing_type_terms[filter['term']] = True
+
+
             if len(aggregations[full_agg_name].keys()) > 2:
                 result_facet['extra_aggs'] = { k:v for k,v in aggregations[full_agg_name].items() if k not in ('doc_count', "primary_agg") }
 
