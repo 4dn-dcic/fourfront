@@ -218,7 +218,8 @@ def main(global_config, **local_config):
         scope = 'openid profile email ga4gh_passport_v1'
         allowed_conn = ['google-oauth2']
          # get public key from jwks uri
-        response = requests.get(url=settings['auth0.domain'] + "/openid/connect/jwks.json")
+        auth0Domain = settings['auth0.domain']
+        response = requests.get(url=f'https://{auth0Domain}/openid/connect/jwks.json')
         # gives the set of jwks keys.the keys has to be passed as it is to jwt.decode() for signature verification.
         jwks = response.json()
         settings['auth0.public.key'] = jwk_to_pem(jwks['keys'][0])
