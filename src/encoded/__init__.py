@@ -205,8 +205,6 @@ def main(global_config, **local_config):
     settings['snovault.jsonld.terms_namespace'] = 'https://www.encodeproject.org/terms/'
     settings['snovault.jsonld.terms_prefix'] = 'encode'
     # set auth0 keys
-    PRINT(f'auth0_domain in settings: {settings.get("auth0.domain")}')
-    PRINT(f'auth0_domain in env: {os.environ.get("Auth0Domain")}')
     settings['auth0.domain'] = settings.get('auth0.domain', os.environ.get('Auth0Domain', DEFAULT_AUTH0_DOMAIN))
     settings['auth0.client'] = settings.get('auth0.client', os.environ.get('Auth0Client'))
     settings['auth0.secret'] = settings.get('auth0.secret', os.environ.get('Auth0Secret'))
