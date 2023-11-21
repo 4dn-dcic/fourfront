@@ -11,7 +11,8 @@ import { LoginNavItem } from './LoginNavItem';
 import { BigDropdownNavItem, BigDropdownIntroductionWrapper } from './BigDropdown';
 
 
-const auth0Options = {
+/** Specific to 4DN */
+export const auth0Options = {
     auth: {
         sso: false,
         redirect: false,

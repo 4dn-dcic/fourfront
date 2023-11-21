@@ -209,35 +209,41 @@ def main(global_config, **local_config):
     settings['auth0.client'] = settings.get('auth0.client', os.environ.get('Auth0Client'))
     settings['auth0.secret'] = settings.get('auth0.secret', os.environ.get('Auth0Secret'))
     
-    scope = 'openid email'
-    allowed_conn = ['github', 'google-oauth2']
-    redirect = False
-    responseType = 'token'
-    if 'nih.gov' in settings['auth0.domain']:
-        # RAS
-        scope = 'openid profile email ga4gh_passport_v1'
-        allowed_conn = ['google-oauth2']
-        redirect = True
-        responseType = 'code'
-         # get public key from jwks uri
-        auth0Domain = settings['auth0.domain']
-        response = requests.get(url=f'https://{auth0Domain}/openid/connect/jwks.json')
-        # gives the set of jwks keys.the keys has to be passed as it is to jwt.decode() for signature verification.
-        jwks = response.json()
-        settings['auth0.public.key'] = jwk_to_pem(jwks['keys'][0])
-
-    settings['auth0.options'] = {
-        'auth': {
-            'sso': False,
-            'redirect': redirect,
-            'responseType': responseType,
-            'params': {
-                'scope': scope,
-                'prompt': 'select_account'
+    #options
+    if 'auth0' in settings['auth0.domain']: # Auth0     
+        settings['auth0.options'] = {
+            'auth': {
+                'sso': False,
+                'redirect': False,
+                'responseType': 'token',
+                'params': {
+                    'scope': 'openid email',
+                    'prompt': 'select_account'
+                }
+            },
+            'allowedConnections': ['github', 'google-oauth2'] # TODO: make at least this part configurable
+        }
+    elif 'nih.gov' in settings['auth0.domain']: # RAS    
+        # we are still keeping the Auth0 structure for compatibility (SPC)
+        settings['auth0.options'] = {
+            'auth': {
+                'responseType': 'code',
+                'params': {
+                    'scope': 'openid profile email ga4gh_passport_v1',
+                    'prompt': 'login consent'
+                }
             }
-        },
-        'allowedConnections': allowed_conn # TODO: make at least this part configurable
-    }
+        }
+        auth0Domain = settings['auth0.domain']
+         # get public key from jwks uri
+        response = requests.get(url=f'https://{auth0Domain}/openid/connect/jwks.json')
+        jwks = response.json()
+        # gives the set of jwks keys.the keys has to be passed as it is to jwt.decode() for signature verification.
+        settings['auth0.public.key'] = jwk_to_pem(jwks['keys'][0])
+    else:
+        # Unknown
+        settings['auth0.options'] = {}
+
     # ga4 api secret
     if 'IDENTITY' in os.environ:
         identity = assume_identity()
