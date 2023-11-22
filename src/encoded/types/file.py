@@ -54,8 +54,6 @@ from urllib.parse import (
     parse_qs,
     urlparse,
 )
-from uuid import uuid4
-# from ..authentication import session_properties
 from ..search import make_search_subreq
 from ..util import check_user_is_logged_in
 from .base import (
@@ -1552,7 +1550,6 @@ def download(context, request):
 
     # download is resricted for anonymous users unless it is
     # for vitessce range requests
-    import pdb;pdb.set_trace()
     if not is_range_request_for_vitessce(context, request):
         check_user_is_logged_in(request)
 

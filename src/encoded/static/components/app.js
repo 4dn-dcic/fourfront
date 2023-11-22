@@ -1294,9 +1294,9 @@ class ContentRenderer extends React.PureComponent {
         } else if (status) {                // error catching
             content = <ErrorPage currRoute={routeLeaf} status={status}/>;
         } else if (context) {               // What should occur (success)
-            console.log('context:', context);
+
             var ContentView = (contentViews || globalContentViews).lookup(context, currentAction);
-            console.log('content view', ContentView);
+
             if (!ContentView){ // Handle the case where context is not loaded correctly
                 content = <ErrorPage status={null}/>;
             } else if (currentAction && _.contains(['edit', 'add', 'create'], currentAction)) { // Handle content edit + create action permissions
