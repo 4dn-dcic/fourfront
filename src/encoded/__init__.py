@@ -153,7 +153,35 @@ def init_code_guru(*, group_name, region=ECSUtils.REGION):
 
 
 def jwk_to_pem(jwk):
-    """ Converts JSON Web Key to PEM format """
+    """Converts JSON Web Key (JWK) to PEM format.
+
+    A JSON Web Key (JWK) contains various fields depending on the key type ('kty').
+    For an RSA key ('kty': 'RSA'), it must include:
+        - 'n': Base64url encoding of the RSA modulus (often called 'n' in mathematical terms).
+        - 'e': Base64url encoding of the RSA public exponent (often called 'e' in mathematical terms).
+
+    Args:
+        jwk (dict): JSON Web Key in dictionary format.
+
+    Returns:
+        bytes: PEM encoded key.
+
+    Raises:
+        ValueError: If the 'kty' field is missing or if the key type is unsupported.
+        ValueError: If the 'n' or 'e' fields are missing in the JWK for an RSA key.
+    """
+
+    # Example usage:
+    # jwk = {
+    #     "kty": "RSA",
+    #     "n": "base64_encoded_value_of_n",
+    #     "e": "base64_encoded_value_of_e"
+    # }
+    # pem_key = jwk_to_pem(jwk)
+    # print(pem_key.decode())
+
+    #TODO Move it into snovault for possible RAS integration of CGAP or SMaHT 
+
     if 'kty' not in jwk:
         raise ValueError("JWK must have a 'kty' field")
     kty = jwk['kty']
