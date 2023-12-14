@@ -13,7 +13,7 @@ import { ItemDetailList } from '@hms-dbmi-bgm/shared-portal-components/es/compon
  * Component that essentially handles the "callback" interaction previously done by
  * the UI. The interaction in the Redis state now proceeds as follows:
  *      1. The UI renders the Auth0Lock component in 'code' mode
- *      2. The user logs in via the Auth0Lock and transmits the code to the back-end 
+ *      2. The user logs in via the Auth0Lock and transmits the code to the back-end
  *         via GET /callback?code=abcdefg...
  *      3. The back-end calls into Auth0 to get JWT and returns a session token to
  *         the browser, returning a success response
@@ -25,7 +25,7 @@ export default class LoginSuccessView extends React.PureComponent {
     static propTypes = {
         'readyToRedirect': PropTypes.bool
     };
-    
+
     constructor(props) {
         super(props);
         this.state = {
@@ -35,7 +35,7 @@ export default class LoginSuccessView extends React.PureComponent {
 
     /**
      * This component is meant to be loaded upon navigating from backend on authentication to the /callback
-     * Once that has happened, we should have stored a jwtToken as a cookie that 
+     * Once that has happened, we should have stored a jwtToken as a cookie that
      * we can use to make authenticated requests ie: the below calls should return
      * clean responses if the user successfully logged in and error out appropriately if
      * they did not.
@@ -48,62 +48,62 @@ export default class LoginSuccessView extends React.PureComponent {
                 setTimeout(function(){ reject({ 'description' : 'timed out', 'type' : 'timed-out' }); }, 30000); /* 30 seconds */
             })
         ])
-        .then((response) => {
-            // this may not be needed?
-            console.log('got response from session properties', response);
-            if (response.code || response.status) throw response;
-            return response;
-        })
-        .then((userInfoResponse) => {
-            const {
-                details: {
-                    email: userEmail = null
-                } = {},
-                user_actions = []
-            } = userInfoResponse;
+            .then((response) => {
+                // this may not be needed?
+                console.log('got response from session properties', response);
+                if (response.code || response.status) throw response;
+                return response;
+            })
+            .then((userInfoResponse) => {
+                const {
+                    details: {
+                        email: userEmail = null
+                    } = {},
+                    user_actions = []
+                } = userInfoResponse;
 
-            if (!userEmail) {
-                throw new Error("Did not receive user details from /session-properties, login failed.");
-            }
+                if (!userEmail) {
+                    throw new Error("Did not receive user details from /session-properties, login failed.");
+                }
 
-            // Fetch user profile and (outdated/to-revisit-later) use their primary lab as the eventLabel.
-            const profileURL = (_.findWhere(user_actions, { 'id' : 'profile' }) || {}).href;
-            if (profileURL){
-                this.setState({ "isLoading" : false });
+                // Fetch user profile and (outdated/to-revisit-later) use their primary lab as the eventLabel.
+                const profileURL = (_.findWhere(user_actions, { 'id': 'profile' }) || {}).href;
+                if (profileURL) {
+                    this.setState({ "isLoading": false });
 
-                JWT.saveUserInfoLocalStorage(userInfoResponse);
-                updateAppSessionState(); // <- this function (in App.js) is now expected to call `Alerts.deQueue(Alerts.LoggedOut);`
-                console.info('Login completed');
+                    JWT.saveUserInfoLocalStorage(userInfoResponse);
+                    updateAppSessionState(); // <- this function (in App.js) is now expected to call `Alerts.deQueue(Alerts.LoggedOut);`
+                    console.info('Login completed');
 
-                // Register an analytics event for UI login.
-                // This is used to segment public vs internal audience in Analytics dashboards.
-                load(profileURL, (profile)=>{
-                    if (typeof successCallback === 'function'){
-                        successCallback(profile);
-                    }
-                    if (typeof onLogin === 'function'){
-                        onLogin(profile);
-                    }
+                    // Register an analytics event for UI login.
+                    // This is used to segment public vs internal audience in Analytics dashboards.
+                    load(profileURL, (profile) => {
+                        if (typeof successCallback === 'function') {
+                            successCallback(profile);
+                        }
+                        if (typeof onLogin === 'function') {
+                            onLogin(profile);
+                        }
 
-                    const { uuid: userId, groups = null } = profile;
+                        const { uuid: userId, groups = null } = profile;
 
-                    setUserID(userId);
+                        setUserID(userId);
 
-                    trackEvent('Authentication', 'UILogin', {
-                        eventLabel : "Authenticated ClientSide",
-                        name: userId,
-                        userId,
-                        userGroups: groups && (JSON.stringify(groups.sort()))
+                        trackEvent('Authentication', 'UILogin', {
+                            eventLabel: "Authenticated ClientSide",
+                            name: userId,
+                            userId,
+                            userGroups: groups && (JSON.stringify(groups.sort()))
+                        });
+
+                    }, 'GET', () => {
+                        throw new Error('Request to profile URL failed.');
                     });
-
-                }, 'GET', ()=>{
-                    throw new Error('Request to profile URL failed.');
-                });
-            } else {
-                console.log('in failed user profile fetch');
-                throw new Error('No profile URL found in user_actions.');
-            }
-            }).catch((error)=>{
+                } else {
+                    console.log('in failed user profile fetch');
+                    throw new Error('No profile URL found in user_actions.');
+                }
+            }).catch((error) => {
                 // Handle Errors
                 console.log(error);
 
@@ -119,16 +119,23 @@ export default class LoginSuccessView extends React.PureComponent {
         });
     }
 
+    getReturnUrl() {
+        const url = document.cookie.split("; ").find((row) => row.startsWith("returnUrl="))?.split("=")[1];
+        return (url && decodeURIComponent(url)) || '/';
+    }
+
     render() {
         var { context, schemas } = this.props;
         if (this.state.readyToRedirect) {
-            navigate("/", {}, (resp)=>{
+            navigate(this.getReturnUrl(), {}, (resp)=>{
                 // Show alert on new Item page
                 Alerts.queue({
                     'title'     : 'Success',
                     'message'   : 'You are now logged in.',
                     'style'     : 'success'
                 });
+                //remove return url cookie
+                document.cookie = `returnUrl=; expires=${new Date(0).toUTCString()}; path=/;`;
             });
         }
         // This needs styling, maybe a spinning loader? Will look into later
@@ -138,5 +145,5 @@ export default class LoginSuccessView extends React.PureComponent {
                 <ItemDetailList context={context} schemas={schemas} />
             </div>
         );
-      }
+    }
 }

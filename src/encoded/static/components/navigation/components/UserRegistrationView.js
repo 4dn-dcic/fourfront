@@ -2,7 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { UserRegistrationModal } from './UserRegistrationModal';
+import { onLoginNavItemClick } from './LoginNavItem';
 import { JWT, console, navigate } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { performLogout } from '@hms-dbmi-bgm/shared-portal-components/es/components/navigation/components/LoginController';
 import { event as trackEvent, setUserID } from '@hms-dbmi-bgm/shared-portal-components/es/components/util/analytics';
 import { load, fetch } from '@hms-dbmi-bgm/shared-portal-components/es/components/util/ajax';
 
@@ -20,7 +22,9 @@ export default class UserRegistrationView extends React.PureComponent {
     constructor(props) {
         super(props);
         this.onRegistrationComplete = this.onRegistrationComplete.bind(this);
+        this.onRegistrationCancel = this.onRegistrationCancel.bind(this);
         this.onLogin = this.onLogin.bind(this);
+        this.showLock = this.showLock.bind(this);
         this.state = {
             id: 'loginbtn',
             unverifiedUserEmail: props.context['@graph'][0],
@@ -115,7 +119,31 @@ export default class UserRegistrationView extends React.PureComponent {
         console.log("Logged in", profile);
     }
 
+    onRegistrationCancel() {
+        // even user is not registered and logged in yet, jwtToken (having redis key) has already been created.
+        // performLogout clears any user-specific data stored during the oauth process.
+        performLogout().then(()=>{
+
+            this.setState({ "isLoading" : false });
+
+            // Remove from analytics session
+            setUserID(null);
+
+            // Attempt to preserve hash, if any, but don't scroll to it.
+            const windowHash = '/';//(window && window.location && window.location.hash) || '';
+            console.info("Logged out; re-loading context");
+            navigate(windowHash, { "inPlace" : true, "dontScrollToTop" : !!(windowHash) });
+        });
+    }
+
+    showLock(){
+        onLoginNavItemClick();
+    }
+
     render() {
-        return <UserRegistrationModal {... this.state} onRegistrationComplete={this.onRegistrationComplete} onLogin={this.onLogin} />;
+        return (
+            <UserRegistrationModal {... this.state} onRegistrationComplete={this.onRegistrationComplete}
+                onRegistrationCancel={this.onRegistrationCancel} onLogin={this.onLogin} showLock={this.showLock} />
+        );
     }
 }
