@@ -1258,13 +1258,13 @@ files = [
 
 [[package]]
 name = "future"
-version = "0.18.3"
+version = "0.18.2"
 description = "Clean single-source support for Python 3 and 2"
 category = "main"
 optional = false
 python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
 files = [
-    {file = "future-0.18.3.tar.gz", hash = "sha256:34a17436ed1e96697a86f9de3d15a3b0be01d8bc8de9c1dffd59fb8234ed5307"},
+    {file = "future-0.18.2.tar.gz", hash = "sha256:b1bead90b70cf6ec3f0710ae53a525360fa360d306a86583adc6bf83a4db537d"},
 ]
 
 [[package]]
@@ -4044,4 +4044,4 @@ test = ["zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8.1,<3.12"
-content-hash = "a882c3fca3890aff477a9cca25f77161658964d244f39ed9c80dc31c5a22877f"
+content-hash = "6c408c2be15559a786d88f11cb24087d8efec4bc3d1176d5121c8988038438c8"
