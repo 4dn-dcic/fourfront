@@ -54,7 +54,6 @@ jobs:
           sudo apt-get install postgresql-14 postgresql-client-14
           echo "/usr/lib/postgresql/14/bin" >> $GITHUB_PATH
           sudo ln -s /usr/lib/postgresql/14/bin/initdb /usr/local/bin/initdb
-          sudo npm install npm@latest -g
       - name: Install Deps
         if: ${{ matrix.test_type == 'NPM' || matrix.test_type == 'UNIT' }}
         run: |
