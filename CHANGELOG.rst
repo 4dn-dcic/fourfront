@@ -6,6 +6,12 @@ fourfront
 Change Log
 ----------
 
+7.1.2
+=====
+
+* Repair GA build
+
+
 7.1.1
 =====
 
