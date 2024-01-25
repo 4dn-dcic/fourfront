@@ -6,6 +6,12 @@ fourfront
 Change Log
 ----------
 
+7.1.3
+=====
+
+* Upgrade critical npm packages
+
+
 7.1.2
 =====
 
