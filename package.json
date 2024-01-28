@@ -121,7 +121,7 @@
     "jose": "^4.14.4",
     "markdown-to-jsx": "^7.1.6",
     "memoize-one": "^5.1.1",
-    "micro-meta-app-react": "git+https:github.com/WU-BIMAC/MicroMetaApp-React#1.7.25-b1",
+    "micro-meta-app-react": "git+https://github.com/WU-BIMAC/MicroMetaApp-React#1.7.25-b1",
     "nuka-carousel": "^4.7.0",
     "pixi.js": "^5.3.0",
     "prop-types": "^15.8.1",

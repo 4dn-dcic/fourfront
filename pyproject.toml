@@ -1,7 +1,7 @@
 [tool.poetry]
 # Note: Various modules refer to this system as "encoded", not "fourfront".
 name = "encoded"
-version = "7.1.0"
+version = "7.1.2"
 description = "4DN-DCIC Fourfront"
 authors = ["4DN-DCIC Team <support@4dnucleome.org>"]
 license = "MIT"
@@ -54,7 +54,6 @@ dcicutils = "^8.0.0"
 elasticsearch = "7.13.4"
 elasticsearch-dsl = "^7.0.0"  # TODO: port code from cgap-portal to get rid of uses
 execnet = "1.4.1"
-future = ">=0.18.2,<1"
 humanfriendly = "^1.44.9"
 hupper = "1.5"
 idna = "^2.10"
@@ -119,6 +118,7 @@ xlwt = "1.2.0"
 codeguru-profiler-agent = "^1.2.4"
 supervisor = "^4.2.4"
 wheel = "0.40.0"
+future = "0.18.2"
 
 
 [tool.poetry.dev-dependencies]
