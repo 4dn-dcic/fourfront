@@ -6,6 +6,12 @@ fourfront
 Change Log
 ----------
 
+7.1.4
+=====
+
+* Update npm packages having critical security flaw reported by dependabot
+
+
 7.1.3
 =====
 
