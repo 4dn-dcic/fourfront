@@ -6,6 +6,13 @@ fourfront
 Change Log
 ----------
 
+7.1.3
+=====
+
+* Inform Auth0 users about RAS transition
+* Bug fix - display excluded data type facet terms
+
+
 7.1.2
 =====
 
