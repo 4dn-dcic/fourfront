@@ -6,6 +6,12 @@ fourfront
 Change Log
 ----------
 
+7.1.5
+=====
+
+* Update Individual Primate schema to link two new organisms (Rhesus monkey and Marmoset)
+
+
 7.1.4
 =====
 
