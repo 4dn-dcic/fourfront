@@ -6,6 +6,12 @@ fourfront
 Change Log
 ----------
 
+7.1.5
+=====
+
+* Update user insert for rahi
+
+
 7.1.4
 =====
 
