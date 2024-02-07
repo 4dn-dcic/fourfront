@@ -168,7 +168,7 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
 
         it('Search files having HiGlass display as static content, then check the HiGlass icon is visible in associated ExpSet file tables', function () {
 
-            cy.visit('/search/?type=File&static_content.location=tab:higlass&source_experiments%21=No+value').end()
+            cy.visit('/search/?type=File&static_content.location=tab:higlass&source_experiments%21=No+value&track_and_facet_info.experiment_bucket=processed+file').end()
                 .login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).end();
 
             cy.searchPageTotalResultCount().then((totalCountExpected) => {
@@ -187,18 +187,22 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
                             accession = $accesionText.text();
                         });
 
-                        cy.get('.files-tables-container .processed-files-table-section').click({ force: 'true' }).end();
-                        cy.get('.name-title.d-inline-block .title-of-file.text-monospace').then(function ($higlassAccesions) {
-                            expect(Cypress._.find($higlassAccesions, function (item) {
-                                return item.outerText.trim() === accession.trim();
-                            })).not.to.equal(undefined);
-                        });
+                        cy.get('.embedded-search-view-outer-container .result-table-row .title-block a').scrollIntoView().click({ force: 'true' }).then(function($linkElem){
+                            const [linkHref] = $linkElem.attr('href').split('#');
+                            cy.location('pathname').should('equal', linkHref);
 
-                        cy.get('.btn.btn-xs.btn-primary.in-stacked-table-button[data-tip="Visualize with HiGlass"]').then(function ($higlassIcon) {
-                            expect($higlassIcon.length).to.be.greaterThan(0);
-                        });
+                            cy.get('.name-title.d-inline-block .title-of-file.text-monospace').then(function ($higlassAccesions) {
+                                expect(Cypress._.find($higlassAccesions, function (item) {
+                                    return item.outerText.trim() === accession.trim();
+                                })).not.to.equal(undefined);
+                            });
 
-                        cy.go('back').end();
+                            cy.get('.btn.btn-xs.btn-primary.in-stacked-table-button[data-tip="Visualize with HiGlass"]').then(function ($higlassIcon) {
+                                expect($higlassIcon.length).to.be.greaterThan(0);
+                            });
+
+                            cy.go(-2).end();
+                        });
                     });
                 });
             });
