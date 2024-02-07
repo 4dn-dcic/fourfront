@@ -6,6 +6,12 @@ fourfront
 Change Log
 ----------
 
+7.1.5
+=====
+
+* Cypress test 10a reimplemented to fix occasional failure in “files having HiGlass display as static content" step
+
+
 7.1.4
 =====
 
