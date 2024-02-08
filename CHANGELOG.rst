@@ -6,6 +6,12 @@ fourfront
 Change Log
 ----------
 
+7.1.6
+=====
+
+* New ignored_enum value (cell data) for file_processed.json schema
+
+
 7.1.5
 =====
 
