@@ -139,7 +139,8 @@
             "exclude_from" : ["submit4dn"],
             "permission": "import_items",
             "suggested_enum": [
-                "hamster"
+                "hamster",
+                "opposum"
             ],
             "lookup": 1000
         }

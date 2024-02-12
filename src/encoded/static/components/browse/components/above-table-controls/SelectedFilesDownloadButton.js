@@ -332,6 +332,7 @@ const SelectedFilesDownloadStartButton = React.memo(function SelectedFilesDownlo
                     item_list_name: analytics.hrefToListName(window && window.location.href)
                 };
                 const products = analytics.transformItemsToProducts(fileList, extData);
+                const productsLength = Array.isArray(products) ? products.length : 0;
                 analytics.event(
                     "add_payment_info",
                     "SelectedFilesDownloadModal",

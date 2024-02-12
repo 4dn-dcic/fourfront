@@ -6,12 +6,48 @@ fourfront
 Change Log
 ----------
 
+7.1.6
+=====
+
+* New ignored_enum value (cell data) for file_processed.json schema
+
+
+7.1.5
+=====
+
+* Cypress test 10a reimplemented to fix occasional failure in “files having HiGlass display as static content" step
+
+
+7.1.4
+=====
+
+* Update npm packages having critical security flaw reported by dependabot
+
+
+7.1.3
+=====
+
+* Inform Auth0 users about RAS transition
+* Bug fix - display excluded data type facet terms
+
+
+7.1.2
+=====
+
+* Repair GA build
+
+
+7.1.1
+=====
+
+* Add opossum to suggested enum to biosource.override_organism to clear foursight check
+
 7.1.0
 =====
 
 `PR1860: Adding 4C-seq properties to ExperimentCaptureC<https://github.com/4dn-dcic/fourfront/pull/1860>`_
 
-* Add fiels/properties to experiment_capture_c schema to support 4C-seq experiments
+* Add fields/properties to experiment_capture_c schema to support 4C-seq experiments
 * Added an insert using these fields to data/inserts
 
 

@@ -116,7 +116,8 @@
                 "reads-combined",
                 "readme",
                 "spt results, submitter format",
-                "filtered feature-barcode matrices"
+                "filtered feature-barcode matrices",
+                "cell data"
             ]
         },
         "file_classification": {
