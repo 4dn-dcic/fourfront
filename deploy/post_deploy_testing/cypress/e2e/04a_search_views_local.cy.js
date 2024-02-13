@@ -370,7 +370,7 @@ describe('Deployment/CI Search View Tests', function () {
             cy.get("a#search-menu-item").click().end()
                 .get('form.navbar-search-form-container button#search-item-type-selector').click().end()
                 .get('form.navbar-search-form-container div.dropdown-menu a[data-key="ExperimentSetReplicate"]').click().end()
-                .get('input[name="q"]').focus().type('mouse').end()
+                .get('input[name="q"]').focus().type('mouse').should('have.value', 'mouse').end()
                 .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()
                 .get('#slow-load-container').should('not.have.class', 'visible').end()
                 .get('#page-title-container .page-title').should('contain', 'Data Browser').end() // Make sure we got redirected to /browse/. We may or may not have results here depending on if on local and logged out or not.
