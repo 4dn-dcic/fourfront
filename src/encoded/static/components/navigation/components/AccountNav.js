@@ -59,7 +59,7 @@ export const AccountNav = React.memo(function AccountNav(props){
 
         return (
             <Nav className="navbar-acct">
-                <LoginController {...{ updateAppSessionState, auth0Options, auth0PopupText }}>
+                <LoginController {...{ updateAppSessionState, auth0Options, auth0PopupText, href }}>
                     <LoginNavItem {...{ schemas, session, href, windowWidth }} key="login-register" className="user-account-item" />
                 </LoginController>
             </Nav>
