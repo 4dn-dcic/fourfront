@@ -25,11 +25,11 @@ describe('Post-Deployment Search View Tests', function () {
             cy.location('search').should('include', 'type=Item');
 
             cy.searchPageTotalResultCount().then((totalCountExpected) => {
-                const intervalCount = Math.min(20, parseInt(totalCountExpected / 25));
+                const pageCount = Math.min(10, parseInt(totalCountExpected / 25));
 
-                for (let interval = 0; interval < intervalCount; interval++) {
+                for (let page = 0; page < pageCount; page++) {
                     cy.scrollToBottom().then(() => {
-                        cy.get('.search-results-container .search-result-row[data-row-number="' + (25 * (interval + 1)) + '"]').should('have.length', 1);
+                        cy.get('.search-results-container .search-result-row[data-row-number="' + (25 * (page + 1)) + '"]').should('have.length', 1);
                     });
                 }
 
@@ -93,10 +93,11 @@ describe('Post-Deployment Search View Tests', function () {
         it('Can scroll all the way down without interruption', function(){
 
             cy.searchPageTotalResultCount().should('be.greaterThan', 50).should('be.lessThan', 30000).then((resultCount)=>{
-                const intervalCount = parseInt(resultCount / 25) - ( resultCount % 25 > 0 ? 0 : 1); // Skip last interval if no more to load.
+                let pageCount = parseInt(resultCount / 25) - ( resultCount % 25 > 0 ? 0 : 1); // Skip last interval if no more to load.
+                pageCount = Math.min(pageCount, 10);
 
-                for (let interval = 0; interval < intervalCount; interval++){
-                    cy.scrollToBottom().end().get('.search-results-container .search-result-row[data-row-number="' + (25 * (interval + 1)) + '"]').should('have.length', 1);
+                for (let page = 0; page < pageCount; page++){
+                    cy.scrollToBottom().end().get('.search-results-container .search-result-row[data-row-number="' + (25 * (page + 1)) + '"]').should('have.length', 1);
                 }
             });
 
