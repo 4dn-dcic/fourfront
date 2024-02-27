@@ -55,7 +55,7 @@ describe('Static Page & Content Tests', function () {
                             });
                             if (count < $listItems.length){
                                 cy.get(helpNavBarItemSelectorStr).click().should('have.class', 'dropdown-open-for').then(()=>{
-                                    cy.get('div.big-dropdown-menu a#' + escapeElementWithNumericId(allLinkElementIDs[count])).scrollIntoView().click().then(($nextListItem)=>{
+                                    cy.get('div.big-dropdown-menu a#' + escapeElementWithNumericId(allLinkElementIDs[count])).scrollIntoView().should('be.visible').click().then(($nextListItem)=>{
                                         const linkHref = $nextListItem.attr('href');
                                         cy.location('pathname').should('equal', linkHref);
                                         testVisit();
