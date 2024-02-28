@@ -1,13 +1,24 @@
 from dcicutils.misc_utils import ignored
+from pyramid.view import HTTPTemporaryRedirect
 from pyramid.httpexceptions import HTTPUnauthorized
 from snovault.project.authentication import SnovaultProjectAuthentication
+
 
 class FourfrontProjectAuthentication(SnovaultProjectAuthentication):
 
     def login(self, context, request, *, samesite):
-        ignored(samesite)
-        samesite = "lax"
-        return super().login(context, request, samesite=samesite)
+        domain = request.registry.settings['auth0.domain']
+        if 'auth0' in domain:
+            ignored(samesite)
+            samesite = "lax"
+            return super().login(context, request, samesite=samesite)
+        else:  # do RAS handshake
+            ras_client_id = request.registry.settings['auth0.client']
+            redir_url = f"{domain}" \
+                        f"?client_id={ras_client_id}&prompt=login+consent&" \
+                        f"redirect_uri={request.scheme}://{request.host}/callback&response_type=code" \
+                        f"&scope=openid+profile+email+ga4gh_passport_v1"
+            raise HTTPTemporaryRedirect(location=redir_url)
 
     def namespaced_authentication_policy_authenticated_userid(self, namespaced_authentication_policy, request, set_user_info_property):
         set_user_info_property = True

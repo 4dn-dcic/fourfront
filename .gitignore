@@ -1,6 +1,7 @@
 .coverage
 coverage.xml
 beanstalk.cfg
+dump.rdb
 /coverage
 /.installed.cfg
 /.mr.developer.cfg
