@@ -261,5 +261,15 @@
         "uuid": "b330d859-4838-4dcc-8ea2-cf2974080ec3",
         "viewing_groups": ["4DN"],
         "groups": ["admin"]
+    },
+    {
+        "email": "onurcank.karatay@gmail.com",
+        "first_name": "Onurcan",
+        "job_title": "Software Developer",
+        "lab": "4dn-dcic-lab",
+        "last_name": "Karatay",
+        "uuid": "e593761f-2ea8-45ce-b212-db0739e0b05d",
+        "viewing_groups": ["4DN"],
+        "groups": ["admin"]
     }
 ]
