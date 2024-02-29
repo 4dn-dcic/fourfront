@@ -6,6 +6,14 @@ fourfront
 Change Log
 ----------
 
+7.1.7
+=====
+
+`Sentry updates <https://github.com/4dn-dcic/fourfront/pull/1875>`_
+
+* Cancels the unnecessary logs that have been depleting the Sentry monthly quota
+
+
 7.1.6
 =====
 
