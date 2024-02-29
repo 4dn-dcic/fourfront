@@ -216,8 +216,8 @@ export function renderFileTitleColumn(file, field, detailIndex, fileEntryBlockPr
         var windowHrefParts = window && window.location;
         if (windowHrefParts && windowHrefParts.protocol && windowHrefParts.hostname){
             var formedURL = (
-                (hrefParts.protocol || '') +
-                (hrefParts.hostname ? '//' +  hrefParts.hostname + (hrefParts.port ? ':' + hrefParts.port : '') : '') +
+                (windowHrefParts.protocol || '') +
+                (windowHrefParts.hostname ? '//' +  windowHrefParts.hostname + (windowHrefParts.port ? ':' + windowHrefParts.port : '') : '') +
                 fileAtId
             );
             evt.dataTransfer.setData('text/plain', formedURL);

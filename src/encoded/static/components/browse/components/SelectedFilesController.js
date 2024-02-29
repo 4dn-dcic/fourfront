@@ -170,7 +170,7 @@ export class SelectedFilesController extends React.PureComponent {
 
             function add(id, fileItemCurr = null){
                 if (typeof newSelectedFiles[id] !== 'undefined'){
-                    logger.error("File already selected!", id);
+                    console.error("File already selected!", id);
                 } else {
                     newSelectedFiles[id] = fileItemCurr || true;
                     if (fileItemCurr){

@@ -6,10 +6,24 @@ fourfront
 Change Log
 ----------
 
+7.1.8
+=====
+
+
+* Update Individual Primate schema to link two new organisms (Rhesus monkey and Marmoset)
+* Added the the new organisms in master_inserts/organism.json and inserts/individual_primate.json
+
+
+
 7.1.7
 =====
 
-* Update Individual Primate schema to link two new organisms (Rhesus monkey and Marmoset) and add them in master_inserts/organism.json
+
+`Sentry updates + new user <https://github.com/4dn-dcic/fourfront/pull/1875>`_
+
+* Cancels the unnecessary logs that have been depleting the Sentry monthly quota
+* Adds Onurcan Karatay into master-inserts' users
+
 
 
 7.1.6
