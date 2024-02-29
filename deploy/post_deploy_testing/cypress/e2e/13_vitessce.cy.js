@@ -20,7 +20,7 @@ describe('Vitessce display page', function () {
         it('Preview a Vitessce-compatible item, check viewer is loaded and displays the image correctly', function () {
             cy.login4DN({ 'email': '4dndcic@gmail.com', 'useEnvToken': true }).end();
             cy.window().then(function (w) {
-                cy.location('pathname').should('not.equal', "/")
+                cy.location('pathname').should('match', /\/files-microscopy\//)
                     .then(function (pathName) {
                         pathName = Cypress._.filter(pathName.split('/'));
                         const fileAccession = pathName[pathName.length - 1];
