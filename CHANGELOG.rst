@@ -9,9 +9,10 @@ Change Log
 7.1.7
 =====
 
-`Sentry updates <https://github.com/4dn-dcic/fourfront/pull/1875>`_
+`Sentry updates + new user <https://github.com/4dn-dcic/fourfront/pull/1875>`_
 
 * Cancels the unnecessary logs that have been depleting the Sentry monthly quota
+* Adds Onurcan Karatay into master-inserts' users
 
 
 7.1.6
