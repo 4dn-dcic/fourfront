@@ -29,7 +29,7 @@
         "status": "in review by lab",
         "submitted_by": "wrangler@wrangler.com",
         "url": "https://www.example.com",
-        "uuid": "af236f6e-1eef-41f6-92b3-68374e91edf7"
+        "uuid": "1324df2f-d108-4ba9-93d0-f19ad5e955d0"
     },
     {
         "age": 5,
@@ -45,6 +45,6 @@
         "status": "in review by lab",
         "submitted_by": "wrangler@wrangler.com",
         "url": "https://www.example.com",
-        "uuid": "da7f2a4b-0d51-4693-9292-eba314418201"
+        "uuid": "dc2c3262-64cb-4773-b14f-72de7d33d108"
     }    
 ]
