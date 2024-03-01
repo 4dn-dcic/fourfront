@@ -9,21 +9,18 @@ Change Log
 7.1.8
 =====
 
-
 * Update Individual Primate schema to link two new organisms (Rhesus monkey and Marmoset)
 * Added the the new organisms in master_inserts/organism.json and inserts/individual_primate.json
-
-
+* fixed a typo in biosource.override_organism enum and added a new value to ignored enum for treatment_agent.concentration_units (ajs)
+* also small update to generate_ontology that I had made locally but now pushing (ajs 2024-03-01)
 
 7.1.7
 =====
-
 
 `Sentry updates + new user <https://github.com/4dn-dcic/fourfront/pull/1875>`_
 
 * Cancels the unnecessary logs that have been depleting the Sentry monthly quota
 * Adds Onurcan Karatay into master-inserts' users
-
 
 
 7.1.6
