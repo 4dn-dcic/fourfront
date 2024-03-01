@@ -81,7 +81,7 @@ describe('Browse Views - Basic Tests', function () {
 
             cy.visit('/browse').get('#slow-load-container').should('not.have.class', 'visible').end()
                 .get(".facets-header .facets-title").should('have.text', 'Included Properties').end()
-                .get('.facet.closed[data-field="experiments_in_set.experiment_type.display_title"] > h5').scrollToCenterElement().click({ force: true }).end()
+                .get('.facet.closed[data-field="experiments_in_set.experiment_type.display_title"] > h5').scrollIntoView().should('be.visible').click({ force: true }).end()
                 .get('.facet.open[data-field="experiments_in_set.experiment_type.display_title"] .facet-list-element[data-is-grouping="true"] a').first().within(($term) => {
                     const subTerms = [], subTermsSelected = [];
                     let groupingTermKey;
