@@ -98,7 +98,8 @@
                 "lux"
             ],
             "ignored_enum": [
-                "μl"
+                "μl",
+                "mg/kg body weight"
             ]
         },
         "duration": {
