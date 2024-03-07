@@ -45,5 +45,18 @@
         "taxon_id": "10036",
         "scientific_name": "Mesocricetus auratus",
         "uuid": "e15deec1-4c1f-41e4-bdd2-71c8c159bf9f"
-}
+    },
+    {
+        "name": "rhesus monkey",
+        "taxon_id": "9544",
+        "scientific_name": "Macaca mulatta",
+        "uuid": "91810543-bc7c-4486-84aa-3f38bc91f290"
+    },
+    {
+        "name": "white-tufted-ear marmoset",
+        "taxon_id": "9483",
+        "scientific_name": "Callithrix jacchus",
+        "uuid": "9fc2a9e4-002f-4c87-b446-bc3c66286378"
+    }
+
 ]

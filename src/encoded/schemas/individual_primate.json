@@ -47,7 +47,7 @@
         },
         "organism": {
             "lookup": 1,
-            "linkEnum": ["feb8c945-762f-497f-821b-1c8ff2235ae2"]
+            "linkEnum": ["feb8c945-762f-497f-821b-1c8ff2235ae2", "91810543-bc7c-4486-84aa-3f38bc91f290", "9fc2a9e4-002f-4c87-b446-bc3c66286378"]
         },
         "dbxrefs": {
             "@type": "@id",
