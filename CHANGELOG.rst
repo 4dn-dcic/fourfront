@@ -6,13 +6,22 @@ fourfront
 Change Log
 ----------
 
-7.1.8
+7.1.9
 =====
 
 `Facets list updates <https://github.com/4dn-dcic/fourfront/pull/1876>`_
 
 * Adds prop (hideHeaderToggle) to make facets list header's included/excluded toggle optional 
 * Adds support for facet item's hide_from_view property
+
+
+7.1.8
+=====
+
+* Update Individual Primate schema to link two new organisms (Rhesus monkey and Marmoset)
+* Added the the new organisms in master_inserts/organism.json and inserts/individual_primate.json
+* fixed a typo in biosource.override_organism enum and added a new value to ignored enum for treatment_agent.concentration_units (ajs)
+* also small update to generate_ontology that I had made locally but now pushing (ajs 2024-03-01)
 
 
 7.1.7
