@@ -81,3 +81,35 @@ def test_is_uri():
 
     assert is_uri("http://abc.def/foo#alpha") is True  # TODO: Reconsider tags
     assert is_uri("http://abc.def/foo#alpha:beta") is True  # TODO: Reconsider tags
+
+
+@pytest.mark.parametrize('obj, expected', [
+    ({
+        'accession': 'not valid'
+    }, False),
+    ({
+        'accession': 'SNOnotvalid'
+    }, False),
+    ({
+        'accession': 'TSTnotvalid'
+    }, False),
+    ({
+        'accession': 'TSTabcclose'
+    }, False),
+    ({
+         'accession': 'TSTBS439abcd'  # lowercase fails
+     }, False),
+    ({
+         'accession': 'TSTBS4399428'  # real one that matches
+     }, True),
+    ({
+         'accession': 'TSTBS4393BCD'  # real one that matches (can be trailing characters)
+     }, True),
+    ({}, True),  # serverDefault should work
+])
+def test_custom_validator_with_real_type(testapp, obj, expected):
+    """ Tests that we can validate accessions (or other nonstandard format fields) """
+    if not expected:
+        testapp.post_json('/TestingServerDefault', obj, status=422)
+    else:
+        testapp.post_json('/TestingServerDefault', obj, status=201)
