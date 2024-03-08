@@ -6,13 +6,10 @@ fourfront
 Change Log
 ----------
 
-7.1.9
+7.2.0
 =====
 
-`Facets list updates <https://github.com/4dn-dcic/fourfront/pull/1876>`_
-
-* Adds prop (hideHeaderToggle) to make facets list header's included/excluded toggle optional 
-* Adds support for facet item's hide_from_view property
+* Repairs accession validation
 
 
 7.1.8

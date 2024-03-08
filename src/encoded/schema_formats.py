@@ -1,10 +1,10 @@
 import re
 
 from dcicutils.misc_utils import ignored, is_valid_absolute_uri
-from jsonschema import Draft202012Validator
+from snovault.schema_utils import format_checker
+from snovault.server_defaults import ACCESSION_FACTORY
 from pyramid.threadlocal import get_current_request
 from .server_defaults import (
-    ACCESSION_FACTORY,
     ACCESSION_PREFIX,
     ACCESSION_TEST_PREFIX,
     test_accession,
@@ -17,13 +17,13 @@ ACCESSION_CODES = "BS|ES|EX|FI|FS|IN|SR|WF"
 ACCESSION_TEST_CODES = "BS|ES|EX|FI|FS|IN|SR|WF"
 
 accession_re = re.compile(r'^%s(%s)[1-9A-Z]{7}$' % (ACCESSION_PREFIX, ACCESSION_CODES))
-test_accession_re = re.compile(r'^%s(%s)[0-9]{4}([0-9][0-9][0-9]|[A-Z][A-Z][A-Z])$' % (
+test_accession_re = re.compile(r'^%s(%s)[0-9A-Z]{7}$' % (
     ACCESSION_TEST_PREFIX, ACCESSION_TEST_CODES))
 
 uuid_re = re.compile(r'(?i)[{]?(?:[0-9a-f]{4}-?){8}[}]?')
 
 
-@Draft202012Validator.FORMAT_CHECKER.cls_checks("uuid")
+@format_checker.checks("uuid")
 def is_uuid(instance):
     # Python's UUID ignores all dashes, whereas Postgres is more strict
     # http://www.postgresql.org/docs/9.2/static/datatype-uuid.html
@@ -39,7 +39,7 @@ def is_accession(instance):
     )
 
 
-@Draft202012Validator.FORMAT_CHECKER.cls_checks("accession")
+@format_checker.checks("accession")
 def is_accession_for_server(instance):
     # Unfortunately we cannot access the accessionType here
     if accession_re.match(instance):
@@ -51,14 +51,14 @@ def is_accession_for_server(instance):
     return False
 
 
-@Draft202012Validator.FORMAT_CHECKER.cls_checks("gene_name")
+@format_checker.checks("gene_name")
 def is_gene_name(instance):
     """This SHOULD check a webservice at HGNC/MGI for validation, but for now this just returns True always.."""
     ignored(instance)
     return True
 
 
-@Draft202012Validator.FORMAT_CHECKER.cls_checks("target_label")
+@format_checker.checks("target_label")
 def is_target_label(instance):
     if is_gene_name(instance):
         return True
@@ -72,6 +72,6 @@ def is_target_label(instance):
     return True
 
 
-@Draft202012Validator.FORMAT_CHECKER.cls_checks("uri", raises=ValueError)
+@format_checker.checks("uri", raises=ValueError)
 def is_uri(instance):
     return is_valid_absolute_uri(instance)
