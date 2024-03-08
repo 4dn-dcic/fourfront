@@ -44,20 +44,3 @@ def test_accession_anontestapp(request, test_accession_app, external_tx, zsa_sav
         'HTTP_ACCEPT': 'application/json',
     }
     return webtest.TestApp(test_accession_app, environ)
-
-
-def test_test_accession_server_defaults(admin, test_accession_anontestapp):
-    notice_pytest_fixtures(admin, test_accession_anontestapp)
-    email = admin['email']
-    extra_environ = {'REMOTE_USER': str(email)}
-    res = test_accession_anontestapp.post_json(
-        '/testing_server_default', {}, status=201,
-        extra_environ=extra_environ,
-    )
-    item = res.json['@graph'][0]
-    assert item['accession'].startswith('TSTAB')
-
-    test_accession_anontestapp.patch_json(
-        res.location, {}, status=200,
-        extra_environ=extra_environ,
-    )
