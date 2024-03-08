@@ -6,6 +6,12 @@ fourfront
 Change Log
 ----------
 
+7.2.0
+=====
+
+* Repairs accession validation
+
+
 7.1.8
 =====
 

@@ -13,6 +13,7 @@ _ONTOLOGY_PATH = os.path.join(REPOSITORY_ROOT_DIR, 'ontology.json')
 _app_settings = {
     'collection_datastore': 'database',
     'item_datastore': 'database',
+    "accession_factory": "snovault.server_defaults.test_accession",
     'multiauth.policies': 'session remoteuser accesskey auth0',
     'multiauth.groupfinder': 'encoded.authorization.groupfinder',
     'multiauth.policy.session.use': 'snovault.authentication.NamespacedAuthenticationPolicy',
@@ -44,6 +45,7 @@ _app_settings = {
     'file_wfout_bucket': 'test-wfout-bucket',
     'file_upload_profile_name': 'test-profile',
 }
+
 
 def make_app_settings_dictionary():
     return _app_settings.copy()

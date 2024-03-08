@@ -33,7 +33,6 @@ def test_accession_app(request, check_constraints, zsa_savepoints, app_settings)
     notice_pytest_fixtures(request, check_constraints, zsa_savepoints, app_settings)
 
     app_settings = app_settings.copy()
-    app_settings['accession_factory'] = 'encoded.server_defaults.test_accession'
     return main({}, **app_settings)
 
 
