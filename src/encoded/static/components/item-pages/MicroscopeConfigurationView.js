@@ -1013,7 +1013,8 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
             onFilter: this.onFilter,
             useRadioIcon: true,
             persistSelectedTerms: false,
-            showClearFiltersButton: false
+            showClearFiltersButton: false,
+            hideHeaderToggle: true //for hiding included/excluded properties toggle
         };
 
         return (
