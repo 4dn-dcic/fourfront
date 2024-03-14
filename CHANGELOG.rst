@@ -6,6 +6,12 @@ fourfront
 Change Log
 ----------
 
+7.2.2
+=====
+
+* Bump dcicsnovault v1.13.0 to fix non-admins AccessKey deleting restriction
+
+
 7.2.1
 =====
 
