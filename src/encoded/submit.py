@@ -2704,7 +2704,8 @@ def xls_to_json(vapp, xls_data, project, institution, ingestion_id, submission_t
             f"{submission_type} is not a valid submission_type argument,"
             ' expected values are "accessioning" or "family_history"'
         )
-    result.output["errors"] = result.errors
+    if result.errors:
+        result.output["errors"] = result.errors
     return result.output, result.passing
 
 

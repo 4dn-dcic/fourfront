@@ -10,8 +10,9 @@ Change Log
 =====
 
 * Added upgrade/ingestion_submission.py for "new" (as of 5 months ago) restriction
-  in ingestion_submission schema that the "errors" property, if present, must have
-  at least one element.
+  in ingestion_submission schema that the "errors" array property, if present,
+  must have at least one element.
+* In submit.py/xls_to_json only populate the "errors" property if it is a non-empty array.
 
 
 7.3.0
