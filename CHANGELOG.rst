@@ -6,10 +6,19 @@ fourfront
 Change Log
 ----------
 
+7.3.1
+=====
+
+* Added upgrade/ingestion_submission.py for "new" (as of 5 months ago) restriction
+  in ingestion_submission schema that the "errors" property, if present, must have
+  at least one element.
+
+
 7.3.0
 =====
 
 * Updates nginx to latest
+
 
 7.2.2
 =====
