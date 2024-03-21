@@ -6,6 +6,32 @@ fourfront
 Change Log
 ----------
 
+7.3.0
+=====
+
+* Updates nginx to latest
+
+7.2.2
+=====
+
+* Bump dcicsnovault v1.13.0 to fix non-admins AccessKey deleting restriction
+
+
+7.2.1
+=====
+
+`Facets list updates <https://github.com/4dn-dcic/fourfront/pull/1876>`_
+
+* Adds prop (hideHeaderToggle) to make facets list header's included/excluded toggle optional
+* Adds support for facet item's hide_from_view property
+
+
+7.2.0
+=====
+
+* Repairs accession validation
+
+
 7.1.8
 =====
 
@@ -13,6 +39,7 @@ Change Log
 * Added the the new organisms in master_inserts/organism.json and inserts/individual_primate.json
 * fixed a typo in biosource.override_organism enum and added a new value to ignored enum for treatment_agent.concentration_units (ajs)
 * also small update to generate_ontology that I had made locally but now pushing (ajs 2024-03-01)
+
 
 7.1.7
 =====
