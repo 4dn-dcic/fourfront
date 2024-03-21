@@ -12,7 +12,8 @@ Change Log
 * Added upgrade/ingestion_submission.py for "new" (as of 5 months ago) restriction
   in ingestion_submission schema that the "errors" array property, if present,
   must have at least one element.
-* In submit.py/xls_to_json only populate the "errors" property if it is a non-empty array.
+* Added schemas/ingestion_schema.json which simply refers to snovault version (via $merge);
+  this is so we can update the schema_version (from 1 to 2), so the above upgrader takes.
 
 
 7.3.0
