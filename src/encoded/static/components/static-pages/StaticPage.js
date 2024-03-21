@@ -44,6 +44,20 @@ export const parseSectionsContent = memoize(function(context){
                 }
                 const props = object.attributesToProps(domNode.attribs);
                 return <MarkdownHeading {...props} type={domNode.name}>{children}</MarkdownHeading>;
+            } else if (domNode.type === 'tag' && domNode.name === 'pre') {
+                const children = _.pluck(domNode.children, 'data');
+                const className = domNode.attribs.class;
+                return (
+                    <div style={{ position: 'relative' }}>
+                        <object.CopyWrapper
+                            value={children}
+                            className={(className || '') + " mt-2"}
+                            wrapperElement="pre"
+                            whitespace={false}>
+                            {children}
+                        </object.CopyWrapper>
+                    </div>
+                );
             }
         }
     };
