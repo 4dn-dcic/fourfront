@@ -6,10 +6,21 @@ fourfront
 Change Log
 ----------
 
+7.3.1
+=====
+
+* Added upgrade/ingestion_submission.py for "new" (as of 5 months ago) restriction
+  in ingestion_submission schema that the "errors" array property, if present,
+  must have at least one element.
+* Added schemas/ingestion_schema.json which simply refers to snovault version (via $merge);
+  this is so we can update the schema_version (from 1 to 2), so the above upgrader takes.
+
+
 7.3.0
 =====
 
 * Updates nginx to latest
+
 
 7.2.2
 =====
