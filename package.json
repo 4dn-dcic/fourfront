@@ -144,6 +144,6 @@
     "vitessce": "^2.0.3"
   },
   "optionalDependencies": {
-    "cypress": "^13.6.6"
+    "cypress": "^13.7.0"
   }
 }
