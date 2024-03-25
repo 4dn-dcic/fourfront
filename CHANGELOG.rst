@@ -6,6 +6,12 @@ fourfront
 Change Log
 ----------
 
+7.3.2
+=====
+
+* Added new ignored_enum "normalized contact intensities" for file_processed.json schema
+
+
 7.3.1
 =====
 
