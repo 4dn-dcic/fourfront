@@ -6,15 +6,26 @@ fourfront
 Change Log
 ----------
 
+7.3.3
+=====
+
+* Cypress v13 upgrade
+
+
+7.3.2
+=====
+
+* Added new ignored_enum "normalized contact intensities" for file_processed.json schema
+
+
 7.3.1
 =====
 
-`RST static content updates <https://github.com/4dn-dcic/fourfront/pull/1882>`_
-
-* Adds admonition (currently, only "tip" supported)
-* Adds enhanced table features
-* Adds "initial_header_level" support
-* Adds copy-to-clipboard feature for <pre>
+* Added upgrade/ingestion_submission.py for "new" (as of 5 months ago) restriction
+  in ingestion_submission schema that the "errors" array property, if present,
+  must have at least one element.
+* Added schemas/ingestion_schema.json which simply refers to snovault version (via $merge);
+  this is so we can update the schema_version (from 1 to 2), so the above upgrader takes.
 
 
 7.3.0

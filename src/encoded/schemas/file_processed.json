@@ -117,7 +117,8 @@
                 "readme",
                 "spt results, submitter format",
                 "filtered feature-barcode matrices",
-                "cell data"
+                "cell data",
+                "normalized contact intensities"
             ]
         },
         "file_classification": {
