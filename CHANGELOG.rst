@@ -6,6 +6,12 @@ fourfront
 Change Log
 ----------
 
+7.3.3
+=====
+
+* Cypress v13 upgrade
+
+
 7.3.2
 =====
 
