@@ -66,6 +66,13 @@
                     "description": "For true, force external links to be opened in a new tab. Otherwise, leave it as is.",
                     "default": true
                 },
+                "initial_header_level": {
+                    "title": "Initial Header Level",
+                    "description": "The initial level for section header elements (H1 to H6, and only valid for RST content)",
+                    "type": "number",
+                    "minimum": 1,
+                    "maximum": 6
+                },
                 "collapsible" : {
                     "title" : "Is Collapsible",
                     "type" : "boolean",
