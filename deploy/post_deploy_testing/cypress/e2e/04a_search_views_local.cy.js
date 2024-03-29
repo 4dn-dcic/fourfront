@@ -468,7 +468,7 @@ describe('Deployment/CI Search View Tests', function () {
                 .get("a#search-menu-item").click().end()
                 .get('form.navbar-search-form-container button#search-item-type-selector').click().end()
                 .get('form.navbar-search-form-container div.dropdown-menu a[data-key="Within"]').click().end()
-                .get('input[name="q"]').focus().type('gene').end()
+                .get('form.navbar-search-form-container input[name="q"]').focus().type('gene').end()
                 .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()
                 .get('#slow-load-container').should('not.have.class', 'visible').end()
                 .get('#page-title-container .page-title').should('contain', 'Search').end()
@@ -491,7 +491,7 @@ describe('Deployment/CI Search View Tests', function () {
                 .get("a#search-menu-item").click().end()
                 .get('form.navbar-search-form-container button#search-item-type-selector').click().end()
                 .get('form.navbar-search-form-container div.dropdown-menu a[data-key="Within"]').click().end()
-                .get('input[name="q"]').focus().type('human').end()
+                .get('form.navbar-search-form-container input[name="q"]').focus().type('human').end()
                 .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()
                 .get('#slow-load-container').should('not.have.class', 'visible').end()
                 .get(".facet-list-element.selected .facet-item").then(function ($selectedFacet) {
