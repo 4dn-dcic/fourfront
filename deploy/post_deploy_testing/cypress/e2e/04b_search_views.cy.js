@@ -81,7 +81,7 @@ describe('Post-Deployment Search View Tests', function () {
         it('Starting from /search/, typing "olfactory" into searchbox redirects back to search', function () {
             cy.get("a#search-menu-item").click().end()
                 .searchPageTotalResultCount().should('be.greaterThan', 100).then(function (origResultCount) {
-                    return cy.get('.big-dropdown-menu-background .form-control').focus().clear().type('olfactory', { force: true }).should('have.value', 'olfactory').end()
+                    return cy.get('.big-dropdown-menu-background .form-control').focus().clear().type('olfactory', { delay: 0 }).should('have.value', 'olfactory').end()
                         .get('form.navbar-search-form-container').submit().end()
                         .location('search').should('include', 'q=olfactory').end()
                         .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()
