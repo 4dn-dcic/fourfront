@@ -6,6 +6,13 @@ fourfront
 Change Log
 ----------
 
+
+7.3.4
+=====
+
+* added new allowed relationship type to both File and Experiment - 'matched with'
+
+
 7.3.3
 =====
 
