@@ -488,8 +488,8 @@ describe('Deployment/CI Search View Tests', function () {
                 })
                 .get(".facets-body div.facet:not([data-field='']):nth-child(" + facetItemIndex + ") > h5").scrollToCenterElement().click({ force: true }).end()
                 .get(".facet.open .facet-list-element a.term .facet-item").first().click({ force: true }).end()
-                .get("a#search-menu-item").click({ force: true }).end()
-                .get('form.navbar-search-form-container button#search-item-type-selector').click().end()
+                .get("a#search-menu-item").click().end()
+                .get('form.navbar-search-form-container button#search-item-type-selector').should('be.visible').click().end()
                 .get('form.navbar-search-form-container div.dropdown-menu a[data-key="Within"]').click().end()
                 .get('form.navbar-search-form-container input[name="q"]').focus().type('human', { delay: 0 }).end()
                 .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()
@@ -502,7 +502,7 @@ describe('Deployment/CI Search View Tests', function () {
         it('"Biosource" option works, takes us to biosource search results', function () {
             cy.visit('/')
                 .get("a#search-menu-item").click().end()
-                .get('form.navbar-search-form-container button#search-item-type-selector').click().end()
+                .get('form.navbar-search-form-container button#search-item-type-selector').should('be.visible').click().end()
                 .get('form.navbar-search-form-container div.dropdown-menu a[data-key="Item"]').click().end()
                 .get('input[name="q"]').focus().type('hamster', { delay: 0 }).end()
                 .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()
@@ -513,7 +513,7 @@ describe('Deployment/CI Search View Tests', function () {
         it('"Publication" option works, takes us to publication search results', function () {
             cy.visit('/')
                 .get("a#search-menu-item").click().end()
-                .get('form.navbar-search-form-container button#search-item-type-selector').click().end()
+                .get('form.navbar-search-form-container button#search-item-type-selector').should('be.visible').click().end()
                 .get('form.navbar-search-form-container div.dropdown-menu a[data-key="Publication"]').click().end()
                 .get('input[name="q"]').focus().type('nature', { delay: 0 }).end()
                 .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()
@@ -523,7 +523,7 @@ describe('Deployment/CI Search View Tests', function () {
 
         it('SearchBox input works, goes to /search', function () {
             cy.get("a#search-menu-item").click().end()
-                .get('form.navbar-search-form-container button#search-item-type-selector').click().end()
+                .get('form.navbar-search-form-container button#search-item-type-selector').should('be.visible').click().end()
                 .get('form.navbar-search-form-container div.dropdown-menu a[data-key="Item"]').click().end()
                 .get('form.navbar-search-form-container input[name="q"]').focus().type('mouse', { delay: 0 }).end()
                 .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()

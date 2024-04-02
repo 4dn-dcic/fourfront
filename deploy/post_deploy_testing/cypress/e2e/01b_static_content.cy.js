@@ -95,7 +95,7 @@ describe('Static Page & Content Tests', function () {
 
                         });
                     }
-                    cy.wrap($listItems.eq(0)).click({ force: true }).then(function($linkElem){
+                    cy.wrap($listItems.eq(0)).should('be.visible').click({ force: true }).then(function($linkElem){
                         cy.get('#slow-load-container').should('not.have.class', 'visible').end();
                         const linkHref = $linkElem.attr('href');
                         cy.location('pathname').should('equal', linkHref);
