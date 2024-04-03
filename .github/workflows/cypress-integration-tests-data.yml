@@ -31,7 +31,6 @@ jobs:
       - name: Install
         run: |
           npm --version
-          npm config set python /usr/bin/python3.7
           npm ci
           $(npm bin)/cypress install
 
