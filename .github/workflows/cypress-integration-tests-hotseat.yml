@@ -11,7 +11,7 @@ on:
 jobs:
   cypress-run:
     # The type of runner that the job will run on
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false  # suggested by Cypress
       matrix:
@@ -19,23 +19,17 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Cypress run
+        uses: cypress-io/github-action@v6
         with:
-          node-version: '18'
-
-      # Runs a set of commands using the runners shell
-      - name: Install
-        run: |
-          npm --version
-          npm config set python /usr/bin/python3.8
-          npm ci
-          $(npm bin)/cypress install
-
-      - name: Cypress
+          project: ./deploy/post_deploy_testing
+          record: true
+          browser: chrome
+          parallel: true
+          config: baseUrl=http://fourfront-hotseat-1650461284.us-east-1.elb.amazonaws.com/
         env:
-          CYPRESS_KEY: ${{ secrets.CYPRESS_KEY }}
-          Auth0Client: ${{ secrets.Auth0Client }}
-          Auth0Secret: ${{ secrets.Auth0Secret }}
-        run: |
-         $(npm bin)/cypress run --record --key $CYPRESS_KEY --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret --project ./deploy/post_deploy_testing --browser chrome --config baseUrl=http://fourfront-hotseat-1650461284.us-east-1.elb.amazonaws.com/ --parallel 
+          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_KEY }}
+          CYPRESS_Auth0Client: ${{ secrets.Auth0Client }}
+          CYPRESS_Auth0Secret: ${{ secrets.Auth0Secret }}
