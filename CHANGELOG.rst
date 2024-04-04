@@ -6,15 +6,11 @@ fourfront
 Change Log
 ----------
 
+
 7.3.4
 =====
 
-`RST static content updates <https://github.com/4dn-dcic/fourfront/pull/1882>`_
-
-* Adds admonition (currently, only "tip" supported)
-* Adds enhanced table features
-* Adds "initial_header_level" support
-* Adds copy-to-clipboard feature for <pre>
+* added new allowed relationship type to both File and Experiment - 'matched with'
 
 
 7.3.3

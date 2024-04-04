@@ -26,7 +26,7 @@ describe('Biosample create page', function () {
 
             // Submit create biosample data name
             const identifier = ("bs-test-" + new Date().getTime());
-            cy.get('.modal-dialog input#aliasInput.form-control').focus().type(identifier).end()
+            cy.get('.modal-dialog input#aliasInput.form-control').focus().type(identifier, { delay: 0 }).end()
                 .get("button.btn-primary.btn").should('contain', 'Submit').click().end();
 
             // Add biosources data file

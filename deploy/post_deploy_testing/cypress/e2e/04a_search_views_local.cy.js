@@ -118,11 +118,11 @@ describe('Deployment/CI Search View Tests', function () {
 
             // set microscope conf. name
             const identifier = ("mc-test-" + new Date().getTime());
-            cy.get('.modal-dialog input#microscope_name.form-control').focus().type(identifier).end();
+            cy.get('.modal-dialog input#microscope_name.form-control').focus().type(identifier, { delay: 0 }).end();
 
             // set microscope conf. description
             microscopeDescription = "tier-1 microscope conf. description";
-            cy.get('.modal-dialog input#microscope_description.form-control').focus().type(microscopeDescription).end();
+            cy.get('.modal-dialog input#microscope_description.form-control').focus().type(microscopeDescription, { delay: 0 }).end();
 
             // set microscope conf. stand type
             cy.get('button#validation_tier.dropdown-toggle.btn.btn-primary').contains('Select Stand Type').click().end()
@@ -367,10 +367,10 @@ describe('Deployment/CI Search View Tests', function () {
         });
 
         it('SearchBox input works, goes to /browse/ on submit', function(){
-            cy.get("a#search-menu-item").click().end()
+            cy.get("a#search-menu-item").click({ force: true }).end()
                 .get('form.navbar-search-form-container button#search-item-type-selector').click().end()
                 .get('form.navbar-search-form-container div.dropdown-menu a[data-key="ExperimentSetReplicate"]').click().end()
-                .get('input[name="q"]').focus().type('mouse', { force: true }).should('have.value', 'mouse').end()
+                .get('form.navbar-search-form-container input[name="q"]').scrollToCenterElement().focus().type('mouse', { delay: 0 }).should('have.value', 'mouse').end()
                 .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()
                 .get('#slow-load-container').should('not.have.class', 'visible').end()
                 .get('#page-title-container .page-title').should('contain', 'Data Browser').end() // Make sure we got redirected to /browse/. We may or may not have results here depending on if on local and logged out or not.
@@ -380,7 +380,7 @@ describe('Deployment/CI Search View Tests', function () {
         });
 
         it('"General (All Item Types)" option works, takes us to search page', function(){
-            cy.get("a#search-menu-item").click().end()
+            cy.get("a#search-menu-item").click({ force: true }).end()
                 .get('form.navbar-search-form-container button#search-item-type-selector').click().end()
                 .get('form.navbar-search-form-container div.dropdown-menu a[data-key="Item"]').click().end()
                 .get('form.navbar-search-form-container').submit().end()
@@ -401,7 +401,7 @@ describe('Deployment/CI Search View Tests', function () {
 
         it('Wildcard query string returns all results.', function(){
             cy.window().screenshot('Before text search "*"').end().searchPageTotalResultCount().then((origTotalResults)=>{
-                cy.get("a#search-menu-item").click().end()
+                cy.get("a#search-menu-item").click({ force: true }).end()
                     .get('.big-dropdown-menu-background .form-control').focus().clear().type('*').end()
                     .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()
                     // handle url encoding
@@ -412,7 +412,7 @@ describe('Deployment/CI Search View Tests', function () {
         });
 
         it('Change search type, and check SearchBox placeholder', function () {
-            cy.visit('/').get("a#search-menu-item").click().end();
+            cy.visit('/').get("a#search-menu-item").click({ force: true }).end();
             for (let interval = 1; interval < 7; interval++) {
                 cy.get('form.navbar-search-form-container button#search-item-type-selector').click().end();
                 cy.get('a.w-100.dropdown-item:nth-child(' + interval + ')').click().then(($dataKey) => {
@@ -449,7 +449,7 @@ describe('Deployment/CI Search View Tests', function () {
                     cy.get("a#search-menu-item").click().end()
                         .get('form.navbar-search-form-container button#search-item-type-selector').click().end()
                         .get('form.navbar-search-form-container div.dropdown-menu a[data-key="ByAccession"]').click().end()
-                        .get('input[name="q"]').focus().type(accesion).end()
+                        .get('input[name="q"]').focus().type(accesion, { delay: 0 }).end()
                         .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()
                         .get('.clickable.copy-wrapper.accession.inline-block').should('contain', accesion).end();
                 });
@@ -465,10 +465,10 @@ describe('Deployment/CI Search View Tests', function () {
                 })
                 .get(".facets-body div.facet:not([data-field='']):nth-child(" + facetItemIndex + ") > h5").scrollToCenterElement().click({ force: true }).end()
                 .get(".facet.open .facet-list-element a.term .facet-item").first().click({ force: true }).end()
-                .get("a#search-menu-item").click().end()
+                .get("a#search-menu-item").click({ force: true }).end()
                 .get('form.navbar-search-form-container button#search-item-type-selector').click().end()
                 .get('form.navbar-search-form-container div.dropdown-menu a[data-key="Within"]').click().end()
-                .get('input[name="q"]').focus().type('gene').end()
+                .get('form.navbar-search-form-container input[name="q"]').focus().type('gene', { delay: 0 }).end()
                 .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()
                 .get('#slow-load-container').should('not.have.class', 'visible').end()
                 .get('#page-title-container .page-title').should('contain', 'Search').end()
@@ -489,9 +489,9 @@ describe('Deployment/CI Search View Tests', function () {
                 .get(".facets-body div.facet:not([data-field='']):nth-child(" + facetItemIndex + ") > h5").scrollToCenterElement().click({ force: true }).end()
                 .get(".facet.open .facet-list-element a.term .facet-item").first().click({ force: true }).end()
                 .get("a#search-menu-item").click().end()
-                .get('form.navbar-search-form-container button#search-item-type-selector').click().end()
+                .get('form.navbar-search-form-container button#search-item-type-selector').should('be.visible').click().end()
                 .get('form.navbar-search-form-container div.dropdown-menu a[data-key="Within"]').click().end()
-                .get('input[name="q"]').focus().type('human').end()
+                .get('form.navbar-search-form-container input[name="q"]').focus().type('human', { delay: 0 }).end()
                 .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()
                 .get('#slow-load-container').should('not.have.class', 'visible').end()
                 .get(".facet-list-element.selected .facet-item").then(function ($selectedFacet) {
@@ -502,9 +502,9 @@ describe('Deployment/CI Search View Tests', function () {
         it('"Biosource" option works, takes us to biosource search results', function () {
             cy.visit('/')
                 .get("a#search-menu-item").click().end()
-                .get('form.navbar-search-form-container button#search-item-type-selector').click().end()
+                .get('form.navbar-search-form-container button#search-item-type-selector').should('be.visible').click().end()
                 .get('form.navbar-search-form-container div.dropdown-menu a[data-key="Item"]').click().end()
-                .get('input[name="q"]').focus().type('hamster').end()
+                .get('input[name="q"]').focus().type('hamster', { delay: 0 }).end()
                 .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()
                 .get('#slow-load-container').should('not.have.class', 'visible').end()
                 .get('#page-title-container .page-title').should('contain', 'Search').end();
@@ -513,9 +513,9 @@ describe('Deployment/CI Search View Tests', function () {
         it('"Publication" option works, takes us to publication search results', function () {
             cy.visit('/')
                 .get("a#search-menu-item").click().end()
-                .get('form.navbar-search-form-container button#search-item-type-selector').click().end()
+                .get('form.navbar-search-form-container button#search-item-type-selector').should('be.visible').click().end()
                 .get('form.navbar-search-form-container div.dropdown-menu a[data-key="Publication"]').click().end()
-                .get('input[name="q"]').focus().type('nature').end()
+                .get('input[name="q"]').focus().type('nature', { delay: 0 }).end()
                 .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()
                 .get('#slow-load-container').should('not.have.class', 'visible').end()
                 .get('#page-title-container .page-title').should('contain', 'Publications').end();
@@ -523,9 +523,9 @@ describe('Deployment/CI Search View Tests', function () {
 
         it('SearchBox input works, goes to /search', function () {
             cy.get("a#search-menu-item").click().end()
-                .get('form.navbar-search-form-container button#search-item-type-selector').click().end()
+                .get('form.navbar-search-form-container button#search-item-type-selector').should('be.visible').click().end()
                 .get('form.navbar-search-form-container div.dropdown-menu a[data-key="Item"]').click().end()
-                .get('input[name="q"]').focus().type('mouse').end()
+                .get('form.navbar-search-form-container input[name="q"]').focus().type('mouse', { delay: 0 }).end()
                 .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()
                 .get('#slow-load-container').should('not.have.class', 'visible').end()
                 .get('#page-title-container .page-title').should('contain', 'Search').end();

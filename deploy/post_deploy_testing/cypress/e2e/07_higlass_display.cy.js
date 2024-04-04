@@ -204,9 +204,9 @@ describe("HiGlass Display pages", function(){
 
                         // Click on the edit button and wait for the page load.
                         .get(".action-button[data-action='edit'] a").click({ force: true }).end()
-                        .get("input#field_for_title").clear().type(newTitle).end()
-                        .get('#field_for_description').clear().type(newDescription).end()
-                        .get('input#field_for_tags.form-control').focus().type('deleted_by_cypress_test').end()
+                        .get("input#field_for_title").clear().type(newTitle, { delay: 0 }).end()
+                        .get('#field_for_description').clear().type(newDescription, { delay: 0 }).end()
+                        .get('input#field_for_tags.form-control').focus().type('deleted_by_cypress_test', { delay: 0 }).end()
                         // Click validate then click submit
                         .get(".action-buttons-container button.btn-info").click().end()
                         .get(".action-buttons-container button.btn-success").click().end()
