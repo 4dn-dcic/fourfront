@@ -6,6 +6,11 @@ fourfront
 Change Log
 ----------
 
+7.4.0
+=====
+
+* Cypress GA configuration updated - migrated into Ubuntu 22, actions/checkout@v4, cypress-io/github-action@v6
+
 
 7.3.4
 =====
