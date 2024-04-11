@@ -43,7 +43,7 @@ describe('Post-Deployment Search View Tests', function () {
             cy.searchPageTotalResultCount().then((totalCountExpected) => {
                 const intervalCount = Math.floor(Math.random() * 5);//Math.min(5, parseInt(totalCountExpected / 25));
                 cy.get('.search-result-row.detail-closed[data-row-number="' + intervalCount + '"] .search-result-column-block[data-field="@type"] .item-type-title').then(function ($typeTitle) {
-                    typeTitle = $typeTitle.text().replace(/\s/g,'').replace(/([A-Z])/g, ' $1').trim();
+                    typeTitle = $typeTitle.text().replace(/\s/g,'').replace(/([A-Z])/g, ' $1').replace('Hi Glass', 'HiGlass').trim();
                     cy.log('typeTitle:' + typeTitle);
 
                     cy.get('.search-result-row.detail-closed[data-row-number="' + intervalCount + '"] .search-result-column-block[data-field="@type"] .icon-container .icon').click({ force: true }).end();
