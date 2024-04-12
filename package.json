@@ -117,7 +117,7 @@
     "higlass": "1.12.2",
     "higlass-multivec": "0.3.1",
     "higlass-register": "^0.3.0",
-    "html-react-parser": "^1.2.8",
+    "html-react-parser": "^5.1.10",
     "jose": "^4.14.4",
     "markdown-to-jsx": "^7.1.6",
     "memoize-one": "^5.1.1",
