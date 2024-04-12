@@ -82,13 +82,20 @@
                     "items": {
                         "type": "string"
                     }
+                },
+                "expanded" : {
+                    "title": "Expanded",
+                    "description": "Expand all TOC nodes by default or not.",
+                    "type": "boolean",
+                    "default": true
                 }
             },
             "default" : {
                 "enabled" : false,
                 "include-top-link" : false,
                 "skip-depth" : 1,
-                "header-depth" : 4
+                "header-depth" : 4,
+                "expanded": true
             }
         },
         "content": {
