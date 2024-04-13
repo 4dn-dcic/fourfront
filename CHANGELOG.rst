@@ -6,15 +6,10 @@ fourfront
 Change Log
 ----------
 
-7.3.5
+7.4.0
 =====
 
-`RST static content updates <https://github.com/4dn-dcic/fourfront/pull/1882>`_
-
-* Adds admonition (currently, only "tip" supported)
-* Adds enhanced table features
-* Adds "initial_header_level" support
-* Adds copy-to-clipboard feature for <pre>
+* Cypress GA configuration updated - migrated into Ubuntu 22, actions/checkout@v4, cypress-io/github-action@v6
 
 
 7.3.4
