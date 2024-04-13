@@ -363,14 +363,14 @@ The scripts accepts the following parameters:.
 
 .. code-block::
 
-   --keyfile      access key file path (default is “home_folder/keypairs.json”)
-   --key           name of the key (default is “default”)
-   --type          use for each sheet that you want to add to the excel workbook
-   --descriptions  adds the descriptions in the second line (by default True)
-   --enums         adds the enum options in the third line (by default True)
-   --comments   adds the comments together with enums (by default False)
+   --keyfile         access key file path (default is “home_folder/keypairs.json”)
+   --key             name of the key (default is “default”)
+   --type            use for each sheet that you want to add to the excel workbook
+   --descriptions    adds the descriptions in the second line (by default True)
+   --enums           adds the enum options in the third line (by default True)
+   --comments        adds the comments together with enums (by default False)
    --writexls        creates the xls file (by default True)
-   --outfile          change the default file name "fields.xls" to a specified one
+   --outfile         change the default file name "fields.xls" to a specified one
 
 
 

@@ -26,16 +26,13 @@ There are several possible 'entry' points to a web submission
 **To create a new item**
 
 
-#. 
-   Navigate to an item of the type for which you want to create metadata.
+#. Navigate to an item of the type for which you want to create metadata.
 
-#. 
-   You can find **Create** and **Edit** links near the top of a page for most items in our system.  **NOTE** You will not see one or both of these buttons if you lack permission to perform these operations, which may be due to the status of the item and/or your role in our system.
+#. You can find **Create** and **Edit** links near the top of a page for most items in our system.  **NOTE** You will not see one or both of these buttons if you lack permission to perform these operations, which may be due to the status of the item and/or your role in our system.
 
-#. When you click **Create** the first thing you will be asked is to create an alias for your item.  This is a lab specific unique identifier for this object taking the form of xxxx:xxxxx where the portion before the colon is a lab designation eg. 4dndcic and the portion after is an identifier that you choose that is unique within your lab group (see section on using aliases `here </help/getting-started#referencing-existing-objects>`_\ ).
-#. 
-   When you submit your alias you will be brought to a page where you can start entering metadata.  
+#. When you click **Create** the first thing you will be asked is to create an alias for your item.  This is a lab specific unique identifier for this object taking the form of xxxx:xxxxx where the portion before the colon is a lab designation eg. 4dndcic and the portion after is an identifier that you choose that is unique within your lab group (see section on using aliases `here </help/getting-started#referencing-existing-objects>`__).
 
+#. When you submit your alias you will be brought to a page where you can start entering metadata.  
 
    * You will see two gray bars *Fields* and *Linked Objects* and selecting the *+* will expand those bars to show the fields and objects that can be entered.  
    * Hovering your pointer over the **i** next to Navigation pops up an explanation for what the different colors of the objects displayed in the Navigation tree.
@@ -45,8 +42,7 @@ There are several possible 'entry' points to a web submission
    * As you create or add linked Objects you will see the Objects listed in the *Navigate* section change colors accordingly.  
    * You can use the *Navigate* section to review what you have submitted, validated and what remains to be added.
 
-#. 
-   And finally when all your linked objects are submitted and validated (green) you can validate and submit the object to complete your submission.
+#. And finally when all your linked objects are submitted and validated (green) you can validate and submit the object to complete your submission.
 
 **WARNING: Be careful with the BACK and RELOAD buttons.** Currently, if you choose to create a new linked object and then decide you actually don't want to or should have actually chosen an existing object you still should create the object with only the minimum information required, Validate and then Submit it.  You will then be taken back to the previous form you were working on and be able to *remove* the unwanted object.  If you try to navigate back to the previous page using your browser buttons you will lose the previously unsubmitted changes.  We are working to improve this aspect of the interface.
 

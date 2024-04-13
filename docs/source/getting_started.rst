@@ -240,5 +240,6 @@ If you have been designated as a submitter for the project and plan to use eithe
   * the ``--keyfile`` parameter as an argument to any of the scripts to provide the path to your keypairs file.
   * the ``--key`` parameter to indicate a stored key name.
   
-  .::
+  ::
+
     import_data --keyfile Path/name_of_file.json --key NotDefault
