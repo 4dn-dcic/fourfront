@@ -1,6 +1,5 @@
-==============
-Web Submission
-==============
+Overview
+--------
 
 
 * An online submission interface has been developed to help with the submission of 4DN metadata.  
