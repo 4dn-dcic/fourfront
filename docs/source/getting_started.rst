@@ -1,11 +1,6 @@
 .. role:: raw-html-m2r(raw)
    :format: html
 
-======================
-Getting Started (User)
-======================
-
-
 Overview
 --------
 
@@ -163,9 +158,6 @@ Any of the following can be used to reference an existing item in an excel sheet
      - name
      - /constructs/GFP-H1B/
      - GFP-H1B
-
-
-:raw-html-m2r:`<br>`
 
 
 * Many of the objects that you may need for your submissions may already exist on the 4DN web site.
