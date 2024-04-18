@@ -31,7 +31,7 @@ jobs:
         with:
           name: build
           if-no-files-found: error
-          path: dist
+          path: /static/build/
 
   cypress-run:
     # The type of runner that the job will run on
