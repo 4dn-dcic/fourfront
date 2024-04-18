@@ -31,7 +31,8 @@ jobs:
         with:
           name: build
           if-no-files-found: error
-          path: /static/build/
+          path: ./src/encoded/static/build/
+          retention-days: 5
 
   cypress-run:
     # The type of runner that the job will run on
