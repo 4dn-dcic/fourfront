@@ -26,13 +26,13 @@ jobs:
           runTests: false
           build: npm run build
 
-      - name: Save build folder
-        uses: actions/upload-artifact@v4
-        with:
-          name: build
-          if-no-files-found: error
-          path: ./src/encoded/static/build/
-          retention-days: 5
+      # - name: Save build folder
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: build
+      #     if-no-files-found: error
+      #     path: ./src/encoded/static/build/
+      #     retention-days: 5
 
   cypress-run:
     # The type of runner that the job will run on
@@ -48,10 +48,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Download the build folder
-        uses: actions/download-artifact@v4
-        with:
-          name: build
+      # - name: Download the build folder
+      #   uses: actions/download-artifact@v4
+      #   with:
+      #     name: build
 
       - name: Cypress run
         uses: cypress-io/github-action@v6
