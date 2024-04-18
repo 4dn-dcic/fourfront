@@ -37,6 +37,7 @@ jobs:
   cypress-run:
     # The type of runner that the job will run on
     runs-on: ubuntu-22.04
+    needs: install
     strategy:
       fail-fast: false  # suggested by Cypress
       matrix:
