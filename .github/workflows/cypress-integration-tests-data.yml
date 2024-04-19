@@ -13,27 +13,27 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
 
-  install:
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+  # install:
+  #   runs-on: ubuntu-22.04
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
 
-      - name: Cache npm and Cypress
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/Cypress
-            node_modules
-          key: my-cache-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+  #     - name: Cache npm and Cypress
+  #       uses: actions/cache@v4
+  #       with:
+  #         path: |
+  #           ~/.cache/Cypress
+  #           node_modules
+  #         key: my-cache-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
 
-      - name: Install Cypress
-        run: npm i cypress
+  #     - name: Install Cypress
+  #       run: npm i cypress
 
   cypress-run:
     # The type of runner that the job will run on
     runs-on: ubuntu-22.04
-    needs: install
+    # needs: install
     strategy:
       fail-fast: false  # suggested by Cypress
       matrix:
@@ -47,7 +47,6 @@ jobs:
       - name: Cypress run
         uses: cypress-io/github-action@v6
         with:
-          install: false
           project: ./deploy/post_deploy_testing
           record: true
           browser: chrome
