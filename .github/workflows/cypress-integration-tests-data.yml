@@ -19,18 +19,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # - name: Cache npm and Cypress
-      #   uses: actions/cache@v4
-      #   with:
-      #     path: |
-      #       ~/.cache/Cypress
-      #       node_modules
-      #     key: my-cache-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - name: Cache npm and Cypress
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/Cypress
+            node_modules
+          key: my-cache-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
 
       - name: Install Cypress
-        run: |
-          npm ci
-          npm i cypress
+        run: npm i cypress
 
   cypress-run:
     # The type of runner that the job will run on
@@ -49,12 +47,15 @@ jobs:
       - name: Cypress run
         uses: cypress-io/github-action@v6
         with:
+          install: false
           project: ./deploy/post_deploy_testing
           record: true
           browser: chrome
           parallel: true
           config: baseUrl=https://data.4dnucleome.org/
         env:
+          # pass GitHub token to allow accurately detecting a build vs a re-run build
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_KEY }}
           CYPRESS_Auth0Client: ${{ secrets.Auth0Client }}
           CYPRESS_Auth0Secret: ${{ secrets.Auth0Secret }}
