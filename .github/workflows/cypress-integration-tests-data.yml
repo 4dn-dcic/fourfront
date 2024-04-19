@@ -19,23 +19,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Cache npm and Cypress
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/Cypress
-            node_modules
-          key: my-cache-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      # - name: Cache npm and Cypress
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: |
+      #       ~/.cache/Cypress
+      #       node_modules
+      #     key: my-cache-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
 
       - name: Install Cypress
-        run: npm i cypress
-
-      # - name: Cypress install
-      #   uses: cypress-io/github-action@v6
-      #   with:
-      #     # Disable running of tests within install job
-      #     install: false
-      #     runTests: false
+        run: |
+          npm ci
+          npm i cypress
 
   cypress-run:
     # The type of runner that the job will run on
