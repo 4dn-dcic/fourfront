@@ -33,6 +33,8 @@ jobs:
           parallel: true
           config: baseUrl=https://staging.4dnucleome.org/
         env:
+          # pass GitHub token to allow accurately detecting a build vs a re-run build
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_KEY }}
           CYPRESS_Auth0Client: ${{ secrets.Auth0Client }}
           CYPRESS_Auth0Secret: ${{ secrets.Auth0Secret }}
