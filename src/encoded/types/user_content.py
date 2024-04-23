@@ -1,6 +1,5 @@
 """Abstract collection for UserContent and sub-classes of StaticSection, HiglassViewConfig, etc."""
 
-from argparse import FileType
 from uuid import uuid4
 from snovault import (
     abstract_collection,
@@ -8,8 +7,10 @@ from snovault import (
     collection,
     load_schema
 )
-import docutils.core
+from docutils.core import publish_parts
+from bs4 import BeautifulSoup
 import markdown
+import re
 from snovault.interfaces import STORAGE
 from .base import (
     Item,
@@ -144,15 +145,23 @@ class StaticSection(UserContent):
         content = self.content(request, body, file)
         if not content:
             return None
-        
+
         file_type = self.filetype(request, body, file, options)
         convert_ext_links = request and request.domain and options and options.get('convert_ext_links', True)
 
         if file_type == 'rst':
-            output = docutils.core.publish_parts(content, writer_name='html')
+            # html header: range <h1> to <h6>, default <h2>
+            initial_header_level = options.get('initial_header_level', 2) if options is not None else 2
+            settings_overrides = {
+                'doctitle_xform': False,
+                'initial_header_level': initial_header_level
+            }
+            parts = publish_parts(content, writer_name='html', settings_overrides=settings_overrides)
+            
+            output = post_process_rst_html(parts["html_body"])
             if convert_ext_links:
-                return convert_external_links(output["html_body"], request.domain)
-            return output["html_body"]
+                return convert_external_links(output, request.domain)
+            return output
         elif file_type == 'html':
             if convert_ext_links:
                 return convert_external_links(content, request.domain)
@@ -376,3 +385,40 @@ def convert_external_links(content, reference_domain):
             content = content.replace(match[0], external_link)
     
     return content
+
+
+def post_process_rst_html(raw_html):
+    # Parse the HTML content with BeautifulSoup
+    soup = BeautifulSoup(raw_html, 'html.parser')
+
+    # rename default wrapper class
+    document_div = soup.find('div', class_='document')
+    if document_div:
+        document_div['class'] = ['rst-container']
+
+    # Find all div elements with class="section" and unwrap them
+    section_divs = soup.find_all('div', class_='section')
+    for section_div in section_divs:
+        section_div.unwrap()
+
+    # Find all <tt> tags and convert to <code>
+    tt_tags = soup.find_all('tt')
+    for tt_tag in tt_tags:
+        code_tag = soup.new_tag('code')
+        if tt_tag.string:
+            code_tag.string = tt_tag.string
+        tt_tag.replace_with(code_tag)
+
+    output = str(soup)
+    
+    # Find all <pre> tags with their attributes and content
+    pre_matches = re.findall(r'<pre.*?>(.*?)</pre>', output, re.DOTALL)
+
+    # Replace '\n' outside of <pre> tags with an empty string
+    output = re.sub(r'(<pre.*?>.*?</pre>)|(\n)', lambda match: match.group(1) or '', output, flags=re.DOTALL)
+
+    # Restore the original content within <pre> tags
+    for pre_match in pre_matches:
+        output = output.replace(f'<pre>{pre_match}</pre>', f'<pre>{pre_match}</pre>')
+
+    return output

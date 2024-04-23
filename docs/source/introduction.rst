@@ -39,7 +39,7 @@ The DCIC, with input from different 4DN Network Working groups, has defined a me
 * and other pertinent data.
 
 The framework for the the metadata structure is based on the work of
-`ENCODE DCC <https://www.encodeproject.org/help/getting-started/#organization>`_.
+`ENCODE DCC <https://www.encodeproject.org/help/getting-started/#organization>`__.
 
 The metadata is organized as objects that are related with each other.
 An overview of the major objects is provided in the following slides.

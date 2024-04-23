@@ -6,6 +6,17 @@ fourfront
 Change Log
 ----------
 
+7.4.1
+=====
+
+`RST static content updates <https://github.com/4dn-dcic/fourfront/pull/1882>`_
+
+* Adds admonition (currently, only "tip" supported)
+* Adds enhanced table features
+* Adds "initial_header_level" support
+* Adds copy-to-clipboard feature for <pre>
+
+
 7.4.0
 =====
 

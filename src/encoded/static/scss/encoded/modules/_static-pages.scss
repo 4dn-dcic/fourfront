@@ -861,7 +861,92 @@
 			vertical-align: top;
 			display: inline-block;
 		}
-	} 
+	}
+
+	table.docutils {
+		margin: 40px 0;
+	}
+
+	// since rst-to-html non-customizable,
+	// tweak some css rules to display h3/h4 like h4/h5 respectively
+	// use the same styles for raw HTML
+	.rst-container,
+	.html-container {
+		h3 {
+			font-size: 1.3rem;
+			margin-bottom: 0.5rem;
+		}
+
+		h4 {
+			font-size: 1.2rem;
+		}
+		
+		ul {
+			margin-top: 1rem;
+		}
+
+		pre {
+			margin-top: 1rem;
+			margin-bottom: 1rem;
+			padding: 10px;
+			border: 2px solid #f0f0f1;
+			border-radius: 5px;
+			background-color: #f8f8f8;
+			color: #212529;
+
+			i.icon-copy {
+				position: absolute;
+				font-size: 0.875rem;
+				color: #B1B1B1;
+				right: 6px;
+				top: 6px;
+
+				@include media-breakpoint-down(lg){
+					right: -20px;
+					top: 2px;
+				}
+
+				&:hover {
+					color: #212529;
+				}
+			}
+		}
+
+		.admonition.tip {
+			background-color: #EFF7F8;
+			padding: 12px;
+  			line-height: 24px;
+  			margin-top: 24px;
+
+			.admonition-title {
+				background-color: #34646C;
+				font-weight: 700;
+  				display: block;
+  				color: #fff;
+				padding: 6px 12px;
+  				margin: -12px -12px 12px;
+				
+				&:before {
+					font-family: $fa-font-family;
+					content: "\f06a";
+					display: inline-block;
+  					font-style: normal;
+  					font-weight: 700;
+  					line-height: 1;
+  					text-decoration: inherit;
+					margin-right: 4px;
+				}
+			}
+		}
+
+		a.reference {
+			white-space: pre-wrap; /* CSS3 */    
+			white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
+			white-space: -pre-wrap; /* Opera 4-6 */    
+			white-space: -o-pre-wrap; /* Opera 7 */    
+			word-wrap: break-word; /* Internet Explorer 5.5+ */
+		}
+	}
 }
 
 
