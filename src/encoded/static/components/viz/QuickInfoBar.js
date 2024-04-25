@@ -317,7 +317,7 @@ class Stat extends React.PureComponent {
         'experiments' : "/search/?type=Experiment&experiment_sets.experimentset_type=replicate&experiment_sets.@type=ExperimentSetReplicate",
         'expsets' : "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate",
         'files' : "/search/?type=File&experiments.experiment_sets.@type=ExperimentSetReplicate&experiments.experiment_sets.experimentset_type=replicate"
-    }
+    };
 
     filtersHrefChunk(){
         const { expSetFilters, classNameID } = this.props;
@@ -330,16 +330,40 @@ class Stat extends React.PureComponent {
         }
     }
 
+    // Version 1: Always goto Browse page for now
+    // label(){
+    //     const { value, shortLabel, expSetFilters, href } = this.props;
+    //     if (!value) {
+    //         return shortLabel;
+    //     }
+
+    //     // Always goto Browse page for now
+    //     var filtersHrefChunk = searchFilters.expSetFiltersToURLQuery(expSetFilters); //this.filtersHrefChunk();
+    //     var targetHref = navigate.getBrowseBaseHref();
+    //     targetHref += (filtersHrefChunk ? navigate.determineSeparatorChar(targetHref) + filtersHrefChunk : '');
+
+    //     if (typeof href === 'string'){
+    //         // Strip hostname/port from this.props.href and compare pathnames to check if we are already on this page.
+    //         if (navigate.isBrowseHref(href)) return <span>{ shortLabel }</span>;
+    //         // eslint-disable-next-line no-useless-escape
+    //         if (href.replace(/(http:|https:)(\/\/)[^\/]+(?=\/)/, '') === targetHref) return <span>{ shortLabel }</span>;
+    //     }
+
+    //     return (
+    //         <a href={targetHref}>{ shortLabel }</a>
+    //     );
+    // }
+
+    // Version 2: Goto ExpSet, Exp, File
     label(){
-        const { value, shortLabel, expSetFilters, href } = this.props;
+        const { value, shortLabel, href, classNameID } = this.props;
         if (!value) {
             return shortLabel;
         }
 
-        // Always goto Browse page for now
-        var filtersHrefChunk = searchFilters.expSetFiltersToURLQuery(expSetFilters); //this.filtersHrefChunk();
-        var targetHref = navigate.getBrowseBaseHref();
-        targetHref += (filtersHrefChunk ? navigate.determineSeparatorChar(targetHref) + filtersHrefChunk : '');
+        const filtersHrefChunk = this.filtersHrefChunk();
+        const sep = filtersHrefChunk && filtersHrefChunk.length > 0 ? '&' : '';
+        const targetHref = Stat.typesPathMap[classNameID] + sep + (filtersHrefChunk || '');
 
         if (typeof href === 'string'){
             // Strip hostname/port from this.props.href and compare pathnames to check if we are already on this page.
