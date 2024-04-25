@@ -287,7 +287,7 @@ const StatsCol = React.memo(function StatsCol(props){
             'files'             : total.files || 0
         };
     }
-    const statProps = _.extend(_.pick(props, 'id', 'href', 'isLoadingChartData'), { 'expSetFilters' : expSetFilters });
+    const statProps = _.extend(_.pick(props, 'id', 'href', 'isLoadingChartData', 'browseBaseState'), { 'expSetFilters' : expSetFilters });
     return (
         <div className="col-8 left-side clearfix">
             <Stat {...statProps} shortLabel="Experiment Sets" longLabel="Experiment Sets" classNameID="expsets" value={stats.experiment_sets} key="expsets" />
@@ -356,12 +356,12 @@ class Stat extends React.PureComponent {
 
     // Version 2: Goto ExpSet, Exp, File
     label(){
-        const { value, shortLabel, href, classNameID } = this.props;
+        const { value, shortLabel, href, classNameID, browseBaseState } = this.props;
         if (!value) {
             return shortLabel;
         }
 
-        const filtersHrefChunk = this.filtersHrefChunk();
+        const filtersHrefChunk = (browseBaseState === 'only_4dn' ? 'award.project=4DN' : '');//this.filtersHrefChunk();
         const sep = filtersHrefChunk && filtersHrefChunk.length > 0 ? '&' : '';
         const targetHref = Stat.typesPathMap[classNameID] + sep + (filtersHrefChunk || '');
 
