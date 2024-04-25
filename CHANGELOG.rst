@@ -6,6 +6,12 @@ fourfront
 Change Log
 ----------
 
+7.4.2
+=====
+
+* changes QuickInfoBar experiment and file links from /browse to /search 
+
+
 7.4.1
 =====
 
