@@ -174,14 +174,28 @@ SUM_FILES_EXPS_AGGREGATION_DEFINITION = {
             "precision_threshold" : 10000
         }
     },
+    "total_expset_other_processed_files" : {
+        "cardinality" : {
+            "field" : "embedded.other_processed_files.accession.raw",
+            "precision_threshold" : 10000
+        }
+    },
+    "total_exp_other_processed_files" : {
+        "cardinality" : {
+            "field" : "embedded.experiments_in_set.other_processed_files.accession.raw",
+            "precision_threshold" : 10000
+        }
+    },
     "total_files" : {
         "bucket_script" : {
             "buckets_path": {
                 "expSetProcessedFiles": "total_expset_processed_files",
                 "expProcessedFiles": "total_exp_processed_files",
+                "expSetOtherProcessedFiles": "total_expset_other_processed_files",
+                "expOtherProcessedFiles": "total_exp_other_processed_files",
                 "expRawFiles": "total_exp_raw_files"
             },
-            "script" : "params.expSetProcessedFiles + params.expProcessedFiles + params.expRawFiles"
+            "script" : "params.expSetProcessedFiles + params.expProcessedFiles + params.expSetOtherProcessedFiles + params.expOtherProcessedFiles + params.expRawFiles"
         }
     },
     "total_experiments" : {
