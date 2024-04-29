@@ -287,7 +287,9 @@ def bar_plot_chart(context, request):
             "files": (
                 search_result['aggregations']['total_expset_processed_files']['value'] +
                 search_result['aggregations']['total_exp_raw_files']['value'] +
-                search_result['aggregations']['total_exp_processed_files']['value']
+                search_result['aggregations']['total_exp_processed_files']['value'] +
+                search_result['aggregations']['total_exp_other_processed_files']['value'] +
+                search_result['aggregations']['total_expset_other_processed_files']['value']
             )
         },
         "other_doc_count": search_result['aggregations']['field_0'].get('sum_other_doc_count', 0),
