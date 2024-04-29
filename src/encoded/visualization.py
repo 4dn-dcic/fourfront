@@ -176,13 +176,13 @@ SUM_FILES_EXPS_AGGREGATION_DEFINITION = {
     },
     "total_expset_other_processed_files" : {
         "cardinality" : {
-            "field" : "embedded.other_processed_files.accession.raw",
+            "field" : "embedded.other_processed_files.files.accession.raw",
             "precision_threshold" : 10000
         }
     },
     "total_exp_other_processed_files" : {
         "cardinality" : {
-            "field" : "embedded.experiments_in_set.other_processed_files.accession.raw",
+            "field" : "embedded.experiments_in_set.other_processed_files.files.accession.raw",
             "precision_threshold" : 10000
         }
     },
