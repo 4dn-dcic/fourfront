@@ -14,5 +14,37 @@
         "submitted_by": "wrangler@wrangler.com",
         "url": "https://www.example.com",
         "uuid": "3cfe1236-368f-45a0-9ff9-a5277f1a56a9"
-    }
+    },
+    {
+        "age": 6,
+        "age_units": "year",
+        "aliases": [
+            "dcic:rhesus-monkey"
+        ],
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "organism": "91810543-bc7c-4486-84aa-3f38bc91f290",
+        "primate_life_stage": "infant",
+        "sex": "male",
+        "status": "in review by lab",
+        "submitted_by": "wrangler@wrangler.com",
+        "url": "https://www.example.com",
+        "uuid": "1324df2f-d108-4ba9-93d0-f19ad5e955d0"
+    },
+    {
+        "age": 5,
+        "age_units": "year",
+        "aliases": [
+            "dcic:white-tufted-ear-marmoset"
+        ],
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "organism": "9fc2a9e4-002f-4c87-b446-bc3c66286378",
+        "primate_life_stage": "infant",
+        "sex": "male",
+        "status": "in review by lab",
+        "submitted_by": "wrangler@wrangler.com",
+        "url": "https://www.example.com",
+        "uuid": "dc2c3262-64cb-4773-b14f-72de7d33d108"
+    }    
 ]

@@ -1,8 +1,3 @@
-===================
-Account Creation
-===================
-
-
 If you are a data submitter for a 4DN lab or are new to the project
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

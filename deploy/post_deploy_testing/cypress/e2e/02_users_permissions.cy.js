@@ -54,7 +54,7 @@ describe('Impersonate user JWT, navigate to profile, edit last_name to & back.',
                     return cy.visit(currUrl + '?datastore=database').end() // Edit last name ON DATASTORE=DATABASE TO PREVENT ERRORS DUE TO INDEXING NOT BEING CAUGHT UP FROM PRIOR TEST
                         .get('.page-container .user-title-row-container h1.user-title .last_name .value.saved a.edit-button').click().end()
                         .get('.page-container .user-title-row-container h1.user-title .last_name .value.editing input')
-                        .scrollToCenterElement().clear().type('SuperTest').then(function(inputfield){
+                        .scrollToCenterElement().clear().type('SuperTest', { delay: 0 }).then(function(inputfield){
                             return cy.window().get('.page-container .user-title-row-container h1.user-title .last_name .value.editing .save-button').click()
                                 .should('have.length', 0).end()
                                 .get('.page-container .user-title-row-container h1.user-title .last_name .value.editing .loading-icon').should('have.length', 0).end()
@@ -65,7 +65,7 @@ describe('Impersonate user JWT, navigate to profile, edit last_name to & back.',
                                 // Cleanup & test again
                                 .get('.page-container .user-title-row-container h1.user-title .last_name .value.saved a.edit-button').click().end()
                                 .get('.page-container .user-title-row-container h1.user-title .last_name .value.editing input').should('have.value', 'SuperTest')
-                                .clear({ force : true }).type('Test', { force : true }).then(function(inputfield){
+                                .clear({ force : true }).type('Test', { delay: 0 }).then(function(inputfield){
                                     return cy
                                         .get('.page-container .user-title-row-container h1.user-title .last_name .value.editing .save-button').click()
                                         .should('have.length', 0).end()

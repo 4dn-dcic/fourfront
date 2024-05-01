@@ -683,6 +683,7 @@ class File(Item):
             "supercedes": "is superceded by",
             "is superceded by": "supercedes",
             "paired with": "paired with",
+            "matched with": "matched with",
             # "grouped with": "grouped with"
         }
 

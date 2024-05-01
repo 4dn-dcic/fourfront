@@ -244,7 +244,7 @@ class TestingServerDefault(Item):
             },
             'accession': {
                 'serverDefault': 'accession',
-                'accessionType': 'AB',
+                'accessionType': 'BS',
                 'format': 'accession',
                 'type': 'string',
             },

@@ -2,9 +2,10 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import _ from 'underscore';
+import _, { forEach } from 'underscore';
 import memoize from 'memoize-one';
 import { compiler } from 'markdown-to-jsx';
+import { domToReact } from 'html-react-parser';
 
 import { MarkdownHeading, TableOfContents } from '@hms-dbmi-bgm/shared-portal-components/es/components/static-pages/TableOfContents';
 import { console, object, isServerSide } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
@@ -26,7 +27,7 @@ export const parseSectionsContent = memoize(function(context){
 
     const markdownCompilerOptions = {
         // Override basic header elements with MarkdownHeading to allow it to be picked up by TableOfContents
-        'overrides' : _.object(_.map(['h1','h2','h3','h4', 'h5', 'h6'], function(type){ // => { type : { component, props } }
+        'overrides' : _.object(_.map(['h1', 'h2', 'h3', 'h4', 'h5', 'h6'], function(type){ // => { type : { component, props } }
             return [type, {
                 'component' : MarkdownHeading,
                 'props'     : { 'type' : type }
@@ -34,16 +35,44 @@ export const parseSectionsContent = memoize(function(context){
         }))
     };
 
+    const getTextContent = (domNode) => {
+        let textContent = '';
+
+        if (domNode.type === 'text') {
+            textContent += domNode.data;
+        } else if (domNode.type === 'tag') {
+            forEach(domNode.children, (child) => {
+                textContent += getTextContent(child);
+            });
+        }
+
+        return textContent;
+    };
+
     const jsxCompilerOptions = {
         replace: (domNode) => {
-            if (['h1','h2','h3','h4', 'h5', 'h6'].indexOf(domNode.name) >= 0) {
-                const children = _.pluck(domNode.children, 'data');
-                const title = TableOfContents.textFromReactChildren(children) || '';
+            if (['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].indexOf(domNode.name) >= 0) {
+                const title = getTextContent(domNode) || '';
                 if (title.replace('-', '').trim().length === 0) {
                     return domNode;
                 }
+                const idToSet = TableOfContents.slugify(title);
                 const props = object.attributesToProps(domNode.attribs);
-                return <MarkdownHeading {...props} type={domNode.name}>{children}</MarkdownHeading>;
+                return <MarkdownHeading {...props} id={idToSet} type={domNode.name}>{domToReact(domNode.children)}</MarkdownHeading>;
+            } else if (domNode.type === 'tag' && domNode.name === 'pre') {
+                const children = _.pluck(domNode.children, 'data');
+                const className = domNode.attribs.class;
+                return (
+                    <div style={{ position: 'relative' }}>
+                        <object.CopyWrapper
+                            value={children}
+                            className={(className || '') + " mt-2"}
+                            wrapperElement="pre"
+                            whitespace={false}>
+                            {children}
+                        </object.CopyWrapper>
+                    </div>
+                );
             }
         }
     };

@@ -70,7 +70,7 @@ describe("Multiselect Search Page (e.g. HiGlass Add File)", function () {
                 originalFileText = originalFileText.match(/\d/g);
                 allResultTotalCount = parseInt(originalFileText.join(''));
 
-                cy.get('input[name="q"]').focus().type('mouse').end()
+                cy.get('input[name="q"]').focus().type('mouse', { delay: 0 }).end()
                     .get('form.navbar-search-form-container').submit().end()
                     .get('#slow-load-container').should('not.have.class', 'visible').end()
                     .searchPageTotalResultCount().should('be.greaterThan', 0).should('be.lessThan', allResultTotalCount);

@@ -35,6 +35,7 @@ from snovault.elasticsearch import APP_FACTORY
 from snovault.elasticsearch.interfaces import INVALIDATION_SCOPE_ENABLED
 
 from .appdefs import APP_VERSION_REGISTRY_KEY
+from .schema_formats import format_checker
 from snovault.loadxl import load_all
 
 

@@ -55,7 +55,9 @@ describe('Static Page & Content Tests', function () {
                             });
                             if (count < $listItems.length){
                                 cy.get(helpNavBarItemSelectorStr).click().should('have.class', 'dropdown-open-for').then(()=>{
-                                    cy.get('div.big-dropdown-menu a#' + escapeElementWithNumericId(allLinkElementIDs[count])).scrollIntoView().click().then(($nextListItem)=>{
+                                    //TODO: Remove wait() when a better workaround finds out
+                                    //TODO: May apply possible solutions described in https://www.cypress.io/blog/2018/02/05/when-can-the-test-start
+                                    cy.get('div.big-dropdown-menu a#' + escapeElementWithNumericId(allLinkElementIDs[count])).wait(500).click().then(($nextListItem)=>{
                                         const linkHref = $nextListItem.attr('href');
                                         cy.location('pathname').should('equal', linkHref);
                                         testVisit();
@@ -95,7 +97,8 @@ describe('Static Page & Content Tests', function () {
 
                         });
                     }
-                    cy.wrap($listItems.eq(0)).click().then(function($linkElem){
+                    cy.wrap($listItems.eq(0)).should('be.visible').click({ force: true }).then(function($linkElem){
+                        cy.get('#slow-load-container').should('not.have.class', 'visible').end();
                         const linkHref = $linkElem.attr('href');
                         cy.location('pathname').should('equal', linkHref);
                         testVisit();

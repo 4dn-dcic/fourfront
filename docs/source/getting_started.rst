@@ -1,11 +1,6 @@
 .. role:: raw-html-m2r(raw)
    :format: html
 
-======================
-Getting Started (User)
-======================
-
-
 Overview
 --------
 
@@ -45,8 +40,7 @@ The excel metadata workbooks
 * Can be generated using the Submit4DN software
 * Are used as input to the Submit4DN software which validates submissions and pushes the content of the forms to our database.
 
-Documentation of the data submission process using these forms can be found
-`here </help/submitter-guide/spreadsheet>`_.
+Documentation of the data submission process using these forms can be found `here </help/submitter-guide/spreadsheet>`__.
 
 REST API
 ^^^^^^^^
@@ -56,9 +50,9 @@ For both meta/data submission and retrival, you can also access our database dir
 
 * Data objects exchanged with the server conform to the standard JavaScript Object Notation (JSON) format.
 * Our implementation is analagous to the one developed
-  by the `ENCODE DCC <https://www.encodeproject.org/help/rest-api/>`_.
+  by the `ENCODE DCC <https://www.encodeproject.org/help/rest-api/>`__.
 
-If you would like to directly interact with the REST API for data submission see the documentation `here </help/user-guide/rest-api>`_.
+If you would like to directly interact with the REST API for data submission see the documentation `here </help/user-guide/rest-api>`__.
 
 Notes on Experiments and Replicate Sets
 ---------------------------------------
@@ -166,9 +160,6 @@ Any of the following can be used to reference an existing item in an excel sheet
      - GFP-H1B
 
 
-:raw-html-m2r:`<br>`
-
-
 * Many of the objects that you may need for your submissions may already exist on the 4DN web site.
 * We encourage submitters to use existing database items as much as possible.
 * Common reusable items include:
@@ -225,23 +216,22 @@ If you have been designated as a submitter for the project and plan to use eithe
    * the json must be formatted as shown below - replace key and secret with your new “Access Key ID” and “Secret Access Key”.  
    * You can use the same key and secret to use the 4DN `REST-API </help/user-guide/rest-api>`_.
 
-**Sample content for keypairs.json**
+**Sample content for keypairs.json**::
 
-.. code-block:: json
+  {
+    "default": {
+      "key": "ABCDEFG",
+      "secret": "abcdefabcd1ab",
+      "server": "https://data.4dnucleome.org/"
+    }
+  }
 
-   {
-     "default": {
-       "key": "ABCDEFG",
-       "secret": "abcdefabcd1ab",
-       "server": "https://data.4dnucleome.org/"
-     }
-   }
+.. Tip ::
+  If you don’t want to use that filename or keep the file in your home directory you can use:
 
-**Tip:** If you don’t want to use that filename or keep the file in your home directory you can use:
+  * the ``--keyfile`` parameter as an argument to any of the scripts to provide the path to your keypairs file.
+  * the ``--key`` parameter to indicate a stored key name.
+  
+  ::
 
-
-* the ``--keyfile`` parameter as an argument to any of the scripts to provide the path to your keypairs file.
-* 
-  the ``--key`` parameter to indicate a stored key name.
-
-    ``import_data --keyfile Path/name_of_file.json --key NotDefault``
+    import_data --keyfile Path/name_of_file.json --key NotDefault

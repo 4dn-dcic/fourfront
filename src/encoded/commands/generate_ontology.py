@@ -109,11 +109,10 @@ def get_termid_from_uri(uri):
     """Given a uri - takes the last part (name) and converts _ to :
         eg. http://www.ebi.ac.uk/efo/EFO_0002784 => EFO:0002784
     """
-    trans_tbl = str.maketrans('','','%?:#&= ')
+    trans_tbl = str.maketrans('', '', '%?:#&= ')
     term_id = splitNameFromNamespace(uri)[0]
     term_id = term_id.translate(trans_tbl)
     return term_id.replace('_', ':')
-
 
 
 def get_term_name_from_rdf(class_, data):
@@ -397,7 +396,6 @@ def get_slim_terms(connection):
 def get_existing_ontology_terms(connection, ontologies=None):
     """Retrieves all existing ontology terms from the db
     """
-    search_suffix = 'search/?type=OntologyTerm&status=released&status=obsolete'  # + ont_list
     db_terms = {}
     ignore = [
         "111112bc-8535-4448-903e-854af460a233", "111113bc-8535-4448-903e-854af460a233",
@@ -1005,6 +1003,7 @@ def write_outfile(to_write, filename, pretty=False):
         else:
             json.dump(to_write, outfile)
 
+
 def filter_ontologies(ontologies):
     for i, o in enumerate(ontologies):
         if o['ontology_name'].startswith('4DN'):
@@ -1102,7 +1101,11 @@ def main():
     connection = connect2server(args.env, key, args)
     print("Pre-processing")
     all_ontologies = get_ontologies(connection, 'all')
-    filter_ontologies(all_ontologies)
+    # ajs - 2024-03-01 commented filtering out of 4DN ontology so terms that have same name as these
+    # from other ontologies aren't thought to be new terms and then fail post due to shared term_id
+    # needed to add CL terms that had been not been included in UBERON - though the generation of the
+    # UBERON file (composite-metazoan) was fixed so may no longer be necessary
+    # filter_ontologies(all_ontologies)
     ontologies = get_ontologies(connection, args.ontology)
     if len(ontologies) > 1 and args.simple:
         print("INVALID USAGE - simple can only be used while processing a single ontology")
@@ -1110,7 +1113,7 @@ def main():
     if len(ontologies) > 1 and args.owlfile:
         print("INVALID USAGE - path to local owlfile can only be used while processing a single ontology")
         sys.exit(1)
-    filter_ontologies(ontologies)
+    # filter_ontologies(ontologies)
     print('HAVE ONTOLOGY INFO')
     slim_terms = get_slim_terms(connection)
     print('HAVE SLIM TERMS')

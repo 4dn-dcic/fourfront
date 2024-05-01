@@ -6,6 +6,96 @@ fourfront
 Change Log
 ----------
 
+7.4.1
+=====
+
+`RST static content updates <https://github.com/4dn-dcic/fourfront/pull/1882>`_
+
+* Adds admonition (currently, only "tip" supported)
+* Adds enhanced table features
+* Adds "initial_header_level" support
+* Adds copy-to-clipboard feature for <pre>
+
+
+7.4.0
+=====
+
+* Cypress GA configuration updated - migrated into Ubuntu 22, actions/checkout@v4, cypress-io/github-action@v6
+
+
+7.3.4
+=====
+
+* added new allowed relationship type to both File and Experiment - 'matched with'
+
+
+7.3.3
+=====
+
+* Cypress v13 upgrade
+
+
+7.3.2
+=====
+
+* Added new ignored_enum "normalized contact intensities" for file_processed.json schema
+
+
+7.3.1
+=====
+
+* Added upgrade/ingestion_submission.py for "new" (as of 5 months ago) restriction
+  in ingestion_submission schema that the "errors" array property, if present,
+  must have at least one element.
+* Added schemas/ingestion_schema.json which simply refers to snovault version (via $merge);
+  this is so we can update the schema_version (from 1 to 2), so the above upgrader takes.
+
+
+7.3.0
+=====
+
+* Updates nginx to latest
+
+
+7.2.2
+=====
+
+* Bump dcicsnovault v1.13.0 to fix non-admins AccessKey deleting restriction
+
+
+7.2.1
+=====
+
+`Facets list updates <https://github.com/4dn-dcic/fourfront/pull/1876>`_
+
+* Adds prop (hideHeaderToggle) to make facets list header's included/excluded toggle optional
+* Adds support for facet item's hide_from_view property
+
+
+7.2.0
+=====
+
+* Repairs accession validation
+
+
+7.1.8
+=====
+
+* Update Individual Primate schema to link two new organisms (Rhesus monkey and Marmoset)
+* Added the the new organisms in master_inserts/organism.json and inserts/individual_primate.json
+* fixed a typo in biosource.override_organism enum and added a new value to ignored enum for treatment_agent.concentration_units (ajs)
+* also small update to generate_ontology that I had made locally but now pushing (ajs 2024-03-01)
+
+
+7.1.7
+=====
+
+`Sentry updates + new user <https://github.com/4dn-dcic/fourfront/pull/1875>`_
+
+* Cancels the unnecessary logs that have been depleting the Sentry monthly quota
+* Adds Onurcan Karatay into master-inserts' users
+
+
 7.1.6
 =====
 

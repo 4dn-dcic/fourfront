@@ -3017,7 +3017,7 @@
         "uuid": "b9829418-49e5-4c33-afab-9ec90d659999"
     },
     {
-        "accession": "4DNWFP00U73B",
+        "accession": "4DNWFPOOU73B",
         "app_name": "hi-c-processing-partb",
         "app_version": "0.2.0",
         "arguments": [
@@ -3567,7 +3567,7 @@
         "uuid": "e554d10d-d1e7-4055-aef6-4226ff1bcdb2"
     },
     {
-        "accession": "4DNWF06BPEF2",
+        "accession": "4DNWF16BPEF2",
         "arguments": [
             {
                 "argument_format": "cool",
@@ -4044,7 +4044,7 @@
         "uuid": "3feedadc-50f9-4bb4-919b-09a8b731d0cc"
     },
     {
-        "accession": "4DNWF37VHW0F",
+        "accession": "4DNWF37VHW1F",
         "app_name": "pairsam-parse-sort",
         "app_version": "0.2.0",
         "arguments": [
@@ -4332,7 +4332,7 @@
         "uuid": "a18978fa-7e78-488f-8e6b-bfb6f63b8861"
     },
     {
-        "accession": "4DNWF38VH15",
+        "accession": "4DNWF38VH151",
         "app_name": "pairsam-filter",
         "app_version": "0.2.0",
         "arguments": [
@@ -4454,7 +4454,7 @@
         "uuid": "3758e00c-2035-43c6-b783-bb92afe57c99"
     },
     {
-        "accession": "4DNWZJ2G671",
+        "accession": "4DNWFZJ2G671",
         "app_name": "addfragtopairs",
         "app_version": "0.2.0",
         "arguments": [
@@ -4558,7 +4558,7 @@
         "uuid": "ef125750-8df2-418e-a1ee-402285f9dd93"
     },
     {
-        "accession": "4DNWZH36VU2",
+        "accession": "4DNWFZH36VU2",
         "app_name": "pairs-patch",
         "app_version": "0.2.0",
         "arguments": [
@@ -9066,7 +9066,7 @@
         "uuid": "05b62bba-7bfa-46cc-8d8e-3d37f4feb8bd"
     },
     {
-        "accession": "4DNWJV73GVL",
+        "accession": "4DNWFJV73GVL",
         "app_name": "bedGraphToBigWig",
         "app_version": "v4",
         "arguments": [
@@ -9165,7 +9165,7 @@
         "uuid": "667b14a7-a47e-4857-adf1-12a6393c4b8e"
     },
     {
-        "accession": "4DNWJL752HA",
+        "accession": "4DNWFJL752HA",
         "app_name": "encode-chipseq",
         "app_version": "dev",
         "arguments": [
@@ -9594,7 +9594,7 @@
         "uuid": "5b44ce1b-0347-40a6-bc9c-f39fb5d7bce3"
     },
     {
-        "accession": "4DNWF25VHY9",
+        "accession": "4DNWF25VHY92",
         "app_name": "encode-chipseq-aln-chip",
         "app_version": "1.1.1",
         "arguments": [
@@ -10441,7 +10441,7 @@
         "uuid": "1dfb78e8-9844-48c6-804e-d05e7257e179"
     },
     {
-        "accession": "4DNWF3BT781",
+        "accession": "4DNWF3BT7812",
         "app_name": "encode-chipseq-postaln",
         "app_version": "1.1.1",
         "arguments": [
@@ -10850,7 +10850,7 @@
         "uuid": "1f04547b-7d26-43a4-888d-2d8a4595f513"
     },
     {
-        "accession": "4DNWB42C877",
+        "accession": "4DNWFB42C877",
         "app_name": "encode-atacseq",
         "app_version": "dev",
         "arguments": [
@@ -11260,7 +11260,7 @@
         "uuid": "6fb021e9-858c-4561-8ce1-e0adc673e0b5"
     },
     {
-        "accession": "4DNWF2BBZ1E",
+        "accession": "4DNWF2BBZ1E1",
         "app_name": "encode-atacseq-aln",
         "app_version": "1.1.1",
         "arguments": [
@@ -11656,7 +11656,7 @@
         "uuid": "d497c075-ab57-4c5b-8c65-7bb8410f26fa"
     },
     {
-        "accession": "4DNWF2VTG8I",
+        "accession": "4DNWF2VTG8I1",
         "app_name": "encode-atacseq-postaln",
         "app_version": "1.1.1",
         "arguments": [
@@ -11969,7 +11969,7 @@
         "aliases": ["4dn-dcic-lab:wf-encode-atacseq-postaln"]
     },
     {
-        "accession": "4DNWLM174GGG",
+        "accession": "4DNWFLM174GG",
         "app_name": "bedtobeddb",
         "app_version": "v2",
         "arguments": [

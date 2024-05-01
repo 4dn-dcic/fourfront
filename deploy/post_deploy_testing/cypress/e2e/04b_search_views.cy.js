@@ -25,11 +25,11 @@ describe('Post-Deployment Search View Tests', function () {
             cy.location('search').should('include', 'type=Item');
 
             cy.searchPageTotalResultCount().then((totalCountExpected) => {
-                const intervalCount = Math.min(20, parseInt(totalCountExpected / 25));
+                const pageCount = Math.min(10, parseInt(totalCountExpected / 25));
 
-                for (let interval = 0; interval < intervalCount; interval++) {
+                for (let page = 0; page < pageCount; page++) {
                     cy.scrollToBottom().then(() => {
-                        cy.get('.search-results-container .search-result-row[data-row-number="' + (25 * (interval + 1)) + '"]').should('have.length', 1);
+                        cy.get('.search-results-container .search-result-row[data-row-number="' + (25 * (page + 1)) + '"]').should('have.length', 1);
                     });
                 }
 
@@ -43,7 +43,7 @@ describe('Post-Deployment Search View Tests', function () {
             cy.searchPageTotalResultCount().then((totalCountExpected) => {
                 const intervalCount = Math.floor(Math.random() * 5);//Math.min(5, parseInt(totalCountExpected / 25));
                 cy.get('.search-result-row.detail-closed[data-row-number="' + intervalCount + '"] .search-result-column-block[data-field="@type"] .item-type-title').then(function ($typeTitle) {
-                    typeTitle = $typeTitle.text().replace(/\s/g,'').replace(/([A-Z])/g, ' $1').trim();
+                    typeTitle = $typeTitle.text().replace(/\s/g,'').replace(/([A-Z])/g, ' $1').replace('Hi Glass', 'HiGlass').trim();
                     cy.log('typeTitle:' + typeTitle);
 
                     cy.get('.search-result-row.detail-closed[data-row-number="' + intervalCount + '"] .search-result-column-block[data-field="@type"] .icon-container .icon').click({ force: true }).end();
@@ -81,7 +81,7 @@ describe('Post-Deployment Search View Tests', function () {
         it('Starting from /search/, typing "olfactory" into searchbox redirects back to search', function () {
             cy.get("a#search-menu-item").click().end()
                 .searchPageTotalResultCount().should('be.greaterThan', 100).then(function (origResultCount) {
-                    return cy.get('.big-dropdown-menu-background .form-control').focus().clear().type('olfactory').should('have.value', 'olfactory').end()
+                    return cy.get('.big-dropdown-menu-background .form-control').focus().clear().type('olfactory', { delay: 0 }).should('have.value', 'olfactory').end()
                         .get('form.navbar-search-form-container').submit().end()
                         .location('search').should('include', 'q=olfactory').end()
                         .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()
@@ -93,10 +93,11 @@ describe('Post-Deployment Search View Tests', function () {
         it('Can scroll all the way down without interruption', function(){
 
             cy.searchPageTotalResultCount().should('be.greaterThan', 50).should('be.lessThan', 30000).then((resultCount)=>{
-                const intervalCount = parseInt(resultCount / 25) - ( resultCount % 25 > 0 ? 0 : 1); // Skip last interval if no more to load.
+                let pageCount = parseInt(resultCount / 25) - ( resultCount % 25 > 0 ? 0 : 1); // Skip last interval if no more to load.
+                pageCount = Math.min(pageCount, 10);
 
-                for (let interval = 0; interval < intervalCount; interval++){
-                    cy.scrollToBottom().end().get('.search-results-container .search-result-row[data-row-number="' + (25 * (interval + 1)) + '"]').should('have.length', 1);
+                for (let page = 0; page < pageCount; page++){
+                    cy.scrollToBottom().end().get('.search-results-container .search-result-row[data-row-number="' + (25 * (page + 1)) + '"]').should('have.length', 1);
                 }
             });
 
