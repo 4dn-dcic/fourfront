@@ -13,12 +13,14 @@ from sqlalchemy import exc
 
 from dcicutils.ff_mocks import NO_SERVER_FIXTURES
 from dcicutils.qa_utils import notice_pytest_fixtures, MockFileSystem
+from dcicutils.redis_utils import create_redis_client
 from pyramid.request import apply_request_extensions
 from pyramid.testing import DummyRequest
 from pyramid.threadlocal import get_current_registry, manager as threadlocal_manager
 from snovault import DBSESSION, ROOT, UPGRADER
 from snovault.elasticsearch import ELASTIC_SEARCH, create_mapping
 from snovault.util import generate_indexer_namespace_for_testing
+from pytest_redis import factories
 from .conftest_settings import make_app_settings_dictionary
 from .. import main
 from snovault.loadxl import load_all
@@ -76,6 +78,17 @@ def app_settings(request, wsgi_server_host_port, conn, DBSession):  # noQA - We 
     return settings
 
 
+@pytest.fixture(scope='session')
+def ras_app_settings(request, wsgi_server_host_port, conn, DBSession):  # noQA - We didn't choose the fixture name.
+    notice_pytest_fixtures(request, wsgi_server_host_port, conn, DBSession)
+    settings = make_app_settings_dictionary()
+    settings['auth0.audiences'] = 'http://%s:%s' % wsgi_server_host_port
+    settings['auth0.domain'] = 'https://stsstg.nih.gov'
+    settings['auth0.client'] = 'dummy-client-id'
+    settings[DBSESSION] = DBSession
+    return settings
+
+
 INDEXER_NAMESPACE_FOR_TESTING = generate_indexer_namespace_for_testing('fourfront')
 
 
@@ -94,6 +107,24 @@ def es_app_settings(wsgi_server_host_port, elasticsearch_server, postgresql_serv
     # use aws auth to access elasticsearch
     if aws_auth:
         settings['elasticsearch.aws_auth'] = aws_auth
+    return settings
+
+
+# special redis fixture for the session
+redis_proc = factories.redis_proc(port=8888)
+
+
+@pytest.fixture(scope='session')
+def redis_app_settings(wsgi_server_host_port, postgresql_server, redis_proc):
+    settings = make_app_settings_dictionary()
+    settings['create_tables'] = True
+    settings['persona.audiences'] = 'http://%s:%s' % wsgi_server_host_port  # 2-tuple such as: ('localhost', '5000')
+    settings['sqlalchemy.url'] = postgresql_server
+    settings['collection_datastore'] = 'elasticsearch'
+    settings['item_datastore'] = 'elasticsearch'
+    settings['indexer'] = True
+    settings['indexer.namespace'] = INDEXER_NAMESPACE_FOR_TESTING
+    settings['redis.server'] = f'redis://127.0.0.1:8888'
     return settings
 
 
@@ -159,6 +190,11 @@ def app(app_settings):
 
 
 @pytest.fixture(scope='session')
+def ras_app(ras_app_settings):
+    return main({}, **ras_app_settings)
+
+
+@pytest.fixture(scope='session')
 def es_app(es_app_settings, **kwargs):
     """
     App that uses both Postgres and ES - pass this as "app" argument to TestApp.
@@ -167,6 +203,13 @@ def es_app(es_app_settings, **kwargs):
     app = main({}, **es_app_settings)
     create_mapping.run(app, **kwargs)
 
+    return app
+
+
+@pytest.fixture(scope='session')
+def redis_app(redis_app_settings, **kwargs):
+    """ App that uses Redis and Postgres for testing session tokens """
+    app = main({}, **redis_app_settings)
     return app
 
 
@@ -282,6 +325,26 @@ def es_testapp(es_app):
         'REMOTE_USER': 'TEST',
     }
     return webtest.TestApp(es_app, environ)
+
+
+@pytest.fixture(scope='session')
+def redis_testapp(redis_app):
+    """ Testapp with Postgres and Redis """
+    environ = {
+        'HTTP_ACCEPT': 'application/json',
+        'REMOTE_USER': 'TEST',
+    }
+    return webtest.TestApp(redis_app, environ)
+
+
+@pytest.fixture(scope='session')
+def ras_testapp(ras_app):
+    """ Testapp for use with RAS """
+    environ = {
+        'HTTP_ACCEPT': 'application/json',
+        'REMOTE_USER': 'TEST',
+    }
+    return webtest.TestApp(ras_app, environ)
 
 
 @pytest.fixture

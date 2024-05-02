@@ -29,6 +29,7 @@ from snovault import (
     load_schema,
     abstract_collection,
 )
+from snovault.authentication import session_properties
 from snovault.attachment import ItemWithAttachment
 from snovault.crud_views import (
     collection_add,
@@ -53,8 +54,6 @@ from urllib.parse import (
     parse_qs,
     urlparse,
 )
-from uuid import uuid4
-from ..authentication import session_properties
 from ..search import make_search_subreq
 from ..util import check_user_is_logged_in
 from .base import (
@@ -1517,7 +1516,6 @@ def update_google_analytics(context, request, ga_config, filename, file_size_dow
             }
         ]
     }
-    # import pdb;pdb.set_trace()
 
     if user_uuid:
         ga_payload['events'][0]['params']['user_uuid'] = user_uuid

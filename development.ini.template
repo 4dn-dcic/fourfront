@@ -6,6 +6,7 @@
 [app:app]
 use = config:base.ini#app
 sqlalchemy.url = postgresql://postgres@localhost:5441/postgres?host=/tmp/snovault/pgdata
+redis.server = redis://localhost:6379
 blob_bucket = encoded-4dn-blobs
 metadata_bundles_bucket = metadata-bundles-fourfront-local-test
 load_test_only = true
