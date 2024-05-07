@@ -177,20 +177,28 @@ SUM_FILES_EXPS_AGGREGATION_DEFINITION = {
     "total_exp_expset_other_processed_files" : {
         "cardinality" : {
             "script":{
-		        "source":"return [doc['embedded.experiments_in_set.other_processed_files.files.accession.raw'], doc['embedded.experiments_in_set.other_processed_files.files.accession.raw']]"
+		        "source":"return [doc['embedded.experiments_in_set.other_processed_files.files.accession.raw'], doc['embedded.other_processed_files.files.accession.raw']]"
 		    },
             "precision_threshold" : 10000
         }
     },
+    # "total_files" : {
+    #     "bucket_script" : {
+    #         "buckets_path": {
+    #             "expSetProcessedFiles": "total_expset_processed_files",
+    #             "expProcessedFiles": "total_exp_processed_files",
+    #             "expExpSetOtherProcessedFiles": "total_exp_expset_other_processed_files",
+    #             "expRawFiles": "total_exp_raw_files"
+    #         },
+    #         "script" : "params.expSetProcessedFiles + params.expProcessedFiles + params.expExpSetOtherProcessedFiles + params.expRawFiles"
+    #     }
+    # },
     "total_files" : {
-        "bucket_script" : {
-            "buckets_path": {
-                "expSetProcessedFiles": "total_expset_processed_files",
-                "expProcessedFiles": "total_exp_processed_files",
-                "expExpSetOtherProcessedFiles": "total_exp_expset_other_processed_files",
-                "expRawFiles": "total_exp_raw_files"
-            },
-            "script" : "params.expSetProcessedFiles + params.expProcessedFiles + params.expExpSetOtherProcessedFiles + params.expRawFiles"
+        "cardinality" : {
+            "script":{
+		        "source":"return [doc['embedded.experiments_in_set.files.accession.raw'], doc['embedded.processed_files.accession.raw'], doc['embedded.experiments_in_set.processed_files.accession.raw'], doc['embedded.experiments_in_set.other_processed_files.files.accession.raw'], doc['embedded.other_processed_files.files.accession.raw']]"
+		    },
+            "precision_threshold" : 10000
         }
     },
     "total_experiments" : {
