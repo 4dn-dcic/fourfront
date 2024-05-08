@@ -316,7 +316,8 @@ class Stat extends React.PureComponent {
     static typesPathMap = {
         'experiments' : "/search/?type=Experiment&experiment_sets.experimentset_type=replicate&experiment_sets.@type=ExperimentSetReplicate",
         'expsets' : "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate",
-        'files' : "/search/?type=File&experiments.experiment_sets.@type=ExperimentSetReplicate&experiments.experiment_sets.experimentset_type=replicate"
+        'files' : "/search/?type=File&track_and_facet_info.replicate_info!=No+value"
+        // 'files' : "/search/?type=File&experiments.experiment_sets.@type=ExperimentSetReplicate&experiments.experiment_sets.experimentset_type=replicate"
     };
 
     filtersHrefChunk(){
