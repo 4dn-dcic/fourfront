@@ -174,33 +174,38 @@ SUM_FILES_EXPS_AGGREGATION_DEFINITION = {
             "precision_threshold" : 10000
         }
     },
-    "total_exp_expset_other_processed_files" : {
+    "total_expset_other_processed_files" : {
         "cardinality" : {
-            "script":{
-		        "source":"return [doc['embedded.experiments_in_set.other_processed_files.files.accession.raw'], doc['embedded.other_processed_files.files.accession.raw']]"
-		    },
+            "field": "embedded.other_processed_files.files.accession.raw",
             "precision_threshold" : 10000
         }
     },
-    # "total_files" : {
-    #     "bucket_script" : {
-    #         "buckets_path": {
-    #             "expSetProcessedFiles": "total_expset_processed_files",
-    #             "expProcessedFiles": "total_exp_processed_files",
-    #             "expExpSetOtherProcessedFiles": "total_exp_expset_other_processed_files",
-    #             "expRawFiles": "total_exp_raw_files"
-    #         },
-    #         "script" : "params.expSetProcessedFiles + params.expProcessedFiles + params.expExpSetOtherProcessedFiles + params.expRawFiles"
-    #     }
-    # },
-    "total_files" : {
+    "total_exp_other_processed_files" : {
         "cardinality" : {
-            "script":{
-		        "source":"return [doc['embedded.experiments_in_set.files.accession.raw'], doc['embedded.processed_files.accession.raw'], doc['embedded.experiments_in_set.processed_files.accession.raw'], doc['embedded.experiments_in_set.other_processed_files.files.accession.raw'], doc['embedded.other_processed_files.files.accession.raw']]"
-		    },
-            "precision_threshold" : 40000
+            "field": "embedded.experiments_in_set.other_processed_files.files.accession.raw",
+            "precision_threshold" : 10000
         }
     },
+    "total_files" : {
+        "bucket_script" : {
+            "buckets_path": {
+                "expSetProcessedFiles": "total_expset_processed_files",
+                "expProcessedFiles": "total_exp_processed_files",
+                "expSetOtherProcessedFiles": "total_expset_other_processed_files",
+                "expOtherProcessedFiles": "total_exp_other_processed_files",
+                "expRawFiles": "total_exp_raw_files"
+            },
+            "script" : "params.expSetProcessedFiles + params.expProcessedFiles + params.expSetOtherProcessedFiles + params.expOtherProcessedFiles + params.expRawFiles"
+        }
+    },
+    # "total_files" : {
+    #     "cardinality" : {
+    #         "script":{
+	# 	        "source":"return [doc['embedded.experiments_in_set.files.accession.raw'], doc['embedded.processed_files.accession.raw'], doc['embedded.experiments_in_set.processed_files.accession.raw'], doc['embedded.experiments_in_set.other_processed_files.files.accession.raw'], doc['embedded.other_processed_files.files.accession.raw']]"
+	# 	    },
+    #         "precision_threshold" : 10000
+    #     }
+    # },
     "total_experiments" : {
         "value_count" : {
             "field" : "embedded.experiments_in_set.accession.raw"
@@ -291,7 +296,8 @@ def bar_plot_chart(context, request):
                 search_result['aggregations']['total_expset_processed_files']['value'] +
                 search_result['aggregations']['total_exp_raw_files']['value'] +
                 search_result['aggregations']['total_exp_processed_files']['value'] +
-                search_result['aggregations']['total_exp_expset_other_processed_files']['value']
+                search_result['aggregations']['total_expset_other_processed_files']['value'] +
+                search_result['aggregations']['total_exp_other_processed_files']['value']
             )
         },
         "other_doc_count": search_result['aggregations']['field_0'].get('sum_other_doc_count', 0),
