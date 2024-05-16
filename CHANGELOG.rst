@@ -6,6 +6,12 @@ fourfront
 Change Log
 ----------
 
+7.4.2
+=====
+
+* Bug fix - LocalizedTime component cannot handle invalid dates and makes UI failing completely
+
+
 7.4.1
 =====
 
