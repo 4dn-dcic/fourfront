@@ -52,7 +52,7 @@ TSV_MAPPING = OrderedDict([
     ('File Download URL',           (FILE,      ['href'], True)),
     ('Experiment Set Accession',    (EXP_SET,   ['accession'], True)),
     ('Experiment Accession',        (EXP,       ['accession'], True)),
-    ('Experiment Set Accession ',   (FILE_ONLY, ['experiment_sets.accession'], True)), #do not remove trailing whitespace of the key
+    ('Experiment Set Accession ',   (FILE_ONLY, ['source_experiment_sets.display_title'], True)), #do not remove trailing whitespace of the key
     ('Experiment Accession ',       (FILE_ONLY, ['experiments.accession'], True)), #do not remove trailing whitespace of the key
     ('File Accession',              (FILE,      ['accession'], True)),
 
