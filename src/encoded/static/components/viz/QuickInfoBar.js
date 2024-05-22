@@ -287,7 +287,7 @@ const StatsCol = React.memo(function StatsCol(props){
             'files'             : total.files || 0
         };
     }
-    const statProps = _.extend(_.pick(props, 'id', 'href', 'isLoadingChartData'), { 'expSetFilters' : expSetFilters });
+    const statProps = _.extend(_.pick(props, 'id', 'href', 'isLoadingChartData', 'browseBaseState'), { 'expSetFilters' : expSetFilters });
     return (
         <div className="col-8 left-side clearfix">
             <Stat {...statProps} shortLabel="Experiment Sets" longLabel="Experiment Sets" classNameID="expsets" value={stats.experiment_sets} key="expsets" />
@@ -316,8 +316,9 @@ class Stat extends React.PureComponent {
     static typesPathMap = {
         'experiments' : "/search/?type=Experiment&experiment_sets.experimentset_type=replicate&experiment_sets.@type=ExperimentSetReplicate",
         'expsets' : "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate",
-        'files' : "/search/?type=File&experiments.experiment_sets.@type=ExperimentSetReplicate&experiments.experiment_sets.experimentset_type=replicate"
-    }
+        'files' : "/search/?type=File&track_and_facet_info.replicate_info!=No+value"
+        // 'files' : "/search/?type=File&experiments.experiment_sets.@type=ExperimentSetReplicate&experiments.experiment_sets.experimentset_type=replicate"
+    };
 
     filtersHrefChunk(){
         const { expSetFilters, classNameID } = this.props;
@@ -330,16 +331,40 @@ class Stat extends React.PureComponent {
         }
     }
 
+    // Version 1: Always goto Browse page for now
+    // label(){
+    //     const { value, shortLabel, expSetFilters, href } = this.props;
+    //     if (!value) {
+    //         return shortLabel;
+    //     }
+
+    //     // Always goto Browse page for now
+    //     var filtersHrefChunk = searchFilters.expSetFiltersToURLQuery(expSetFilters); //this.filtersHrefChunk();
+    //     var targetHref = navigate.getBrowseBaseHref();
+    //     targetHref += (filtersHrefChunk ? navigate.determineSeparatorChar(targetHref) + filtersHrefChunk : '');
+
+    //     if (typeof href === 'string'){
+    //         // Strip hostname/port from this.props.href and compare pathnames to check if we are already on this page.
+    //         if (navigate.isBrowseHref(href)) return <span>{ shortLabel }</span>;
+    //         // eslint-disable-next-line no-useless-escape
+    //         if (href.replace(/(http:|https:)(\/\/)[^\/]+(?=\/)/, '') === targetHref) return <span>{ shortLabel }</span>;
+    //     }
+
+    //     return (
+    //         <a href={targetHref}>{ shortLabel }</a>
+    //     );
+    // }
+
+    // Version 2: Goto ExpSet, Exp, File
     label(){
-        const { value, shortLabel, expSetFilters, href } = this.props;
+        const { value, shortLabel, href, classNameID, browseBaseState } = this.props;
         if (!value) {
             return shortLabel;
         }
 
-        // Always goto Browse page for now
-        var filtersHrefChunk = searchFilters.expSetFiltersToURLQuery(expSetFilters); //this.filtersHrefChunk();
-        var targetHref = navigate.getBrowseBaseHref();
-        targetHref += (filtersHrefChunk ? navigate.determineSeparatorChar(targetHref) + filtersHrefChunk : '');
+        const filtersHrefChunk = (browseBaseState === 'only_4dn' ? 'award.project=4DN' : '');//this.filtersHrefChunk();
+        const sep = filtersHrefChunk && filtersHrefChunk.length > 0 ? '&' : '';
+        const targetHref = Stat.typesPathMap[classNameID] + sep + (filtersHrefChunk || '');
 
         if (typeof href === 'string'){
             // Strip hostname/port from this.props.href and compare pathnames to check if we are already on this page.

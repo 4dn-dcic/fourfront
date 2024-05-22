@@ -6,6 +6,13 @@ fourfront
 Change Log
 ----------
 
+7.5.0
+=====
+
+* changes QuickInfoBar experiment and file links from /browse to /search
+* adds OPF to File counts
+
+
 7.4.2
 =====
 
