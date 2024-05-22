@@ -198,14 +198,6 @@ SUM_FILES_EXPS_AGGREGATION_DEFINITION = {
             "script" : "params.expSetProcessedFiles + params.expProcessedFiles + params.expSetOtherProcessedFiles + params.expOtherProcessedFiles + params.expRawFiles"
         }
     },
-    # "total_files" : {
-    #     "cardinality" : {
-    #         "script":{
-	# 	        "source":"return [doc['embedded.experiments_in_set.files.accession.raw'], doc['embedded.processed_files.accession.raw'], doc['embedded.experiments_in_set.processed_files.accession.raw'], doc['embedded.experiments_in_set.other_processed_files.files.accession.raw'], doc['embedded.other_processed_files.files.accession.raw']]"
-	# 	    },
-    #         "precision_threshold" : 10000
-    #     }
-    # },
     "total_experiments" : {
         "value_count" : {
             "field" : "embedded.experiments_in_set.accession.raw"

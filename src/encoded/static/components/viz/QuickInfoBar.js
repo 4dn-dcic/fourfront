@@ -362,7 +362,7 @@ class Stat extends React.PureComponent {
             return shortLabel;
         }
 
-        const filtersHrefChunk = (browseBaseState === 'only_4dn' ? 'award.project=4DN' : '');//this.filtersHrefChunk();
+        const filtersHrefChunk = (browseBaseState === 'only_4dn' ? 'award.project=4DN' : '');
         const sep = filtersHrefChunk && filtersHrefChunk.length > 0 ? '&' : '';
         const targetHref = Stat.typesPathMap[classNameID] + sep + (filtersHrefChunk || '');
 
