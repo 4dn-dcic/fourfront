@@ -6,6 +6,12 @@ fourfront
 Change Log
 ----------
 
+7.5.1
+=====
+
+* grab ExpSet accession from source_experiment_sets instead of experiment_sets for FileView's metadata.tsv generation
+
+
 7.5.0
 =====
 
