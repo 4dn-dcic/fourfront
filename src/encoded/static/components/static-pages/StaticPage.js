@@ -68,7 +68,7 @@ export const parseSectionsContent = memoize(function(context){
                             value={children}
                             className={(className || '') + " mt-2"}
                             wrapperElement="pre"
-                            whitespace={false}>
+                            whitespace={false} analyticsOnCopy maskAnalyticsValue={true}>
                             {children}
                         </object.CopyWrapper>
                     </div>
