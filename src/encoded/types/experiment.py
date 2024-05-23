@@ -1053,32 +1053,42 @@ class ExperimentMic(Experiment):
         return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample))
 
     @calculated_property(schema=EXP_CATEGORIZER_SCHEMA)
-    def experiment_categorizer(self, request, experiment_type, biosample, imaging_paths=None):
+    def experiment_categorizer(self, request, experiment_type, imaging_paths=None):
         ''' Use the target(s) in the imaging path'''
         if imaging_paths:
-            unique_targets = []
-            path_targets = []
+            path_targets_by_type = {}
             for pathobj in imaging_paths:
                 path = get_item_or_none(request, pathobj['path'], 'imaging_path')
                 for target in path.get('target', []):
                     biofeature = get_item_or_none(request, target, 'bio_feature')
-                    if biofeature['@id'] not in unique_targets:
-                        unique_targets.append(biofeature['@id'])
-                        path_targets.append(biofeature['display_title'])
-            if path_targets:
+                    if biofeature:
+                        ftype = biofeature.get('feature_type')
+                        atid = biofeature.get('@id')
+                        path_targets_by_type.setdefault(ftype, {}).setdefault(atid, '')
+                        path_targets_by_type[ftype][atid] = biofeature.get('display_title')
+            if path_targets_by_type:
                 value = []
-                sum_targets = {}
-                for target in path_targets:
-                    # check if target starts with numbers, e.g. '50 TADs', '40 TADs'
-                    # sum them if there are more: '90 TADs'
-                    split_target = re.split(r'(^[0-9]+)', target, maxsplit=1)
-                    if len(split_target) > 1:
-                        t_num, t_name = split_target[1:3]
-                        sum_targets[t_name] = sum_targets.setdefault(t_name, 0) + int(t_num)
-                    elif target not in value:
-                        value.append(target)
-                if sum_targets:
-                    value = [str(n) + t for t, n in sum_targets.items()] + value
+                for feat_type, targets in path_targets_by_type.items():
+                    if len(targets) > 5:
+                        ftype_term = get_item_or_none(request, feat_type, 'ontology_term')
+                        ftype_str = ftype_term.get('display_title')
+                        if ftype_str == 'region':
+                            ftype_str = 'genomic region'
+                        ftype_str = f"{ftype_str.replace('_', ' ')}s"
+                        value.append(f"{len(targets)} {ftype_str}")
+                    else:
+                        sum_targets = {}
+                        for tname in targets.values():
+                            # check if target starts with numbers, e.g. '50 TADs', '40 TADs'
+                            # sum them if there are more: '90 TADs'
+                            split_target = re.split(r'(^[0-9]+)', tname, maxsplit=1)
+                            if len(split_target) > 1:
+                                t_num, t_name = split_target[1:3]
+                                sum_targets[t_name] = sum_targets.setdefault(t_name, 0) + int(t_num)
+                            elif tname not in value:
+                                value.append(tname)
+                        if sum_targets:
+                            value = [str(n) + t for t, n in sum_targets.items()] + value
                 value = ', '.join(value)
                 return {
                     'field': 'Target',
