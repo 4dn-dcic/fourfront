@@ -6,6 +6,12 @@ fourfront
 Change Log
 ----------
 
+7.5.2
+=====
+
+* adds two new props to object.CopyWrapper to allow/prevent sending analytics data into GA4
+
+
 7.5.1
 =====
 

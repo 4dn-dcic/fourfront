@@ -825,7 +825,8 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         const gridState = layout.responsiveGridState(windowWidth);
         const isMobile = gridState !== 'lg' && gridState !== 'xl';
         return (
-            <object.CopyWrapper data-tip="Copy view URL to clipboard to share with others." includeIcon={false} wrapperElement="button" value={href}>
+            <object.CopyWrapper data-tip="Copy view URL to clipboard to share with others." includeIcon={false} wrapperElement="button"
+                value={href} analyticsOnCopy maskAnalyticsValue={false}>
                 <i className="icon icon-fw icon-copy far"/>
                 {isMobile ?
                     <React.Fragment>

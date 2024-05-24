@@ -214,7 +214,8 @@ export class TopRow extends React.Component {
                         {typeInfoVisible ? this.typeInfoLabel() : null}
                         { typeInfoVisible && context.accession ?
                             <object.CopyWrapper value={context.accession} className="accession inline-block" data-tip={accessionTooltip}
-                                wrapperElement="span" iconProps={{ 'style': { 'fontSize': '0.875rem', 'marginLeft': -3 } }}>
+                                wrapperElement="span" iconProps={{ 'style': { 'fontSize': '0.875rem', 'marginLeft': -3 } }}
+                                analyticsOnCopy maskAnalyticsValue={true}>
                                 {context.accession}
                             </object.CopyWrapper>
                             : null}
