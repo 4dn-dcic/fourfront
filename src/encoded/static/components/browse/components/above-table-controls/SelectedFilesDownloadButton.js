@@ -292,7 +292,7 @@ const ModalCodeSnippet = React.memo(function ModalCodeSnippet(props){
     const plainValue = `cut -f 1 ${filename} | tail -n +3 | grep -v ^# | xargs -n 1 curl -O -L` + (session ? " --user <access_key_id>:<access_key_secret>" : '');
     return (
         <object.CopyWrapper value={plainValue} className="curl-command-wrapper" data-tip={'Click to copy'}
-            wrapperElement="div" iconProps={{ }}>
+            wrapperElement="div" iconProps={{ }} analyticsOnCopy maskAnalyticsValue={false}>
             {htmlValue}
         </object.CopyWrapper>
     );

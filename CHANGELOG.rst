@@ -6,12 +6,18 @@ fourfront
 Change Log
 ----------
 
-7.5.2
+
+7.5.3
 =====
 
 `calcprop update  <https://github.com/4dn-dcic/fourfront/pull/1890>`_
 
 * Updated experiment_categorizer calcprop for ExperimentMic to deal with many targets in imaging paths
+
+7.5.2
+=====
+
+* adds two new props to object.CopyWrapper to allow/prevent sending analytics data into GA4
 
 
 7.5.1

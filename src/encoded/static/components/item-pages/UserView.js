@@ -148,7 +148,9 @@ class SyncedAccessKeyTable extends React.PureComponent {
                             Access Key ID
                         </div>
                         <div className="col-8">
-                            <code>{ access_key_id }</code>
+                            <object.CopyWrapper value={access_key_id} data-tip={'Click to copy'} className="d-inline-block"
+                                wrapperElement="div" iconProps={{}} analyticsOnCopy={false}><code>{access_key_id}</code>
+                            </object.CopyWrapper>
                         </div>
                     </div>
                     <div className="row mt-05">
@@ -156,7 +158,9 @@ class SyncedAccessKeyTable extends React.PureComponent {
                             Secret Access Key
                         </div>
                         <div className="col-8">
-                            <code>{ secret_access_key }</code>
+                            <object.CopyWrapper value={secret_access_key} data-tip={'Click to copy'} className="d-inline-block"
+                                wrapperElement="div" iconProps={{}} analyticsOnCopy={false}><code>{secret_access_key}</code>
+                            </object.CopyWrapper>
                         </div>
                     </div>
                 </Modal.Body>
