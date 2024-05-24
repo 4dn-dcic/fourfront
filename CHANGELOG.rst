@@ -6,6 +6,14 @@ fourfront
 Change Log
 ----------
 
+
+7.5.3
+=====
+
+`calcprop update  <https://github.com/4dn-dcic/fourfront/pull/1890>`_
+
+* Updated experiment_categorizer calcprop for ExperimentMic to deal with many targets in imaging paths
+
 7.5.2
 =====
 

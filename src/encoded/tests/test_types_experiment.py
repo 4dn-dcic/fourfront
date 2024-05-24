@@ -677,6 +677,22 @@ def basic_info(lab, award):
 
 
 @pytest.fixture
+def list_of_region_biofeatures(testapp, basic_info, region_term):
+    item = {'description': 'Test Region Biofeature',
+            'feature_type': region_term['@id']}
+    item.update(basic_info)
+    feats = []
+    for i in range(10):
+        item['preferred_label'] = f'genomic region {i + 1}'
+        feats.append(testapp.post_json('/bio_feature', item).json['@graph'][0])
+    return feats
+
+@pytest.fixture
+def list_of_3_reg_biofeatures(list_of_region_biofeatures):
+    return list_of_region_biofeatures[:3]
+
+
+@pytest.fixture
 def imaging_path_1(testapp, basic_info, genomic_region_bio_feature):
     basic_info['target'] = [genomic_region_bio_feature['@id']]
     basic_info['labeled_probe'] = 'FITC goat anti rabbit'
@@ -698,8 +714,57 @@ def imaging_path_3(testapp, basic_info, basic_region_bio_feature):
 
 
 @pytest.fixture
+def imaging_path_4(testapp, basic_info, list_of_region_biofeatures):
+    basic_info['target'] = [bf.get('@id') for bf in list_of_region_biofeatures]
+    basic_info['labeled_probe'] = 'DAPI'
+    return testapp.post_json('/imaging_path', basic_info).json['@graph'][0]
+
+
+@pytest.fixture
+def imaging_path_5(testapp, basic_info, list_of_3_reg_biofeatures):
+    basic_info['target'] = [bf.get('@id') for bf in list_of_3_reg_biofeatures]
+    basic_info['labeled_probe'] = 'DAPI'
+    return testapp.post_json('/imaging_path', basic_info).json['@graph'][0]
+
+
+@pytest.fixture
+def imaging_path_6(testapp, basic_info, prot_bio_feature):
+    basic_info['target'] = [prot_bio_feature['@id']]
+    basic_info['labeled_probe'] = 'DAPI'
+    return testapp.post_json('/imaging_path', basic_info).json['@graph'][0]
+
+
+@pytest.fixture
 def microscopy_no_path(testapp, repliseq_info, exp_types):
     repliseq_info['experiment_type'] = exp_types['fish']['@id']
+    return testapp.post_json('/experiment_mic', repliseq_info).json['@graph'][0]
+
+
+@pytest.fixture
+def microscopy_w_path_w_many_targets(testapp, repliseq_info, imaging_path_4, exp_types):
+    repliseq_info['experiment_type'] = exp_types['fish']['@id']
+    img_path = {'path': imaging_path_4['@id'], 'channel': 'ch01'}
+    repliseq_info['imaging_paths'] = [img_path]
+    return testapp.post_json('/experiment_mic', repliseq_info).json['@graph'][0]
+
+
+@pytest.fixture
+def microscopy_w_path_w_many_targets_and_split_path(testapp, repliseq_info, imaging_path_4,
+                                                    imaging_path_2, imaging_path_6, exp_types):
+    repliseq_info['experiment_type'] = exp_types['fish']['@id']
+    img_path1 = {'path': imaging_path_4['@id'], 'channel': 'ch01'}
+    img_path2 = {'path': imaging_path_2['@id'], 'channel': 'ch02'}
+    img_path3 = {'path': imaging_path_6['@id'], 'channel': 'ch03'}
+    repliseq_info['imaging_paths'] = [img_path1, img_path2, img_path3]
+    return testapp.post_json('/experiment_mic', repliseq_info).json['@graph'][0]
+
+@pytest.fixture
+def microscopy_w_path_w_few_targets_and_split_path(testapp, repliseq_info, imaging_path_5,
+                                                    imaging_path_6, exp_types):
+    repliseq_info['experiment_type'] = exp_types['fish']['@id']
+    img_path1 = {'path': imaging_path_5['@id'], 'channel': 'ch01'}
+    img_path2 = {'path': imaging_path_6['@id'], 'channel': 'ch02'}
+    repliseq_info['imaging_paths'] = [img_path1, img_path2]
     return testapp.post_json('/experiment_mic', repliseq_info).json['@graph'][0]
 
 
@@ -778,6 +843,30 @@ def test_experiment_categorizer_4_mic_w_multi_path(testapp, microscopy_w_multipa
     assert len(value) == len2chk
     for v in vals2chk:
         assert v in value
+
+
+def test_experiment_categorizer_4_mic_w_path_w_many_targets(testapp, microscopy_w_path_w_many_targets):
+    assert microscopy_w_path_w_many_targets['experiment_categorizer']['field'] == 'Target'
+    assert microscopy_w_path_w_many_targets['experiment_categorizer']['value'] == '10 genomic regions'
+
+
+def test_experiment_categorizer_4_mic_w_path_w_many_targets_and_split_path(testapp, microscopy_w_path_w_many_targets_and_split_path,
+                                                                           prot_bio_feature):
+    assert microscopy_w_path_w_many_targets_and_split_path['experiment_categorizer']['field'] == 'Target'
+    value = microscopy_w_path_w_many_targets_and_split_path['experiment_categorizer']['value']
+    assert '11 genomic regions' in value
+    assert prot_bio_feature.get('display_title') in value
+
+
+def test_experiment_categorizer_4_mic_w_paths_w_fewer_targets(testapp, microscopy_w_path_w_few_targets_and_split_path,
+                                                              list_of_3_reg_biofeatures, prot_bio_feature):
+    # import pdb; pdb.set_trace()
+    assert microscopy_w_path_w_few_targets_and_split_path['experiment_categorizer']['field'] == 'Target'
+    value = microscopy_w_path_w_few_targets_and_split_path['experiment_categorizer']['value']
+    for bf in list_of_3_reg_biofeatures:
+        assert bf.get('display_title') in value
+    assert prot_bio_feature.get('display_title') in value
+
 
 
 def test_experiment_categorizer_4_mic_w_split_path(testapp, microscopy_w_splitpath):
