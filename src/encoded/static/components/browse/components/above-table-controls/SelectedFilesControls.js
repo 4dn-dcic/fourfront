@@ -133,6 +133,7 @@ export class SelectAllFilesButton extends React.PureComponent {
     }
 
     render(){
+        const { totalOPFCount } = this.props;
         const { selecting } = this.state;
         const isAllSelected = this.isAllSelected();
         const isEnabled = this.isEnabled();
@@ -140,9 +141,13 @@ export class SelectAllFilesButton extends React.PureComponent {
             "mr-05 icon icon-fw icon-" + (selecting ? 'circle-notch icon-spin fas' : (isAllSelected ? 'square far' : 'check-square far'))
         );
         const cls = "btn " + (isAllSelected ? "btn-outline-primary" : "btn-primary");
-        const tooltip = (!isAllSelected && !isEnabled) ?
-            `"Select All" is disabled since the total file count exceeds the upper limit: ${SELECT_ALL_LIMIT}` :
-            (!isAllSelected ? 'Select all files (Please note that Supplementary files will not be included in the selection)' : null);
+
+        let tooltip = null;
+        if (!isAllSelected && !isEnabled) {
+            tooltip = `"Select All" is disabled since the total file count exceeds the upper limit: ${SELECT_ALL_LIMIT}`;
+        } else if (!isAllSelected) {
+            tooltip = 'Select All Files' + (totalOPFCount ? ` - please note that Supplementary files (${totalOPFCount}) will not be included in the selection` : '');
+        }
 
         return (
             <div className="pull-left box selection-buttons">
@@ -290,7 +295,7 @@ export const SelectedFilesControls = React.memo(function SelectedFilesControls(p
     } = props;
     const selectedFileProps = SelectedFilesController.pick(props);
 
-    let totalUniqueFilesCount;
+    let totalUniqueFilesCount = 0, totalUniqueOPFCount = 0;
     if (Array.isArray(context['@type']) && context['@type'].indexOf('FileSearchResults') > -1) {
         totalUniqueFilesCount = context.total || 0;
     } else {
@@ -298,14 +303,17 @@ export const SelectedFilesControls = React.memo(function SelectedFilesControls(p
         // This gets unique file count from ES aggs. In future we might be able to get total including
         // duplicates, in which case should change up logic downstream from this component for e.g. `isAllSelected`
         // in SelectAllFilesButton & similar.
-        totalUniqueFilesCount = (barPlotData && barPlotData.total && barPlotData.total.files) || 0;
+        if (barPlotData && barPlotData.total) {
+            totalUniqueFilesCount = barPlotData.total.files || 0;
+            totalUniqueOPFCount = barPlotData.total.files_opf || 0;
+        }
     }
 
     return (
         // This rendered within a row by AboveTableControlsBase.js
         // TODO maybe refactor some of this stuff to be simpler.
         <div className="col">
-            <SelectAllFilesButton {...selectedFileProps} {...{ href, context }} totalFilesCount={totalUniqueFilesCount} />
+            <SelectAllFilesButton {...selectedFileProps} {...{ href, context }} totalFilesCount={totalUniqueFilesCount} totalOPFCount={totalUniqueOPFCount} />
             <div className="pull-left box selection-buttons">
                 <div className="btn-group">
                     <BrowseViewSelectedFilesDownloadButton {...{ selectedFiles, subSelectedFiles, context, session }} totalFilesCount={totalUniqueFilesCount} />
