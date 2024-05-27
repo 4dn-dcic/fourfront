@@ -273,18 +273,20 @@ const StatsCol = React.memo(function StatsCol(props){
     const { total, current } = QuickInfoBar.getCountsFromProps(props);
     const expSetFilters = QuickInfoBar.expSetFilters((context && context.filters) || null, navigate.getBrowseBaseParams(browseBaseState));
 
+    const totalFilesIncludingOPF = (total.files || 0) + (total.files_opf || 0);
+    const currentFilesIncludingOPF = current ? (current.files || 0) + (current.files_opf || 0) : 0;
     let stats;
     if (current && (typeof current.experiment_sets === 'number' || typeof current.experiments === 'number' || typeof current.files === 'number')) {
         stats = {
             'experiment_sets'   : <span>{ current.experiment_sets }<small> / { total.experiment_sets || 0 }</small></span>,
             'experiments'       : <span>{ current.experiments }<small> / {total.experiments || 0}</small></span>,
-            'files'             : <span>{ current.files }<small> / {total.files || 0}</small></span>
+            'files'             : <span>{ currentFilesIncludingOPF }<small> / { totalFilesIncludingOPF }</small></span>
         };
     } else {
         stats = {
             'experiment_sets'   : total.experiment_sets || 0,
             'experiments'       : total.experiments || 0,
-            'files'             : total.files || 0
+            'files'             : totalFilesIncludingOPF
         };
     }
     const statProps = _.extend(_.pick(props, 'id', 'href', 'isLoadingChartData', 'browseBaseState'), { 'expSetFilters' : expSetFilters });
@@ -292,7 +294,7 @@ const StatsCol = React.memo(function StatsCol(props){
         <div className="col-8 left-side clearfix">
             <Stat {...statProps} shortLabel="Experiment Sets" longLabel="Experiment Sets" classNameID="expsets" value={stats.experiment_sets} key="expsets" />
             <Stat {...statProps} shortLabel="Experiments" longLabel="Experiments" classNameID="experiments" value={stats.experiments} key="experiments" />
-            <Stat {...statProps} shortLabel="Files" longLabel="Files in Experiments" classNameID="files" value={stats.files} key="files" />
+            <Stat {...statProps} shortLabel="Files" longLabel="Raw, Processed and Supplementary Files in Experiments" classNameID="files" value={stats.files} key="files" />
             <div className={"any-filters glance-label" + (show ? " showing" : "")} data-tip={anyFiltersSet ? "Filtered" : "No Filters Set"}
                 onMouseEnter={onIconMouseEnter}>
                 <i className="icon icon-filter fas" style={{ 'opacity' : anyFiltersSet ? 1 : 0.25 }} />
