@@ -6,6 +6,12 @@ fourfront
 Change Log
 ----------
 
+7.5.5
+=====
+
+* bug fix - button "Select All" not turns into "Deselect All" in /browse after QuickInfoBar updates in 7.5.0
+
+
 7.5.4
 =====
 
