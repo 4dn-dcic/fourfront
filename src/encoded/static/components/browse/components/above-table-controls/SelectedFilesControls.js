@@ -140,7 +140,9 @@ export class SelectAllFilesButton extends React.PureComponent {
             "mr-05 icon icon-fw icon-" + (selecting ? 'circle-notch icon-spin fas' : (isAllSelected ? 'square far' : 'check-square far'))
         );
         const cls = "btn " + (isAllSelected ? "btn-outline-primary" : "btn-primary");
-        const tooltip = (!isAllSelected && !isEnabled) ? `"Select All" is disabled since the total file count exceeds the upper limit: ${SELECT_ALL_LIMIT}` : null;
+        const tooltip = (!isAllSelected && !isEnabled) ?
+            `"Select All" is disabled since the total file count exceeds the upper limit: ${SELECT_ALL_LIMIT}` :
+            (!isAllSelected ? 'Select all files (Please note that Supplementary files will not be included in the selection)' : null);
 
         return (
             <div className="pull-left box selection-buttons">
