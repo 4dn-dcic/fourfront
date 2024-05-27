@@ -6,6 +6,11 @@ fourfront
 Change Log
 ----------
 
+7.5.4
+=====
+
+* bug fix - analytics impression count calculation fails for the lists having 200+ items
+
 
 7.5.3
 =====
@@ -13,6 +18,7 @@ Change Log
 `calcprop update  <https://github.com/4dn-dcic/fourfront/pull/1890>`_
 
 * Updated experiment_categorizer calcprop for ExperimentMic to deal with many targets in imaging paths
+
 
 7.5.2
 =====
