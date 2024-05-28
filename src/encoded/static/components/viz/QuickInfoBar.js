@@ -273,28 +273,35 @@ const StatsCol = React.memo(function StatsCol(props){
     const { total, current } = QuickInfoBar.getCountsFromProps(props);
     const expSetFilters = QuickInfoBar.expSetFilters((context && context.filters) || null, navigate.getBrowseBaseParams(browseBaseState));
 
-    const totalFilesIncludingOPF = (total.files || 0) + (total.files_opf || 0);
-    const currentFilesIncludingOPF = current ? (current.files || 0) + (current.files_opf || 0) : 0;
+    // file counts including OPF
+    const totalFiles = (total.files || 0) + (total.files_opf || 0);
+    const currentFiles = current ? (current.files || 0) + (current.files_opf || 0) : 0;
+    // file counts (only OPF)
+    const totalOPFFiles = (total.files_opf || 0);
+    const currentOPFFiles = current && typeof current.files_opf === 'number' ? (current.files_opf || 0) : 0;
+
     let stats;
     if (current && (typeof current.experiment_sets === 'number' || typeof current.experiments === 'number' || typeof current.files === 'number')) {
         stats = {
             'experiment_sets'   : <span>{ current.experiment_sets }<small> / { total.experiment_sets || 0 }</small></span>,
             'experiments'       : <span>{ current.experiments }<small> / {total.experiments || 0}</small></span>,
-            'files'             : <span>{ currentFilesIncludingOPF }<small> / { totalFilesIncludingOPF }</small></span>
+            'files'             : <span>{ currentFiles }<small> / { totalFiles }</small></span>
         };
     } else {
         stats = {
             'experiment_sets'   : total.experiment_sets || 0,
             'experiments'       : total.experiments || 0,
-            'files'             : totalFilesIncludingOPF
+            'files'             : totalFiles
         };
     }
+    // OPF extra stats are for Cypress 03d_browse_views_files_selection, we pass them as attributes like data-total_opf, data-current_opf
+    const files_extra = { 'total_opf': totalOPFFiles, 'current_opf': current && typeof current.files_opf === 'number' ? currentOPFFiles : null };
     const statProps = _.extend(_.pick(props, 'id', 'href', 'isLoadingChartData', 'browseBaseState'), { 'expSetFilters' : expSetFilters });
     return (
         <div className="col-8 left-side clearfix">
             <Stat {...statProps} shortLabel="Experiment Sets" longLabel="Experiment Sets" classNameID="expsets" value={stats.experiment_sets} key="expsets" />
             <Stat {...statProps} shortLabel="Experiments" longLabel="Experiments" classNameID="experiments" value={stats.experiments} key="experiments" />
-            <Stat {...statProps} shortLabel="Files" longLabel="Raw, Processed and Supplementary Files in Experiments" classNameID="files" value={stats.files} key="files" />
+            <Stat {...statProps} shortLabel="Files" longLabel="Raw, Processed and Supplementary Files in Experiments" classNameID="files" value={stats.files} extra={files_extra} key="files" />
             <div className={"any-filters glance-label" + (show ? " showing" : "")} data-tip={anyFiltersSet ? "Filtered" : "No Filters Set"}
                 onMouseEnter={onIconMouseEnter}>
                 <i className="icon icon-filter fas" style={{ 'opacity' : anyFiltersSet ? 1 : 0.25 }} />
@@ -380,11 +387,24 @@ class Stat extends React.PureComponent {
         );
     }
 
+    convertToDataAttributes(obj) {
+        const dataAttributes = {};
+        for (const key in obj) {
+            if (Object.prototype.hasOwnProperty.call(obj, key) && typeof obj[key] !== 'undefined' && obj[key] !== null) {
+                dataAttributes[`data-${key}`] = obj[key];
+            }
+        }
+        return dataAttributes;
+    }
+
     render(){
-        var { classNameID, longLabel, value, id, isLoadingChartData } = this.props;
+        var { classNameID, longLabel, value, id, isLoadingChartData, extra } = this.props;
+
+        const extraAttr = extra ? this.convertToDataAttributes(extra) : {};
+
         return (
             <div className={"stat stat-" + classNameID} title={longLabel}>
-                <div id={id + '-stat-' + classNameID} className={"stat-value" + (isLoadingChartData ? ' loading' : '')}>
+                <div id={id + '-stat-' + classNameID} className={"stat-value" + (isLoadingChartData ? ' loading' : '')} {...extraAttr}>
                     { isLoadingChartData ? <i className="icon icon-fw icon-spin icon-circle-notch fas" style={{ opacity : 0.25 }}/> : value }
                 </div>
                 <div className="stat-label">
