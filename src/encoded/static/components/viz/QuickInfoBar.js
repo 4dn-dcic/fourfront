@@ -274,8 +274,8 @@ const StatsCol = React.memo(function StatsCol(props){
     const expSetFilters = QuickInfoBar.expSetFilters((context && context.filters) || null, navigate.getBrowseBaseParams(browseBaseState));
 
     // file counts including OPF
-    const totalFiles = (total.files || 0) + (total.files_opf || 0);
-    const currentFiles = current ? (current.files || 0) + (current.files_opf || 0) : 0;
+    const totalFiles = total.files_all || 0;
+    const currentFiles = current ? (current.files_all || 0) : 0;
     // file counts (only OPF)
     const totalOtherProcessedFiles = (total.files_opf || 0);
     const currentOtherProcessedFiles = current && typeof current.files_opf === 'number' ? (current.files_opf || 0) : 0;
