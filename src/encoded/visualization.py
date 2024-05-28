@@ -299,7 +299,8 @@ def bar_plot_chart(context, request):
             "experiment_sets": search_result['total'],
             "experiments": search_result['aggregations']['total_experiments']['value'],
             "files": raw_and_processed_count,
-            "files_opf": opf_count
+            "files_opf": opf_count,
+            "files_all": raw_and_processed_count + opf_count
         },
         "other_doc_count": search_result['aggregations']['field_0'].get('sum_other_doc_count', 0),
         "time_generated": str(datetime.utcnow())
@@ -311,7 +312,8 @@ def bar_plot_chart(context, request):
             'experiment_sets'   : int(bucket_result['doc_count']),
             'experiments'       : int(bucket_result['total_experiments']['value']),
             'files'             : int(bucket_result['total_files']['value']),
-            'files_opf'         : int(bucket_result['total_opf_files']['value'])
+            'files_opf'         : int(bucket_result['total_opf_files']['value']),
+            'files_all'         : int(bucket_result['total_files']['value']) + int(bucket_result['total_opf_files']['value'])
         }
 
         next_field_name = None
