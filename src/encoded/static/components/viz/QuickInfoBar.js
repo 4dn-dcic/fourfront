@@ -277,8 +277,8 @@ const StatsCol = React.memo(function StatsCol(props){
     const totalFiles = (total.files || 0) + (total.files_opf || 0);
     const currentFiles = current ? (current.files || 0) + (current.files_opf || 0) : 0;
     // file counts (only OPF)
-    const totalOPFFiles = (total.files_opf || 0);
-    const currentOPFFiles = current && typeof current.files_opf === 'number' ? (current.files_opf || 0) : 0;
+    const totalOtherProcessedFiles = (total.files_opf || 0);
+    const currentOtherProcessedFiles = current && typeof current.files_opf === 'number' ? (current.files_opf || 0) : 0;
 
     let stats, filesLongLabel;
     if (current && (typeof current.experiment_sets === 'number' || typeof current.experiments === 'number' || typeof current.files === 'number')) {
@@ -287,17 +287,17 @@ const StatsCol = React.memo(function StatsCol(props){
             'experiments'       : <span>{ current.experiments }<small> / {total.experiments || 0}</small></span>,
             'files'             : <span>{ currentFiles }<small> / { totalFiles }</small></span>
         };
-        filesLongLabel = `Raw + Processed Files: (${current.files || 0}/${total.files || 0}), Supplementary Files: (${currentOPFFiles}/${totalOPFFiles})`;
+        filesLongLabel = `Raw + Processed Files: (${current.files || 0}/${total.files || 0}), Supplementary Files: (${currentOtherProcessedFiles}/${totalOtherProcessedFiles})`;
     } else {
         stats = {
             'experiment_sets'   : total.experiment_sets || 0,
             'experiments'       : total.experiments || 0,
             'files'             : totalFiles
         };
-        filesLongLabel = `Raw + Processed Files: ${total.files || 0}, Supplementary Files: ${totalOPFFiles}`;
+        filesLongLabel = `Raw + Processed Files: ${total.files || 0}, Supplementary Files: ${totalOtherProcessedFiles}`;
     }
     // OPF extra stats are for Cypress 03d_browse_views_files_selection, we pass them as attributes like data-total_opf, data-current_opf
-    const files_extra = { 'total_opf': totalOPFFiles, 'current_opf': current && typeof current.files_opf === 'number' ? currentOPFFiles : null };
+    const files_extra = { 'total_opf': totalOtherProcessedFiles, 'current_opf': current && typeof current.files_opf === 'number' ? currentOtherProcessedFiles : null };
     const statProps = _.extend(_.pick(props, 'id', 'href', 'isLoadingChartData', 'browseBaseState'), { 'expSetFilters' : expSetFilters });
     return (
         <div className="col-8 left-side clearfix">
