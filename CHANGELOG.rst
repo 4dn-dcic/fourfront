@@ -6,6 +6,15 @@ fourfront
 Change Log
 ----------
 
+7.5.6
+=====
+
+`fix cypress 03d  <https://github.com/4dn-dcic/fourfront/pull/1893>`_
+
+* fixes cypress 03d's failing "Select All" step
+* adds OPF coun into Chart's files agg
+
+
 7.5.5
 =====
 
