@@ -6,6 +6,15 @@ fourfront
 Change Log
 ----------
 
+7.5.7
+=====
+
+`Fix command to pull inserts <https://github.com/4dn-dcic/fourfront/pull/1894>`_
+
+* Update snovault and use its updated command to pull inserts
+* Delete nonfunctional command in this repo
+
+
 7.5.6
 =====
 
