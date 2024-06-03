@@ -210,7 +210,7 @@ prepare-local-dev = "encoded.commands.prepare_template:prepare_local_dev_main"
 publish-to-pypi = "dcicutils.scripts.publish_to_pypi:main"
 run-upgrade-on-inserts = "encoded.commands.run_upgrader_on_inserts:main"
 spreadsheet-to-json = "encoded.commands.spreadsheet_to_json:main"
-update-inserts-from-server = "encoded.commands.update_inserts_from_server:main"
+update-inserts-from-server = "snovault.commands.update_inserts_from_server:main"
 verify-item = "encoded.commands.verify_item:main"
 
 [paste.app_factory]
