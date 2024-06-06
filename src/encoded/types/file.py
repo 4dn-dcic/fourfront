@@ -1705,6 +1705,7 @@ def drs(context, request):
     """ DRS object implementation for file. """
     rendered_object = request.embed(str(context.uuid), '@@object', as_user=True)
     accession = rendered_object['accession']
+    open_data_url = rendered_object.get('open_data_url', None)
     drs_object_base = {
         'id': rendered_object['@id'],
         'created_time': rendered_object['date_created'],
@@ -1714,12 +1715,13 @@ def drs(context, request):
             {
                 # always prefer https
                 'access_url': {
-                    'url': f'https://{request.host}/{accession}/@@download'
+                    'url': open_data_url or f'https://{request.host}/{accession}/@@download'
                 },
                 'type': 'https'
             },
             {
                 # but provide http as well in case we are not on prod
+                # note that open data URLs will not work with http for obvious reasons
                 'access_url': {
                     'url': f'http://{request.host}/{accession}/@@download'
                 },

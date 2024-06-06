@@ -74,3 +74,9 @@ def test_fastq_file_drs_access(testapp, file):
     assert drs_object_download == {
         'url': f'https://localhost:80/{drs_object_uri}/@@download'
     }
+
+
+def test_drs_always_returns_json(htmltestapp, file):
+    """ DRS is a JSON only API so should never not return this """
+    drs_meta = htmltestapp.get(file['@id'] + '@@drs')
+    assert drs_meta.content_type == 'application/json'

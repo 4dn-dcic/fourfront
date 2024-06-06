@@ -6,6 +6,13 @@ fourfront
 Change Log
 ----------
 
+7.5.2
+=====
+
+* Update DRS API to return JSON always
+* Update DRS download URLs to return direct downloads to Open Data where applicable
+
+
 7.5.1
 =====
 
