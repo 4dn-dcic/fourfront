@@ -52,6 +52,28 @@ configure:  # does any pre-requisite installs
 	pip install setuptools==57.5.0 # this version allows 2to3, any later will break -wrr 20-Sept-2021
 	poetry config virtualenvs.create false --local # do not create a virtualenv - the user should have already done this -wrr 20-Sept-2021
 
+check-awscli:
+	@if ! aws --version > /dev/null 2>&1; then \
+		echo "AWS CLI is not installed."; \
+		exit 0; \
+	else \
+		echo "AWS CLI is already installed. Exiting."; \
+		exit 1; \
+	fi
+
+install-awscli: check-awscli  # installs awscli v2 for use with credentialing
+	@echo "Installing AWS CLI v2..."
+	curl "https://awscli.amazonaws.com/AWSCLIV2.pkg" -o "AWSCLIV2.pkg"
+	sudo installer -pkg AWSCLIV2.pkg -target /usr/local/bin/
+	aws --version
+	rm AWSCLIV2.pkg
+
+clear-aws:
+	@echo "unset AWS_ACCESS_KEY_ID" > ~/.clear_aws_env && \
+	echo "unset AWS_SECRET_ACCESS_KEY" >> ~/.clear_aws_env && \
+	echo "unset AWS_SESSION_TOKEN" >> ~/.clear_aws_env && \
+	echo "Run 'source ~/.clear_aws_env' to finish clearing"
+
 build-poetry:
 	make configure
 	poetry install

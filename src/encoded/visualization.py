@@ -191,11 +191,18 @@ SUM_FILES_EXPS_AGGREGATION_DEFINITION = {
             "buckets_path": {
                 "expSetProcessedFiles": "total_expset_processed_files",
                 "expProcessedFiles": "total_exp_processed_files",
-                "expSetOtherProcessedFiles": "total_expset_other_processed_files",
-                "expOtherProcessedFiles": "total_exp_other_processed_files",
                 "expRawFiles": "total_exp_raw_files"
             },
-            "script" : "params.expSetProcessedFiles + params.expProcessedFiles + params.expSetOtherProcessedFiles + params.expOtherProcessedFiles + params.expRawFiles"
+            "script" : "params.expSetProcessedFiles + params.expProcessedFiles + params.expRawFiles"
+        }
+    },
+    "total_opf_files" : {
+        "bucket_script" : {
+            "buckets_path": {
+                "expSetOtherProcessedFiles": "total_expset_other_processed_files",
+                "expOtherProcessedFiles": "total_exp_other_processed_files",
+            },
+            "script" : "params.expSetOtherProcessedFiles + params.expOtherProcessedFiles"
         }
     },
     "total_experiments" : {
@@ -252,6 +259,7 @@ def bar_plot_chart(context, request):
 
     primary_agg.update(deepcopy(SUM_FILES_EXPS_AGGREGATION_DEFINITION))
     del primary_agg['total_files']  # "bucket_script" not supported on root-level aggs
+    del primary_agg['total_opf_files']  # "bucket_script" not supported on root-level aggs
 
     # Nest in additional fields, if any
     curr_field_aggs = primary_agg['field_0']['aggs']
@@ -278,19 +286,21 @@ def bar_plot_chart(context, request):
             continue
         del search_result[field_to_delete]
 
+    raw_and_processed_count = (search_result['aggregations']['total_expset_processed_files']['value'] + 
+                           search_result['aggregations']['total_exp_raw_files']['value'] + 
+                           search_result['aggregations']['total_exp_processed_files']['value'])
+    opf_count = (search_result['aggregations']['total_expset_other_processed_files']['value'] +
+                search_result['aggregations']['total_exp_other_processed_files']['value'])
+
     ret_result = {  # We will fill up the "terms" here from our search_result buckets and then return this dictionary.
         "field": fields_to_aggregate_for[0],
         "terms": {},
         "total": {
             "experiment_sets": search_result['total'],
             "experiments": search_result['aggregations']['total_experiments']['value'],
-            "files": (
-                search_result['aggregations']['total_expset_processed_files']['value'] +
-                search_result['aggregations']['total_exp_raw_files']['value'] +
-                search_result['aggregations']['total_exp_processed_files']['value'] +
-                search_result['aggregations']['total_expset_other_processed_files']['value'] +
-                search_result['aggregations']['total_exp_other_processed_files']['value']
-            )
+            "files": raw_and_processed_count,
+            "files_opf": opf_count,
+            "files_all": raw_and_processed_count + opf_count
         },
         "other_doc_count": search_result['aggregations']['field_0'].get('sum_other_doc_count', 0),
         "time_generated": str(datetime.utcnow())
@@ -301,7 +311,9 @@ def bar_plot_chart(context, request):
         curr_bucket_totals = {
             'experiment_sets'   : int(bucket_result['doc_count']),
             'experiments'       : int(bucket_result['total_experiments']['value']),
-            'files'             : int(bucket_result['total_files']['value'])
+            'files'             : int(bucket_result['total_files']['value']),
+            'files_opf'         : int(bucket_result['total_opf_files']['value']),
+            'files_all'         : int(bucket_result['total_files']['value']) + int(bucket_result['total_opf_files']['value'])
         }
 
         next_field_name = None

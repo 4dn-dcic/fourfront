@@ -6,11 +6,55 @@ fourfront
 Change Log
 ----------
 
-7.5.2
+7.5.8
 =====
 
 * Update DRS API to return JSON always
 * Update DRS download URLs to return direct downloads to Open Data where applicable
+
+
+7.5.7
+=====
+
+`Fix command to pull inserts <https://github.com/4dn-dcic/fourfront/pull/1894>`_
+
+* Update snovault and use its updated command to pull inserts
+* Delete nonfunctional command in this repo
+
+
+7.5.6
+=====
+
+`fix cypress 03d  <https://github.com/4dn-dcic/fourfront/pull/1893>`_
+
+* fixes cypress 03d's failing "Select All" step
+* adds OPF coun into Chart's files agg
+
+
+7.5.5
+=====
+
+* bug fix - button "Select All" not turns into "Deselect All" in /browse after QuickInfoBar updates in 7.5.0
+
+
+7.5.4
+=====
+
+* bug fix - analytics impression count calculation fails for the lists having 200+ items
+
+
+7.5.3
+=====
+
+`calcprop update  <https://github.com/4dn-dcic/fourfront/pull/1890>`_
+
+* Updated experiment_categorizer calcprop for ExperimentMic to deal with many targets in imaging paths
+
+
+7.5.2
+=====
+
+* adds two new props to object.CopyWrapper to allow/prevent sending analytics data into GA4
 
 
 7.5.1
