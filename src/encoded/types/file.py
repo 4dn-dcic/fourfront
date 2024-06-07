@@ -20,6 +20,7 @@ from pyramid.settings import asbool
 from pyramid.threadlocal import get_current_request
 from pyramid.traversal import resource_path
 from pyramid.view import view_config
+from pyramid.response import Response
 from snovault import (
     AfterModified,
     BeforeModified,
@@ -1706,6 +1707,9 @@ def drs(context, request):
     rendered_object = request.embed(str(context.uuid), '@@object', as_user=True)
     accession = rendered_object['accession']
     open_data_url = rendered_object.get('open_data_url', None)
+    # TODO: implement access_id mechanism
+    if not open_data_url:
+        return Response('Access ID support planned for the future', status=404)
     drs_object_base = {
         'id': rendered_object['@id'],
         'created_time': rendered_object['date_created'],
@@ -1713,20 +1717,12 @@ def drs(context, request):
         'self_uri': f'drs://{request.host}{request.path}',
         'access_methods': [
             {
-                # always prefer https
+                # always use open data
                 'access_url': {
-                    'url': open_data_url or f'https://{request.host}/{accession}/@@download'
+                    'url': open_data_url
                 },
                 'type': 'https'
-            },
-            {
-                # but provide http as well in case we are not on prod
-                # note that open data URLs will not work with http for obvious reasons
-                'access_url': {
-                    'url': f'http://{request.host}/{accession}/@@download'
-                },
-                'type': 'http'
-            },
+            }
         ]
     }
     return build_drs_object_from_props(drs_object_base, rendered_object)
