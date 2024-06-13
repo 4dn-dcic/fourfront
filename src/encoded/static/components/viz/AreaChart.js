@@ -137,16 +137,18 @@ export class StatsChartViewAggregator extends React.PureComponent {
         this.getRefWidth = this.getRefWidth.bind(this);
         this.handleToggle = this.handleToggle.bind(this);
         this.handleToggleSmoothEdges = this.handleToggleSmoothEdges.bind(this);
+        this.handleToggleCumulativeSum = this.handleToggleCumulativeSum.bind(this);
         this.generateAggsToState = this.generateAggsToState.bind(this);
         this.state = _.extend(this.generateAggsToState(props, {}), {
             'chartToggles' : {},
-            'smoothEdges' : false
+            'smoothEdges' : false,
+            'cumulativeSum': false
         });
 
         this.elemRef = React.createRef();
     }
 
-    componentDidUpdate(pastProps){
+    componentDidUpdate(prevProps, prevState){
         const { shouldReaggregate } = this.props;
         var updateState = false,
             keys        = _.keys(this.props),
@@ -155,7 +157,7 @@ export class StatsChartViewAggregator extends React.PureComponent {
         for (i = 0; i < keys.length; i++){
             k = keys[i];
             // eslint-disable-next-line react/destructuring-assignment
-            if (pastProps[k] !== this.props[k]){
+            if (prevProps[k] !== this.props[k]){
                 if (k !== 'aggregationsToChartData' && k !== 'externalTermMap'){
                     var k4 = k.slice(0,4);
                     if (k4 !== 'resp'){
@@ -171,7 +173,7 @@ export class StatsChartViewAggregator extends React.PureComponent {
         }
 
         if (typeof shouldReaggregate === 'function' && !updateState){
-            updateState = shouldReaggregate(pastProps, this.props);
+            updateState = shouldReaggregate(prevProps, this.props, prevState, this.state);
         }
 
         if (updateState){
@@ -205,6 +207,20 @@ export class StatsChartViewAggregator extends React.PureComponent {
         });
     }
 
+    handleToggleCumulativeSum(cumulativeSum, cb){
+        this.setState(function(currState){
+            if (typeof cumulativeSum === 'boolean'){
+                if (cumulativeSum === currState.cumulativeSum){
+                    return null;
+                }
+                return { cumulativeSum };
+            } else {
+                cumulativeSum = !currState.cumulativeSum;
+                return { cumulativeSum };
+            }
+        });
+    }
+
     generateAggsToState(props, state){
         return _.object(_.map(_.keys(props.aggregationsToChartData), (key) =>
             [
@@ -221,7 +237,12 @@ export class StatsChartViewAggregator extends React.PureComponent {
         const { children } = this.props;
         const width = this.getRefWidth() || null;
         const childProps = _.extend(
-            { width, 'onChartToggle' : this.handleToggle, 'onSmoothEdgeToggle' : this.handleToggleSmoothEdges },
+            {
+                width,
+                'onChartToggle': this.handleToggle,
+                'onSmoothEdgeToggle': this.handleToggleSmoothEdges,
+                'onCumulativeSumToggle': this.handleToggleCumulativeSum
+            },
             this.props, this.state
         );
         let extendedChildren;
@@ -245,17 +266,28 @@ export class StatsChartViewAggregator extends React.PureComponent {
 export class GroupByController extends React.PureComponent {
 
     static getDerivedStateFromProps(props, state){
-        const { groupByOptions, initialGroupBy } = props;
-        const { currentGroupBy } = state;
-        if (typeof groupByOptions[currentGroupBy] === 'undefined'){
-            if (typeof groupByOptions[initialGroupBy] === 'undefined'){
+        const { groupByOptions, initialGroupBy, dateRangeOptions, initialDateRangePreset } = props;
+        const { currentGroupBy, currentDateRangePreset } = state;
+
+        const stateObj = {};
+        if (typeof groupByOptions[currentGroupBy] === 'undefined') {
+            if (typeof groupByOptions[initialGroupBy] === 'undefined') {
                 logger.error('Changed props.groupByOptions but state.currentGroupBy and props.initialGroupBy are now both invalid.');
                 throw new Error('Changed props.groupByOptions but state.currentGroupBy and props.initialGroupBy are now both invalid.');
             } else {
-                return { 'currentGroupBy' : initialGroupBy };
+                _.extend(stateObj, { 'currentGroupBy': initialGroupBy });
             }
         }
-        return null;
+        if (dateRangeOptions && typeof dateRangeOptions[currentDateRangePreset] === 'undefined') {
+            if (typeof dateRangeOptions[initialDateRangePreset] === 'undefined') {
+                logger.error('Changed props.dateRangeOptions but state.currentDateRangePreset and props.initialDateRangePreset are now both invalid.');
+                throw new Error('Changed props.dateRangeOptions but state.currentDateRangePreset and props.initialDateRangePreset are now both invalid.');
+            } else {
+                _.extend(stateObj, { 'currentDateRangePreset': initialDateRangePreset });
+            }
+        }
+
+        return _.isEmpty(stateObj) ? null : stateObj;
     }
 
     static defaultProps = {
@@ -272,7 +304,13 @@ export class GroupByController extends React.PureComponent {
     constructor(props){
         super(props);
         this.handleGroupByChange = this.handleGroupByChange.bind(this);
-        this.state = { 'currentGroupBy' : props.initialGroupBy };
+        this.handleDateRangeChange = this.handleDateRangeChange.bind(this);
+        this.state = {
+            'currentGroupBy': props.initialGroupBy,
+            'currentDateRangePreset': props.initialDateRangePreset,
+            'currentDateRangeFrom': props.initialDateRangeFrom || null,
+            'currentDateRangeTo': props.initialDateRangeTo || null
+        };
     }
 
     handleGroupByChange(field){
@@ -284,10 +322,32 @@ export class GroupByController extends React.PureComponent {
         });
     }
 
+    handleDateRangeChange(field, from, to){
+        this.setState(function(currState){
+            if (currState.currentDateRangePreset === field &&
+                currState.currentDateRangeFrom === from && currState.currentDateRangeTo === to) {
+                return null;
+            }
+
+            return {
+                'currentDateRangePreset': field,
+                'currentDateRangeFrom': field !== 'custom' ? null : from,
+                'currentDateRangeTo': field !== 'custom' ? null : to
+            };
+        });
+    }
+
     render(){
-        var { children } = this.props,
-            { currentGroupBy } = this.state,
-            childProps = _.extend(_.omit(this.props, 'children', 'initialGroupBy'),{ currentGroupBy, 'handleGroupByChange' : this.handleGroupByChange });
+        const { children } = this.props;
+        const { currentGroupBy, currentDateRangePreset, currentDateRangeFrom, currentDateRangeTo } = this.state;
+        const childProps = _.extend(
+            _.omit(this.props, 'children', 'initialGroupBy', 'initialDateRangePreset', 'initialDateRangeFrom', 'initialDateRangeTo'),
+            {
+                currentGroupBy,
+                'handleGroupByChange': this.handleGroupByChange,
+                currentDateRangePreset, currentDateRangeFrom, currentDateRangeTo,
+                'handleDateRangeChange': this.handleDateRangeChange
+            });
 
         if (Array.isArray(children)){
             return <div>{ React.Children.map(children, (c) =>  React.cloneElement(c, childProps) ) }</div>;
@@ -301,21 +361,24 @@ export class GroupByController extends React.PureComponent {
 export class GroupByDropdown extends React.PureComponent {
 
     static defaultProps = {
-        'title' : "Group By",
+        'groupByTitle' : "Group By",
+        'dateRangeTitle' : "Date",
         'buttonStyle' : {
             'marginLeft' : 12,
             'textAlign' : 'left'
         },
         'outerClassName' : "dropdown-container mb-15",
-        'id' : "select_primary_charts_group_by"
+        'groupById' : "select_primary_charts_group_by",
+        'dateRangeId' : "select_primary_charts_date_range"
     };
 
     constructor(props){
         super(props);
-        this.onSelect = _.throttle(this.onSelect.bind(this), 1000);
+        this.onGroupBySelect = _.throttle(this.onGroupBySelect.bind(this), 1000);
+        this.onDateRangeSelect = _.throttle(this.onDateRangeSelect.bind(this), 1000);
     }
 
-    onSelect(eventKey, evt){
+    onGroupBySelect(eventKey, evt){
         const { handleGroupByChange } = this.props;
         if (typeof handleGroupByChange !== 'function'){
             throw new Error("No handleGroupByChange function passed to GroupByDropdown.");
@@ -323,20 +386,69 @@ export class GroupByDropdown extends React.PureComponent {
         handleGroupByChange(eventKey);
     }
 
+    onDateRangeSelect(presetField, from, to){
+        const { handleDateRangeChange } = this.props;
+        if (typeof handleDateRangeChange !== 'function'){
+            throw new Error("No handleDateRangeChange function passed to DateRangeDropdown.");
+        }
+        handleDateRangeChange(presetField, from, to);
+    }
+
     render(){
-        const { groupByOptions, currentGroupBy, title, loadingStatus, buttonStyle, outerClassName, children, id } = this.props;
-        const optionItems = _.map(_.pairs(groupByOptions), ([field, title]) =>
+        const {
+            groupByOptions, currentGroupBy, groupByTitle,
+            dateRangeOptions, currentDateRangePreset, currentDateRangeFrom, currentDateRangeTo, dateRangeTitle,
+            loadingStatus, buttonStyle, outerClassName, children,
+            groupById, dateRangeId } = this.props;
+        // group by
+        const groupByOptionItems = _.map(_.pairs(groupByOptions), ([field, title]) =>
             <DropdownItem eventKey={field} key={field} active={field === currentGroupBy}>{ title }</DropdownItem>
         );
-        const selectedValueTitle = loadingStatus === 'loading' ? <i className="icon icon-fw icon-spin fas icon-circle-notch"/> : groupByOptions[currentGroupBy];
+        const selectedGroupByValueTitle = loadingStatus === 'loading' ? <i className="icon icon-fw icon-spin fas icon-circle-notch"/> : groupByOptions[currentGroupBy];
+
+        if (dateRangeOptions) {
+            const dateRangeOptionItems = _.map(_.pairs(_.pick(dateRangeOptions, (value, key) => key !== 'custom')), ([field, title]) =>
+                <DropdownItem eventKey={field} key={field} active={field === currentDateRangePreset}>{title}</DropdownItem>
+            );
+            const selectedDateRangeValueTitle = (loadingStatus === 'loading' ? <i className="icon icon-fw icon-spin fas icon-circle-notch" /> : dateRangeOptions[currentDateRangePreset]);
+            const buttonStyleOverriden = buttonStyle && _.extend({}, buttonStyle, { 'marginLeft': 0 });
+            return (
+                <div className={outerClassName}>
+                    <div className="dropdown-container-col col-12 col-lg-3 align-top">
+                        <div className="text-500 d-block mb-1">{groupByTitle}</div>
+                        <DropdownButton id={groupById} title={selectedGroupByValueTitle} onSelect={this.onGroupBySelect} style={buttonStyleOverriden} disabled={groupByOptionItems.length < 2}>
+                            {groupByOptionItems}
+                        </DropdownButton>
+                    </div>
+                    <div className="dropdown-container-col col-12 col-lg-6 align-top">
+                        <div className="text-500 d-block mb-1">{dateRangeTitle}</div>
+                        <div className="date-range">
+                            {/* <span className="text-300 pt-05">Presets</span> */}
+                            <DropdownButton id={dateRangeId} title={selectedDateRangeValueTitle} onSelect={e => this.onDateRangeSelect(e, null, null)} style={buttonStyleOverriden}>
+                                {dateRangeOptionItems}
+                            </DropdownButton>
+                            <div className="d-flex custom-date-range">
+                                <span className="text-300 pt-05 d-none d-md-inline-block mr-05">Custom:</span>
+                                <input id="submission_data_range_from" type="date" className="form-control" onChange={e => this.onDateRangeSelect('custom', e.target.value, currentDateRangeTo)} value={currentDateRangeFrom || ''} />
+                                <input id="submission_data_range_to" type="date" className="form-control" onChange={e => this.onDateRangeSelect('custom', currentDateRangeFrom, e.target.value)} value={currentDateRangeTo || ''} />
+                            </div>
+                        </div>
+                    </div>
+                    <div className="dropdown-container-col col-12 col-lg-3 align-top pl-2">
+                        <div className="text-500 d-block mb-1">Settings</div>
+                        {children}
+                    </div>
+                </div>
+            );
+        }
 
         return (
             <div className={outerClassName}>
-                <span className="text-500">{ title }</span>
-                <DropdownButton id={id} title={selectedValueTitle} onSelect={this.onSelect} style={buttonStyle} disabled={optionItems.length < 2}>
-                    { optionItems }
+                <span className="text-500">{groupByTitle}</span>
+                <DropdownButton id={groupById} title={selectedGroupByValueTitle} onSelect={this.onGroupBySelect} style={buttonStyle} disabled={groupByOptionItems.length < 2}>
+                    {groupByOptionItems}
                 </DropdownButton>
-                { children }
+                {children}
             </div>
         );
     }
@@ -458,10 +570,16 @@ export class HorizontalD3ScaleLegend extends React.Component {
         return false;
     }
 
+    componentDidUpdate(pastProps, pastState) {
+        setTimeout(function () {
+            ReactTooltip.rebuild();
+        }, 1000);
+    }
+
     renderColorItem([term, color], idx, all){
         return (
-            <div className="col-sm-4 col-md-3 col-lg-2 mb-03 text-truncate" key={term}>
-                <div className="color-patch" style={{ 'backgroundColor' : color }} data-term={term} />
+            <div className="col-sm-4 col-md-3 col-lg-2 mb-03 text-truncate" key={term} data-tip={term.length > 30 ? term : null}>
+                <div className="color-patch" style={{ 'backgroundColor': color }} data-term={term} />
                 { term }
             </div>
         );
