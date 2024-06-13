@@ -13,6 +13,7 @@ from urllib.parse import (
     urlencode,
 )
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
 import uuid
 from .search import (
     DEFAULT_BROWSE_PARAM_LISTS,
@@ -449,6 +450,14 @@ def date_histogram_aggregations(context, request):
                 if interval not in interval_to_es_interval.keys():
                     raise IndexError('"{}" is not one of daily, weekly, monthly, or yearly.'.format(interval))
             del search_param_lists['date_histogram_interval'] # We don't wanna use it as search filter.
+        if 'date_range' in search_param_lists and len(search_param_lists['date_range']) > 0:
+            date_range = search_param_lists['date_range'][0]
+            date_from, date_to = convert_date_range(date_range)
+            if date_from is not None:
+                search_param_lists['{}.from'.format(date_histogram_fields[0])] = date_from.strftime("%Y-%m-%d")
+            if date_to is not None:
+                search_param_lists['{}.to'.format(date_histogram_fields[0])] = date_to.strftime("%Y-%m-%d")
+            del search_param_lists['date_range']
         if not search_param_lists:
             search_param_lists = deepcopy(DEFAULT_BROWSE_PARAM_LISTS)
             del search_param_lists['award.project']
@@ -535,6 +544,37 @@ def date_histogram_aggregations(context, request):
         del search_result[field_to_delete]
 
     return search_result
+
+DATE_RANGE_PRESETS = {
+    'all': lambda today: (None, None),
+    'thismonth': lambda today: (today.replace(day=1), None),
+    'previousmonth': lambda today: (today.replace(day=1) - relativedelta(months=1), today.replace(day=1) - relativedelta(days=1)),
+    'last3months': lambda today: (today.replace(day=1) - relativedelta(months=2), None),
+    'last6months': lambda today: (today.replace(day=1) - relativedelta(months=5), None),
+    'last12months': lambda today: (today.replace(day=1) - relativedelta(months=11), None),
+    'thisyear': lambda today: (datetime(today.year, 1, 1), None),
+    'previousyear': lambda today: (datetime(today.year - 1, 1, 1), datetime(today.year - 1, 12, 31)),
+}
+
+def convert_date_range(date_range_str):
+    data_range_split = date_range_str.split('|')
+    preset = data_range_split[0]
+    
+    if preset not in DATE_RANGE_PRESETS and preset != 'custom':
+        raise IndexError(f'"{preset}" is not one of {", ".join(DATE_RANGE_PRESETS.keys())} or custom.')
+
+    today = datetime.today()
+    date_from, date_to = None, None
+
+    if preset in DATE_RANGE_PRESETS:
+        date_from, date_to = DATE_RANGE_PRESETS[preset](today)
+    elif preset == 'custom':
+        if len(data_range_split) > 1 and data_range_split[1] and len(data_range_split[1]) == 10:
+            date_from = datetime.strptime(data_range_split[1], '%Y-%m-%d')
+        if len(data_range_split) > 2 and data_range_split[2] and len(data_range_split[2]) == 10:
+            date_to = datetime.strptime(data_range_split[2], '%Y-%m-%d')
+
+    return [date_from, date_to]
 
 @view_config(route_name='add_files_to_higlass_viewconf', request_method='POST')
 @debug_log
