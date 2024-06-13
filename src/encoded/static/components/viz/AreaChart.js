@@ -1304,7 +1304,7 @@ export class AreaChartContainer extends React.Component {
     buttonSection(){
         const { extraButtons } = this.props;
         return (
-            <div className="pull-right mt-05">
+            <div className="pull-right mt-07">
                 { extraButtons }
                 { this.expandButton() }
             </div>

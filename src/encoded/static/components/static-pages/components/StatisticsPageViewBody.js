@@ -625,7 +625,8 @@ export const submissionsAggsToChartData = _.pick(aggregationsToChartData,
 );
 
 export const usageAggsToChartData = _.pick(aggregationsToChartData,
-    'sessions_by_country', 'fields_faceted', 'experiment_set_views', 'file_downloads', 'file_views'
+    'sessions_by_country', 'fields_faceted', 'experiment_set_views',
+    'file_downloads', 'file_downloads_volume', 'file_views'
 );
 
 
@@ -828,6 +829,9 @@ class UsageChartsCountByDropdown extends React.PureComponent {
     handleSelection(evtKey, evt){
         const { changeCountByForChart, chartID } = this.props;
         changeCountByForChart(chartID, evtKey);
+        if (chartID == 'file_downloads') {
+            changeCountByForChart('file_downloads_volume', evtKey);
+        }
     }
 
     render(){
@@ -946,7 +950,7 @@ export function UsageStatsView(props){
                 <ColorScaleProvider resetScalesWhenChange={file_downloads}>
 
                     <div className="clearfix">
-                        <div className="pull-right mt-05">
+                        <div className="pull-right mt-07">
                             <UsageChartsCountByDropdown {...countByDropdownProps} chartID="file_downloads" />
                         </div>
                         <h3 className="charts-group-title">
