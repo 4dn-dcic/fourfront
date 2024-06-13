@@ -682,9 +682,9 @@ export class UsageStatsViewController extends React.PureComponent {
                 uri += "&field=google_analytics.for_date";
 
                 // For simpler testing & debugging -- if on localhost, connects to data.4dn by default.
-                if (href && href.indexOf('http://localhost') > -1){
-                    uri = 'https://data.4dnucleome.org' + uri;
-                }
+                // if (href && href.indexOf('http://localhost') > -1){
+                //     uri = 'https://data.4dnucleome.org' + uri;
+                // }
                 return uri;
             }
         },
@@ -880,7 +880,8 @@ export function UsageStatsView(props){
         changeCountByForChart, countBy,
         // Passed in from StatsChartViewAggregator:
         sessions_by_country, chartToggles, fields_faceted, /* fields_faceted_group_by, browse_search_queries, other_search_queries, */
-        experiment_set_views, file_downloads, file_views, smoothEdges, onChartToggle, onSmoothEdgeToggle, cumulativeSum, onCumulativeSumToggle
+        experiment_set_views, file_downloads, file_downloads_volume, file_views,
+        smoothEdges, onChartToggle, onSmoothEdgeToggle, cumulativeSum, onCumulativeSumToggle
     } = props;
 
     if (loadingStatus === 'failed'){
@@ -923,7 +924,9 @@ export function UsageStatsView(props){
         cumulativeSum: cumulativeSum
     };
     const countByDropdownProps = { countBy, changeCountByForChart };
+
     const enableFileDownloadsChartTooltipItemClick = (countBy.file_downloads === 'top_files');
+    const fileDownloadsChartHeight = enableFileDownloadsChartTooltipItemClick ? 350 : commonContainerProps.defaultHeight;
 
     return (
         <div className="stats-charts-container" key="charts" id="usage">
@@ -1005,7 +1008,7 @@ export function UsageStatsView(props){
                             <h3 className="charts-group-title">
                                 <span className="d-block d-sm-inline">{countBy.sessions_by_country === 'sessions' ? 'User Sessions' : 'Page Views'}</span>
                                 <span className="text-300 d-none d-sm-inline"> - </span>
-                                <span className="text-300">{countBy.sessions_by_country !== 'device_category' ? ' - by country' : ' - by device categoory'}</span>
+                                <span className="text-300">{UsageStatsView.titleExtensions['sessions_by_country'][countBy.sessions_by_country]}</span>
                             </h3>
                         }
                         extraButtons={<UsageChartsCountByDropdown {...countByDropdownProps} chartID="sessions_by_country" />}
@@ -1057,9 +1060,7 @@ export function UsageStatsView(props){
                             <h3 className="charts-group-title">
                                 <span className="d-block d-sm-inline">Experiment Set Detail Views</span>
                                 <span className="text-300 d-none d-sm-inline"> - </span>
-                                <span className="text-300">{ countBy.experiment_set_views === 'expset_list_views' ? '- appearances in search results' :
-                                    countBy.experiment_set_views === 'expset_clicks' ? '- clicks from browse results' : '- page detail views' }
-                                </span>
+                                <span className="text-300">{ UsageStatsView.titleExtensions['experiment_set_views'][countBy.experiment_set_views] }</span>
                             </h3>
                         }
                         extraButtons={<UsageChartsCountByDropdown {...countByDropdownProps} chartID="experiment_set_views" />}
@@ -1098,23 +1099,25 @@ export function UsageStatsView(props){
     );
 }
 UsageStatsView.titleExtensions = {
+    'experiment_set_views': {
+        'expset_list_views': 'appearances in results',
+        'expset_clicks': 'clicks from browse results',
+        'expset_detail_views': 'detail views by lab',
+    },
+    'sessions_by_country': {
+        'views': 'by country',
+        'sessions': 'by country',
+        'device_category': 'by device category'
+    },
     'file_views': {
         'metadata_tsv_by_country': 'metadata.tsv files',
         'file_list_views': 'appearances in results',
-        'file_clicks': 'clicks from results',
-        'file_detail_views_by_file_type': 'detail views by file type',
-    },
-    'sessions_by_country': {
-        'views_by_country': 'by country',
-        'views_by_city': 'by city',
-        'sessions_by_country': 'by country',
-        'sessions_by_city': 'by city',
-        'device_category': 'by device category',
-        'page_title': 'by page title',
-        'page_url': 'by page url'
+        'file_clicks': 'clicks from browse results',
+        'file_detail_views': 'detail views by file type',
     },
     'file_downloads': {
-        'assay_type': 'by assay type',
+        'filetype': 'by file type',
+        'experiment_type': 'by experiment type',
         'top_files': 'top 10 files'
     },
     'fields_faceted': {
