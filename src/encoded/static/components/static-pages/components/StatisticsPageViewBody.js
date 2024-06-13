@@ -557,7 +557,7 @@ const aggregationsToChartData = {
 
             let useReport = 'file_downloads_by_filetype';
             let groupingKey = "ga:productVariant"; // File Type
-            const countKey = 'ga:metric2'; // Download Size
+            const countKey = 'ga:metric1'; // Download Size
             let topCount = 0; // all
 
             switch (countBy) {
