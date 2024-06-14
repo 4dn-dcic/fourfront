@@ -110,7 +110,11 @@ export default class StatisticsPageView extends React.PureComponent {
         // GroupByController is on outside here because SubmissionStatsViewController detects if props.currentGroupBy has changed in orded to re-fetch aggs.
         const { browseBaseState } = this.props;
 
-        const groupByOptions = { 'award.project' : <span><i className="icon icon-fw fas icon-university mr-1"/>Project</span> };
+        const groupByOptions = {
+            'award.project' : <span><i className="icon icon-fw fas icon-university mr-1"/>Project</span>,
+            'experiments_in_set.processed_files.track_and_facet_info.experimental_lab' : <span><i className="icon icon-fw fas icon-university mr-1"/>Lab</span>,
+            'experiments_in_set.processed_files.track_and_facet_info.experiment_type' : <span><i className="icon icon-fw fas icon-university mr-1"/>Experiment Type</span>,
+        };
 
         let initialGroupBy = 'award.project';
 
@@ -125,7 +129,7 @@ export default class StatisticsPageView extends React.PureComponent {
             'previousyear'  : <span>Previous Year</span>,
             'custom'        : <span>Custom</span>
         };
-        const initialDateRangePreset = 'thisyear';
+        const initialDateRangePreset = 'all';
 
         if (browseBaseState !== 'all'){
             _.extend(groupByOptions, {
