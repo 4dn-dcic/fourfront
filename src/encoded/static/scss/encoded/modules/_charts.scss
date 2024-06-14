@@ -1363,6 +1363,11 @@ $workflow-node-color-type-global-context: #ffb3b3;
         border-bottom: 2px solid #f4f4f4;
         background-color: #F1F9FF;
     }
+    &#submissions {
+        .date-range .dropdown button {
+            min-width: 120px;
+        }
+    }
     &#usage {
         .dropdown-container {
             display: flex !important;
@@ -1382,7 +1387,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
             .dropdown .btn {
                 margin-top: 10px;
             }
-        }       
+        }   
     }
 
 }
