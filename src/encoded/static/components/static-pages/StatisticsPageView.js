@@ -142,7 +142,7 @@ export default class StatisticsPageView extends React.PureComponent {
         return (
             <dynamicImports.GroupByController {...{ groupByOptions, initialGroupBy, dateRangeOptions, initialDateRangePreset }}>
                 <dynamicImports.SubmissionStatsViewController {..._.pick(this.props, 'session', 'browseBaseState', 'windowWidth')}>
-                    <dynamicImports.StatsChartViewAggregator {...{ shouldReaggregate }} aggregationsToChartData={dynamicImports.submissionsAggsToChartData}>
+                    <dynamicImports.StatsChartViewAggregator {...{ shouldReaggregate }} aggregationsToChartData={dynamicImports.submissionsAggsToChartData} cumulativeSum={true}>
                         <dynamicImports.SubmissionsStatsView />
                     </dynamicImports.StatsChartViewAggregator>
                 </dynamicImports.SubmissionStatsViewController>

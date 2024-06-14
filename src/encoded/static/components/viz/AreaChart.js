@@ -129,11 +129,14 @@ export class StatsChartViewAggregator extends React.PureComponent {
     static propTypes = {
         'aggregationsToChartData' : PropTypes.object.isRequired,
         'shouldReaggregate' : PropTypes.func,
+        'cumulativeSum': PropTypes.bool,
         'children' : PropTypes.node.isRequired
     };
 
     constructor(props){
         super(props);
+        const { cumulativeSum = false } = props;
+
         this.getRefWidth = this.getRefWidth.bind(this);
         this.handleToggle = this.handleToggle.bind(this);
         this.handleToggleSmoothEdges = this.handleToggleSmoothEdges.bind(this);
@@ -142,7 +145,7 @@ export class StatsChartViewAggregator extends React.PureComponent {
         this.state = _.extend(this.generateAggsToState(props, {}), {
             'chartToggles' : {},
             'smoothEdges' : false,
-            'cumulativeSum': false
+            'cumulativeSum': cumulativeSum
         });
 
         this.elemRef = React.createRef();
