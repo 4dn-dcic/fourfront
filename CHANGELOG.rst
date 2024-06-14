@@ -6,6 +6,14 @@ fourfront
 Change Log
 ----------
 
+7.6.0
+=====
+
+* Add cumulative sum and date range options for submission statistics
+* Add cumulative sum and 60 days options for usage statistics
+* Update statistics page style and improve mobile UI
+
+
 7.5.7
 =====
 
