@@ -954,7 +954,8 @@ export function UsageStatsView(props){
                             <UsageChartsCountByDropdown {...countByDropdownProps} chartID="file_downloads" />
                         </div>
                         <h3 className="charts-group-title">
-                            <span className="d-block d-sm-inline">File Downloads<sup>*</sup></span><span className="text-300 d-none d-sm-inline"> - </span>
+                            <span className="d-block d-sm-inline">File Downloads<sup>*</sup></span>
+                            <span className="text-300 d-none d-sm-inline"> - </span>
                             <span className="text-300">{UsageStatsView.titleExtensions['file_downloads'][countBy.file_downloads]}</span>
                         </h3>
                     </div>
@@ -1178,7 +1179,13 @@ export function SubmissionsStatsView(props) {
                 <ColorScaleProvider width={width} colorScale={SubmissionsStatsView.colorScaleForPublicVsInternal}>
 
                     <AreaChartContainer {...commonContainerProps} id="expsets_released_vs_internal"
-                        title={<h4 className="text-300 mt-0"><span className="text-500">Experiment Sets</span> - internal vs public release</h4>}>
+                        title={
+                            <h3 className="charts-group-title">
+                                <span className="d-block d-sm-inline">Experiment Sets</span>
+                                <span className="text-300 d-none d-sm-inline"> - </span>
+                                <span className="text-300">internal vs public release</span>
+                            </h3>
+                        }>
                         <AreaChart {...commonChartProps} data={expsets_released_vs_internal} />
                     </AreaChartContainer>
 
@@ -1201,35 +1208,43 @@ export function SubmissionsStatsView(props) {
                 <HorizontalD3ScaleLegend {...{ loadingStatus }} />
 
                 <AreaChartContainer {...commonContainerProps} id="expsets_released" title={
-                    <h4 className="text-300 mt-0">
-                        <span className="text-500">Experiment Sets</span> - { session ? 'publicly released' : 'released' }
-                    </h4>
+                    <h3 className="charts-group-title">
+                        <span className="d-block d-sm-inline">Experiment Sets</span>
+                        <span className="text-300 d-none d-sm-inline"> - </span>
+                        <span className="text-300">{ session ? 'publicly released' : 'released' }</span>
+                    </h3>
                 }>
                     <AreaChart {...commonChartProps} data={expsets_released} />
                 </AreaChartContainer>
 
                 { showInternalReleaseCharts ?
                     <AreaChartContainer {...commonContainerProps} id="expsets_released_internal" title={
-                        <h4 className="text-300 mt-0">
-                            <span className="text-500">Experiment Sets</span> - released (public or within 4DN)
-                        </h4>
+                        <h3 className="charts-group-title">
+                            <span className="d-block d-sm-inline">Experiment Sets</span>
+                            <span className="text-300 d-none d-sm-inline"> - </span>
+                            <span className="text-300">released (public or within 4DN)</span>
+                        </h3>
                     }>
                         <AreaChart {...commonChartProps} data={expsets_released_internal} />
                     </AreaChartContainer>
                     : null }
 
                 <AreaChartContainer {...commonContainerProps} id="files_released" title={
-                    <h4 className="text-300 mt-0">
-                        <span className="text-500">Files</span> - { session ? 'publicly released' : 'released' }
-                    </h4>
+                    <h3 className="charts-group-title">
+                        <span className="d-block d-sm-inline">Files</span>
+                        <span className="text-300 d-none d-sm-inline"> - </span>
+                        <span className="text-300">{ session ? 'publicly released' : 'released' }</span>
+                    </h3>
                 }>
                     <AreaChart {...commonChartProps} data={files_released} />
                 </AreaChartContainer>
 
                 <AreaChartContainer {...commonContainerProps} id="file_volume_released" title={
-                    <h4 className="text-300 mt-0">
-                        <span className="text-500">Total File Size</span> - { session ? 'publicly released' : 'released' }
-                    </h4>
+                    <h3 className="charts-group-title">
+                        <span className="d-block d-sm-inline">Total File Size</span>
+                        <span className="text-300 d-none d-sm-inline"> - </span>
+                        <span className="text-300">{ session ? 'publicly released' : 'released' }</span>
+                    </h3>
                 }>
                     <AreaChart {...commonChartProps} data={file_volume_released} yAxisLabel="GB" />
                 </AreaChartContainer>
