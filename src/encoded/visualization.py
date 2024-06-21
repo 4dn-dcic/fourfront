@@ -453,10 +453,11 @@ def date_histogram_aggregations(context, request):
         if 'date_range' in search_param_lists and len(search_param_lists['date_range']) > 0:
             date_range = search_param_lists['date_range'][0]
             date_from, date_to = convert_date_range(date_range)
-            if date_from is not None:
-                search_param_lists['{}.from'.format(date_histogram_fields[0])] = date_from.strftime("%Y-%m-%d")
-            if date_to is not None:
-                search_param_lists['{}.to'.format(date_histogram_fields[0])] = date_to.strftime("%Y-%m-%d")
+            for dh_field in date_histogram_fields:
+                if date_from is not None:
+                    search_param_lists['{}.from'.format(dh_field)] = date_from.strftime("%Y-%m-%d")
+                if date_to is not None:
+                    search_param_lists['{}.to'.format(dh_field)] = date_to.strftime("%Y-%m-%d")
             del search_param_lists['date_range']
         if not search_param_lists:
             search_param_lists = deepcopy(DEFAULT_BROWSE_PARAM_LISTS)
