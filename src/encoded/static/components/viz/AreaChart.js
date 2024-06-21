@@ -334,8 +334,8 @@ export class GroupByController extends React.PureComponent {
 
             return {
                 'currentDateRangePreset': field,
-                'currentDateRangeFrom': field !== 'custom' ? null : from,
-                'currentDateRangeTo': field !== 'custom' ? null : to
+                'currentDateRangeFrom': field !== 'custom' || from === '' ? null : from,
+                'currentDateRangeTo': field !== 'custom' || to === '' ? null : to
             };
         });
     }
@@ -378,7 +378,25 @@ export class GroupByDropdown extends React.PureComponent {
     constructor(props){
         super(props);
         this.onGroupBySelect = _.throttle(this.onGroupBySelect.bind(this), 1000);
-        this.onDateRangeSelect = _.throttle(this.onDateRangeSelect.bind(this), 1000);
+        this.onDateRangeSelect = this.onDateRangeSelect.bind(this);
+        //used as workaround to fix input type="date" unwanted reset bug
+        this.state = {
+            'tempDateRangeFrom': '',
+            'tempDateRangeTo': ''
+        };
+    }
+
+    componentDidUpdate(pastProps, pastState){
+        const { currentDateRangeFrom, currentDateRangeTo } = this.props;
+        // if current date range from/to changed, then force the temp values get reset
+        if (pastProps.currentDateRangeFrom !== currentDateRangeFrom || pastProps.currentDateRangeTo !== currentDateRangeTo) {
+            setTimeout(() => {
+                this.setState({
+                    'tempDateRangeFrom': currentDateRangeFrom,
+                    'tempDateRangeTo': currentDateRangeTo
+                });
+            }, 750);
+        }
     }
 
     onGroupBySelect(eventKey, evt){
@@ -403,6 +421,7 @@ export class GroupByDropdown extends React.PureComponent {
             dateRangeOptions, currentDateRangePreset, currentDateRangeFrom, currentDateRangeTo, dateRangeTitle,
             loadingStatus, buttonStyle, outerClassName, children,
             groupById, dateRangeId } = this.props;
+        const { tempDateRangeFrom, tempDateRangeTo } = this.state;
         // group by
         const groupByOptionItems = _.map(_.pairs(groupByOptions), ([field, title]) =>
             <DropdownItem eventKey={field} key={field} active={field === currentGroupBy}>{ title }</DropdownItem>
@@ -427,13 +446,19 @@ export class GroupByDropdown extends React.PureComponent {
                         <div className="text-500 d-block mb-1">{dateRangeTitle}</div>
                         <div className="date-range">
                             {/* <span className="text-300 pt-05">Presets</span> */}
-                            <DropdownButton id={dateRangeId} title={selectedDateRangeValueTitle} onSelect={e => this.onDateRangeSelect(e, null, null)} style={buttonStyleOverriden}>
+                            <DropdownButton id={dateRangeId} title={selectedDateRangeValueTitle} onSelect={(e) => this.onDateRangeSelect(e, null, null)} style={buttonStyleOverriden}>
                                 {dateRangeOptionItems}
                             </DropdownButton>
                             <div className="d-flex custom-date-range">
                                 <span className="text-300 pt-05 d-none d-md-inline-block mr-05">Custom:</span>
-                                <input id="submission_data_range_from" type="date" className="form-control" onChange={e => this.onDateRangeSelect('custom', e.target.value, currentDateRangeTo)} value={currentDateRangeFrom || ''} />
-                                <input id="submission_data_range_to" type="date" className="form-control" onChange={e => this.onDateRangeSelect('custom', currentDateRangeFrom, e.target.value)} value={currentDateRangeTo || ''} />
+                                <input id="submission_data_range_from" type="date"
+                                    className="form-control" value={tempDateRangeFrom || ''}
+                                    onChange={(e) => { this.setState({ "tempDateRangeFrom": e.target.value }); }}
+                                    onBlur={(e) => this.onDateRangeSelect('custom', tempDateRangeFrom, currentDateRangeTo)} />
+                                <input id="submission_data_range_to" type="date"
+                                    className="form-control" value={tempDateRangeTo || ''}
+                                    onChange={(e) => { this.setState({ "tempDateRangeTo": e.target.value }); }}
+                                    onBlur={(e) => this.onDateRangeSelect('custom', currentDateRangeFrom, tempDateRangeTo)} />
                             </div>
                         </div>
                     </div>
@@ -1142,7 +1167,7 @@ export class AreaChart extends React.PureComponent {
     destroyExistingChart(){
         var drawn = this.drawnD3Elements;
         if (!drawn || !drawn.svg) {
-            logger.error('No D3 SVG to clear.');
+            console.error('No D3 SVG to clear.');
             return;
         }
         drawn.svg.selectAll('*').remove();
@@ -1156,8 +1181,9 @@ export class AreaChart extends React.PureComponent {
         // If data has changed.... decide whether to re-draw graph or try to transition it.
 
         if (!this.drawnD3Elements) {
-            logger.error('No existing elements to transition.');
-            throw new Error('No existing elements to transition.');
+            console.error('No existing elements to transition.');
+            // throw new Error('No existing elements to transition.');
+            return;
         }
 
         const { transitionDuration } = this.props;
