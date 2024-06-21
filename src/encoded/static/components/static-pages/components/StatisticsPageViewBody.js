@@ -323,7 +323,7 @@ export const commonParsingFxn = {
 
 const aggregationsToChartData = {
     'expsets_released' : {
-        'requires'  : 'ExperimentSetReplicate',
+        'requires'  : 'ExperimentSetReplicatePublic',
         'function'  : function(resp, props){
             if (!resp || !resp.aggregations) return null;
             const { aggregations : {
@@ -339,7 +339,7 @@ const aggregationsToChartData = {
         }
     },
     'expsets_released_internal' : {
-        'requires'  : 'ExperimentSetReplicate',
+        'requires'  : 'ExperimentSetReplicateInternal',
         'function'  : function(resp, props){
             if (!resp || !resp.aggregations) return null;
             const { aggregations : {
@@ -355,7 +355,7 @@ const aggregationsToChartData = {
         }
     },
     'expsets_released_vs_internal' : {
-        'requires' : 'ExperimentSetReplicate',
+        'requires' : 'ExperimentSetReplicatePublicAndInternal',
         'function'  : function(resp, props){
             if (!resp || !resp.aggregations) return null;
 
@@ -407,27 +407,33 @@ const aggregationsToChartData = {
         }
     },
     'files_released' : {
-        'requires'  : 'ExperimentSetReplicate',
+        'requires'  : 'ExperimentSetReplicatePublic',
         'function'  : function(resp, props){
             if (!resp || !resp.aggregations) return null;
-            var weeklyIntervalBuckets = resp && resp.aggregations && resp.aggregations.weekly_interval_public_release && resp.aggregations.weekly_interval_public_release.buckets;
-            if (!Array.isArray(weeklyIntervalBuckets)/* || weeklyIntervalBuckets.length < 2*/) return null;
+            const { aggregations : {
+                weekly_interval_public_release : { buckets: publicBuckets = [] } = {}
+            } } = resp;
+
+            // if (publicBuckets.length < 2) return null;
 
             return commonParsingFxn.countsToTotals(
-                commonParsingFxn.bucketTotalFilesCounts(weeklyIntervalBuckets, props.currentGroupBy, props.externalTermMap),
+                commonParsingFxn.bucketTotalFilesCounts(publicBuckets, props.currentGroupBy, props.externalTermMap),
                 props.cumulativeSum
             );
         }
     },
     'file_volume_released' : {
-        'requires'  : 'ExperimentSetReplicate',
+        'requires'  : 'ExperimentSetReplicatePublic',
         'function'  : function(resp, props){
             if (!resp || !resp.aggregations) return null;
-            var weeklyIntervalBuckets = resp.aggregations.weekly_interval_public_release && resp.aggregations.weekly_interval_public_release.buckets;
-            if (!Array.isArray(weeklyIntervalBuckets)/* || weeklyIntervalBuckets.length < 2*/) return null;
+            const { aggregations : {
+                weekly_interval_public_release : { buckets: publicBuckets = [] } = {}
+            } } = resp;
+
+            // if (publicBuckets.length < 2) return null;
 
             return commonParsingFxn.countsToTotals(
-                commonParsingFxn.bucketTotalFilesVolume(weeklyIntervalBuckets, props.currentGroupBy, props.externalTermMap),
+                commonParsingFxn.bucketTotalFilesVolume(publicBuckets, props.currentGroupBy, props.externalTermMap),
                 props.cumulativeSum
             );
         }
@@ -755,7 +761,7 @@ export class SubmissionStatsViewController extends React.PureComponent {
                 params.date_range = `custom|${props.currentDateRangeFrom || ''}|${props.currentDateRangeTo || ''}`;
         }
         if (date_histogram) {
-            params.date_histogram = [date_histogram];
+            params.date_histogram = Array.isArray(date_histogram) ? date_histogram : [date_histogram];
         }
         const uri = '/date_histogram_aggregations/?' + queryString.stringify(params) + '&limit=0&format=json';
 
@@ -766,8 +772,14 @@ export class SubmissionStatsViewController extends React.PureComponent {
 
     static defaultProps = {
         'searchURIs' : {
-            'ExperimentSetReplicate' : function(props) {
-                return SubmissionStatsViewController.createFileSearchUri(props, null);
+            'ExperimentSetReplicatePublicAndInternal' : function(props) {
+                return SubmissionStatsViewController.createFileSearchUri(props, ['public_release', 'project_release']);
+            },
+            'ExperimentSetReplicatePublic' : function(props) {
+                return SubmissionStatsViewController.createFileSearchUri(props, ['public_release']);
+            },
+            'ExperimentSetReplicateInternal' : function(props) {
+                return SubmissionStatsViewController.createFileSearchUri(props, ['project_release']);
             }
         },
         'shouldRefetchAggs' : function(pastProps, nextProps){
