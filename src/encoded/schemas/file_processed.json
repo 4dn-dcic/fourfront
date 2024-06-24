@@ -111,6 +111,7 @@
                 "image mask-cytoplasm",
                 "image mask-nucleus",
                 "locus distances, submitter format",
+                "read count ratios",
                 "read counts (minus)",
                 "read counts (plus)",
                 "reads-combined",
