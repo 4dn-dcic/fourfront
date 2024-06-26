@@ -14,6 +14,14 @@ Change Log
 * Update statistics page style and improve mobile UI
 
 
+7.5.8
+=====
+
+`Add ignored enum  <https://github.com/4dn-dcic/fourfront/pull/1897>`_
+
+* Add value to ignored_enum for file_type
+
+
 7.5.7
 =====
 
