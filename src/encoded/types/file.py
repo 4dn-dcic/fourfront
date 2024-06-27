@@ -1711,10 +1711,9 @@ def drs(context, request):
     if not open_data_url:
         return Response('Access ID support planned for the future', status=404)
     drs_object_base = {
-        'id': rendered_object['@id'],
+        'id': accession,
         'created_time': rendered_object['date_created'],
-        'drs_id': accession,
-        'self_uri': f'drs://{request.host}{request.path}',
+        'self_uri': f'drs://{request.host}/{accession}',
         'access_methods': [
             {
                 # always use open data

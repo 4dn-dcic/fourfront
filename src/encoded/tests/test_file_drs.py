@@ -43,10 +43,9 @@ def file(testapp, award, experiment, lab, file_formats):
 
 def validate_drs_conversion(drs_obj, meta, uri=None):
     """ Validates drs object structure against the metadata in the db """
-    assert drs_obj['id'] == meta['@id']
+    assert drs_obj['id'] == meta['accession']
     assert drs_obj['created_time'] == meta['date_created']
-    assert drs_obj['drs_id'] == meta['accession']
-    assert drs_obj['self_uri'] == f'drs://localhost:80{meta["@id"]}@@drs' if not uri else uri
+    assert drs_obj['self_uri'] == f'drs://localhost:80/{meta["accession"]}' if not uri else uri
     assert drs_obj['version'] == meta['md5sum']
     assert drs_obj['name'] == meta['filename']
     assert drs_obj['aliases'] == [meta['uuid']]
@@ -75,7 +74,7 @@ def test_fastq_file_drs_access(testapp, file):
     """ Tests that access URLs are retrieved successfully """
     with mock.patch('encoded.types.file.File._head_s3', return_value=None):
         drs_meta = testapp.get(file['@id'] + '@@drs').json
-        drs_object_uri = drs_meta['drs_id']
+        drs_object_uri = drs_meta['id']
         drs_object_download = testapp.get(f'/ga4gh/drs/v1/objects/{drs_object_uri}/access/').json
         assert drs_object_download == {
             'url': f'https://4dn-open-data-public.s3.amazonaws.com/fourfront-webprod/wfoutput/'
