@@ -217,7 +217,7 @@ const OtherProcessedFilesSection = React.memo(function ProcessedFilesSection(pro
             <ProcessedFilesStackedTable {...SelectedFilesController.pick(props)}
                 files={otherProcessedFiles} fadeIn={false} collapseLongLists href={href} preventExpand
                 width={containerWidth ? (Math.max(containerWidth - paddingWidth, minimumWidth) /* account for padding of pane */) : null}
-                showMoreTargetTabKey="supplementary-files" />
+                titleForFiles="Supplementary Files" showMoreTargetTabKey="supplementary-files" />
         );
     }
 
