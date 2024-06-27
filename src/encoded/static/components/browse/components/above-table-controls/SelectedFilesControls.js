@@ -81,10 +81,10 @@ export class SelectAllFilesButton extends React.PureComponent {
     }
 
     isAllSelected(){
-        const { totalFilesCount, selectedFiles } = this.props;
+        const { totalFilesCount, totalOPFCount, selectedFiles } = this.props;
         if (!totalFilesCount) return false;
         // totalFilesCount as returned from bar plot aggs at moment is unique.
-        if (totalFilesCount === this.memoized.uniqueFileCount(selectedFiles)){
+        if ((totalFilesCount + (totalOPFCount || 0)) === this.memoized.uniqueFileCount(selectedFiles)){
             return true;
         }
         return false;
