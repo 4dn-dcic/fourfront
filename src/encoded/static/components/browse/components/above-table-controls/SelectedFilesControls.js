@@ -157,7 +157,9 @@ export class SelectAllFilesButton extends React.PureComponent {
         if (!isAllSelected && !isEnabled) {
             tooltip = `"Select All" is disabled since the total file count exceeds the upper limit: ${SELECT_ALL_LIMIT}`;
         } else if (!isAllSelected) {
-            tooltip = 'Select All Files' + (totalOPFCount ? ` - please note that Supplementary files (${totalOPFCount}) will not be included in the selection` : '');
+            //OPFs added - tooltip is obsolete
+            //tooltip = 'Select All Files' + (totalOPFCount ? ` - please note that Supplementary files (${totalOPFCount}) will not be included in the selection` : '');
+            tooltip = 'Select All Files';
         }
 
         return (
