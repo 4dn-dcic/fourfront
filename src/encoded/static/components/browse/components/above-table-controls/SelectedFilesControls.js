@@ -49,6 +49,18 @@ export class SelectAllFilesButton extends React.PureComponent {
         'experiments_in_set.processed_files.@id',
         'experiments_in_set.processed_files.@type',
         'experiments_in_set.processed_files.file_type_detailed',
+
+        'experiments_in_set.other_processed_files.files.accession',
+        'experiments_in_set.other_processed_files.files.display_title',
+        'experiments_in_set.other_processed_files.files.@id',
+        'experiments_in_set.other_processed_files.files.@type',
+        'experiments_in_set.other_processed_files.files.file_type_detailed',
+
+        'other_processed_files.files.accession',
+        'other_processed_files.files.display_title',
+        'other_processed_files.files.@id',
+        'other_processed_files.files.@type',
+        'other_processed_files.files.file_type_detailed',
     ];
 
     constructor(props){
@@ -98,8 +110,7 @@ export class SelectAllFilesButton extends React.PureComponent {
                     let allExtendedFiles;
                     let filesToSelect;
                     if (extData.item_list_name === 'browse') {
-
-                        allExtendedFiles = _.reduce(resp['@graph'] || [], (m, v) => m.concat(allFilesFromExperimentSet(v, true)), []);
+                        allExtendedFiles = _.reduce(resp['@graph'] || [], (m, v) => m.concat(allFilesFromExperimentSet(v, true, true)), []);
                         filesToSelect = _.zip(filesToAccessionTriples(allExtendedFiles, true, true), allExtendedFiles);
                     } else {
                         allExtendedFiles =(resp['@graph'] || []);

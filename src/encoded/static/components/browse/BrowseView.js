@@ -52,7 +52,7 @@ class ExperimentSetCheckBox extends React.PureComponent {
     }
 
     static expSetFilesToObjectKeyedByAccessionTriples(expSet){
-        const allFiles = allFilesFromExperimentSet(expSet, true);
+        const allFiles = allFilesFromExperimentSet(expSet, true, true);
         const allFileAccessionTriples = filesToAccessionTriples(allFiles, true, true);
         return _.object(_.zip(allFileAccessionTriples, allFiles));
     }
