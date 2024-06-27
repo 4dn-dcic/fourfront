@@ -1002,20 +1002,19 @@ tox = ["tox"]
 
 [[package]]
 name = "dcicsnovault"
-version = "11.15.1"
+version = "11.16.0.1b0"
 description = "Storage support for 4DN Data Portals."
 optional = false
 python-versions = "<3.12,>=3.8.1"
 files = [
-    {file = "dcicsnovault-11.15.1-py3-none-any.whl", hash = "sha256:534767555e5f2053fb8db7a166496d053c2d114c5fe2fbd532af3e879efef0ad"},
-    {file = "dcicsnovault-11.15.1.tar.gz", hash = "sha256:06f7dcd310ab2c68762a209557a1954aadb1025bb962f0365c145df1bb118e97"},
+    {file = "dcicsnovault-11.16.0.1b0-py3-none-any.whl", hash = "sha256:cff494cc2c3e7f4fc53ff05d83ad7762ae33f4570dc5cb0a1e7f6202bb83dea0"},
 ]
 
 [package.dependencies]
 aws_requests_auth = ">=0.4.1,<0.5.0"
 boto3 = ">=1.28.62"
 botocore = ">=1.31.62"
-dcicutils = ">=8.8.5,<9.0.0"
+dcicutils = ">=8.11.0,<9.0.0"
 elasticsearch = "7.13.4"
 elasticsearch_dsl = ">=7.4.0,<8.0.0"
 future = ">=0.15.2,<1"
@@ -1058,13 +1057,13 @@ xlrd = ">=1.0.0,<2.0.0"
 
 [[package]]
 name = "dcicutils"
-version = "8.9.0"
+version = "8.12.0"
 description = "Utility package for interacting with the 4DN Data Portal and other 4DN resources"
 optional = false
 python-versions = "<3.13,>=3.8"
 files = [
-    {file = "dcicutils-8.9.0-py3-none-any.whl", hash = "sha256:6fb0a76d1f11b70f1b518d7b7f1f05d3d8aa3f762b99d5aaa4ce22b5eddba6e7"},
-    {file = "dcicutils-8.9.0.tar.gz", hash = "sha256:9a78fad1137d7827d6155a7fd5982c25f482313f8f6cfbec577f69d61de63e09"},
+    {file = "dcicutils-8.12.0-py3-none-any.whl", hash = "sha256:663283630f694a95b246817aa014fff66df06c5a92653af381ab5515af76f6ef"},
+    {file = "dcicutils-8.12.0.tar.gz", hash = "sha256:402c2a123e66e12da72a38db0a164aa64871f003785a57468fa50ac221faf895"},
 ]
 
 [package.dependencies]
@@ -4040,4 +4039,4 @@ test = ["zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8.1,<3.12"
-content-hash = "d7a7c1e9e877317d5d70d7ddbc87d8f7b99d5ee2a1273f8c69e922b212d2fb7c"
+content-hash = "03e9fef6bc6db18f7d65c472a125f7b9f0aceb6937bb5d8e6ab8cb311d9db486"
