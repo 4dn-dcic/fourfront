@@ -794,7 +794,8 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
         // These must have .experiments property, which itself should have .experiment_sets property. There's a utility function to get all files
         'files' : PropTypes.array.isRequired,
         'analyticsImpressionOnMount' : PropTypes.bool,
-        'showNotesColumns': PropTypes.bool
+        'showNotesColumns': PropTypes.bool,
+        'showMoreTargetTabKey': PropTypes.oneOf(['processed-files', 'supplementary-files'])
     };
 
     static defaultProps = {
@@ -808,7 +809,8 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
         'collapseLongLists' : true,
         'nonFileHeaderCols' : ['experiment', 'file'],
         'titleForFiles'     : 'Processed Files',
-        'showNotesColumns'  : null
+        'showNotesColumns'  : null,
+        'showMoreTargetTabKey' : null,
     };
 
     /**
@@ -919,7 +921,7 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
     }
 
     renderExperimentBlocks(filesGroupedByExperimentOrGlobal){
-        const { titleForFiles, collapseLongLists, preventExpand } = this.props;
+        const { titleForFiles, collapseLongLists, preventExpand, showMoreTargetTabKey } = this.props;
         return filesGroupedByExperimentOrGlobal.map(([experimentAccession, filesForExperiment]) => {
 
             const experiment = filesForExperiment[0].from_experiment; // All should have same 1
@@ -946,9 +948,11 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
             );
 
             const expSetAccession = experiment.from_experiment_set.accession;
-            const showMoreExtTitle = preventExpand && expSetAccession ? (
-                <a href={object.itemUtil.atId(experiment.from_experiment_set)}>(view in Experiment Set)</a>
-            ) : null;
+            let showMoreExtTitle = null;
+            if (preventExpand && expSetAccession) {
+                const expSetHref = object.itemUtil.atId(experiment.from_experiment_set) + (showMoreTargetTabKey ? '#' + showMoreTargetTabKey : '');
+                showMoreExtTitle = <a href={expSetHref}>(view in Experiment Set)</a>;
+            }
 
             return (
                 <StackedBlock columnClass="experiment" hideNameOnHover={experimentAccession === 'global'}
