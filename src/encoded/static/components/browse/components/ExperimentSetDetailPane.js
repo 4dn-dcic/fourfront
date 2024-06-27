@@ -45,11 +45,13 @@ export class ExperimentSetDetailPane extends React.PureComponent {
         super(props);
         this.toggleProcessedFilesOpen = _.throttle(this.toggleStateProperty.bind(this, 'processedFilesOpen'), 600, { 'trailing' : false });
         this.toggleRawFilesOpen = _.throttle(this.toggleStateProperty.bind(this, 'rawFilesOpen'), 600, { 'trailing' : false });
+        this.toggleOtherProcessedFilesOpen = _.throttle(this.toggleStateProperty.bind(this, 'otherProcessedFilesOpen'), 600, { 'trailing' : false });
         const id = object.itemUtil.atId(props.result);
         const initialState = props.initialStateCache[id];
         this.state = initialState || {
             'rawFilesOpen' : false,
-            'processedFilesOpen' : false
+            'processedFilesOpen' : false,
+            'otherProcessedFilesOpen' : false
         };
     }
 
@@ -60,9 +62,9 @@ export class ExperimentSetDetailPane extends React.PureComponent {
             return;
         }
 
-        const { rawFilesOpen, processedFilesOpen } = this.state;
+        const { rawFilesOpen, processedFilesOpen, otherProcessedFilesOpen } = this.state;
         const id = object.itemUtil.atId(result);
-        updateFileSectionStateCache(id, (rawFilesOpen || processedFilesOpen) ? { rawFilesOpen, processedFilesOpen } : null);
+        updateFileSectionStateCache(id, (rawFilesOpen || processedFilesOpen || otherProcessedFilesOpen) ? { rawFilesOpen, processedFilesOpen, otherProcessedFilesOpen } : null);
     }
 
     toggleStateProperty(property){
@@ -80,7 +82,7 @@ export class ExperimentSetDetailPane extends React.PureComponent {
 
     render(){
         const { paddingWidthMap, paddingWidth, containerWidth, windowWidth, result, minimumWidth, href } = this.props;
-        const { processedFilesOpen, rawFilesOpen } = this.state;
+        const { processedFilesOpen, rawFilesOpen, otherProcessedFilesOpen = false } = this.state;
 
         let usePadWidth = paddingWidth || 0;
         if (paddingWidthMap){
@@ -129,6 +131,7 @@ export class ExperimentSetDetailPane extends React.PureComponent {
                 <div style={{ overflowX : 'auto', width: containerWidth ? (containerWidth - usePadWidth) : null }} className="files-tables-container">
                     <RawFilesSection {...commonFileSectionProps} open={rawFilesOpen} onToggle={this.toggleRawFilesOpen} />
                     <ProcessedFilesSection {...commonFileSectionProps} open={processedFilesOpen} onToggle={this.toggleProcessedFilesOpen} />
+                    <OtherProcessedFilesSection {...commonFileSectionProps} open={otherProcessedFilesOpen} onToggle={this.toggleOtherProcessedFilesOpen} />
                 </div>
             </div>
         );
@@ -194,6 +197,34 @@ const ProcessedFilesSection = React.memo(function ProcessedFilesSection(props){
             <h4 className="pane-section-title" onClick={onToggle}>
                 <i className={"toggle-open-icon icon icon-fw fas icon-" + (open ? 'minus' : 'plus')} />
                 <i className="icon icon-fw icon-microchip fas"/> <span className="text-400">{ processedFiles.length }</span> Processed Files
+            </h4>
+            { innerTableContents }
+        </div>
+    );
+});
+
+const OtherProcessedFilesSection = React.memo(function ProcessedFilesSection(props){
+    const { containerWidth, result, href, minimumWidth, paddingWidth, open = false, onToggle } = props;
+    const otherProcessedFiles = expFxn.allOtherProcessedFilesFromExperimentSet(result);
+
+    if (!Array.isArray(otherProcessedFiles) || otherProcessedFiles.length === 0){
+        return null;
+    }
+
+    let innerTableContents = null;
+    if (open) {
+        innerTableContents = (
+            <ProcessedFilesStackedTable {...SelectedFilesController.pick(props)}
+                files={otherProcessedFiles} fadeIn={false} collapseLongLists href={href} preventExpand
+                width={containerWidth ? (Math.max(containerWidth - paddingWidth, minimumWidth) /* account for padding of pane */) : null} />
+        );
+    }
+
+    return (
+        <div className="processed-files-table-section">
+            <h4 className="pane-section-title" onClick={onToggle}>
+                <i className={"toggle-open-icon icon icon-fw fas icon-" + (open ? 'minus' : 'plus')} />
+                <i className="icon icon-fw icon-microchip fas"/> <span className="text-400">{ otherProcessedFiles.length }</span> Supplementary Files
             </h4>
             { innerTableContents }
         </div>
