@@ -480,11 +480,9 @@ export function allFilesFromExperiment(experiment, includeProcessedFiles = false
 /**
  * Returns all files from an Experiment Set Item.
  */
-export function allFilesFromExperimentSet(expSet, includeProcessedFiles = false, includeOtherProcessedFiles = false){
+export function allFilesFromExperimentSet(expSet, includeRawFiles = true, includeProcessedFiles = false, includeOtherProcessedFiles = false){
+    const rawFiles = includeRawFiles ? _.reduce(experimentsFromExperimentSet(expSet), function (m, exp) { return m.concat(allFilesFromExperiment(exp)); }, []) : [];
     const processedFiles = includeProcessedFiles ? reduceProcessedFilesWithExperimentsAndSets(allProcessedFilesFromExperimentSet(expSet)) : [];
-    const rawFiles = _.reduce(experimentsFromExperimentSet(expSet), function(m, exp){
-        return m.concat(allFilesFromExperiment(exp));
-    }, []);
     const otherProcessedFiles = includeOtherProcessedFiles ? reduceProcessedFilesWithExperimentsAndSets(allOtherProcessedFilesFromExperimentSet(expSet)) : [];
 
     return rawFiles.concat(processedFiles).concat(otherProcessedFiles);
