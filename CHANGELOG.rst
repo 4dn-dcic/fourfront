@@ -6,6 +6,16 @@ fourfront
 Change Log
 ----------
 
+
+7.6.0
+=====
+
+`Add routes page  <https://github.com/4dn-dcic/fourfront/pull/>`_
+
+* Add routes page to list all endpoints
+* updated lock file
+
+
 7.5.8
 =====
 
