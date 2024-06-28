@@ -10,7 +10,7 @@ Change Log
 7.6.0
 =====
 
-`Add routes page  <https://github.com/4dn-dcic/fourfront/pull/>`_
+`Add routes page  <https://github.com/4dn-dcic/fourfront/pull/1898>`_
 
 * Add routes page to list all endpoints
 * updated lock file
