@@ -145,7 +145,12 @@ export class SelectAllFilesButton extends React.PureComponent {
     }
 
     onSelectAllClick(selectType){
+        const { resetSelectedFiles } = this.props;
         switch (selectType) {
+            case 'clear':
+                resetSelectedFiles();
+                this.setState({ 'selecting' : false });
+                break;
             case 'raw-files':
                 this.handleSelectAll(true, false, false);
                 break;
@@ -162,9 +167,10 @@ export class SelectAllFilesButton extends React.PureComponent {
     }
 
     render(){
-        const { href } = this.props;
+        const { href, selectedFiles } = this.props;
         const { selecting } = this.state;
         const isAllSelected = this.isAllSelected();
+        const anySelected = !selectedFiles || Object.keys(selectedFiles).length === 0;
         const isEnabled = this.isEnabled();
         const disabled = selecting || (!isAllSelected && !isEnabled);
         const iconClassName = (
@@ -181,9 +187,10 @@ export class SelectAllFilesButton extends React.PureComponent {
         }
 
         const options = [
-            { label: 'Select All Raw Files', key: 'raw-files' },
-            { label: 'Select All Processed Files', key: 'processed-files' },
-            { label: 'Select All Supplementary Files', key: 'other-processed-files' },
+            { label: 'Clear Selection', key: 'clear', iconClassName: 'mr-05 icon icon-fw far icon-times-circle', hidden: anySelected },
+            { label: 'Select All Raw Files', key: 'raw-files', disabled: isAllSelected },
+            { label: 'Select All Processed Files', key: 'processed-files', disabled: isAllSelected },
+            { label: 'Select All Supplementary Files', key: 'other-processed-files', disabled: isAllSelected },
         ];
 
         return (
@@ -366,7 +373,8 @@ export const SelectedFilesControls = React.memo(function SelectedFilesControls(p
 });
 
 
-export const SplitButton = React.memo(function ({ onClick, options, disabled, isAllSelected, iconClassName, tooltip, hideToggle = false }) {
+export const SplitButton = React.memo(function SplitButton(props) {
+    const { onClick, options: propOptions, disabled, isAllSelected, iconClassName, tooltip, hideToggle = false } = props;
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef(null);
 
@@ -377,38 +385,40 @@ export const SplitButton = React.memo(function ({ onClick, options, disabled, is
         };
     }, []);
 
-    const handleButtonClick = () => {
-        if(typeof onClick === 'function')
+    const handleButtonClick = function(){
+        if (typeof onClick === 'function')
             onClick();
     };
 
-    const toggleMenu = () => {
+    const toggleMenu = function(){
         setIsOpen(!isOpen);
     };
 
-    const handleMenuItemClick = (key) => {
-        if(typeof onClick === 'function')
+    const handleMenuItemClick = function(key){
+        if (typeof onClick === 'function')
             onClick(key);
         setIsOpen(false);
     };
 
-    const handleClickOutside = (event) => {
+    const handleClickOutside = function(event){
         if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
             setIsOpen(false);
         }
     };
 
-    const cls = "main-button btn " + (isAllSelected ? "btn-outline-primary" : "btn-primary");
+    const mainCls = "main-button btn " + (isAllSelected ? "btn-outline-primary" : "btn-primary");
+    const toggleCls = "dropdown-toggle btn " + (isAllSelected ? "btn-outline-primary" : "btn-primary");
+    const options = _.filter(propOptions, function (opt) { return !opt.hidden;});
 
     return (
         <div className="split-button" ref={dropdownRef}>
-            <button type="button" className={cls} onClick={handleButtonClick} data-tip={tooltip} disabled={disabled} data-has-toggle={!hideToggle}>
+            <button type="button" className={mainCls} onClick={handleButtonClick} data-tip={tooltip} disabled={disabled} data-has-toggle={!hideToggle}>
                 <i className={iconClassName} />
                 <span className="d-none d-md-inline text-400">{isAllSelected ? 'Deselect' : 'Select'} </span>
                 <span className="text-600">All</span>
             </button>
             {!hideToggle &&
-                <button type="button" className="dropdown-toggle btn btn-primary" onClick={toggleMenu} disabled={disabled}>
+                <button type="button" className={toggleCls} onClick={toggleMenu} disabled={disabled}>
                     <i className="icon icon-fw icon-angle-down ml-03 fas" />
                 </button>
             }
@@ -416,8 +426,8 @@ export const SplitButton = React.memo(function ({ onClick, options, disabled, is
                 <ul className="split-dropdown-menu">
                     {
                         options.map((item, index) => (
-                            <li key={index} onClick={() => handleMenuItemClick(item.key)}>
-                                <i className={iconClassName} />
+                            <li key={index} onClick={(e) => handleMenuItemClick(item.key)} className={item.disabled && "disabled"}>
+                                <i className={item.iconClassName || iconClassName} />
                                 <span className="text-400">{item.label}</span>
                             </li>
                         ))

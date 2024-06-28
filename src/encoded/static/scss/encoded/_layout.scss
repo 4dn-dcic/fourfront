@@ -652,6 +652,11 @@ $margin-util-sizes-mini: 1, 2, 3, 4, 5, 6, 7, 8; 		// * 1px
 		li {
 			padding: 5px 10px;
 			cursor: pointer;
+
+			&.disabled {
+				pointer-events: none; //This makes it not clickable
+				opacity: 0.6;         //This grays it out to look disabled
+			}
 		}
 	
 		li:hover {
