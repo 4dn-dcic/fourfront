@@ -460,7 +460,7 @@ export class RawFilesStackedTable extends React.PureComponent {
     }
 
     static allRawFiles(expOrExpSet) {
-        return RawFilesStackedTable.isExperimentSet(expOrExpSet) ? expFxn.allFilesFromExperimentSet(expOrExpSet, false) : expOrExpSet.files;
+        return RawFilesStackedTable.isExperimentSet(expOrExpSet) ? expFxn.allFilesFromExperimentSet(expOrExpSet) : expOrExpSet.files;
     }
 
     static propTypes = {
@@ -517,7 +517,7 @@ export class RawFilesStackedTable extends React.PureComponent {
                 const experimentsGroupedByBiosample = expFxn.groupExperimentsByBiosampleRepNo(
                     expFxn.combineWithReplicateNumbers(replicate_exps, experiments_in_set)
                 );
-                const allRawFiles = expFxn.allFilesFromExperimentSet(experimentSet, false);
+                const allRawFiles = expFxn.allFilesFromExperimentSet(experimentSet);
                 return { experimentsGroupedByBiosample, allRawFiles };
             }),
             columnHeaders: memoize(RawFilesStackedTable.columnHeaders)
