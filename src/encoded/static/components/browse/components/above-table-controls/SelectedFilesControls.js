@@ -202,8 +202,8 @@ export class SelectAllFilesButton extends React.PureComponent {
                         <span className="d-none d-md-inline text-400">{ isAllSelected ? 'Deselect' : 'Select' } </span>
                         <span className="text-600">All</span>
                     </button> */}
-                    <SplitButton onClick={this.onSelectAllClick} options={options} isAllSelected={isAllSelected} disabled={disabled}
-                        iconClassName={iconClassName} tooltip={tooltip} hideToggle={hideToggle} />
+                    <SplitButton onClick={this.onSelectAllClick} buttonId="select-all-files-button"
+                        {...{ options, isAllSelected, disabled, iconClassName, tooltip, hideToggle }} />
                 </div>
             </div>
         );
@@ -374,7 +374,7 @@ export const SelectedFilesControls = React.memo(function SelectedFilesControls(p
 
 
 export const SplitButton = React.memo(function SplitButton(props) {
-    const { onClick, options: propOptions, disabled, isAllSelected, iconClassName, tooltip, hideToggle = false } = props;
+    const { onClick, buttonId = '', options: propOptions, disabled, isAllSelected, iconClassName, tooltip, hideToggle = false } = props;
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef(null);
 
@@ -412,7 +412,7 @@ export const SplitButton = React.memo(function SplitButton(props) {
 
     return (
         <div className="split-button" ref={dropdownRef}>
-            <button type="button" className={mainCls} onClick={handleButtonClick} data-tip={tooltip} disabled={disabled} data-has-toggle={!hideToggle}>
+            <button type="button" id={buttonId} className={mainCls} onClick={handleButtonClick} data-tip={tooltip} disabled={disabled} data-has-toggle={!hideToggle}>
                 <i className={iconClassName} />
                 <span className="d-none d-md-inline text-400">{isAllSelected ? 'Deselect' : 'Select'} </span>
                 <span className="text-600">All</span>
