@@ -49,7 +49,7 @@ colorama = "0.3.3"
 # we get odd 'pyo3_runtime.PanicException: Python API call failed' error on import
 # of cryptography.hazmat.bindings._rust in cryptography package. 2023-04-21.
 cryptography = "39.0.2"
-dcicsnovault = "11.17.0.1b4"
+dcicsnovault = "11.17.0.1b5"
 dcicutils = "8.12.0.1b8"
 elasticsearch = "7.13.4"
 elasticsearch-dsl = "^7.0.0"  # TODO: port code from cgap-portal to get rid of uses
@@ -118,7 +118,7 @@ xlwt = "1.2.0"
 codeguru-profiler-agent = "^1.2.4"
 supervisor = "^4.2.4"
 wheel = "^0.43.0"
-future = "^1.0.0"
+future = "^0.18.3"
 pygments = "^2.17.2"
 
 
