@@ -1,7 +1,7 @@
 [tool.poetry]
 # Note: Various modules refer to this system as "encoded", not "fourfront".
 name = "encoded"
-version = "7.5.8"
+version = "7.5.8.1b1"  # TODO: To become 7.6.0
 description = "4DN-DCIC Fourfront"
 authors = ["4DN-DCIC Team <support@4dnucleome.org>"]
 license = "MIT"
@@ -34,14 +34,15 @@ classifiers = [
     'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
-    'Programming Language :: Python :: 3.11'
+    'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12'
 ]
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.13"
-awscli = ">=1.29.62"
-boto3 = "^1.28.62"
-botocore = "^1.31.62"
+awscli = ">=1.33.18"
+boto3 = "^1.34.136"
+botocore = "^1.34.136"
 certifi = ">=2021.5.30"
 chardet = "^5.2.0"
 colorama = "0.3.3"
@@ -127,8 +128,8 @@ pygments = "^2.17.2"
 
 [tool.poetry.dev-dependencies]
 # PyCharm says boto3-stubs contains useful type hints
-boto3-stubs = "^1.28.62"
-botocore-stubs = "^1.31.62"
+boto3-stubs = "^1.34.136"
+botocore-stubs = "^1.34.136"
 coverage = ">=6.2"
 codacy-coverage = ">=1.3.11"
 coveralls = ">=3.3.1"
