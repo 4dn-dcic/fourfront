@@ -38,9 +38,6 @@ npm-setup:  # runs all front-end setup
 moto-setup:  # optional moto setup that must be done separately
 	pip install "moto[server]==1.3.7"
 
-# macpoetry-install:  # Same as 'poetry install' except that on OSX Catalina, an environment variable wrapper is needed
-# 	bin/macpoetry-install
-
 configure:  # does any pre-requisite installs
 	@#pip install --upgrade pip==21.0.1
 	pip install --upgrade pip
@@ -59,33 +56,17 @@ build-poetry:
 	make configure
 	poetry install
 
-# macbuild-poetry:
-# 	make configure
-# 	make macpoetry-install
-
 build:  # builds
 	make build-poetry
 	make build-after-poetry
-
-# macbuild:  # builds for Catalina
-# 	make macbuild-poetry
-# 	make build-after-poetry
 
 rebuild:
 	make clean  # Among other things, this assures 'make npm-setup' will run, but it also does other cleanup.
 	make build
 
-# macrebuild:
-# 	make clean  # Among other things, this assures 'make npm-setup' will run, but it also does other cleanup.
-# 	make macbuild
-
 build-full:  # rebuilds for Catalina, addressing zlib possibly being in an alternate location.
 	make clean-node-modules  # This effectively assures that 'make npm-setup' will need to run.
 	make build
-
-# macbuild-full:  # rebuilds for Catalina, addressing zlib possibly being in an alternate location.
-# 	make clean-node-modules  # This effectively assures that 'make npm-setup' will need to run.
-# 	make macbuild
 
 build-after-poetry:  # continuation of build after poetry install
 	make moto-setup
@@ -100,10 +81,6 @@ fix-dist-info:
 build-dev:  # same as build, but sets up locust as well
 	make build
 	make build-locust
-
-# macbuild-dev:  # same as macbuild, but sets up locust as well
-# 	make macbuild
-# 	make build-locust
 
 build-locust:  # just pip installs locust - may cause instability
 	pip install locust
