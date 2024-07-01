@@ -1,7 +1,7 @@
 [tool.poetry]
 # Note: Various modules refer to this system as "encoded", not "fourfront".
 name = "encoded"
-version = "7.5.8.1b2"  # TODO: To become 7.6.0
+version = "7.5.8"
 description = "4DN-DCIC Fourfront"
 authors = ["4DN-DCIC Team <support@4dnucleome.org>"]
 license = "MIT"
@@ -31,7 +31,6 @@ classifiers = [
     # Specify the Python versions you support here. In particular, ensure
     # that you indicate whether you support Python 2, Python 3 or both.
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
@@ -40,7 +39,7 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.13"
-awscli = ">=1.33.18"
+awscli = ">=1.29.62"
 boto3 = "^1.34.136"
 botocore = "^1.34.136"
 certifi = ">=2021.5.30"
@@ -50,10 +49,8 @@ colorama = "0.3.3"
 # we get odd 'pyo3_runtime.PanicException: Python API call failed' error on import
 # of cryptography.hazmat.bindings._rust in cryptography package. 2023-04-21.
 cryptography = "39.0.2"
-# dcicsnovault = "^11.14.2"
-dcicsnovault = "11.17.0.1b3"
-# dcicutils = "^8.0.0"
-dcicutils = "8.12.0.1b8"
+dcicsnovault = "11.17.0.1b6"
+dcicutils = "8.12.0.1b10"
 elasticsearch = "7.13.4"
 elasticsearch-dsl = "^7.0.0"  # TODO: port code from cgap-portal to get rid of uses
 execnet = "1.4.1"
@@ -121,7 +118,7 @@ xlwt = "1.2.0"
 codeguru-profiler-agent = "^1.2.4"
 supervisor = "^4.2.4"
 wheel = "0.40.0"
-future = "0.18.2"
+future = "^0.18.3"
 pygments = "^2.17.2"
 
 
