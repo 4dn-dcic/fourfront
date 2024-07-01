@@ -38,8 +38,8 @@ npm-setup:  # runs all front-end setup
 moto-setup:  # optional moto setup that must be done separately
 	pip install "moto[server]==1.3.7"
 
-macpoetry-install:  # Same as 'poetry install' except that on OSX Catalina, an environment variable wrapper is needed
-	bin/macpoetry-install
+# macpoetry-install:  # Same as 'poetry install' except that on OSX Catalina, an environment variable wrapper is needed
+# 	bin/macpoetry-install
 
 configure:  # does any pre-requisite installs
 	@#pip install --upgrade pip==21.0.1
@@ -47,42 +47,45 @@ configure:  # does any pre-requisite installs
 	@#pip install poetry==1.1.9  # this version is known to work. -kmp 11-Mar-2021
 	# Pin to version 1.1.15 for now to avoid this error:
 	#   Because encoded depends on wheel (>=0.29.0) which doesn't match any versions, version solving failed.
-	pip install wheel==0.40.0
-	pip install poetry==1.7.1
-	pip install setuptools==57.5.0 # this version allows 2to3, any later will break -wrr 20-Sept-2021
+	# pip install wheel==0.40.0
+	# pip install poetry==1.7.1
+	# pip install setuptools==57.5.0 # this version allows 2to3, any later will break -wrr 20-Sept-2021
+	pip install wheel
+	pip install poetry
+	pip install setuptools
 	poetry config virtualenvs.create false --local # do not create a virtualenv - the user should have already done this -wrr 20-Sept-2021
 
 build-poetry:
 	make configure
 	poetry install
 
-macbuild-poetry:
-	make configure
-	make macpoetry-install
+# macbuild-poetry:
+# 	make configure
+# 	make macpoetry-install
 
 build:  # builds
 	make build-poetry
 	make build-after-poetry
 
-macbuild:  # builds for Catalina
-	make macbuild-poetry
-	make build-after-poetry
+# macbuild:  # builds for Catalina
+# 	make macbuild-poetry
+# 	make build-after-poetry
 
 rebuild:
 	make clean  # Among other things, this assures 'make npm-setup' will run, but it also does other cleanup.
 	make build
 
-macrebuild:
-	make clean  # Among other things, this assures 'make npm-setup' will run, but it also does other cleanup.
-	make macbuild
+# macrebuild:
+# 	make clean  # Among other things, this assures 'make npm-setup' will run, but it also does other cleanup.
+# 	make macbuild
 
 build-full:  # rebuilds for Catalina, addressing zlib possibly being in an alternate location.
 	make clean-node-modules  # This effectively assures that 'make npm-setup' will need to run.
 	make build
 
-macbuild-full:  # rebuilds for Catalina, addressing zlib possibly being in an alternate location.
-	make clean-node-modules  # This effectively assures that 'make npm-setup' will need to run.
-	make macbuild
+# macbuild-full:  # rebuilds for Catalina, addressing zlib possibly being in an alternate location.
+# 	make clean-node-modules  # This effectively assures that 'make npm-setup' will need to run.
+# 	make macbuild
 
 build-after-poetry:  # continuation of build after poetry install
 	make moto-setup
@@ -98,9 +101,9 @@ build-dev:  # same as build, but sets up locust as well
 	make build
 	make build-locust
 
-macbuild-dev:  # same as macbuild, but sets up locust as well
-	make macbuild
-	make build-locust
+# macbuild-dev:  # same as macbuild, but sets up locust as well
+# 	make macbuild
+# 	make build-locust
 
 build-locust:  # just pip installs locust - may cause instability
 	pip install locust
