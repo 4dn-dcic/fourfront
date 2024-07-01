@@ -16,4 +16,4 @@ def test_gen_access_keys(testapp, admin):
         assert res['server'] == 'http://fourfront-hotseat'
         assert res['secret']
         assert res['key']
-        assert mocked_url.called_once()
+        mocked_url.assert_called_once()
