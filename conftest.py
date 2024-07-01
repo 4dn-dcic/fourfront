@@ -43,7 +43,7 @@ my_selected_env = os.environ.get("ENV_NAME")
 if not my_selected_account or my_selected_account == "643366669028":
     PRINT("The legacy account is correctly selected for testing Fourfront.")
 elif not my_selected_env:
-    print(f"ENV_NAME was not set. It is being set to {desired_env}.")
+    print("ENV_NAME was not set. It is being set to {desired_env}.")
     os.environ['ENV_NAME'] = desired_env
 elif my_selected_env != desired_env:
     PRINT(f"ENV_NAME must be set to {desired_env} (or left unset) for testing. (It is set to {my_selected_env}.)")
