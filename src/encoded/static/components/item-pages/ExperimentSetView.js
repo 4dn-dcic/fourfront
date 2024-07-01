@@ -99,7 +99,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
 
         const processedFiles = this.allProcessedFilesFromExperimentSet(context);
         const processedFilesUniqeLen = (processedFiles && processedFiles.length && ProcessedFilesStackedTableSection.allFilesUniqueCount(processedFiles)) || 0;
-        const rawFiles = this.allFilesFromExperimentSet(context, false);
+        const rawFiles = this.allFilesFromExperimentSet(context);
         const rawFilesUniqueLen = (rawFiles && rawFiles.length && RawFilesStackedTableSection.allFilesUniqueCount(rawFiles)) || 0;
         const width = this.getTabViewWidth();
 

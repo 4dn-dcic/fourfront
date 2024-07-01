@@ -1,6 +1,6 @@
 'use strict';
 
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import url from 'url';
 import queryString from 'query-string';
@@ -11,7 +11,7 @@ import { Checkbox } from '@hms-dbmi-bgm/shared-portal-components/es/components/f
 import { console, object, ajax, analytics, memoizedUrlParse, logger } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { requestAnimationFrame as raf } from '@hms-dbmi-bgm/shared-portal-components/es/components/viz/utilities';
 
-import { Schemas, typedefs } from './../../../util';
+import { Schemas, typedefs, navigate } from './../../../util';
 import { allFilesFromExperimentSet, filesToAccessionTriples, fileToAccessionTriple } from './../../../util/experiments-transforms';
 import { BrowseViewSelectedFilesDownloadButton } from './SelectedFilesDownloadButton';
 import { uniqueFileCount, SelectedFilesController } from './../SelectedFilesController';
@@ -49,12 +49,25 @@ export class SelectAllFilesButton extends React.PureComponent {
         'experiments_in_set.processed_files.@id',
         'experiments_in_set.processed_files.@type',
         'experiments_in_set.processed_files.file_type_detailed',
+
+        'experiments_in_set.other_processed_files.files.accession',
+        'experiments_in_set.other_processed_files.files.display_title',
+        'experiments_in_set.other_processed_files.files.@id',
+        'experiments_in_set.other_processed_files.files.@type',
+        'experiments_in_set.other_processed_files.files.file_type_detailed',
+
+        'other_processed_files.files.accession',
+        'other_processed_files.files.display_title',
+        'other_processed_files.files.@id',
+        'other_processed_files.files.@type',
+        'other_processed_files.files.file_type_detailed',
     ];
 
     constructor(props){
         super(props);
         this.isAllSelected = this.isAllSelected.bind(this);
         this.handleSelectAll = this.handleSelectAll.bind(this);
+        this.onSelectAllClick = this.onSelectAllClick.bind(this);
         this.state = { 'selecting' : false };
         this.memoized = {
             uniqueFileCount: memoize(uniqueFileCount)
@@ -69,16 +82,16 @@ export class SelectAllFilesButton extends React.PureComponent {
     }
 
     isAllSelected(){
-        const { totalFilesCount, selectedFiles } = this.props;
+        const { totalFilesCount, totalOPFCount, selectedFiles } = this.props;
         if (!totalFilesCount) return false;
         // totalFilesCount as returned from bar plot aggs at moment is unique.
-        if (totalFilesCount === this.memoized.uniqueFileCount(selectedFiles)){
+        if ((totalFilesCount + (totalOPFCount || 0)) === this.memoized.uniqueFileCount(selectedFiles)){
             return true;
         }
         return false;
     }
 
-    handleSelectAll(evt){
+    handleSelectAll(includeRawFiles = true, includeProcessedFiles = true, includeOtherProcessedFiles = true){
         const { selectFile, selectedFiles, resetSelectedFiles, href, context, totalFilesCount } = this.props;
         if (typeof selectFile !== 'function' || typeof resetSelectedFiles !== 'function'){
             logger.error("No 'selectFiles' or 'resetSelectedFiles' function prop passed to SelectedFilesController.");
@@ -98,8 +111,7 @@ export class SelectAllFilesButton extends React.PureComponent {
                     let allExtendedFiles;
                     let filesToSelect;
                     if (extData.item_list_name === 'browse') {
-
-                        allExtendedFiles = _.reduce(resp['@graph'] || [], (m, v) => m.concat(allFilesFromExperimentSet(v, true)), []);
+                        allExtendedFiles = _.reduce(resp['@graph'] || [], (m, v) => m.concat(allFilesFromExperimentSet(v, includeRawFiles, includeProcessedFiles, includeOtherProcessedFiles)), []);
                         filesToSelect = _.zip(filesToAccessionTriples(allExtendedFiles, true, true), allExtendedFiles);
                     } else {
                         allExtendedFiles =(resp['@graph'] || []);
@@ -132,32 +144,66 @@ export class SelectAllFilesButton extends React.PureComponent {
         });
     }
 
+    onSelectAllClick(selectType){
+        const { resetSelectedFiles } = this.props;
+        switch (selectType) {
+            case 'clear':
+                resetSelectedFiles();
+                this.setState({ 'selecting' : false });
+                break;
+            case 'raw-files':
+                this.handleSelectAll(true, false, false);
+                break;
+            case 'processed-files':
+                this.handleSelectAll(false, true, false);
+                break;
+            case 'other-processed-files':
+                this.handleSelectAll(false, false, true);
+                break;
+            default:
+                this.handleSelectAll(true, true, true);
+                break;
+        }
+    }
+
     render(){
-        const { totalOPFCount } = this.props;
+        const { href, selectedFiles } = this.props;
         const { selecting } = this.state;
         const isAllSelected = this.isAllSelected();
+        const anySelected = !selectedFiles || Object.keys(selectedFiles).length === 0;
         const isEnabled = this.isEnabled();
+        const disabled = selecting || (!isAllSelected && !isEnabled);
         const iconClassName = (
             "mr-05 icon icon-fw icon-" + (selecting ? 'circle-notch icon-spin fas' : (isAllSelected ? 'square far' : 'check-square far'))
         );
-        const cls = "btn " + (isAllSelected ? "btn-outline-primary" : "btn-primary");
+        // const cls = "btn " + (isAllSelected ? "btn-outline-primary" : "btn-primary");
+        const hideToggle = !navigate.isBrowseHref(href);
 
         let tooltip = null;
         if (!isAllSelected && !isEnabled) {
             tooltip = `"Select All" is disabled since the total file count exceeds the upper limit: ${SELECT_ALL_LIMIT}`;
         } else if (!isAllSelected) {
-            tooltip = 'Select All Files' + (totalOPFCount ? ` - please note that Supplementary files (${totalOPFCount}) will not be included in the selection` : '');
+            tooltip = 'Select All Files';
         }
+
+        const options = [
+            { label: 'Clear Selection', key: 'clear', iconClassName: 'mr-05 icon icon-fw far icon-times-circle', hidden: anySelected },
+            { label: 'Select All Raw Files', key: 'raw-files', disabled: isAllSelected },
+            { label: 'Select All Processed Files', key: 'processed-files', disabled: isAllSelected },
+            { label: 'Select All Supplementary Files', key: 'other-processed-files', disabled: isAllSelected },
+        ];
 
         return (
             <div className="pull-left box selection-buttons">
                 <div className="btn-group">
-                    <button type="button" id="select-all-files-button" disabled={selecting || (!isAllSelected && !isEnabled)}
+                    {/* <button type="button" id="select-all-files-button" disabled={selecting || (!isAllSelected && !isEnabled)}
                         className={cls} onClick={this.handleSelectAll} data-tip={tooltip}>
                         <i className={iconClassName}/>
                         <span className="d-none d-md-inline text-400">{ isAllSelected ? 'Deselect' : 'Select' } </span>
                         <span className="text-600">All</span>
-                    </button>
+                    </button> */}
+                    <SplitButton onClick={this.onSelectAllClick} buttonId="select-all-files-button"
+                        {...{ options, isAllSelected, disabled, iconClassName, tooltip, hideToggle }} />
                 </div>
             </div>
         );
@@ -322,6 +368,72 @@ export const SelectedFilesControls = React.memo(function SelectedFilesControls(p
                         {...selectedFileProps} {...{ currentFileTypeFilters, setFileTypeFilters, currentOpenPanel }} />
                 </div>
             </div>
+        </div>
+    );
+});
+
+
+export const SplitButton = React.memo(function SplitButton(props) {
+    const { onClick, buttonId = '', options: propOptions, disabled, isAllSelected, iconClassName, tooltip, hideToggle = false } = props;
+    const [isOpen, setIsOpen] = useState(false);
+    const dropdownRef = useRef(null);
+
+    useEffect(() => {
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
+    const handleButtonClick = function(){
+        if (typeof onClick === 'function')
+            onClick();
+    };
+
+    const toggleMenu = function(){
+        setIsOpen(!isOpen);
+    };
+
+    const handleMenuItemClick = function(key){
+        if (typeof onClick === 'function')
+            onClick(key);
+        setIsOpen(false);
+    };
+
+    const handleClickOutside = function(event){
+        if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+            setIsOpen(false);
+        }
+    };
+
+    const mainCls = "main-button btn " + (isAllSelected ? "btn-outline-primary" : "btn-primary");
+    const toggleCls = "dropdown-toggle btn " + (isAllSelected ? "btn-outline-primary" : "btn-primary");
+    const options = _.filter(propOptions, function (opt) { return !opt.hidden;});
+
+    return (
+        <div className="split-button" ref={dropdownRef}>
+            <button type="button" id={buttonId} className={mainCls} onClick={handleButtonClick} data-tip={tooltip} disabled={disabled} data-has-toggle={!hideToggle}>
+                <i className={iconClassName} />
+                <span className="d-none d-md-inline text-400">{isAllSelected ? 'Deselect' : 'Select'} </span>
+                <span className="text-600">All</span>
+            </button>
+            {!hideToggle &&
+                <button type="button" className={toggleCls} onClick={toggleMenu} disabled={disabled}>
+                    <i className="icon icon-fw icon-angle-down ml-03 fas" />
+                </button>
+            }
+            {isOpen &&
+                <ul className="split-dropdown-menu">
+                    {
+                        options.map((item, index) => (
+                            <li key={index} onClick={(e) => handleMenuItemClick(item.key)} className={item.disabled && "disabled"}>
+                                <i className={item.iconClassName || iconClassName} />
+                                <span className="text-400">{item.label}</span>
+                            </li>
+                        ))
+                    }
+                </ul>
+            }
         </div>
     );
 });
