@@ -27,7 +27,7 @@ jobs:
       matrix:
         test_type: ['UNIT', 'NPM', 'Docker']
         # We are really not set up for these next two to be multiplicative, so be careful adding more.
-        python_version: ['3.12']
+        python_version: ['3.11']
         node_version: ['18']
 
     # Steps represent a sequence of tasks that will be executed as part of the job
