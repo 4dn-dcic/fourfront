@@ -54,22 +54,21 @@ files = [
 
 [[package]]
 name = "attrs"
-version = "23.2.0"
+version = "22.2.0"
 description = "Classes Without Boilerplate"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.6"
 files = [
-    {file = "attrs-23.2.0-py3-none-any.whl", hash = "sha256:99b87a485a5820b23b879f04c2305b44b951b502fd64be915879d77a7e8fc6f1"},
-    {file = "attrs-23.2.0.tar.gz", hash = "sha256:935dc3b529c262f6cf76e50877d35a4bd3c1de194fd41f47a2b7ae8f19971f30"},
+    {file = "attrs-22.2.0-py3-none-any.whl", hash = "sha256:29e95c7f6778868dbd49170f98f8818f78f3dc5e0e37c0b1f474e3561b240836"},
+    {file = "attrs-22.2.0.tar.gz", hash = "sha256:c9227bfc2f01993c03f68db37d1d15c9690188323c067c641f1a35ca58185f99"},
 ]
 
 [package.extras]
-cov = ["attrs[tests]", "coverage[toml] (>=5.3)"]
-dev = ["attrs[tests]", "pre-commit"]
-docs = ["furo", "myst-parser", "sphinx", "sphinx-notfound-page", "sphinxcontrib-towncrier", "towncrier", "zope-interface"]
-tests = ["attrs[tests-no-zope]", "zope-interface"]
-tests-mypy = ["mypy (>=1.6)", "pytest-mypy-plugins"]
-tests-no-zope = ["attrs[tests-mypy]", "cloudpickle", "hypothesis", "pympler", "pytest (>=4.3.0)", "pytest-xdist[psutil]"]
+cov = ["attrs[tests]", "coverage-enable-subprocess", "coverage[toml] (>=5.3)"]
+dev = ["attrs[docs,tests]"]
+docs = ["furo", "myst-parser", "sphinx", "sphinx-notfound-page", "sphinxcontrib-towncrier", "towncrier", "zope.interface"]
+tests = ["attrs[tests-no-zope]", "zope.interface"]
+tests-no-zope = ["cloudpickle", "cloudpickle", "hypothesis", "hypothesis", "mypy (>=0.971,<0.990)", "mypy (>=0.971,<0.990)", "pympler", "pympler", "pytest (>=4.3.0)", "pytest (>=4.3.0)", "pytest-mypy-plugins", "pytest-mypy-plugins", "pytest-xdist[psutil]", "pytest-xdist[psutil]"]
 
 [[package]]
 name = "aws-requests-auth"
@@ -3818,30 +3817,21 @@ tests = ["coverage", "freezegun (>=0.2.8)", "pretend", "pytest (>=3.3.0)", "pyth
 
 [[package]]
 name = "submit4dn"
-version = "0.9.7"
-description = "Tools for data wrangling and submission to data.4dnucleome.org"
+version = "4.0.3.1b1"
+description = "Utility package for submitting data to the 4DN Data Portal"
 optional = false
-python-versions = "*"
+python-versions = "<3.13,>=3.8.1"
 files = [
-    {file = "Submit4DN-0.9.7-py2-none-any.whl", hash = "sha256:61bb192c86fc3d50c7ed679c7309c20cd0fba17d99fd8a5f355b875dc3a1496c"},
-    {file = "Submit4DN-0.9.7-py3-none-any.whl", hash = "sha256:c487e00ab5b1b32bf9e17a73b0542fb2569e31f23937f353f32f9ad6b1a9ba07"},
-    {file = "Submit4DN-0.9.7.tar.gz", hash = "sha256:845e3c5b957eedec6d8eef0877aad3095eca71c371e2b07a31ac3b4c53ed311e"},
+    {file = "submit4dn-4.0.3.1b1-py3-none-any.whl", hash = "sha256:661dc54cf50c0a15497171b13d7d35739ffca4586823c7c9903ce4e813a11e24"},
+    {file = "submit4dn-4.0.3.1b1.tar.gz", hash = "sha256:44ceafcee313e67bfef0ea4e57ecefbcf2dd90b375d4e61e4b82b6701c0140dd"},
 ]
 
 [package.dependencies]
-attrs = "*"
-awscli = "*"
-Pillow = "*"
-py = ">=1.4.31"
-python-magic = ">=0.4.12"
-requests = "*"
-six = "*"
-wheel = ">=0.24.0"
-xlrd = "*"
-xlwt = ">=1.1.2"
-
-[package.extras]
-test = ["pytest (>=3.0.1)", "pytest-cov", "pytest-mock", "tox (>=2.5.0)"]
+attrs = ">=22.2,<23.0"
+awscli = ">=1.27,<2.0"
+dcicutils = ">=8.13.0,<9.0.0"
+openpyxl = ">=3.1.2,<4.0.0"
+python-magic = ">=0.4.12,<1"
 
 [[package]]
 name = "subprocess-middleware"
@@ -4428,4 +4418,4 @@ test = ["zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.13"
-content-hash = "87e8369b74491731f35c5018df6306095fa4ea8f6568fc0d014c0939b8523e31"
+content-hash = "3dad3bbcad9ac9eb35065531be96e8a2649521e9bc1ec9152ff950db26931019"
