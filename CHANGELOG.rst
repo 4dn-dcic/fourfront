@@ -6,12 +6,14 @@ fourfront
 Change Log
 ----------
 
+
 7.6.0
 =====
 
-* Add cumulative sum and date range options for submission statistics
-* Add cumulative sum and 60 days options for usage statistics
-* Update statistics page style and improve mobile UI
+`Add routes page  <https://github.com/4dn-dcic/fourfront/pull/1898>`_
+
+* Add routes page to list all endpoints
+* updated lock file
 
 
 7.5.8
