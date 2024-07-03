@@ -1010,8 +1010,6 @@ export function UsageStatsView(props){
                         <AreaChart {...commonChartProps} data={file_views} />
                     </AreaChartContainer>
 
-                    <HorizontalD3ScaleLegend {...{ loadingStatus }} />
-
                 </ColorScaleProvider>
 
                 : null}
@@ -1105,8 +1103,6 @@ export function UsageStatsView(props){
                         legend={<HorizontalD3ScaleLegend {...{ loadingStatus }} />}>
                         <AreaChart {...commonChartProps} data={fields_faceted} />
                     </AreaChartContainer>
-
-                    <HorizontalD3ScaleLegend {...{ loadingStatus }} />
 
                 </ColorScaleProvider>
 

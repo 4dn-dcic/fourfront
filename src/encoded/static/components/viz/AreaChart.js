@@ -260,7 +260,6 @@ export class StatsChartViewAggregator extends React.PureComponent {
 }
 
 
-
 /**
  * Optionally wrap a class or sub-class instance of StatsViewController (or ancestor which passes down props)
  * with this component and place a GroupByDropdown later in rendering tree to use/accept these props.
@@ -483,7 +482,6 @@ export class GroupByDropdown extends React.PureComponent {
 }
 
 
-
 /** Wraps AreaCharts or AreaChartContainers in order to provide shared color scales. */
 export class ColorScaleProvider extends React.PureComponent {
 
@@ -565,7 +563,6 @@ export class ColorScaleProvider extends React.PureComponent {
 }
 
 
-
 export class HorizontalD3ScaleLegend extends React.Component {
 
     constructor(props){
@@ -628,8 +625,6 @@ export class HorizontalD3ScaleLegend extends React.Component {
     }
 
 }
-
-
 
 
 export class ChartTooltip extends React.PureComponent {
@@ -1265,7 +1260,6 @@ export function ErrorIcon(props){
 ErrorIcon.defaultProps = { 'children' : "Loading failed. Please try again later." };
 
 
-
 export class AreaChartContainer extends React.Component {
 
     static isExpanded(props){
@@ -1277,7 +1271,8 @@ export class AreaChartContainer extends React.Component {
 
     static defaultProps = {
         'colorScale' : null,
-        'extraButtons' : []
+        'extraButtons' : [],
+        'legend': null
     };
 
     constructor(props){
@@ -1341,7 +1336,7 @@ export class AreaChartContainer extends React.Component {
     }
 
     render(){
-        const { title, subTitle, children, width, defaultHeight, colorScale, chartMargin, updateColorStore } = this.props;
+        const { title, subTitle, children, width, defaultHeight, colorScale, chartMargin, updateColorStore, legend } = this.props;
 
         const expanded = AreaChartContainer.isExpanded(this.props);
         const useWidth = width || this.getRefWidth();
@@ -1362,6 +1357,16 @@ export class AreaChartContainer extends React.Component {
             visualToShow = <LoadingIcon>Initializing...</LoadingIcon>;
         }
 
+        let legendToShow;
+        if (legend) {
+            const childProps = {
+                ..._.pick(this.props,
+                    'chartMargin', 'className', 'colorScale', 'colorScaleStore', 'resetScaleLegendWhenChange',
+                    'resetScalesWhenChange', 'updateColorStore'), width: useWidth
+            };
+            legendToShow = React.cloneElement(legend, childProps);
+        }
+
         return (
             <div className="mt-2">
                 <div className="text-300 clearfix">
@@ -1369,6 +1374,7 @@ export class AreaChartContainer extends React.Component {
                     { title }
                 </div>
                 {subTitle ? <div className="text-center">{subTitle}</div> : null}
+                { legendToShow }
                 <div ref={this.elemRef} style={{ 'overflowX' : expanded ? 'scroll' : 'auto', 'overflowY' : 'hidden' }}>
                     { visualToShow }
                 </div>
