@@ -6,10 +6,19 @@ fourfront
 Change Log
 ----------
 
-7.6.0
+7.7.0
 =====
 
 * Updates related to Python 3.12.
+
+
+7.6.0
+=====
+
+`Add routes page  <https://github.com/4dn-dcic/fourfront/pull/1898>`_
+
+* Add routes page to list all endpoints
+* updated lock file
 
 
 7.5.8
