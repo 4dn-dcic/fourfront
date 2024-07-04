@@ -1139,6 +1139,7 @@ UsageStatsView.titleExtensions = {
     }
 };
 
+
 export function SubmissionsStatsView(props) {
     const {
         loadingStatus, mounted, session, currentGroupBy, groupByOptions, handleGroupByChange, windowWidth,
@@ -1169,6 +1170,7 @@ export function SubmissionsStatsView(props) {
         currentGroupBy, groupByOptions, handleGroupByChange,
         currentDateRangePreset, currentDateRangeFrom, currentDateRangeTo, dateRangeOptions, handleDateRangeChange, loadingStatus
     };
+    const invalidDateRange = currentDateRangeFrom && currentDateRangeTo && currentDateRangeFrom > currentDateRangeTo;
 
     return (
         <div className="stats-charts-container" key="charts" id="submissions">
@@ -1193,7 +1195,8 @@ export function SubmissionsStatsView(props) {
                                 <span className="text-300 d-none d-sm-inline"> - </span>
                                 <span className="text-300">internal vs public release</span>
                             </h3>
-                        }>
+                        }
+                        subTitle={<ChartSubTitle invalidDateRange={invalidDateRange} data={expsets_released_vs_internal} />}>
                         <AreaChart {...commonChartProps} data={expsets_released_vs_internal} />
                     </AreaChartContainer>
 
@@ -1215,45 +1218,52 @@ export function SubmissionsStatsView(props) {
 
                 <HorizontalD3ScaleLegend {...{ loadingStatus }} />
 
-                <AreaChartContainer {...commonContainerProps} id="expsets_released" title={
-                    <h3 className="charts-group-title">
-                        <span className="d-block d-sm-inline">Experiment Sets</span>
-                        <span className="text-300 d-none d-sm-inline"> - </span>
-                        <span className="text-300">{ session ? 'publicly released' : 'released' }</span>
-                    </h3>
-                }>
+                <AreaChartContainer {...commonContainerProps} id="expsets_released"
+                    title={
+                        <h3 className="charts-group-title">
+                            <span className="d-block d-sm-inline">Experiment Sets</span>
+                            <span className="text-300 d-none d-sm-inline"> - </span>
+                            <span className="text-300">{session ? 'publicly released' : 'released'}</span>
+                        </h3>}
+                    subTitle={<ChartSubTitle invalidDateRange={invalidDateRange} data={expsets_released} />}>
                     <AreaChart {...commonChartProps} data={expsets_released} />
                 </AreaChartContainer>
 
                 { showInternalReleaseCharts ?
-                    <AreaChartContainer {...commonContainerProps} id="expsets_released_internal" title={
-                        <h3 className="charts-group-title">
-                            <span className="d-block d-sm-inline">Experiment Sets</span>
-                            <span className="text-300 d-none d-sm-inline"> - </span>
-                            <span className="text-300">released (public or within 4DN)</span>
-                        </h3>
-                    }>
+                    <AreaChartContainer {...commonContainerProps} id="expsets_released_internal"
+                        title={
+                            <h3 className="charts-group-title">
+                                <span className="d-block d-sm-inline">Experiment Sets</span>
+                                <span className="text-300 d-none d-sm-inline"> - </span>
+                                <span className="text-300">released (public or within 4DN)</span>
+                            </h3>
+                        }
+                        subTitle={<ChartSubTitle invalidDateRange={invalidDateRange} data={expsets_released_internal} />}>
                         <AreaChart {...commonChartProps} data={expsets_released_internal} />
                     </AreaChartContainer>
                     : null }
 
-                <AreaChartContainer {...commonContainerProps} id="files_released" title={
-                    <h3 className="charts-group-title">
-                        <span className="d-block d-sm-inline">Files</span>
-                        <span className="text-300 d-none d-sm-inline"> - </span>
-                        <span className="text-300">{ session ? 'publicly released' : 'released' }</span>
-                    </h3>
-                }>
+                <AreaChartContainer {...commonContainerProps} id="files_released"
+                    title={
+                        <h3 className="charts-group-title">
+                            <span className="d-block d-sm-inline">Files</span>
+                            <span className="text-300 d-none d-sm-inline"> - </span>
+                            <span className="text-300">{session ? 'publicly released' : 'released'}</span>
+                        </h3>
+                    }
+                    subTitle={<ChartSubTitle invalidDateRange={invalidDateRange} data={files_released} />}>
                     <AreaChart {...commonChartProps} data={files_released} />
                 </AreaChartContainer>
 
-                <AreaChartContainer {...commonContainerProps} id="file_volume_released" title={
-                    <h3 className="charts-group-title">
-                        <span className="d-block d-sm-inline">Total File Size</span>
-                        <span className="text-300 d-none d-sm-inline"> - </span>
-                        <span className="text-300">{ session ? 'publicly released' : 'released' }</span>
-                    </h3>
-                }>
+                <AreaChartContainer {...commonContainerProps} id="file_volume_released"
+                    title={
+                        <h3 className="charts-group-title">
+                            <span className="d-block d-sm-inline">Total File Size</span>
+                            <span className="text-300 d-none d-sm-inline"> - </span>
+                            <span className="text-300">{session ? 'publicly released' : 'released'}</span>
+                        </h3>
+                    }
+                    subTitle={<ChartSubTitle invalidDateRange={invalidDateRange} data={file_volume_released} />}>
                     <AreaChart {...commonChartProps} data={file_volume_released} yAxisLabel="GB" />
                 </AreaChartContainer>
 
@@ -1337,7 +1347,6 @@ const convertDataRangeToXDomain = memoize(function (rangePreset = 'all', rangeFr
     return [firstWeekdayFrom, to];
 });
 
-
 function groupExternalChildren(children, externalTermMap){
 
     if (!externalTermMap){
@@ -1366,3 +1375,13 @@ function groupExternalChildren(children, externalTermMap){
     }
     return newChildren;
 }
+
+const ChartSubTitle = memoize(function ({ data, invalidDateRange }) {
+    if (invalidDateRange === true) {
+        return <h4 className="font-weight-normal text-secondary">Invalid date range</h4>;
+    }
+    if (!data || (Array.isArray(data) && data.length === 0)) {
+        return <h4 className="font-weight-normal text-secondary">No data to display</h4>;
+    }
+    return null;
+});
