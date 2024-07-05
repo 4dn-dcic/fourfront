@@ -612,57 +612,8 @@ $margin-util-sizes-mini: 1, 2, 3, 4, 5, 6, 7, 8; 		// * 1px
 
 /************** MORE BUTTON STYLES ***********/
 
-.split-button {
-	display: inline-block;
-	position: relative;
-
-	.main-button {
-		&[data-has-toggle="true"] {
-			border-top-right-radius: 0 !important;
-			border-bottom-right-radius: 0 !important;
-		}
-	}
-	
-	.dropdown-toggle {
-		border-top-left-radius: 0 !important;
-		border-bottom-left-radius: 0 !important;
-		border-left: 1px solid #f9f9f942;
-	
-		&:after {
-			content: none;
-		}
-		&.btn {
-			padding-right: 5px !important;
-			padding-left: 5px !important;
-		}
-	}
-	
-	.split-dropdown-menu {
-		position: absolute;
-		top: 100%;
-		left: 0;
-		list-style: none;
-		margin: 0;
-		padding: 0;
-		border: 1px solid #ccc;
-		background-color: white;
-		z-index: 1000;
-		min-width: 250px;
-	
-		li {
-			padding: 5px 10px;
-			cursor: pointer;
-
-			&.disabled {
-				pointer-events: none; //This makes it not clickable
-				opacity: 0.6;         //This grays it out to look disabled
-			}
-		}
-	
-		li:hover {
-			background-color: #f0f0f0;
-		}
-	}
+.dropdown-toggle-split {
+	border-left: 1px solid #f9f9f942;
 }
 
 /*

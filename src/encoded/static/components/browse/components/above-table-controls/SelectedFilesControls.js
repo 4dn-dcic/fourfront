@@ -6,6 +6,9 @@ import url from 'url';
 import queryString from 'query-string';
 import _ from 'underscore';
 import memoize from 'memoize-one';
+import Dropdown from 'react-bootstrap/esm/Dropdown';
+import Button from 'react-bootstrap/esm/Button'; // TODO: Use plain HTML w. bootstrap classNames in place of this.
+import ButtonGroup from 'react-bootstrap/esm/ButtonGroup';
 
 import { Checkbox } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/Checkbox';
 import { console, object, ajax, analytics, memoizedUrlParse, logger } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
@@ -202,7 +205,7 @@ export class SelectAllFilesButton extends React.PureComponent {
                         <span className="d-none d-md-inline text-400">{ isAllSelected ? 'Deselect' : 'Select' } </span>
                         <span className="text-600">All</span>
                     </button> */}
-                    <SplitButton onClick={this.onSelectAllClick} buttonId="select-all-files-button"
+                    <SelectAllSplitButton onClick={this.onSelectAllClick} buttonId="select-all-files-button"
                         {...{ options, isAllSelected, disabled, iconClassName, tooltip, hideToggle }} />
                 </div>
             </div>
@@ -372,68 +375,49 @@ export const SelectedFilesControls = React.memo(function SelectedFilesControls(p
     );
 });
 
-
-export const SplitButton = React.memo(function SplitButton(props) {
+const SelectAllSplitButton = (props) => {
     const { onClick, buttonId = '', options: propOptions, disabled, isAllSelected, iconClassName, tooltip, hideToggle = false } = props;
-    const [isOpen, setIsOpen] = useState(false);
-    const dropdownRef = useRef(null);
 
-    useEffect(() => {
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, []);
+    const title = (
+        <React.Fragment>
+            <i className={iconClassName} />
+            <span className="d-none d-md-inline text-400">{isAllSelected ? 'Deselect' : 'Select'} </span>
+            <span className="text-600">All</span>
+        </React.Fragment>
+    );
+
+    const options = _.filter(propOptions, function (opt) { return !opt.hidden;});
+    const variant = isAllSelected ? 'outline-primary' : 'primary';
 
     const handleButtonClick = function(){
         if (typeof onClick === 'function')
             onClick();
     };
 
-    const toggleMenu = function(){
-        setIsOpen(!isOpen);
-    };
-
-    const handleMenuItemClick = function(key){
+    const handleMenuItemClick = function (key) {
         if (typeof onClick === 'function')
             onClick(key);
-        setIsOpen(false);
     };
-
-    const handleClickOutside = function(event){
-        if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-            setIsOpen(false);
-        }
-    };
-
-    const mainCls = "main-button btn " + (isAllSelected ? "btn-outline-primary" : "btn-primary");
-    const toggleCls = "dropdown-toggle btn " + (isAllSelected ? "btn-outline-primary" : "btn-primary");
-    const options = _.filter(propOptions, function (opt) { return !opt.hidden;});
 
     return (
-        <div className="split-button" ref={dropdownRef}>
-            <button type="button" id={buttonId} className={mainCls} onClick={handleButtonClick} data-tip={tooltip} disabled={disabled} data-has-toggle={!hideToggle}>
-                <i className={iconClassName} />
-                <span className="d-none d-md-inline text-400">{isAllSelected ? 'Deselect' : 'Select'} </span>
-                <span className="text-600">All</span>
-            </button>
+        <Dropdown as={ButtonGroup}>
+            <Button id={buttonId} variant={variant} data-tip={tooltip} onClick={handleButtonClick} disabled={disabled}>{title}</Button>
             {!hideToggle &&
-                <button type="button" className={toggleCls} onClick={toggleMenu} disabled={disabled}>
-                    <i className="icon icon-fw icon-angle-down ml-03 fas" />
-                </button>
+                <React.Fragment>
+                    <Dropdown.Toggle split variant={variant} disabled={disabled} />
+                    <Dropdown.Menu>
+                        {
+                            options.map((item, index) => (
+                                <Dropdown.Item key={index} disabled={item.disabled} onClick={() => handleMenuItemClick(item.key)}>
+                                    <span className={null}>
+                                        <i className={item.iconClassName || iconClassName} />&nbsp;  {item.label}
+                                    </span>
+                                </Dropdown.Item>
+                            ))
+                        }
+                    </Dropdown.Menu>
+                </React.Fragment>
             }
-            {isOpen &&
-                <ul className="split-dropdown-menu">
-                    {
-                        options.map((item, index) => (
-                            <li key={index} onClick={(e) => handleMenuItemClick(item.key)} className={item.disabled && "disabled"}>
-                                <i className={item.iconClassName || iconClassName} />
-                                <span className="text-400">{item.label}</span>
-                            </li>
-                        ))
-                    }
-                </ul>
-            }
-        </div>
+        </Dropdown>
     );
-});
+};
