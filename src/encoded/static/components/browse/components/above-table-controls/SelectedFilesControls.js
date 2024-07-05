@@ -161,7 +161,7 @@ export class SelectAllFilesButton extends React.PureComponent {
             case 'processed-files':
                 this.handleSelectAll(false, true, false);
                 break;
-            case 'other-processed-files':
+            case 'supplementary-files':
                 this.handleSelectAll(false, false, true);
                 break;
             default:
@@ -171,7 +171,7 @@ export class SelectAllFilesButton extends React.PureComponent {
     }
 
     render(){
-        const { href, selectedFiles, totalRawFilesCount, totalProcessedFilesCount, totalOPFCount } = this.props;
+        const { href, selectedFiles, totalRawFilesCount = 0, totalProcessedFilesCount = 0, totalOPFCount = 0 } = this.props;
         const { selecting } = this.state;
         const isAllSelected = this.isAllSelected();
         const anySelected = selectedFiles && Object.keys(selectedFiles).length > 0;
@@ -200,9 +200,9 @@ export class SelectAllFilesButton extends React.PureComponent {
 
         const options = [
             { label: 'Clear Selection', key: 'clear', iconClassName: 'mr-05 icon icon-fw far icon-times-circle', hidden: !anySelected },
-            { label: 'Select All Raw Files', key: 'raw-files', disabled: isAllSelected || isAllRawFilesSelected },
-            { label: 'Select All Processed Files', key: 'processed-files', disabled: isAllSelected || isAllProcessedFilesSelected },
-            { label: 'Select All Supplementary Files', key: 'other-processed-files', disabled: isAllSelected || isAllOtherProcessedFilesSelected },
+            { label: 'Select All Raw Files', key: 'raw-files', disabled: isAllSelected || isAllRawFilesSelected, hidden: totalRawFilesCount === 0 },
+            { label: 'Select All Processed Files', key: 'processed-files', disabled: isAllSelected || isAllProcessedFilesSelected, hidden: totalProcessedFilesCount === 0 },
+            { label: 'Select All Supplementary Files', key: 'supplementary-files', disabled: isAllSelected || isAllOtherProcessedFilesSelected, hidden: totalOPFCount === 0 },
         ];
 
         return (
