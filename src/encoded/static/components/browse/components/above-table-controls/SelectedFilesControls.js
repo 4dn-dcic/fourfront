@@ -88,7 +88,7 @@ export class SelectAllFilesButton extends React.PureComponent {
         const { totalFilesCount, totalOPFCount, selectedFiles } = this.props;
         if (!totalFilesCount) return false;
         // totalFilesCount as returned from bar plot aggs at moment is unique.
-        if ((totalFilesCount + (totalOPFCount || 0)) === this.memoized.uniqueFileCount(selectedFiles)){
+        if (totalFilesCount === this.memoized.uniqueFileCount(selectedFiles)){
             return true;
         }
         return false;
@@ -344,16 +344,18 @@ export const SelectedFilesControls = React.memo(function SelectedFilesControls(p
     } = props;
     const selectedFileProps = SelectedFilesController.pick(props);
 
-    let totalUniqueFilesCount = 0, totalUniqueOPFCount = 0;
+    let totalUniqueAllFilesCount = 0, totalUniqueRawFilesCount = 0, totalUniqueProcessedFilesCount = 0, totalUniqueOPFCount = 0;
     if (Array.isArray(context['@type']) && context['@type'].indexOf('FileSearchResults') > -1) {
-        totalUniqueFilesCount = context.total || 0;
+        totalUniqueAllFilesCount = context.total || 0;
     } else {
         const barPlotData = (barplot_data_filtered || barplot_data_unfiltered);
         // This gets unique file count from ES aggs. In future we might be able to get total including
         // duplicates, in which case should change up logic downstream from this component for e.g. `isAllSelected`
         // in SelectAllFilesButton & similar.
         if (barPlotData && barPlotData.total) {
-            totalUniqueFilesCount = barPlotData.total.files || 0;
+            totalUniqueAllFilesCount = barPlotData.total.files || 0;
+            totalUniqueRawFilesCount = barPlotData.total.files_raw || 0;
+            totalUniqueProcessedFilesCount = barPlotData.total.files_processed || 0;
             totalUniqueOPFCount = barPlotData.total.files_opf || 0;
         }
     }
@@ -362,11 +364,12 @@ export const SelectedFilesControls = React.memo(function SelectedFilesControls(p
         // This rendered within a row by AboveTableControlsBase.js
         // TODO maybe refactor some of this stuff to be simpler.
         <div className="col">
-            <SelectAllFilesButton {...selectedFileProps} {...{ href, context }} totalFilesCount={totalUniqueFilesCount} totalOPFCount={totalUniqueOPFCount} />
+            <SelectAllFilesButton {...selectedFileProps} {...{ href, context }} totalFilesCount={totalUniqueAllFilesCount}
+                totalRawFilesCount={totalUniqueRawFilesCount} totalProcessedFilesCount={totalUniqueProcessedFilesCount} totalOPFCount={totalUniqueOPFCount} />
             <div className="pull-left box selection-buttons">
                 <div className="btn-group">
-                    <BrowseViewSelectedFilesDownloadButton {...{ selectedFiles, subSelectedFiles, context, session }} totalFilesCount={totalUniqueFilesCount} />
-                    <SelectedFilesFilterByButton totalFilesCount={totalUniqueFilesCount} onFilterFilesByClick={props.panelToggleFxns.filterFilesBy}
+                    <BrowseViewSelectedFilesDownloadButton {...{ selectedFiles, subSelectedFiles, context, session }} totalFilesCount={totalUniqueAllFilesCount} />
+                    <SelectedFilesFilterByButton totalFilesCount={totalUniqueAllFilesCount} onFilterFilesByClick={props.panelToggleFxns.filterFilesBy}
                         active={currentOpenPanel === "filterFilesBy"} // <- must be boolean
                         {...selectedFileProps} {...{ currentFileTypeFilters, setFileTypeFilters, currentOpenPanel }} />
                 </div>

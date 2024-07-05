@@ -44,7 +44,7 @@ export class UIControlsWrapper extends React.PureComponent {
             // Aggr type
             'experiment_sets'   : "Experiment Sets",
             'experiments'       : 'Experiments',
-            'files_all'         : "Files",
+            'files'             : "Files",
 
             // Show state
             'all'               : 'All',
@@ -393,7 +393,7 @@ export class UIControlsWrapper extends React.PureComponent {
                                     onSelect={this.handleAggregateTypeSelect}
                                     title={this.titleMap(aggregateType)}
                                     onToggle={this.handleDropDownYAxisFieldToggle}>
-                                    { this.renderDropDownMenuItems(['experiment_sets','experiments','files_all'], aggregateType) }
+                                    { this.renderDropDownMenuItems(['experiment_sets','experiments','files'], aggregateType) }
                                 </DropdownButton>
                             </div>
                         </div>
