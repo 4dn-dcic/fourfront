@@ -185,10 +185,7 @@ export class SelectAllFilesButton extends React.PureComponent {
         }
         const isEnabled = this.isEnabled();
         const disabled = selecting || (!isAllSelected && !isEnabled);
-        const iconClassName = (
-            "mr-05 icon icon-fw icon-" + (selecting ? 'circle-notch icon-spin fas' : (isAllSelected ? 'square far' : 'check-square far'))
-        );
-        // const cls = "btn " + (isAllSelected ? "btn-outline-primary" : "btn-primary");
+        const iconClassName = "mr-05 icon icon-fw icon-" + (selecting ? 'circle-notch icon-spin fas' : (isAllSelected ? 'square far' : 'check-square far'));
         const hideToggle = !navigate.isBrowseHref(href);
 
         let tooltip = null;
@@ -200,9 +197,9 @@ export class SelectAllFilesButton extends React.PureComponent {
 
         const options = [
             { label: 'Clear Selection', key: 'clear', iconClassName: 'mr-05 icon icon-fw far icon-times-circle', hidden: !anySelected },
-            { label: 'Select All Raw Files', key: 'raw-files', disabled: isAllSelected || isAllRawFilesSelected, hidden: totalRawFilesCount === 0 },
-            { label: 'Select All Processed Files', key: 'processed-files', disabled: isAllSelected || isAllProcessedFilesSelected, hidden: totalProcessedFilesCount === 0 },
-            { label: 'Select All Supplementary Files', key: 'supplementary-files', disabled: isAllSelected || isAllOtherProcessedFilesSelected, hidden: totalOPFCount === 0 },
+            { label: `Select All Raw Files (${totalRawFilesCount})`, key: 'raw-files', disabled: isAllRawFilesSelected, hidden: totalRawFilesCount === 0 },
+            { label: `Select All Processed Files (${totalProcessedFilesCount})`, key: 'processed-files', disabled: isAllProcessedFilesSelected, hidden: totalProcessedFilesCount === 0 },
+            { label: `Select All Supplementary Files (${totalOPFCount})`, key: 'supplementary-files', disabled: isAllOtherProcessedFilesSelected, hidden: totalOPFCount === 0 },
         ];
 
         return (
