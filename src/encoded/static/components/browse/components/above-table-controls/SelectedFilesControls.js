@@ -179,9 +179,9 @@ export class SelectAllFilesButton extends React.PureComponent {
         // get actual counts when it is necessary, e.g. some files selected but not all
         if (!isAllSelected && anySelected) {
             const countsBySource = this.memoized.uniqueFileCountBySource(selectedFiles);
-            isAllRawFilesSelected = totalRawFilesCount > 0 && (countsBySource['raw'] || 0 === totalRawFilesCount);
-            isAllProcessedFilesSelected = totalProcessedFilesCount > 0 && (countsBySource['processed'] || 0 === totalProcessedFilesCount);
-            isAllOtherProcessedFilesSelected = totalOPFCount > 0 && (countsBySource['supplementary'] || 0 === totalOPFCount);
+            isAllRawFilesSelected = totalRawFilesCount > 0 && ((countsBySource['raw'] || 0) === totalRawFilesCount);
+            isAllProcessedFilesSelected = totalProcessedFilesCount > 0 && ((countsBySource['processed'] || 0) === totalProcessedFilesCount);
+            isAllOtherProcessedFilesSelected = totalOPFCount > 0 && ((countsBySource['supplementary'] || 0) === totalOPFCount);
         }
         const isEnabled = this.isEnabled();
         const disabled = selecting || (!isAllSelected && !isEnabled);
