@@ -621,7 +621,11 @@ class SupplementaryFilesTabView extends React.PureComponent {
         const collectionsFromExpSet = _.map(experiment_set.other_processed_files, function(collection){
             const { files : origFiles } = collection;
             const files = _.map(origFiles || [], function(file){
-                return _.extend({ 'from_experiment_set' : experiment_set, 'from_experiment' : { 'from_experiment_set' : experiment_set, 'accession' : 'NONE' } }, file);
+                return _.extend({
+                    'from_experiment_set': experiment_set,
+                    'from_experiment': { 'from_experiment_set': experiment_set, 'accession': 'NONE' },
+                    'from_source': 'supplementary'
+                }, file);
             });
             return _.extend({}, collection, { files });
         });

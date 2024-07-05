@@ -592,7 +592,7 @@ export class RawFilesStackedTable extends React.PureComponent {
             contents = contents.concat(_.map(fileGroups, function(group, j){
                 // Ensure can be converted to accessionTriple
                 group = _.map(group, function(f){
-                    return fileUtil.extendFile(f, exp, experimentSet || { accession: 'NONE' });
+                    return fileUtil.extendFile(f, exp, experimentSet || { accession: 'NONE' }, 'raw');
                 });
                 // Find relation/group type(s)
                 const relationshipTypes = new Set(_.pluck(_.flatten(_.pluck(group, 'related_files'), true), 'relationship_type'));
@@ -613,7 +613,7 @@ export class RawFilesStackedTable extends React.PureComponent {
         // Add in remaining unpaired files, if any.
         if (haveUngroupedFiles){
             contents = contents.concat(_.map(ungroupedFiles, function(file, j){
-                const extendedFile = fileUtil.extendFile(file, exp, experimentSet || { accession: 'NONE' });
+                const extendedFile = fileUtil.extendFile(file, exp, experimentSet || { accession: 'NONE' }, 'raw');
 
                 return (
                     <FilePairBlock key={object.atIdFromObject(extendedFile) || j} files={[extendedFile]}

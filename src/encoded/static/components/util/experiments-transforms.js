@@ -200,6 +200,7 @@ export function allProcessedFilesFromExperiments(experiments){
     return _.reduce(experiments || [], function(m, exp){
         var processed_files_for_exp = _.map(exp.processed_files || [], function(pF){
             pF = _.clone(pF);
+            pF.from_source = 'processed';
             pF.from_experiment = exp;
             return pF;
         });
@@ -222,6 +223,7 @@ export function allProcessedFilesFromExperimentSet(experiment_set){
 
     return _.map(experiment_set.processed_files || [], function(pF){
         pF = _.clone(pF);
+        pF.from_source = 'processed';
         pF.from_experiment_set = experiment_set;
         if (typeof pF.from_experiment === 'undefined') {
             pF.from_experiment = {
@@ -250,6 +252,7 @@ export function allOtherProcessedFilesFromExperiments(experiments){
         }));
         var other_processed_files_for_exp = _.map(expOtherProcessedFiles || [], function(pF){
             pF = _.clone(pF);
+            pF.from_source = 'supplementary';
             pF.from_experiment = exp;
             return pF;
         });
@@ -271,6 +274,7 @@ export function allOtherProcessedFilesFromExperimentSet(experiment_set){
 
     return _.map(expSetOtherProcessedFiles || [], function(pF){
         pF = _.clone(pF);
+        pF.from_source = 'supplementary';
         pF.from_experiment_set = experiment_set;
         if (typeof pF.from_experiment === 'undefined') {
             pF.from_experiment = {
@@ -473,7 +477,7 @@ export function allFilesFromExperiment(experiment, includeProcessedFiles = false
         filesToReturn = filesToReturn.concat(allProcessedFilesFromExperiments([experiment]));
     }
     return _.map(filesToReturn, function(f){
-        return _.extend({}, f, { 'from_experiment' : f.from_experiment || experiment });
+        return _.extend({}, f, { 'from_experiment' : f.from_experiment || experiment, 'from_source': f.from_source || 'raw' });
     });
 }
 

@@ -1,6 +1,6 @@
 'use strict';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import url from 'url';
 import queryString from 'query-string';
@@ -17,7 +17,7 @@ import { requestAnimationFrame as raf } from '@hms-dbmi-bgm/shared-portal-compon
 import { Schemas, typedefs, navigate } from './../../../util';
 import { allFilesFromExperimentSet, filesToAccessionTriples, fileToAccessionTriple } from './../../../util/experiments-transforms';
 import { BrowseViewSelectedFilesDownloadButton } from './SelectedFilesDownloadButton';
-import { uniqueFileCount, SelectedFilesController } from './../SelectedFilesController';
+import { uniqueFileCount, uniqueFileCountBySource, SelectedFilesController } from './../SelectedFilesController';
 
 // eslint-disable-next-line no-unused-vars
 const { Item } = typedefs;
@@ -73,7 +73,8 @@ export class SelectAllFilesButton extends React.PureComponent {
         this.onSelectAllClick = this.onSelectAllClick.bind(this);
         this.state = { 'selecting' : false };
         this.memoized = {
-            uniqueFileCount: memoize(uniqueFileCount)
+            uniqueFileCount: memoize(uniqueFileCount),
+            uniqueFileCountBySource: memoize(uniqueFileCountBySource)
         };
     }
 
@@ -85,7 +86,7 @@ export class SelectAllFilesButton extends React.PureComponent {
     }
 
     isAllSelected(){
-        const { totalFilesCount, totalOPFCount, selectedFiles } = this.props;
+        const { totalFilesCount, selectedFiles } = this.props;
         if (!totalFilesCount) return false;
         // totalFilesCount as returned from bar plot aggs at moment is unique.
         if (totalFilesCount === this.memoized.uniqueFileCount(selectedFiles)){
@@ -170,10 +171,18 @@ export class SelectAllFilesButton extends React.PureComponent {
     }
 
     render(){
-        const { href, selectedFiles } = this.props;
+        const { href, selectedFiles, totalRawFilesCount, totalProcessedFilesCount, totalOPFCount } = this.props;
         const { selecting } = this.state;
         const isAllSelected = this.isAllSelected();
-        const anySelected = !selectedFiles || Object.keys(selectedFiles).length === 0;
+        const anySelected = selectedFiles && Object.keys(selectedFiles).length > 0;
+        let isAllRawFilesSelected = isAllSelected, isAllProcessedFilesSelected = isAllSelected, isAllOtherProcessedFilesSelected = isAllSelected;
+        // get actual counts when it is necessary, e.g. some files selected but not all
+        if (!isAllSelected && anySelected) {
+            const countsBySource = this.memoized.uniqueFileCountBySource(selectedFiles);
+            isAllRawFilesSelected = totalRawFilesCount > 0 && (countsBySource['raw'] || 0 === totalRawFilesCount);
+            isAllProcessedFilesSelected = totalProcessedFilesCount > 0 && (countsBySource['processed'] || 0 === totalProcessedFilesCount);
+            isAllOtherProcessedFilesSelected = totalOPFCount > 0 && (countsBySource['supplementary'] || 0 === totalOPFCount);
+        }
         const isEnabled = this.isEnabled();
         const disabled = selecting || (!isAllSelected && !isEnabled);
         const iconClassName = (
@@ -190,21 +199,15 @@ export class SelectAllFilesButton extends React.PureComponent {
         }
 
         const options = [
-            { label: 'Clear Selection', key: 'clear', iconClassName: 'mr-05 icon icon-fw far icon-times-circle', hidden: anySelected },
-            { label: 'Select All Raw Files', key: 'raw-files', disabled: isAllSelected },
-            { label: 'Select All Processed Files', key: 'processed-files', disabled: isAllSelected },
-            { label: 'Select All Supplementary Files', key: 'other-processed-files', disabled: isAllSelected },
+            { label: 'Clear Selection', key: 'clear', iconClassName: 'mr-05 icon icon-fw far icon-times-circle', hidden: !anySelected },
+            { label: 'Select All Raw Files', key: 'raw-files', disabled: isAllSelected || isAllRawFilesSelected },
+            { label: 'Select All Processed Files', key: 'processed-files', disabled: isAllSelected || isAllProcessedFilesSelected },
+            { label: 'Select All Supplementary Files', key: 'other-processed-files', disabled: isAllSelected || isAllOtherProcessedFilesSelected },
         ];
 
         return (
             <div className="pull-left box selection-buttons">
                 <div className="btn-group">
-                    {/* <button type="button" id="select-all-files-button" disabled={selecting || (!isAllSelected && !isEnabled)}
-                        className={cls} onClick={this.handleSelectAll} data-tip={tooltip}>
-                        <i className={iconClassName}/>
-                        <span className="d-none d-md-inline text-400">{ isAllSelected ? 'Deselect' : 'Select' } </span>
-                        <span className="text-600">All</span>
-                    </button> */}
                     <SelectAllSplitButton onClick={this.onSelectAllClick} buttonId="select-all-files-button"
                         {...{ options, isAllSelected, disabled, iconClassName, tooltip, hideToggle }} />
                 </div>
@@ -378,7 +381,7 @@ export const SelectedFilesControls = React.memo(function SelectedFilesControls(p
     );
 });
 
-const SelectAllSplitButton = (props) => {
+const SelectAllSplitButton = React.memo(function SelectAllSplitButton(props){
     const { onClick, buttonId = '', options: propOptions, disabled, isAllSelected, iconClassName, tooltip, hideToggle = false } = props;
 
     const title = (
@@ -389,10 +392,10 @@ const SelectAllSplitButton = (props) => {
         </React.Fragment>
     );
 
-    const options = _.filter(propOptions, function (opt) { return !opt.hidden;});
+    const options = _.filter(propOptions, function (opt) { return !opt.hidden; });
     const variant = isAllSelected ? 'outline-primary' : 'primary';
 
-    const handleButtonClick = function(){
+    const handleButtonClick = function () {
         if (typeof onClick === 'function')
             onClick();
     };
@@ -423,4 +426,4 @@ const SelectAllSplitButton = (props) => {
             }
         </Dropdown>
     );
-};
+});

@@ -36,6 +36,34 @@ export function fileCountWithDuplicates(files){
     }
 }
 
+/**
+ * Used and memoized in views which have multiple sets of selectedFiles
+ * Groups files by from_source (e.g. all|none and raw|processed|supplementary) if from_source is defined
+ * @param {*} files
+ * @returns {all: [count}, raw: }
+ */
+export function uniqueFileCountBySource(files) {
+    if (!files || (typeof files !== 'object' && !Array.isArray(files))) {
+        logger.error("files not in proper form (object/array) or is non-existent", files);
+        return 0;
+    }
+    files = typeof files === 'object' ? _.values(files) : files;
+    const groupBySource = _.reduce(files, function (memo, file) {
+        const key = file.from_source || 'none';
+        if (!memo[key]) memo[key] = [];
+        memo[key].push(file.accession || 'NONE');
+        memo['all'].push(file.accession || 'NONE');
+        return memo;
+    }, { all: [] });
+
+    // convert array to count
+    _.keys(groupBySource).forEach(function (key) {
+        groupBySource[key] = _.uniq(groupBySource[key]).length;
+    });
+
+    return groupBySource;
+}
+
 
 /**
  * IN PROGRESS -- TODO: Decide if we should store "selectedFiles" or "unselectedFiles" (re: 'All files in facet selection are selected by default')
