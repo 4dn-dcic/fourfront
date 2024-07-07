@@ -70,7 +70,7 @@ export class SelectAllFilesButton extends React.PureComponent {
         super(props);
         this.isAllSelected = this.isAllSelected.bind(this);
         this.handleSelectAll = this.handleSelectAll.bind(this);
-        this.onSelectAllClick = this.onSelectAllClick.bind(this);
+        this.handleSelectAllBySourceClick = this.handleSelectAllBySourceClick.bind(this);
         this.state = { 'selecting' : false };
         this.memoized = {
             uniqueFileCount: memoize(uniqueFileCount),
@@ -148,7 +148,7 @@ export class SelectAllFilesButton extends React.PureComponent {
         });
     }
 
-    onSelectAllClick(selectType){
+    handleSelectAllBySourceClick(selectType){
         const { resetSelectedFiles } = this.props;
         switch (selectType) {
             case 'clear':
@@ -194,20 +194,46 @@ export class SelectAllFilesButton extends React.PureComponent {
         } else if (!isAllSelected) {
             tooltip = 'Select All Files';
         }
+        const variant = isAllSelected ? 'outline-primary' : 'primary';
 
-        const options = [
-            { label: 'Clear Selection', key: 'clear', iconClassName: 'mr-05 icon icon-fw far icon-times-circle', hidden: !anySelected },
+        const title = (
+            <React.Fragment>
+                <i className={iconClassName} />
+                <span className="d-none d-md-inline text-400">{isAllSelected ? 'Deselect' : 'Select'} </span>
+                <span className="text-600">All</span>
+            </React.Fragment>
+        );
+
+        let options = [
             { label: `Select All Raw Files (${totalRawFilesCount})`, key: 'raw-files', disabled: isAllRawFilesSelected, hidden: totalRawFilesCount === 0 },
             { label: `Select All Processed Files (${totalProcessedFilesCount})`, key: 'processed-files', disabled: isAllProcessedFilesSelected, hidden: totalProcessedFilesCount === 0 },
             { label: `Select All Supplementary Files (${totalOPFCount})`, key: 'supplementary-files', disabled: isAllOtherProcessedFilesSelected, hidden: totalOPFCount === 0 },
+            { label: 'Clear Selection', key: 'clear', iconClassName: 'mr-05 icon icon-fw far icon-times-circle', hidden: !anySelected, hasDivider: true },
         ];
+        options = _.filter(options, function (opt) { return !opt.hidden; });
 
         return (
             <div className="pull-left box selection-buttons">
-                <div className="btn-group">
-                    <SelectAllSplitButton onClick={this.onSelectAllClick} buttonId="select-all-files-button"
-                        {...{ options, isAllSelected, disabled, iconClassName, tooltip, hideToggle }} />
-                </div>
+                <Dropdown as={ButtonGroup}>
+                    <Button id="select-all-files-button" variant={variant} data-tip={tooltip} onClick={this.handleSelectAll} disabled={disabled}>{title}</Button>
+                    {!hideToggle &&
+                        <React.Fragment>
+                            <Dropdown.Toggle split variant={variant} disabled={disabled} />
+                            <Dropdown.Menu>
+                                {
+                                    options.map((item, index) => (
+                                        <React.Fragment key={item.key}>
+                                            { item.hasDivider === true ? <Dropdown.Divider key={"divider-" + item.key} /> : null }
+                                            <Dropdown.Item key={'item-' + item.key} disabled={item.disabled} onClick={() => this.handleSelectAllBySourceClick(item.key)}>
+                                                <span><i className={item.iconClassName || iconClassName} />&nbsp;  {item.label}</span>
+                                            </Dropdown.Item>
+                                        </React.Fragment>
+                                    ))
+                                }
+                            </Dropdown.Menu>
+                        </React.Fragment>
+                    }
+                </Dropdown>
             </div>
         );
     }
@@ -375,52 +401,5 @@ export const SelectedFilesControls = React.memo(function SelectedFilesControls(p
                 </div>
             </div>
         </div>
-    );
-});
-
-const SelectAllSplitButton = React.memo(function SelectAllSplitButton(props){
-    const { onClick, buttonId = '', options: propOptions, disabled, isAllSelected, iconClassName, tooltip, hideToggle = false } = props;
-
-    const title = (
-        <React.Fragment>
-            <i className={iconClassName} />
-            <span className="d-none d-md-inline text-400">{isAllSelected ? 'Deselect' : 'Select'} </span>
-            <span className="text-600">All</span>
-        </React.Fragment>
-    );
-
-    const options = _.filter(propOptions, function (opt) { return !opt.hidden; });
-    const variant = isAllSelected ? 'outline-primary' : 'primary';
-
-    const handleButtonClick = function () {
-        if (typeof onClick === 'function')
-            onClick();
-    };
-
-    const handleMenuItemClick = function (key) {
-        if (typeof onClick === 'function')
-            onClick(key);
-    };
-
-    return (
-        <Dropdown as={ButtonGroup}>
-            <Button id={buttonId} variant={variant} data-tip={tooltip} onClick={handleButtonClick} disabled={disabled}>{title}</Button>
-            {!hideToggle &&
-                <React.Fragment>
-                    <Dropdown.Toggle split variant={variant} disabled={disabled} />
-                    <Dropdown.Menu>
-                        {
-                            options.map((item, index) => (
-                                <Dropdown.Item key={index} disabled={item.disabled} onClick={() => handleMenuItemClick(item.key)}>
-                                    <span className={null}>
-                                        <i className={item.iconClassName || iconClassName} />&nbsp;  {item.label}
-                                    </span>
-                                </Dropdown.Item>
-                            ))
-                        }
-                    </Dropdown.Menu>
-                </React.Fragment>
-            }
-        </Dropdown>
     );
 });
