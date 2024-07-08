@@ -1521,17 +1521,17 @@ files = [
 
 [[package]]
 name = "hupper"
-version = "1.5"
+version = "1.12.1"
 description = "Integrated process monitor for developing and reloading daemons."
 optional = false
-python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*"
+python-versions = ">=3.7"
 files = [
-    {file = "hupper-1.5-py2.py3-none-any.whl", hash = "sha256:626b77e3ce55dbfc11e670a0eeed413de6fdbf5cf0bb92458dd4e0d5fc462ab8"},
-    {file = "hupper-1.5.tar.gz", hash = "sha256:693a167badbe82177219fccf1a27c5a007498c843c21d0071795a9bbb3f0c60a"},
+    {file = "hupper-1.12.1-py3-none-any.whl", hash = "sha256:e872b959f09d90be5fb615bd2e62de89a0b57efc037bdf9637fb09cdf8552b19"},
+    {file = "hupper-1.12.1.tar.gz", hash = "sha256:06bf54170ff4ecf4c84ad5f188dee3901173ab449c2608ad05b9bfd6b13e32eb"},
 ]
 
 [package.extras]
-docs = ["Sphinx", "pylons-sphinx-themes", "watchdog"]
+docs = ["Sphinx", "pylons-sphinx-themes", "setuptools", "watchdog"]
 testing = ["mock", "pytest", "pytest-cov", "watchdog"]
 
 [[package]]
@@ -2107,17 +2107,19 @@ totp = ["cryptography"]
 
 [[package]]
 name = "pastedeploy"
-version = "1.5.2"
+version = "3.1.0"
 description = "Load, configure, and compose WSGI applications and servers"
 optional = false
-python-versions = "*"
+python-versions = ">=3.7"
 files = [
-    {file = "PasteDeploy-1.5.2-py2.py3-none-any.whl", hash = "sha256:39973e73f391335fac8bc8a8a95f7d34a9f42e2775600ce2dc518d93b37ef943"},
-    {file = "PasteDeploy-1.5.2.tar.gz", hash = "sha256:d5858f89a255e6294e63ed46b73613c56e3b9a2d82a42f1df4d06c8421a9e3cb"},
+    {file = "PasteDeploy-3.1.0-py3-none-any.whl", hash = "sha256:76388ad53a661448d436df28c798063108f70e994ddc749540d733cdbd1b38cf"},
+    {file = "PasteDeploy-3.1.0.tar.gz", hash = "sha256:9ddbaf152f8095438a9fe81f82c78a6714b92ae8e066bed418b6a7ff6a095a95"},
 ]
 
 [package.extras]
+docs = ["Sphinx (>=1.7.5)", "pylons-sphinx-themes"]
 paste = ["Paste"]
+testing = ["Paste", "pytest", "pytest-cov"]
 
 [[package]]
 name = "patsy"
@@ -4418,4 +4420,4 @@ test = ["zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.13"
-content-hash = "286c4d6571974b8d4c0ea7b5b336624b24f66372517bb1a47bf6dfe527c92f3d"
+content-hash = "8c001a169d696fdc11ea2d11d5655dc4bd3fab8f93a27d49e812901dbe3cbcd0"
