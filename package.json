@@ -141,7 +141,7 @@
     "underscore": "^1.13.6",
     "url": "^0.11.0",
     "uuid": "^8.3.2",
-    "vitessce": "^2.0.3"
+    "vitessce": "3.2.1"
   },
   "optionalDependencies": {
     "cypress": "^13.7.0"
