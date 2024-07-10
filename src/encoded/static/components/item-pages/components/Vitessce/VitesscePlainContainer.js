@@ -185,7 +185,7 @@ const VitesscePlainContainerBody = React.forwardRef(function VitesscePlainContai
      */
     return (
         <div className={"vitessce-view-container" + (className ? ' ' + className : '')} style={style}>
-            { vitessceVersionUsed === null ? null : <link type="text/css" rel="stylesheet" href={`https://unpkg.com/vitessce@${vitessceVersionUsed}/dist/es/production/static/css/index.css`} crossOrigin="true" /> }
+            {/* { vitessceVersionUsed === null ? null : <link type="text/css" rel="stylesheet" href={`https://unpkg.com/vitessce@${vitessceVersionUsed}/dist/es/production/static/css/index.css`} crossOrigin="true" /> } */}
             <div className="vitessce-wrapper">{ vitessceInstance }</div>
         </div>
     );
