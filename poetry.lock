@@ -1125,13 +1125,13 @@ xlrd = ">=1.0.0,<2.0.0"
 
 [[package]]
 name = "dcicutils"
-version = "8.13.0"
+version = "8.13.3"
 description = "Utility package for interacting with the 4DN Data Portal and other 4DN resources"
 optional = false
 python-versions = "<3.13,>=3.8.1"
 files = [
-    {file = "dcicutils-8.13.0-py3-none-any.whl", hash = "sha256:3a443d8f84d845151130b51ea276d4d04193fbbf2e98c91a92228da77ce15f39"},
-    {file = "dcicutils-8.13.0.tar.gz", hash = "sha256:34aa712026720626da2f6fa93c9c23a2888d6b6074c3b934daf509aa83220dd1"},
+    {file = "dcicutils-8.13.3-py3-none-any.whl", hash = "sha256:6d4ab34d6590927e3b68dd63d0168b4de3ee9d12b495103153b934ff7569deff"},
+    {file = "dcicutils-8.13.3.tar.gz", hash = "sha256:f9f61297fcf116f0a03ecdab5e73d30c6669770c2707c9909af0b5ff1bc02c9b"},
 ]
 
 [package.dependencies]
@@ -3819,13 +3819,13 @@ tests = ["coverage", "freezegun (>=0.2.8)", "pretend", "pytest (>=3.3.0)", "pyth
 
 [[package]]
 name = "submit4dn"
-version = "4.0.3.1b1"
+version = "4.1.0"
 description = "Utility package for submitting data to the 4DN Data Portal"
 optional = false
 python-versions = "<3.13,>=3.8.1"
 files = [
-    {file = "submit4dn-4.0.3.1b1-py3-none-any.whl", hash = "sha256:661dc54cf50c0a15497171b13d7d35739ffca4586823c7c9903ce4e813a11e24"},
-    {file = "submit4dn-4.0.3.1b1.tar.gz", hash = "sha256:44ceafcee313e67bfef0ea4e57ecefbcf2dd90b375d4e61e4b82b6701c0140dd"},
+    {file = "submit4dn-4.1.0-py3-none-any.whl", hash = "sha256:cc077fe33eb45acf278d1a4e5c07b463a416cb3b5e17cd248bb0037824695563"},
+    {file = "submit4dn-4.1.0.tar.gz", hash = "sha256:0bc20fb5b7ee9c352119a4adeddd7485f8324ee756b372a60c0bc279fca98582"},
 ]
 
 [package.dependencies]
@@ -4420,4 +4420,4 @@ test = ["zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.13"
-content-hash = "8c001a169d696fdc11ea2d11d5655dc4bd3fab8f93a27d49e812901dbe3cbcd0"
+content-hash = "09184a9cf76ce726660a332daac934a22e947a4d7943a201c185bd6003f50ffa"
