@@ -6,6 +6,11 @@ fourfront
 Change Log
 ----------
 
+7.7.0
+=====
+
+* Updates related to Python 3.12.
+
 
 7.6.0
 =====
