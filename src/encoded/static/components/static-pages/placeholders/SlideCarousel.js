@@ -3,7 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import Carousel from 'nuka-carousel';
+import { Carousel } from 'nuka-carousel';
 
 
 

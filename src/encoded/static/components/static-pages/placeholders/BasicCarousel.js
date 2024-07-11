@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import memoize from 'memoize-one';
 import _ from 'underscore';
-import Carousel from 'nuka-carousel';
+import { Carousel } from 'nuka-carousel';
 
 /** @see https://www.npmjs.com/package/nuka-carousel for documentation of all props/options allowed */
 const defaultCarouselOptions = {
@@ -177,19 +177,20 @@ export class BasicCarousel extends React.PureComponent {
             <div className="basic-carousel-wrapper" ref={BasicCarousel.refFunc} style={{ opacity: '0' }}>
                 <Carousel {...carouselProps}>
                     {
-                        slides.map(function({ img: src, alt, width, height }, index) {
+                        slides.map(function ({ img: src, alt, width, height }, index) {
                             const style = {
                                 "width": width || commonSlideWidth || undefined,
                                 "height": height || commonSlideHeight || undefined
                             };
                             return (
                                 <div className="text-center" key={index}>
-                                    <img {...{ src, alt, style }} />
+                                    <img {...{ src, alt }} />
                                 </div>
                             );
                         })
                     }
                 </Carousel>
-            </div>);
+            </div>
+        );
     }
 }
