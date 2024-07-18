@@ -14,7 +14,8 @@
         { "$ref": "mixins.json#/modified" },
         { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/static_embeds" },
-        { "$ref": "mixins.json#/notes" }
+        { "$ref": "mixins.json#/notes" },
+        { "$ref": "mixins.json#/tags" }
     ],
     "properties": {
         "schema_version": {
@@ -246,6 +247,20 @@
             "description": "CFDE term that corresponds to the 4DN experiment type based on OBI ontology",
             "type": "string",
             "linkTo": "OntologyTerm"
+        },
+        "current_pipeline": {
+            "title": "Current Pipeline",
+            "description": "The name of the current pipeline run for this experiment type",
+            "type": "string"
+        },
+        "accepted_pipelines": {
+            "title": "Accepted Pipelines",
+            "description": "List of accepted pipeline names that have been run on this assay type",
+            "type": "array",
+            "items": {
+                "title": "Pipeline name",
+                "type": "string"
+            }
         }
     },
     "facets": {
