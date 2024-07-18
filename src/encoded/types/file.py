@@ -568,8 +568,9 @@ class File(Item):
     })
     def track_and_facet_info(self, request, biosource_name=None):
         props = self.upgrade_properties()
-        fields = ['experiment_type', 'assay_info', 'lab_name', 'experimental_lab', 'dataset',
-                  'condition', 'biosource_name', 'replicate_info', 'experiment_bucket']
+        # order matters here at leat for last 2 fields
+        fields = ['experiment_type', 'assay_info', 'experimental_lab', 'dataset', 'condition', 
+                  'biosource_name', 'replicate_info', 'experiment_bucket', 'lab_name', 'track_title']
         # look for existing _props
         track_info = {field: props.get('override_' + field) for field in fields}
         track_info = {k: v for k, v in track_info.items() if v is not None}
@@ -580,8 +581,8 @@ class File(Item):
             track_info['biosource_name'] = biosource_name
 
         if len(track_info) != len(fields):  # if track_info has same number of items as fields we have all we need
-            if not (len(track_info) == len(fields) - 1 and 'lab_name' not in track_info):
-                # only if everything but lab exists can we avoid getting expt
+            if not all(field in track_info for field in fields[:-2]):
+                # only if everything but lab and track_title exists can we avoid getting expt
                 einfo = self._get_file_experiment_info(request, track_info)
                 track_info.update({k: v for k, v in einfo.items() if k not in track_info})
 
@@ -593,9 +594,10 @@ class File(Item):
                 if lab:
                     track_info['lab_name'] = lab.get('display_title')
 
-        track_title = self.generate_track_title(track_info, props)
-        if track_title is not None:
-            track_info['track_title'] = track_title
+        if 'track_title' not in track_info:
+            track_title = self.generate_track_title(track_info, props)
+            if track_title is not None:
+                track_info['track_title'] = track_title
         return track_info
 
     def _update(self, properties, sheets=None):
