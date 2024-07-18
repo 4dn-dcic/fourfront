@@ -6,6 +6,15 @@ fourfront
 Change Log
 ----------
 
+7.8.0
+=====
+
+* Added 'tags' mixing to workflow schema
+* Added 'max_runtime' property to workflow schema
+* Added 'current pipeline' and 'accepted_pipelines' to experiment_type for the names
+  of completed pipelines used by foursight
+
+
 7.7.0
 =====
 
