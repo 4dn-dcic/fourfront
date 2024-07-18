@@ -988,6 +988,40 @@ def test_file_generate_track_title_fp_all_present(testapp, file_formats, award, 
     assert pf.get('track_and_facet_info', {}).get('track_title') == 'normalized counts for GM12878 DNase Hi-C PARK1'
 
 
+def test_file_generate_track_title_w_override_title_all_present(testapp, file_formats, award, lab):
+    pf_file_meta = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('mcool').get('uuid'),
+        'override_experiment_type': 'DNase Hi-C',
+        'override_lab_name': 'Test Lab',
+        'file_type': 'normalized counts',
+        'override_assay_info': 'PARK1',
+        'override_biosource_name': 'GM12878',
+        'override_replicate_info': 'Biorep 1, Techrep 1',
+        'override_experiment_bucket': 'processed file',
+        'override_track_title': 'my test track title',
+        'higlass_uid': 'test_hg_uid'
+    }
+    res1 = testapp.post_json('/files-processed', pf_file_meta, status=201)
+    pf = res1.json.get('@graph')[0]
+    assert pf.get('track_and_facet_info', {}).get('track_title') == 'my test track title'
+
+
+def test_file_generate_track_title_w_override_title_all_missing(testapp, file_formats, award, lab):
+    pf_file_meta = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('mcool').get('uuid'),
+        'file_type': 'normalized counts',
+        'override_track_title': 'my test track title',
+        'higlass_uid': 'test_hg_uid'
+    }
+    res1 = testapp.post_json('/files-processed', pf_file_meta, status=201)
+    pf = res1.json.get('@graph')[0]
+    assert pf.get('track_and_facet_info', {}).get('track_title') == 'my test track title'
+
+
 def test_file_generate_track_title_fp_all_missing(testapp, file_formats, award, lab):
     pf_file_meta = {
         'award': award['@id'],
