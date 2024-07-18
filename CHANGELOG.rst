@@ -6,6 +6,14 @@ fourfront
 Change Log
 ----------
 
+7.9.0
+=====
+
+* Added 'override_track_title' to file schema
+* Updated track_and_facet calcprop to use the new property if present
+* Added test cases
+
+
 7.8.0
 =====
 
