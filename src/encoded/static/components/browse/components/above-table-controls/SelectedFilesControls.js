@@ -71,6 +71,7 @@ export class SelectAllFilesButton extends React.PureComponent {
         this.isAllSelected = this.isAllSelected.bind(this);
         this.handleSelectAll = this.handleSelectAll.bind(this);
         this.handleSelectAllBySourceClick = this.handleSelectAllBySourceClick.bind(this);
+        this.menuItemIconClassName = this.menuItemIconClassName.bind(this);
         this.state = { 'selecting' : false };
         this.memoized = {
             uniqueFileCount: memoize(uniqueFileCount),
@@ -95,8 +96,8 @@ export class SelectAllFilesButton extends React.PureComponent {
         return false;
     }
 
-    handleSelectAll(includeRawFiles = true, includeProcessedFiles = true, includeOtherProcessedFiles = true){
-        const { selectFile, selectedFiles, resetSelectedFiles, href, context, totalFilesCount } = this.props;
+    handleSelectAll(includeRawFiles = true, includeProcessedFiles = true, includeSupplementaryFiles = true){
+        const { selectFile, resetSelectedFiles, href, context } = this.props;
         if (typeof selectFile !== 'function' || typeof resetSelectedFiles !== 'function'){
             logger.error("No 'selectFiles' or 'resetSelectedFiles' function prop passed to SelectedFilesController.");
             throw new Error("No 'selectFiles' or 'resetSelectedFiles' function prop passed to SelectedFilesController.");
@@ -115,7 +116,7 @@ export class SelectAllFilesButton extends React.PureComponent {
                     let allExtendedFiles;
                     let filesToSelect;
                     if (extData.item_list_name === 'browse') {
-                        allExtendedFiles = _.reduce(resp['@graph'] || [], (m, v) => m.concat(allFilesFromExperimentSet(v, includeRawFiles, includeProcessedFiles, includeOtherProcessedFiles)), []);
+                        allExtendedFiles = _.reduce(resp['@graph'] || [], (m, v) => m.concat(allFilesFromExperimentSet(v, includeRawFiles, includeProcessedFiles, includeSupplementaryFiles)), []);
                         filesToSelect = _.zip(filesToAccessionTriples(allExtendedFiles, true, true), allExtendedFiles);
                     } else {
                         allExtendedFiles =(resp['@graph'] || []);
@@ -170,22 +171,27 @@ export class SelectAllFilesButton extends React.PureComponent {
         }
     }
 
+    menuItemIconClassName(allSelected){
+        const { selecting } = this.state;
+        return "mr-05 icon icon-fw icon-" + (selecting ? 'circle-notch icon-spin fas' : (!allSelected ? 'square far' : 'check-square far'));
+    }
+
     render(){
         const { href, selectedFiles, totalRawFilesCount = 0, totalProcessedFilesCount = 0, totalOPFCount = 0 } = this.props;
         const { selecting } = this.state;
         const isAllSelected = this.isAllSelected();
         const anySelected = selectedFiles && Object.keys(selectedFiles).length > 0;
-        let isAllRawFilesSelected = isAllSelected, isAllProcessedFilesSelected = isAllSelected, isAllOtherProcessedFilesSelected = isAllSelected;
+        let isAllRawFilesSelected = isAllSelected, isAllProcessedFilesSelected = isAllSelected, isAllSupplementaryFilesSelected = isAllSelected;
         // get actual counts when it is necessary, e.g. some files selected but not all
         if (!isAllSelected && anySelected) {
             const countsBySource = this.memoized.uniqueFileCountBySource(selectedFiles);
             isAllRawFilesSelected = totalRawFilesCount > 0 && ((countsBySource['raw'] || 0) === totalRawFilesCount);
             isAllProcessedFilesSelected = totalProcessedFilesCount > 0 && ((countsBySource['processed'] || 0) === totalProcessedFilesCount);
-            isAllOtherProcessedFilesSelected = totalOPFCount > 0 && ((countsBySource['supplementary'] || 0) === totalOPFCount);
+            isAllSupplementaryFilesSelected = totalOPFCount > 0 && ((countsBySource['supplementary'] || 0) === totalOPFCount);
         }
         const isEnabled = this.isEnabled();
         const disabled = selecting || (!isAllSelected && !isEnabled);
-        const iconClassName = "mr-05 icon icon-fw icon-" + (selecting ? 'circle-notch icon-spin fas' : (isAllSelected ? 'square far' : 'check-square far'));
+        const btnIconClassName = "mr-05 icon icon-fw icon-" + (selecting ? 'circle-notch icon-spin fas' : (isAllSelected ? 'square far' : 'check-square far'));
         const hideToggle = !navigate.isBrowseHref(href);
 
         let tooltip = null;
@@ -198,16 +204,16 @@ export class SelectAllFilesButton extends React.PureComponent {
 
         const title = (
             <React.Fragment>
-                <i className={iconClassName} />
+                <i className={btnIconClassName} />
                 <span className="d-none d-md-inline text-400">{isAllSelected ? 'Deselect' : 'Select'} </span>
                 <span className="text-600">All</span>
             </React.Fragment>
         );
 
         let options = [
-            { label: `Select All Raw Files (${totalRawFilesCount})`, key: 'raw-files', disabled: isAllRawFilesSelected, hidden: totalRawFilesCount === 0 },
-            { label: `Select All Processed Files (${totalProcessedFilesCount})`, key: 'processed-files', disabled: isAllProcessedFilesSelected, hidden: totalProcessedFilesCount === 0 },
-            { label: `Select All Supplementary Files (${totalOPFCount})`, key: 'supplementary-files', disabled: isAllOtherProcessedFilesSelected, hidden: totalOPFCount === 0 },
+            { label: `Select All Raw Files (${totalRawFilesCount})`, key: 'raw-files', iconClassName: this.menuItemIconClassName(isAllRawFilesSelected), hidden: totalRawFilesCount === 0 },
+            { label: `Select All Processed Files (${totalProcessedFilesCount})`, key: 'processed-files', iconClassName: this.menuItemIconClassName(isAllProcessedFilesSelected), hidden: totalProcessedFilesCount === 0 },
+            { label: `Select All Supplementary Files (${totalOPFCount})`, key: 'supplementary-files', iconClassName: this.menuItemIconClassName(isAllSupplementaryFilesSelected), hidden: totalOPFCount === 0 },
             { label: 'Clear Selection', key: 'clear', iconClassName: 'mr-05 icon icon-fw far icon-times-circle', hidden: !anySelected, hasDivider: true },
         ];
         options = _.filter(options, function (opt) { return !opt.hidden; });
@@ -225,7 +231,7 @@ export class SelectAllFilesButton extends React.PureComponent {
                                         <React.Fragment key={item.key}>
                                             { item.hasDivider === true ? <Dropdown.Divider key={"divider-" + item.key} /> : null }
                                             <Dropdown.Item key={'item-' + item.key} disabled={item.disabled} onClick={() => this.handleSelectAllBySourceClick(item.key)}>
-                                                <span><i className={item.iconClassName || iconClassName} />&nbsp;  {item.label}</span>
+                                                <span><i className={item.iconClassName || ''} />&nbsp;  {item.label}</span>
                                             </Dropdown.Item>
                                         </React.Fragment>
                                     ))
