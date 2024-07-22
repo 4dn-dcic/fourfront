@@ -6,14 +6,27 @@ fourfront
 Change Log
 ----------
 
+7.9.0
+=====
+
+* Added 'override_track_title' to file schema
+* Updated track_and_facet calcprop to use the new property if present
+* Added test cases
+
+
+7.8.0
+=====
+
+* Added 'tags' mixing to workflow schema
+* Added 'max_runtime' property to workflow schema
+* Added 'current pipeline' and 'accepted_pipelines' to experiment_type for the names
+  of completed pipelines used by foursight
+
+
 7.7.0
 =====
 
-* Add cumulative sum and date range options for submission statistics
-* Add cumulative sum and 60 days options for usage statistics
-* Update statistics page style and improve mobile UI
-* Add supplementary files table into /browse details
-* Add raw/processed/supplementary file download options into `Select All` button
+* Updates related to Python 3.12.
 
 
 7.6.0
