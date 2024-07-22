@@ -50,7 +50,8 @@ export function uniqueFileCountBySource(files, expSetAccession = null) {
     files = typeof files === 'object' ? _.values(files) : files;
     const groupBySource = _.reduce(files, function (memo, file) {
         if (expSetAccession) {
-            if (!file.from_experiment_set || !file.from_experiment_set.accession || file.from_experiment_set.accession !== expSetAccession) {
+            const expSet = file.from_experiment_set || (file.from_experiment && file.from_experiment.from_experiment_set) || {};
+            if (expSet.accession !== expSetAccession) {
                 return memo;
             }
         }
