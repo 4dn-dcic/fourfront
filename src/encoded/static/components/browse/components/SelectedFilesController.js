@@ -35,20 +35,25 @@ export function fileCountWithDuplicates(files){
         return files.length;
     }
 }
-
 /**
  * Used and memoized in views which have multiple sets of selectedFiles
  * Groups files by from_source (e.g. all|none and raw|processed|supplementary) if from_source is defined
  * @param {*} files
- * @returns {all: [count}, raw: }
+ * @param {*} expSetAccession - optional - if provided filters by from_experiment_set.accession
+ * @returns {all: [count], raw: [count], processed: [count], supplementary: [count] }
  */
-export function uniqueFileCountBySource(files) {
+export function uniqueFileCountBySource(files, expSetAccession = null) {
     if (!files || (typeof files !== 'object' && !Array.isArray(files))) {
         logger.error("files not in proper form (object/array) or is non-existent", files);
         return 0;
     }
     files = typeof files === 'object' ? _.values(files) : files;
     const groupBySource = _.reduce(files, function (memo, file) {
+        if (expSetAccession) {
+            if (!file.from_experiment_set || !file.from_experiment_set.accession || file.from_experiment_set.accession !== expSetAccession) {
+                return memo;
+            }
+        }
         const key = file.from_source || 'none';
         if (!memo[key]) memo[key] = [];
         memo[key].push(file.accession || 'NONE');
