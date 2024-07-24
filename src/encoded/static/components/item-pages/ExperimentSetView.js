@@ -99,7 +99,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
 
         const processedFiles = this.allProcessedFilesFromExperimentSet(context);
         const processedFilesUniqeLen = (processedFiles && processedFiles.length && ProcessedFilesStackedTableSection.allFilesUniqueCount(processedFiles)) || 0;
-        const rawFiles = this.allFilesFromExperimentSet(context, false);
+        const rawFiles = this.allFilesFromExperimentSet(context);
         const rawFilesUniqueLen = (rawFiles && rawFiles.length && RawFilesStackedTableSection.allFilesUniqueCount(rawFiles)) || 0;
         const width = this.getTabViewWidth();
 
@@ -621,7 +621,11 @@ class SupplementaryFilesTabView extends React.PureComponent {
         const collectionsFromExpSet = _.map(experiment_set.other_processed_files, function(collection){
             const { files : origFiles } = collection;
             const files = _.map(origFiles || [], function(file){
-                return _.extend({ 'from_experiment_set' : experiment_set, 'from_experiment' : { 'from_experiment_set' : experiment_set, 'accession' : 'NONE' } }, file);
+                return _.extend({
+                    'from_experiment_set': experiment_set,
+                    'from_experiment': { 'from_experiment_set': experiment_set, 'accession': 'NONE' },
+                    'from_source': 'supplementary'
+                }, file);
             });
             return _.extend({}, collection, { files });
         });

@@ -1135,8 +1135,86 @@ $workflow-node-color-type-global-context: #ffb3b3;
     min-height: 1400px;
 
     .dropdown-container {
-        display: flex;
+        display: block;
         align-items: center;
+        padding-top: 2px;
+        padding-bottom: 10px;
+        position: static;
+
+        &.sticky-top {
+            position: inherit;
+        }
+
+        @include media-breakpoint-up(lg) {
+            display: flex;
+            align-items: flex-start;
+            &.sticky-top {
+                position: sticky;
+                top: 41px;
+                background-color: #ffffff;
+                border-bottom: 1px solid #f4f4f4;
+                z-index: 99 !important;
+            }
+        }
+
+        .dropdown-container-col {
+            @include media-breakpoint-down(lg) {
+                margin-bottom: 20px;
+
+                button.btn {
+                    width: 100%;
+                }
+                &.pl-2 { 
+                    padding-left: 1rem !important;
+                }
+            }
+        }
+
+        // .btn-primary {
+        //     border: 1px solid #0B62BA;
+        // }
+
+        input[type="date"] {
+            width: 150px; 
+            font-size: 0.9rem;
+        }
+
+        .date-range {
+            display: flex !important;
+
+            .custom-date-range {
+                margin-left: 15px;
+
+                .form-control {
+                    margin-right: 12px;
+                }
+            }
+
+            @include media-breakpoint-down(lg) {
+                display: block !important;
+
+                .custom-date-range {
+                    margin-top: 20px;
+                    margin-left: 0px;
+
+                    .form-control {
+                        font-size: 1rem;
+                        width: inherit !important;
+                    }
+                }
+            }
+
+            @include media-breakpoint-up(xxl) {
+                .custom-date-range {
+                    margin-left: 45px;
+
+                    .form-control {
+                        margin-right: 20px;
+                    }
+                }
+            }
+
+        }
     }
 
     .area-chart-inner-container {
@@ -1276,8 +1354,48 @@ $workflow-node-color-type-global-context: #ffb3b3;
         }
     }
 
-}
+    h3.charts-group-title {
+        font-weight: 500;
+        font-size: 1.2rem;
+        color: #343741;
+        margin-top: 40px;
+        margin-bottom: 20px;
+        padding: 10px 10px;
+        border-bottom: 2px solid #f4f4f4;
+        background-color: #F1F9FF;
+    }
+    &#submissions {
+        .date-range .dropdown button {
+            min-width: 120px;
+        }
 
+        .dropdown-container.sticky-top {
+            top: 79px !important;
+        }
+    }
+    &#usage {
+        .dropdown-container {
+            display: flex !important;
+            align-items: center !important;
+        }
+        @include media-breakpoint-down(md) {
+            h3 {
+                font-size: 1rem;
+            }
+            .dropdown .btn {
+                max-width: 160px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+        }
+        @include media-breakpoint-down(xs) {
+            .dropdown .btn {
+                margin-top: 10px;
+            }
+        }   
+    }
+
+}
 
 
 /**** Cursor Component(s) ****/
