@@ -6,6 +6,12 @@ fourfront
 Change Log
 ----------
 
+8.0.0
+=====
+
+* React 18 Migration
+
+
 7.10.0
 =====
 
