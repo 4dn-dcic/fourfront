@@ -82,8 +82,9 @@ export function genChartBarDims(
                     'experiment_sets' : termObj.experiment_sets,
                     'experiments'       : termObj.experiments,
                     'files'             : termObj.files,
+                    'files_raw'         : termObj.files_raw,
+                    'files_processed'   : termObj.files_processed,
                     'files_opf'         : termObj.files_opf,
-                    'files_all'         : termObj.files_all
                 };
                 if (typeof termObj.field === 'string') {
                     barNode.bars = genBarData(termObj, { 'height' : barHeight }, barNode);
@@ -248,7 +249,7 @@ export class Chart extends React.PureComponent {
         'width'         : PropTypes.number,
         'useOnlyPopulatedFields' : PropTypes.bool,
         'showType'      : PropTypes.oneOf(['all', 'filtered', 'both']),
-        'aggregateType' : PropTypes.oneOf(['experiment_sets', 'experiments', 'files_all']),
+        'aggregateType' : PropTypes.oneOf(['experiment_sets', 'experiments', 'files']),
         'windowWidth'   : PropTypes.number,
         'href'          : PropTypes.string,
         'cursorDetailActions' : PopoverViewContainer.propTypes.cursorDetailActions

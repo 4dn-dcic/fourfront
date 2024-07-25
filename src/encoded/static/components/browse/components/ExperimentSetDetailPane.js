@@ -3,13 +3,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
+import memoize from 'memoize-one';
 
 import { FlexibleDescriptionBox } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/FlexibleDescriptionBox';
 import { object, layout } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 
 import { RawFilesStackedTable, ProcessedFilesStackedTable, renderFileTypeSummaryColumn } from './file-tables';
 import { expFxn } from './../../util';
-import { SelectedFilesController } from './SelectedFilesController';
+import { SelectedFilesController, uniqueFileCountBySource } from './SelectedFilesController';
 
 
 
@@ -31,7 +32,8 @@ export class ExperimentSetDetailPane extends React.PureComponent {
         'href' : PropTypes.string.isRequired,
         'minimumWidth' : PropTypes.number,
         'initialStateCache' : PropTypes.object,
-        'updateFileSectionStateCache' : PropTypes.func
+        'updateFileSectionStateCache' : PropTypes.func,
+        'selectedFiles': PropTypes.object
     };
 
     static defaultProps = {
@@ -45,11 +47,16 @@ export class ExperimentSetDetailPane extends React.PureComponent {
         super(props);
         this.toggleProcessedFilesOpen = _.throttle(this.toggleStateProperty.bind(this, 'processedFilesOpen'), 600, { 'trailing' : false });
         this.toggleRawFilesOpen = _.throttle(this.toggleStateProperty.bind(this, 'rawFilesOpen'), 600, { 'trailing' : false });
+        this.toggleSupplementaryFilesOpen = _.throttle(this.toggleStateProperty.bind(this, 'supplementaryFilesOpen'), 600, { 'trailing' : false });
         const id = object.itemUtil.atId(props.result);
         const initialState = props.initialStateCache[id];
         this.state = initialState || {
             'rawFilesOpen' : false,
-            'processedFilesOpen' : false
+            'processedFilesOpen' : false,
+            'supplementaryFilesOpen' : false
+        };
+        this.memoized = {
+            uniqueFileCountBySource: memoize(uniqueFileCountBySource)
         };
     }
 
@@ -60,9 +67,9 @@ export class ExperimentSetDetailPane extends React.PureComponent {
             return;
         }
 
-        const { rawFilesOpen, processedFilesOpen } = this.state;
+        const { rawFilesOpen, processedFilesOpen, supplementaryFilesOpen } = this.state;
         const id = object.itemUtil.atId(result);
-        updateFileSectionStateCache(id, (rawFilesOpen || processedFilesOpen) ? { rawFilesOpen, processedFilesOpen } : null);
+        updateFileSectionStateCache(id, (rawFilesOpen || processedFilesOpen || supplementaryFilesOpen) ? { rawFilesOpen, processedFilesOpen, supplementaryFilesOpen } : null);
     }
 
     toggleStateProperty(property){
@@ -79,8 +86,8 @@ export class ExperimentSetDetailPane extends React.PureComponent {
     }
 
     render(){
-        const { paddingWidthMap, paddingWidth, containerWidth, windowWidth, result, minimumWidth, href } = this.props;
-        const { processedFilesOpen, rawFilesOpen } = this.state;
+        const { paddingWidthMap, paddingWidth, containerWidth, windowWidth, result, minimumWidth, href, selectedFiles } = this.props;
+        const { processedFilesOpen, rawFilesOpen, supplementaryFilesOpen = false } = this.state;
 
         let usePadWidth = paddingWidth || 0;
         if (paddingWidthMap){
@@ -90,6 +97,16 @@ export class ExperimentSetDetailPane extends React.PureComponent {
             ...SelectedFilesController.pick(this.props),
             containerWidth, result, href, minimumWidth, paddingWidth: usePadWidth
         };
+
+        const anySelected = Object.keys(selectedFiles || {}).length > 0;
+        let selectedRawFilesCount = 0, selectedProcessedFilesCount = 0, selectedSupplementaryFilesCount = 0;
+        // get actual counts when it is necessary, e.g. some files selected but not all
+        if (anySelected) {
+            const countsBySource = this.memoized.uniqueFileCountBySource(selectedFiles, result.accession);
+            selectedRawFilesCount = countsBySource['raw'] || 0;
+            selectedProcessedFilesCount = countsBySource['processed'] || 0;
+            selectedSupplementaryFilesCount = countsBySource['supplementary'] || 0;
+        }
 
         return (
             <div className="experiment-set-info-wrapper">
@@ -127,8 +144,9 @@ export class ExperimentSetDetailPane extends React.PureComponent {
                     </div>
                 </div>
                 <div style={{ overflowX : 'auto', width: containerWidth ? (containerWidth - usePadWidth) : null }} className="files-tables-container">
-                    <RawFilesSection {...commonFileSectionProps} open={rawFilesOpen} onToggle={this.toggleRawFilesOpen} />
-                    <ProcessedFilesSection {...commonFileSectionProps} open={processedFilesOpen} onToggle={this.toggleProcessedFilesOpen} />
+                    <RawFilesSection {...commonFileSectionProps} open={rawFilesOpen} onToggle={this.toggleRawFilesOpen} selectedFilesCount={selectedRawFilesCount} />
+                    <ProcessedFilesSection {...commonFileSectionProps} open={processedFilesOpen} onToggle={this.toggleProcessedFilesOpen} selectedFilesCount={selectedProcessedFilesCount} />
+                    <SupplementaryFilesSection {...commonFileSectionProps} open={supplementaryFilesOpen} onToggle={this.toggleSupplementaryFilesOpen} selectedFilesCount={selectedSupplementaryFilesCount} />
                 </div>
             </div>
         );
@@ -137,7 +155,7 @@ export class ExperimentSetDetailPane extends React.PureComponent {
 }
 
 const RawFilesSection = React.memo(function RawFilesSection(props){
-    const { containerWidth, result, href, minimumWidth, paddingWidth, open = false, onToggle } = props;
+    const { containerWidth, result, href, minimumWidth, paddingWidth, open = false, onToggle, selectedFilesCount } = props;
 
     // For debugging stacked tables
     //const useResult = require('./../../testdata/experiment_set/replicate_4DNESH4MYRID');
@@ -162,7 +180,7 @@ const RawFilesSection = React.memo(function RawFilesSection(props){
 
     return (
         <div className="raw-files-table-section">
-            <h4 className="pane-section-title" onClick={onToggle}>
+            <h4 className={"pane-section-title" + (selectedFilesCount > 0 ? "" : " text-muted")} onClick={onToggle}>
                 <i className={"toggle-open-icon icon icon-fw fas icon-" + (open ? 'minus' : 'plus')} />
                 <i className="icon icon-fw icon-leaf fas"/> <span className="text-400">{ rawFilesCount }</span> Raw Files
             </h4>
@@ -173,7 +191,7 @@ const RawFilesSection = React.memo(function RawFilesSection(props){
 });
 
 const ProcessedFilesSection = React.memo(function ProcessedFilesSection(props){
-    const { containerWidth, result, href, minimumWidth, paddingWidth, open = false, onToggle } = props;
+    const { containerWidth, result, href, minimumWidth, paddingWidth, open = false, onToggle, selectedFilesCount = 0 } = props;
     const processedFiles = expFxn.allProcessedFilesFromExperimentSet(result);
 
     if (!Array.isArray(processedFiles) || processedFiles.length === 0){
@@ -191,9 +209,38 @@ const ProcessedFilesSection = React.memo(function ProcessedFilesSection(props){
 
     return (
         <div className="processed-files-table-section">
-            <h4 className="pane-section-title" onClick={onToggle}>
+            <h4 className={"pane-section-title" + (selectedFilesCount > 0 ? "" : " text-muted")} onClick={onToggle}>
                 <i className={"toggle-open-icon icon icon-fw fas icon-" + (open ? 'minus' : 'plus')} />
                 <i className="icon icon-fw icon-microchip fas"/> <span className="text-400">{ processedFiles.length }</span> Processed Files
+            </h4>
+            { innerTableContents }
+        </div>
+    );
+});
+
+const SupplementaryFilesSection = React.memo(function ProcessedFilesSection(props){
+    const { containerWidth, result, href, minimumWidth, paddingWidth, open = false, onToggle, selectedFilesCount = 0 } = props;
+    const supplementaryFiles = expFxn.allOtherProcessedFilesFromExperimentSet(result);
+
+    if (!Array.isArray(supplementaryFiles) || supplementaryFiles.length === 0){
+        return null;
+    }
+
+    let innerTableContents = null;
+    if (open) {
+        innerTableContents = (
+            <ProcessedFilesStackedTable {...SelectedFilesController.pick(props)}
+                files={supplementaryFiles} fadeIn={false} collapseLongLists href={href} preventExpand
+                width={containerWidth ? (Math.max(containerWidth - paddingWidth, minimumWidth) /* account for padding of pane */) : null}
+                titleForFiles="Supplementary Files" showMoreTargetTabKey="supplementary-files" />
+        );
+    }
+
+    return (
+        <div className="processed-files-table-section">
+            <h4 className={"pane-section-title" + (selectedFilesCount > 0 ? "" : " text-muted")} onClick={onToggle}>
+                <i className={"toggle-open-icon icon icon-fw fas icon-" + (open ? 'minus' : 'plus')} />
+                <i className="icon icon-fw icon-microchip fas"/> <span className="text-400">{ supplementaryFiles.length }</span> Supplementary Files
             </h4>
             { innerTableContents }
         </div>

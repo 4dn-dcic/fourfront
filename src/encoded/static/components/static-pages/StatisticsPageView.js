@@ -22,6 +22,11 @@ export default class StatisticsPageView extends React.PureComponent {
             'title' : "Submissions Statistics",
             'icon' : 'upload fas',
             'tip' : "View statistics related to submission and release of Experiment Set",
+            'shouldReaggregate' : function(pastProps, nextProps, pastState, nextState){
+                if(!pastState || !nextState) return false;
+                // Compare object references
+                if (pastState.cumulativeSum !== nextState.cumulativeSum) return true;
+            }
             // Now set upon load:
             // 'aggregationsToChartData' : _.pick(aggregationsToChartData,
             //     'expsets_released', 'expsets_released_internal',
@@ -38,9 +43,9 @@ export default class StatisticsPageView extends React.PureComponent {
             //     'sessions_by_country', 'fields_faceted', /* 'browse_search_queries', 'other_search_queries', */
             //     'experiment_set_views', 'file_downloads'
             // ),
-            'shouldReaggregate' : function(pastProps, nextProps){
+            'shouldReaggregate' : function(pastProps, nextProps, pastState, nextState){
                 // Compare object references
-                if (pastProps.countBy !== nextProps.countBy) return true;
+                if ((pastProps.countBy !== nextProps.countBy) || (pastState.cumulativeSum !== nextState.cumulativeSum)) return true;
             }
         }
     };
@@ -101,12 +106,30 @@ export default class StatisticsPageView extends React.PureComponent {
     }
 
     renderSubmissionsSection(){
+        const { shouldReaggregate } = StatisticsPageView.viewOptions.submissions;
         // GroupByController is on outside here because SubmissionStatsViewController detects if props.currentGroupBy has changed in orded to re-fetch aggs.
         const { browseBaseState } = this.props;
 
-        const groupByOptions = { 'award.project' : <span><i className="icon icon-fw fas icon-university mr-1"/>Project</span> };
+        const groupByOptions = {
+            'award.project' : <span><i className="icon icon-fw fas icon-university mr-1"/>Project</span>,
+            'experiments_in_set.processed_files.track_and_facet_info.experimental_lab' : <span><i className="icon icon-fw fas icon-university mr-1"/>Lab</span>,
+            'experiments_in_set.processed_files.track_and_facet_info.experiment_type' : <span><i className="icon icon-fw fas icon-university mr-1"/>Experiment Type</span>,
+        };
 
         let initialGroupBy = 'award.project';
+
+        const dateRangeOptions = {
+            'all'           : <span>All</span>,
+            'thismonth'     : <span>This Month</span>,
+            'previousmonth' : <span>Previous Month</span>,
+            'last3months'   : <span>Last 3 Months</span>,
+            'last6months'   : <span>Last 6 Months</span>,
+            'last12months'  : <span>Last 12 Months</span>,
+            'thisyear'      : <span>This Year</span>,
+            'previousyear'  : <span>Previous Year</span>,
+            'custom'        : <span>Custom</span>
+        };
+        const initialDateRangePreset = 'all';
 
         if (browseBaseState !== 'all'){
             _.extend(groupByOptions, {
@@ -117,9 +140,9 @@ export default class StatisticsPageView extends React.PureComponent {
             initialGroupBy = 'award.center_title';
         }
         return (
-            <dynamicImports.GroupByController {...{ groupByOptions, initialGroupBy }}>
+            <dynamicImports.GroupByController {...{ groupByOptions, initialGroupBy, dateRangeOptions, initialDateRangePreset }}>
                 <dynamicImports.SubmissionStatsViewController {..._.pick(this.props, 'session', 'browseBaseState', 'windowWidth')}>
-                    <dynamicImports.StatsChartViewAggregator aggregationsToChartData={dynamicImports.submissionsAggsToChartData}>
+                    <dynamicImports.StatsChartViewAggregator {...{ shouldReaggregate }} aggregationsToChartData={dynamicImports.submissionsAggsToChartData} cumulativeSum={true}>
                         <dynamicImports.SubmissionsStatsView />
                     </dynamicImports.StatsChartViewAggregator>
                 </dynamicImports.SubmissionStatsViewController>
@@ -131,10 +154,11 @@ export default class StatisticsPageView extends React.PureComponent {
         const { shouldReaggregate } = StatisticsPageView.viewOptions.usage;
         const groupByOptions = {
             'monthly'   : <span>Previous 12 Months</span>,
-            'daily'     : <span>Previous 30 Days</span>
+            'daily30'     : <span>Previous 30 Days</span>,
+            'daily60'     : <span>Previous 60 Days</span>
         };
         return (
-            <dynamicImports.GroupByController groupByOptions={groupByOptions} initialGroupBy="daily">
+            <dynamicImports.GroupByController groupByOptions={groupByOptions} initialGroupBy="daily60">
                 <dynamicImports.UsageStatsViewController {..._.pick(this.props, 'session', 'windowWidth', 'href')}>
                     <dynamicImports.StatsChartViewAggregator {...{ shouldReaggregate }} aggregationsToChartData={dynamicImports.usageAggsToChartData}>
                         <dynamicImports.UsageStatsView />
