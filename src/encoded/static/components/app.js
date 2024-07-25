@@ -210,8 +210,8 @@ export default class App extends React.PureComponent {
         // The href prop we have was from serverside. It would not have a hash in it, and might be shortened.
         // Here we grab full-length href from window and then update props.href (via Redux), if it is different.
         const windowHref = (window && window.location && window.location.href) || href;
-        if (href !== windowHref){
-            store.dispatch({ 'type' : { 'href' : windowHref } });
+        if (href !== windowHref) {
+            store.dispatch({ type: 'SET_HREF', payload: windowHref });
         }
 
         // Load up analytics
@@ -652,12 +652,15 @@ export default class App extends React.PureComponent {
                 this.currentNavigationRequest.abort();
                 this.currentNavigationRequest = null;
             }
-            store.dispatch({
-                type: {
-                    'href' : windowHref,
-                    'context' : event.state
-                }
-            });
+            // store.dispatch({
+            //     type: {
+            //         'href' : windowHref,
+            //         'context' : event.state
+            //     }
+            // });
+
+            store.dispatch({ type: 'SET_HREF', payload: windowHref });
+            store.dispatch({ type: 'SET_CONTEXT', payload: event.state });
         }
 
         // Always async update in case of server side changes.
@@ -709,9 +712,7 @@ export default class App extends React.PureComponent {
      * @returns {void}
      */
     onHashChange(event) {
-        store.dispatch({
-            type: { 'href' : document.querySelector('link[rel="canonical"]').getAttribute('href') }
-        });
+        store.dispatch({ type: 'SET_HREF', payload: document.querySelector('link[rel="canonical"]').getAttribute('href') });
     }
 
     /**
@@ -880,7 +881,19 @@ export default class App extends React.PureComponent {
                     reduxDispatchDict.href = targetHref + hashAppendage;
                 }
                 if (_.keys(reduxDispatchDict).length > 0){
-                    store.dispatch({ 'type' : reduxDispatchDict });
+                    // store.dispatch({ 'type' : reduxDispatchDict });
+                    if (reduxDispatchDict.context) {
+                        store.dispatch({ type: 'SET_CONTEXT', payload: reduxDispatchDict.context });
+                    }
+                    if (reduxDispatchDict.href) {
+                        store.dispatch({ type: 'SET_HREF', payload: reduxDispatchDict.href });
+                    }
+                    if (reduxDispatchDict.lastCSSBuildTime) {
+                        store.dispatch({ type: 'SET_LAST_CSS_BUILD_TIME', payload: reduxDispatchDict.lastCSSBuildTime });
+                    }
+                    if (reduxDispatchDict.alerts) {
+                        store.dispatch({ type: 'SET_ALERTS', payload: reduxDispatchDict.alerts });
+                    }
                 }
                 return false;
             }
@@ -948,7 +961,20 @@ export default class App extends React.PureComponent {
                     }
 
                     reduxDispatchDict.context = response;
-                    store.dispatch({ 'type' : _.extend({}, reduxDispatchDict, includeReduxDispatch) });
+                    // store.dispatch({ 'type' : _.extend({}, reduxDispatchDict, includeReduxDispatch) });
+                    const payloadReduxDispatchDict = _.extend({}, reduxDispatchDict, includeReduxDispatch);
+                    if (payloadReduxDispatchDict.context) {
+                        store.dispatch({ type: 'SET_CONTEXT', payload: payloadReduxDispatchDict.context });
+                    }
+                    if (payloadReduxDispatchDict.href) {
+                        store.dispatch({ type: 'SET_HREF', payload: payloadReduxDispatchDict.href });
+                    }
+                    if (payloadReduxDispatchDict.lastCSSBuildTime) {
+                        store.dispatch({ type: 'SET_LAST_CSS_BUILD_TIME', payload: payloadReduxDispatchDict.lastCSSBuildTime });
+                    }
+                    if (payloadReduxDispatchDict.alerts) {
+                        store.dispatch({ type: 'SET_ALERTS', payload: payloadReduxDispatchDict.alerts });
+                    }
                     return response;
                 })
                 .then((response) => { // Finalize - clean up `slowLoad : true` if in state, run callbacks and analytics.
