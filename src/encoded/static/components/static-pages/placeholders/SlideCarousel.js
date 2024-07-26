@@ -20,19 +20,22 @@ export class SlideCarousel extends React.PureComponent {
             'dragging' : false,
             'easing' : 'easeLinear',
             'transitionMode' : 'fade',
-            'renderBottomCenterControls' : null
+            'renderBottomCenterControls' : null,
+            'showArrows': true,
+            'slidesToShow': 1,
+            'scrollDistance': 'slide'
         }
     };
 
     render(){
-        var { fileLocation, carouselProps } = this.props,
-            style   = { 'width' : 720, 'height' : 540 },
-            slides = [
-                "Slide01.png", "Slide02.png", "Slide03.png", "Slide04.png",
-                "Slide05.png", "Slide06.png", "Slide07.png", "Slide08.png",
-                "Slide09.png", "Slide10.png", "Slide11.png", "Slide12.png",
-                "Slide13.png", "Slide14.png", "Slide15.png", "Slide16.png"
-            ];
+        const { fileLocation, carouselProps } = this.props;
+        const style = { 'height': 'auto', 'maxWidth': '100%' };
+        const slides = [
+            "Slide01.png", "Slide02.png", "Slide03.png", "Slide04.png",
+            "Slide05.png", "Slide06.png", "Slide07.png", "Slide08.png",
+            "Slide09.png", "Slide10.png", "Slide11.png", "Slide12.png",
+            "Slide13.png", "Slide14.png", "Slide15.png", "Slide16.png"
+        ];
 
         return (
             <Carousel {...carouselProps}>
@@ -40,9 +43,7 @@ export class SlideCarousel extends React.PureComponent {
                     _.map(slides, function(filename){
                         var src = fileLocation + filename;
                         return (
-                            <div className="text-center" key={filename}>
-                                <img {...{ src, style }} alt={filename} />
-                            </div>
+                            <img {...{ src, style }} alt={filename} />
                         );
                     })
                 }

@@ -164,7 +164,8 @@ export class HiGlassPlainContainer extends React.PureComponent {
         this.setState({ 'mounted' : false });
     }
 
-    componentDidCatch(){
+    componentDidCatch(error, info){
+        console.error('Error in HiGlassPlainContainer - error:', error, ' info:', info);
         this.setState({ 'hasRuntimeError' : true });
     }
 
@@ -302,7 +303,7 @@ const HiGlassPlainContainerBody = React.forwardRef(function HiGlassPlainContaine
      */
     return (
         <div className={"higlass-view-container" + (className ? ' ' + className : '')} style={style}>
-            { higlassVersionUsed === null ? null : <link type="text/css" rel="stylesheet" href={`https://unpkg.com/higlass@${higlassVersionUsed}/dist/hglib.css`} crossOrigin="true" /> }
+            {/* { higlassVersionUsed === null ? null : <link type="text/css" rel="stylesheet" href={`https://unpkg.com/higlass@${higlassVersionUsed}/dist/hglib.css`} crossOrigin="true" /> } */}
             <div className="higlass-wrapper">{ hiGlassInstance }</div>
         </div>
     );

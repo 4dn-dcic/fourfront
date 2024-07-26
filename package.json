@@ -124,7 +124,7 @@
     "memoize-one": "^5.1.1",
     "micro-meta-app-react": "git+https://github.com/WU-BIMAC/MicroMetaApp-React#1.7.25-b1",
     "nuka-carousel": "^8.0.1",
-    "pixi.js": "^5.3.0",
+    "pixi.js": "^6.5.10",
     "prop-types": "^15.8.1",
     "query-string": "^8.1.0",
     "rc-tabs": "^9.7.0",
