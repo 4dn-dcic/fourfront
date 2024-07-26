@@ -102,8 +102,7 @@ describe('Browse Views - Files Selection', function () {
                 return cy.getDownloadButton().invoke('text').then((downloadButtonTextContent) => {
                     let foundNum = downloadButtonTextContent.match(/\d/g);
                     foundNum = parseInt(foundNum.join(''));
-                    expect(foundNum).to.equal(counts.files - counts.files_opf); // since "Select All" does not include OPFs, we subtract opf counts
-                    // expect(foundNum).to.equal(counts.files);
+                    expect(foundNum).to.equal(counts.files);
                 });
             });
         });
