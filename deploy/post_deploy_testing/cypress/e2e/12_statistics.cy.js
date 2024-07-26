@@ -16,7 +16,7 @@ describe('Submissions and Usage Statistics page', function () {
         it('Usage statistics tab displays the Page Views charts', function () {
             cy.get('.chart-section-control-wrapper.row a.select-section-btn[href="#usage"]').then(function ($tabBtn) {
                 cy.wrap($tabBtn).click().end();
-                cy.get('#usage.stats-charts-container .chart-group h4.text-300').should('contain', 'Page Views').end();
+                cy.get('#usage.stats-charts-container .chart-group .charts-group-title').should('contain', 'Page Views').end();
             });
         });
 
