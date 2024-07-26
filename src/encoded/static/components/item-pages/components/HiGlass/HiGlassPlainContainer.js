@@ -252,7 +252,6 @@ export function scaleHiGlassViewConfig(originalViewConf, targetHeight){
 const HiGlassPlainContainerBody = React.forwardRef(function HiGlassPlainContainerBody(props, ref){
     const { viewConfig, options, hasRuntimeError, disabled, isValidating, mounted, higlassInitialized, width, height, mountCount, placeholder, style, className, packageLockJson } = props;
     const outerKey = "mount-number-" + mountCount;
-    const { packages: { 'node_modules/higlass' : { version: higlassVersionUsed = null } = {} } = {} } = packageLockJson || {};
     const { HiGlassComponent } = higlassDependencies || {};
 
     let hiGlassInstance = null;
@@ -303,7 +302,6 @@ const HiGlassPlainContainerBody = React.forwardRef(function HiGlassPlainContaine
      */
     return (
         <div className={"higlass-view-container" + (className ? ' ' + className : '')} style={style}>
-            {/* { higlassVersionUsed === null ? null : <link type="text/css" rel="stylesheet" href={`https://unpkg.com/higlass@${higlassVersionUsed}/dist/hglib.css`} crossOrigin="true" /> } */}
             <div className="higlass-wrapper">{ hiGlassInstance }</div>
         </div>
     );
