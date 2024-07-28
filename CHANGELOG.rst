@@ -12,6 +12,12 @@ Change Log
 * React 18 Migration
 
 
+7.10.1
+=====
+
+* Bug fix to revert schema version of workflow.json back to 7 
+
+
 7.10.0
 =====
 
