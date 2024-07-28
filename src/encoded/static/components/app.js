@@ -144,7 +144,7 @@ export default class App extends React.PureComponent {
 
         const { context, href } = props;
 
-        Alerts.setStore(store);
+        Alerts.setStore(store, false);
 
         const analyticsID = getGoogleAnalyticsTrackingID(href);
         /**
