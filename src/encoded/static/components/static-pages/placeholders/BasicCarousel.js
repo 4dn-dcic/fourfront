@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import memoize from 'memoize-one';
 import _ from 'underscore';
-import { Carousel } from 'nuka-carousel';
+import { Carousel, useCarousel } from 'nuka-carousel';
 
 /** @see https://www.npmjs.com/package/nuka-carousel for documentation of all props/options allowed */
 const defaultCarouselOptions = {
@@ -24,6 +24,32 @@ const defaultCarouselOptions = {
     'dragging': true,
     'easing': 'easeLinear',
     'transitionMode': 'scroll'
+};
+
+const Arrows = () => {
+    const { currentPage, totalPages, wrapMode, goBack, goForward } = useCarousel();
+
+    const allowWrap = wrapMode === 'wrap';
+    const enablePrevNavButton = allowWrap || currentPage > 0;
+    const enableNextNavButton = allowWrap || currentPage < totalPages - 1;
+
+    return (
+        <div>
+            {enablePrevNavButton && (
+                <div className="slider-control slider-control-centerleft" onClick={goBack}>
+                    <i className="icon icon-fw fas icon-angle-left icon-3x" />
+                </div>
+            )}
+            {enableNextNavButton && (
+                <div className="slider-control slider-control-centerright" onClick={goForward}>
+                    <i className="icon icon-fw fas icon-angle-right icon-3x" />
+                </div>
+            )}
+            <div className="slider-control-bottomleft">
+                Slide <strong>{currentPage + 1}</strong> of <strong>{totalPages}</strong>
+            </div>
+        </div>
+    );
 };
 
 export class BasicCarousel extends React.PureComponent {
@@ -175,7 +201,7 @@ export class BasicCarousel extends React.PureComponent {
 
         return (
             <div className="basic-carousel-wrapper" ref={BasicCarousel.refFunc} style={{ opacity: '0' }}>
-                <Carousel {...carouselProps}>
+                <Carousel {...carouselProps} showArrows showDots arrows={<Arrows />} >
                     {
                         slides.map(function ({ img: src, alt, width, height }, index) {
                             const style = {
@@ -183,8 +209,8 @@ export class BasicCarousel extends React.PureComponent {
                                 "height": height || commonSlideHeight || undefined
                             };
                             return (
-                                <div className="text-center" key={index}>
-                                    <img {...{ src, alt }} />
+                                <div className="text-center" key={index} style={{ 'min-width': '-webkit-fill-available' }}>
+                                    <img {...{ src, alt, style }} />
                                 </div>
                             );
                         })

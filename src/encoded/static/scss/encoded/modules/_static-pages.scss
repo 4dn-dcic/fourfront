@@ -1307,15 +1307,23 @@
 
 .basic-carousel-wrapper {
 	margin-bottom: 50px;
-  
-	.slider-control-centerleft,
-	.slider-control-centerright {
+
+	.slider-control {
 		cursor: pointer;
 		opacity: 0.7;
+		position: absolute;
+		top: 50%;
   
 		&:hover{
 			opacity: 1;
 		}
+	}
+  
+	.slider-control-centerleft{
+		left: 0;
+	}
+	.slider-control-centerright {
+		right: 0;
 	}
   
 	.slider-control-bottomleft {
