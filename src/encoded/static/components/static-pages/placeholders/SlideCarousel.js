@@ -13,13 +13,14 @@ function Arrows() {
     const enablePrevNavButton = allowWrap || currentPage > 0;
     const enableNextNavButton = allowWrap || currentPage < totalPages - 1;
 
+    // weird but autocomplete="off" fixes the hydration error: https://github.com/vercel/next.js/discussions/21999#discussioncomment-6315670
     return (
         <div>
-            <button type="button" className={`slider-control slider-control-centerleft ${!enablePrevNavButton ? 'slider-control-disabled' : ''}`} onClick={goBack} disabled={!enablePrevNavButton}>Prev</button>
-            <button type="button" className={`slider-control slider-control-centerright ${!enableNextNavButton ? 'slider-control-disabled' : ''}`} onClick={goForward} disabled={!enableNextNavButton}>Next</button>
+            <button type="button" className={`slider-control slider-control-centerleft ${!enablePrevNavButton ? 'slider-control-disabled' : ''}`} onClick={goBack} disabled={!enablePrevNavButton} autoComplete="off">Prev</button>
+            <button type="button" className={`slider-control slider-control-centerright ${!enableNextNavButton ? 'slider-control-disabled' : ''}`} onClick={goForward} disabled={!enableNextNavButton} autoComplete="off">Next</button>
         </div>
     );
-};
+}
 
 export class SlideCarousel extends React.PureComponent {
 
