@@ -15,8 +15,8 @@ function Arrows() {
 
     return (
         <div>
-            <button className={`slider-control slider-control-centerleft ${!enablePrevNavButton ? 'slider-control-disabled' : ''}`} onClick={goBack} disabled={!enablePrevNavButton}>Prev</button>
-            <button className={`slider-control slider-control-centerright ${!enableNextNavButton ? 'slider-control-disabled' : ''}`} onClick={goForward} disabled={!enableNextNavButton}>Next</button>
+            <button type="button" className={`slider-control slider-control-centerleft ${!enablePrevNavButton ? 'slider-control-disabled' : ''}`} onClick={goBack} disabled={!enablePrevNavButton}>Prev</button>
+            <button type="button" className={`slider-control slider-control-centerright ${!enableNextNavButton ? 'slider-control-disabled' : ''}`} onClick={goForward} disabled={!enableNextNavButton}>Next</button>
         </div>
     );
 };
@@ -51,10 +51,10 @@ export class SlideCarousel extends React.PureComponent {
             <div className="slide-carousel-wrapper">
                 <Carousel {...carouselProps}>
                     {
-                        _.map(slides, function(filename){
+                        _.map(slides, function(filename, index){
                             var src = fileLocation + filename;
                             return (
-                                <div className="text-center" style={{ minWidth: '100%' }}>
+                                <div className="text-center" style={{ minWidth: '100%' }} key={"slide-" + index}>
                                     <img {...{ src, style }} alt={filename} />
                                 </div>
                             );
