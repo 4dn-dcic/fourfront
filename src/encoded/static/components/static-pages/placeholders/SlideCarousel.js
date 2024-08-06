@@ -3,27 +3,37 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Carousel } from 'nuka-carousel';
+import { Carousel, useCarousel } from 'nuka-carousel';
 
 
+function Arrows() {
+    const { currentPage, totalPages, wrapMode, goBack, goForward } = useCarousel();
+
+    const allowWrap = wrapMode === 'wrap';
+    const enablePrevNavButton = allowWrap || currentPage > 0;
+    const enableNextNavButton = allowWrap || currentPage < totalPages - 1;
+
+    return (
+        <div>
+            <button className={`slider-control slider-control-centerleft ${!enablePrevNavButton ? 'slider-control-disabled' : ''}`} onClick={goBack} disabled={!enablePrevNavButton}>Prev</button>
+            <button className={`slider-control slider-control-centerright ${!enableNextNavButton ? 'slider-control-disabled' : ''}`} onClick={goForward} disabled={!enableNextNavButton}>Next</button>
+        </div>
+    );
+};
 
 export class SlideCarousel extends React.PureComponent {
 
     static defaultProps = {
         'fileLocation' : "/static/img/Metadata_structure_slides/",
         'carouselProps' : {
-            'cellSpacing' : 20,
-            'speed' : 700,
-            'cellAlign' : 'center',
-            'slideWidth' : 1,
+            'slideWidth': '100%',
             'slideHeight' : '540px',
-            'dragging' : false,
-            'easing' : 'easeLinear',
-            'transitionMode' : 'fade',
-            'renderBottomCenterControls' : null,
+            'swiping': true,
+            'transitionMode': 'fade',
+            'showDots': false,
             'showArrows': true,
             'slidesToShow': 1,
-            'scrollDistance': 'slide'
+            'arrows': <Arrows />
         }
     };
 
@@ -38,16 +48,20 @@ export class SlideCarousel extends React.PureComponent {
         ];
 
         return (
-            <Carousel {...carouselProps}>
-                {
-                    _.map(slides, function(filename){
-                        var src = fileLocation + filename;
-                        return (
-                            <img {...{ src, style }} alt={filename} />
-                        );
-                    })
-                }
-            </Carousel>
+            <div className="slide-carousel-wrapper">
+                <Carousel {...carouselProps}>
+                    {
+                        _.map(slides, function(filename){
+                            var src = fileLocation + filename;
+                            return (
+                                <div className="text-center" style={{ minWidth: '100%' }}>
+                                    <img {...{ src, style }} alt={filename} />
+                                </div>
+                            );
+                        })
+                    }
+                </Carousel>
+            </div>
         );
 
     }

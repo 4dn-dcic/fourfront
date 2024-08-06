@@ -1561,6 +1561,37 @@ $markdown-table-result-row-height: 46px !default;
 }
 
 /**********************************************************
+		Slide Carousel
+***********************************************************/
+
+.slide-carousel-wrapper {
+	.slider-control {
+		cursor: pointer;
+		opacity: 1;
+		position: absolute;
+		top: 50%;
+		padding: 10px;
+		border: 0;
+		background: rgba(0, 0, 0, 0.4);
+		color: white;
+		text-transform: uppercase;
+	}
+
+	.slider-control-centerleft {
+		left: 0;
+	}
+
+	.slider-control-centerright {
+		right: 0;
+	}
+
+	.slider-control-disabled {
+		cursor: not-allowed;
+		opacity: 0.3;
+	}
+}
+
+/**********************************************************
 		HomePage Carousel
 ***********************************************************/
 
