@@ -1210,7 +1210,7 @@ export default class App extends React.PureComponent {
         // `lastCSSBuildTime` is used for both CSS and JS because is most likely they change at the same time on production from recompiling
 
         return (
-            <html lang="en">
+            <html lang="en" suppressHydrationWarning={true}>
                 <head>
                     <meta charSet="utf-8"/>
                     <meta httpEquiv="Content-Type" content="text/html, charset=UTF-8"/>
