@@ -30,7 +30,7 @@ function Arrows() {
             </div>
         </div>
     );
-};
+}
 
 /** @see https://www.npmjs.com/package/nuka-carousel for documentation of all props/options allowed */
 const defaultCarouselOptions = {
