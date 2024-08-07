@@ -1197,11 +1197,11 @@ export default class App extends React.PureComponent {
         // www.google-analytics.com without http(s) makes it available in either data or staging/hotseat ...
         const contentSecurityPolicyStr = [
             "default-src 'self'",
-            "img-src 'self' https://* data: www.google-analytics.com abs.twimg.com https://pbs.twimg.com ton.twimg.com platform.twitter.com https://syndication.twitter.com",
+            "img-src 'self' https://* data: www.google-analytics.com",
             "child-src blob:",
-            "frame-src https://twitter.com platform.twitter.com syndication.twitter.com www.google.com/recaptcha/",
-            "script-src 'self' www.google-analytics.com www.googletagmanager.com https://cdn.auth0.com https://hms-dbmi.auth0.com https://secure.gravatar.com https://cdn.syndication.twimg.com platform.twitter.com https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ 'unsafe-eval'", // + (typeof BUILDTYPE === "string" && BUILDTYPE === "quick" ? " 'unsafe-eval'" : ""),
-            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com  https://unpkg.com https://ton.twimg.com platform.twitter.com https://www.googletagmanager.com",
+            "frame-src www.google.com/recaptcha/",
+            "script-src 'self' www.google-analytics.com www.googletagmanager.com https://cdn.auth0.com https://hms-dbmi.auth0.com https://secure.gravatar.com  https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ 'unsafe-eval'", // + (typeof BUILDTYPE === "string" && BUILDTYPE === "quick" ? " 'unsafe-eval'" : ""),
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com  https://unpkg.com https://www.googletagmanager.com",
             "font-src 'self' https://fonts.gstatic.com",
             "worker-src 'self' blob:",
             "connect-src 'self' * blob: https://raw.githubusercontent.com https://higlass.4dnucleome.org https://*.s3.amazonaws.com https://s3.amazonaws.com/4dn-dcic-public/ https://www.encodeproject.org https://rest.ensembl.org https://www.google-analytics.com https://www.googletagmanager.com https://o427308.ingest.sentry.io https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ 'unsafe-inline' 'unsafe-eval'"
