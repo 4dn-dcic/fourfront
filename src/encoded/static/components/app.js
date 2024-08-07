@@ -1200,7 +1200,7 @@ export default class App extends React.PureComponent {
             "img-src 'self' https://* data: www.google-analytics.com",
             "child-src blob:",
             "frame-src www.google.com/recaptcha/",
-            "script-src 'self' www.google-analytics.com www.googletagmanager.com https://cdn.auth0.com https://hms-dbmi.auth0.com https://secure.gravatar.com  https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ 'unsafe-eval'", // + (typeof BUILDTYPE === "string" && BUILDTYPE === "quick" ? " 'unsafe-eval'" : ""),
+            "script-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://cdn.auth0.com https://hms-dbmi.auth0.com https://secure.gravatar.com  https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ 'unsafe-eval'", // + (typeof BUILDTYPE === "string" && BUILDTYPE === "quick" ? " 'unsafe-eval'" : ""),
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com  https://unpkg.com https://www.googletagmanager.com",
             "font-src 'self' https://fonts.gstatic.com",
             "worker-src 'self' blob:",
