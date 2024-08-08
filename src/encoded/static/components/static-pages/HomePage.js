@@ -137,7 +137,7 @@ const DatasetsAndSocialMediaRow = React.memo(function DatasetsAndSocialMediaRow(
                                 </a>
                             </div>
                             <div>
-                                <a href="https://twitter.com/4dn_dcic" target="_blank" rel="noreferrer" className="btn-follow-on-social-media btn btn-primary w-100 mt-1">
+                                <a href="https://x.com/4dn_dcic" target="_blank" rel="noreferrer" className="btn-follow-on-social-media btn btn-primary w-100 mt-1">
                                     <span className="float-left ml-1">Follow 4DN Data Portal on X</span><span className="float-right mr-1"><i className="icon icon-arrow-right fas"></i></span>
                                 </a>
                             </div>

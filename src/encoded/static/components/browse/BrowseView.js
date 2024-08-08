@@ -217,11 +217,7 @@ export default class BrowseView extends React.PureComponent {
         const { query = {} } = hrefParts;
 
         if (query['award.project'] !== '4DN'){
-            store.dispatch({
-                'type' : {
-                    'browseBaseState' : 'all'
-                }
-            });
+            store.dispatch({ type: 'SET_BROWSE_BASE_STATE', payload: 'all' });
         }
 
         BrowseView.checkResyncChartData(hrefParts, context);

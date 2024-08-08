@@ -160,11 +160,7 @@ navigate.setBrowseBaseStateAndRefresh = function(
         });
     } else {
         // Change Redux store state but don't refresh page.
-        store.dispatch({
-            'type' : {
-                'browseBaseState' : newBrowseBaseState
-            }
-        });
+        store.dispatch({ type : 'SET_BROWSE_BASE_STATE', payload: newBrowseBaseState });
         if (typeof callback === 'function') callback();
     }
 };

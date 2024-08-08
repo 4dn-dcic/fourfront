@@ -159,7 +159,7 @@ export class ExperimentSetMatrix extends React.PureComponent {
         'titleMap': PropTypes.object,
         'columnSubGroupingOrder': PropTypes.arrayOf(PropTypes.string),
         'additionalData': PropTypes.object
-    }
+    };
 
     static convertResult(result, dataSource, fieldChangeMap, valueChangeMap, statusStateTitleMap, fallbackNameForBlankField){
 
@@ -340,42 +340,40 @@ export class ExperimentSetMatrix extends React.PureComponent {
         // const valueChangeMap = propValueChangeMap || { "4DN" : {}, "ENCODE" : {} };
 
         return (sectionKeys.length > 0) ? (
-            <React.Fragment>
-                <div className="static-section joint-analysis-matrix">
-                    <div className="row">
-                        {_.map(sectionKeys, (key) => {
-                            const resultKey = key + "_results";
-                            const url = queries[key] && queries[key].url;
-                            const className =  (sectionStyle && sectionStyle[key] && sectionStyle[key]['sectionClassName']) || "col-md-4";
-                            const rowLabelListingProportion = (sectionStyle && sectionStyle[key] && sectionStyle[key]['rowLabelListingProportion']) || "balanced";
-                            const additional = (additionalData && additionalData[key] );
-                            return (
-                                <div className={'col-12 ' + className}>
-                                    {(headerFor && headerFor[key]) || (<h3 className="mt-2 mb-0 text-300">{key}</h3>)}
-                                    <VisualBody
-                                        {..._.pick(this.props, 'headerColumnsOrder',
-                                            'titleMap', 'statePrioritizationForGroups', 'fallbackNameForBlankField', 'headerPadding')}
-                                        queryUrl={url}
-                                        groupingProperties={groupingProperties[key]}
-                                        fieldChangeMap={fieldChangeMap[key]}
-                                        valueChangeMap={valueChangeMap[key]}
-                                        columnGrouping={columnGrouping[key]}
-                                        additionalData={additional}
-                                        duplicateHeaders={false}
-                                        columnSubGrouping="state"
-                                        rowLabelListingProportion={rowLabelListingProportion}
-                                        // eslint-disable-next-line react/destructuring-assignment
-                                        results={this.state[resultKey]}
-                                        //defaultDepthsOpen={[true, false, false]}
-                                        //keysToInclude={[]}
-                                    />
-                                </div>
-                            );
-                        }
-                        )}
-                    </div>
+            <div className="static-section joint-analysis-matrix">
+                <div className="row">
+                    {_.map(sectionKeys, (key) => {
+                        const resultKey = key + "_results";
+                        const url = queries[key] && queries[key].url;
+                        const className = (sectionStyle && sectionStyle[key] && sectionStyle[key]['sectionClassName']) || "col-md-4";
+                        const rowLabelListingProportion = (sectionStyle && sectionStyle[key] && sectionStyle[key]['rowLabelListingProportion']) || "balanced";
+                        const additional = (additionalData && additionalData[key]);
+                        return (
+                            <div className={'col-12 ' + className}>
+                                {(headerFor && headerFor[key]) || (<h3 className="mt-2 mb-0 text-300">{key}</h3>)}
+                                <VisualBody
+                                    {..._.pick(this.props, 'headerColumnsOrder',
+                                        'titleMap', 'statePrioritizationForGroups', 'fallbackNameForBlankField', 'headerPadding')}
+                                    queryUrl={url}
+                                    groupingProperties={groupingProperties[key]}
+                                    fieldChangeMap={fieldChangeMap[key]}
+                                    valueChangeMap={valueChangeMap[key]}
+                                    columnGrouping={columnGrouping[key]}
+                                    additionalData={additional}
+                                    duplicateHeaders={false}
+                                    columnSubGrouping="state"
+                                    rowLabelListingProportion={rowLabelListingProportion}
+                                    // eslint-disable-next-line react/destructuring-assignment
+                                    results={this.state[resultKey]}
+                                    //defaultDepthsOpen={[true, false, false]}
+                                    //keysToInclude={[]}
+                                />
+                            </div>
+                        );
+                    }
+                    )}
                 </div>
-            </React.Fragment>
+            </div>
         ) : (<em>Not Available</em>);
     }
 

@@ -2,7 +2,8 @@
 // Entry point for browser, compiled into bundle[.chunkHash].js.
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from 'react-dom/client';
+// import ReactDOM from 'react-dom';
 
 import App from './components';
 var domready = require('domready');
@@ -65,13 +66,26 @@ if (typeof window !== 'undefined' && window.document && !window.TEST_RUNNER) {
         // into <script data-prop-name={ propName }> elements.
         var initialReduxStoreState = App.getRenderedProps(document);
         delete initialReduxStoreState.user_details; // Stored into localStorage.
-        store.dispatch({ 'type' : initialReduxStoreState });
+
+        if (initialReduxStoreState.context) {
+            store.dispatch({ type: 'SET_CONTEXT', payload: initialReduxStoreState.context });
+        }
+        if (initialReduxStoreState.href) {
+            store.dispatch({ type: 'SET_HREF', payload: initialReduxStoreState.href });
+        }
+        if (initialReduxStoreState.lastCSSBuildTime) {
+            store.dispatch({ type: 'SET_LAST_CSS_BUILD_TIME', payload: initialReduxStoreState.lastCSSBuildTime });
+        }
+        if (initialReduxStoreState.alerts) {
+            store.dispatch({ type: 'SET_ALERTS', payload: initialReduxStoreState.alerts });
+        }
 
         const AppWithReduxProps = connect(mapStateToProps)(App);
         let app;
 
         try {
-            app = ReactDOM.hydrate(<Provider store={store}><AppWithReduxProps /></Provider>, document);
+            app = ReactDOM.hydrateRoot(document, <Provider store={store}><AppWithReduxProps /></Provider>);
+            // app = ReactDOM.hydrate(<Provider store={store}><AppWithReduxProps /></Provider>, document);
         } catch (e) {
             logger.error("INVARIANT ERROR",e); // To debug
             // So we can get printout and compare diff of renders.

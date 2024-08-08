@@ -19,6 +19,7 @@ export class BigDropdownContainer extends React.PureComponent {
     constructor(props){
         super(props);
         this.onBackgroundClick = this.onBackgroundClick.bind(this);
+        this.nodeRef = React.createRef(null);
     }
 
     componentDidUpdate(pastProps){
@@ -108,12 +109,12 @@ export class BigDropdownContainer extends React.PureComponent {
         const body = React.Children.map(children, (child) => React.cloneElement(child, passProps));
         const renderedElem = (
             <CSSTransition appear in={open || closing} classNames="big-dropdown-menu-transition" unmountOnExit mountOnEnter
-                timeout={{ appear: 0, exit: otherDropdownOpen ? 0 : 300 }} key="dropdown-transition-container">
+                timeout={{ appear: 0, exit: otherDropdownOpen ? 0 : 300 }} key="dropdown-transition-container" nodeRef={this.nodeRef}>
                 <div className={outerCls} onClick={this.onBackgroundClick} key="dropdown-transition-container-inner"
                     data-is-mobile-view={!isDesktopView}
                     data-is-test-warning-visible={testWarningVisible}
                     data-is-closing={closing}
-                    data-is-other-dropdown-closing={otherDropdownClosing}>
+                    data-is-other-dropdown-closing={otherDropdownClosing} ref={this.nodeRef}>
                     <div className={innerCls} data-open-id={id}>
                         <div className="container">
                             { body }

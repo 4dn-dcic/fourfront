@@ -144,7 +144,7 @@ export default class App extends React.PureComponent {
 
         const { context, href } = props;
 
-        Alerts.setStore(store);
+        Alerts.setStore(store, false);
 
         const analyticsID = getGoogleAnalyticsTrackingID(href);
         /**
@@ -210,8 +210,8 @@ export default class App extends React.PureComponent {
         // The href prop we have was from serverside. It would not have a hash in it, and might be shortened.
         // Here we grab full-length href from window and then update props.href (via Redux), if it is different.
         const windowHref = (window && window.location && window.location.href) || href;
-        if (href !== windowHref){
-            store.dispatch({ 'type' : { 'href' : windowHref } });
+        if (href !== windowHref) {
+            store.dispatch({ type: 'SET_HREF', payload: windowHref });
         }
 
         // Load up analytics
@@ -652,12 +652,15 @@ export default class App extends React.PureComponent {
                 this.currentNavigationRequest.abort();
                 this.currentNavigationRequest = null;
             }
-            store.dispatch({
-                type: {
-                    'href' : windowHref,
-                    'context' : event.state
-                }
-            });
+            // store.dispatch({
+            //     type: {
+            //         'href' : windowHref,
+            //         'context' : event.state
+            //     }
+            // });
+
+            store.dispatch({ type: 'SET_HREF', payload: windowHref });
+            store.dispatch({ type: 'SET_CONTEXT', payload: event.state });
         }
 
         // Always async update in case of server side changes.
@@ -709,9 +712,7 @@ export default class App extends React.PureComponent {
      * @returns {void}
      */
     onHashChange(event) {
-        store.dispatch({
-            type: { 'href' : document.querySelector('link[rel="canonical"]').getAttribute('href') }
-        });
+        store.dispatch({ type: 'SET_HREF', payload: document.querySelector('link[rel="canonical"]').getAttribute('href') });
     }
 
     /**
@@ -880,7 +881,19 @@ export default class App extends React.PureComponent {
                     reduxDispatchDict.href = targetHref + hashAppendage;
                 }
                 if (_.keys(reduxDispatchDict).length > 0){
-                    store.dispatch({ 'type' : reduxDispatchDict });
+                    // store.dispatch({ 'type' : reduxDispatchDict });
+                    if (reduxDispatchDict.context) {
+                        store.dispatch({ type: 'SET_CONTEXT', payload: reduxDispatchDict.context });
+                    }
+                    if (reduxDispatchDict.href) {
+                        store.dispatch({ type: 'SET_HREF', payload: reduxDispatchDict.href });
+                    }
+                    if (reduxDispatchDict.lastCSSBuildTime) {
+                        store.dispatch({ type: 'SET_LAST_CSS_BUILD_TIME', payload: reduxDispatchDict.lastCSSBuildTime });
+                    }
+                    if (reduxDispatchDict.alerts) {
+                        store.dispatch({ type: 'SET_ALERTS', payload: reduxDispatchDict.alerts });
+                    }
                 }
                 return false;
             }
@@ -948,7 +961,20 @@ export default class App extends React.PureComponent {
                     }
 
                     reduxDispatchDict.context = response;
-                    store.dispatch({ 'type' : _.extend({}, reduxDispatchDict, includeReduxDispatch) });
+                    // store.dispatch({ 'type' : _.extend({}, reduxDispatchDict, includeReduxDispatch) });
+                    const payloadReduxDispatchDict = _.extend({}, reduxDispatchDict, includeReduxDispatch);
+                    if (payloadReduxDispatchDict.context) {
+                        store.dispatch({ type: 'SET_CONTEXT', payload: payloadReduxDispatchDict.context });
+                    }
+                    if (payloadReduxDispatchDict.href) {
+                        store.dispatch({ type: 'SET_HREF', payload: payloadReduxDispatchDict.href });
+                    }
+                    if (payloadReduxDispatchDict.lastCSSBuildTime) {
+                        store.dispatch({ type: 'SET_LAST_CSS_BUILD_TIME', payload: payloadReduxDispatchDict.lastCSSBuildTime });
+                    }
+                    if (payloadReduxDispatchDict.alerts) {
+                        store.dispatch({ type: 'SET_ALERTS', payload: payloadReduxDispatchDict.alerts });
+                    }
                     return response;
                 })
                 .then((response) => { // Finalize - clean up `slowLoad : true` if in state, run callbacks and analytics.
@@ -1171,11 +1197,11 @@ export default class App extends React.PureComponent {
         // www.google-analytics.com without http(s) makes it available in either data or staging/hotseat ...
         const contentSecurityPolicyStr = [
             "default-src 'self'",
-            "img-src 'self' https://* data: www.google-analytics.com abs.twimg.com https://pbs.twimg.com ton.twimg.com platform.twitter.com https://syndication.twitter.com",
+            "img-src 'self' https://* data: www.google-analytics.com",
             "child-src blob:",
-            "frame-src https://twitter.com platform.twitter.com syndication.twitter.com www.google.com/recaptcha/",
-            "script-src 'self' www.google-analytics.com www.googletagmanager.com https://cdn.auth0.com https://hms-dbmi.auth0.com https://secure.gravatar.com https://cdn.syndication.twimg.com platform.twitter.com https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ 'unsafe-eval'", // + (typeof BUILDTYPE === "string" && BUILDTYPE === "quick" ? " 'unsafe-eval'" : ""),
-            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com  https://unpkg.com https://ton.twimg.com platform.twitter.com https://www.googletagmanager.com",
+            "frame-src www.google.com/recaptcha/",
+            "script-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://cdn.auth0.com https://hms-dbmi.auth0.com https://secure.gravatar.com  https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ 'unsafe-eval'", // + (typeof BUILDTYPE === "string" && BUILDTYPE === "quick" ? " 'unsafe-eval'" : ""),
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com  https://unpkg.com https://www.googletagmanager.com",
             "font-src 'self' https://fonts.gstatic.com",
             "worker-src 'self' blob:",
             "connect-src 'self' * blob: https://raw.githubusercontent.com https://higlass.4dnucleome.org https://*.s3.amazonaws.com https://s3.amazonaws.com/4dn-dcic-public/ https://www.encodeproject.org https://rest.ensembl.org https://www.google-analytics.com https://www.googletagmanager.com https://o427308.ingest.sentry.io https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ 'unsafe-inline' 'unsafe-eval'"
@@ -1184,7 +1210,7 @@ export default class App extends React.PureComponent {
         // `lastCSSBuildTime` is used for both CSS and JS because is most likely they change at the same time on production from recompiling
 
         return (
-            <html lang="en">
+            <html lang="en" suppressHydrationWarning={true}>
                 <head>
                     <meta charSet="utf-8"/>
                     <meta httpEquiv="Content-Type" content="text/html, charset=UTF-8"/>

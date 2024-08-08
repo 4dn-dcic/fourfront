@@ -48,26 +48,28 @@ export function appRenderFxn(body, res) {
         disp_dict.alerts.push(Alerts.LoggedOut);
     }
     // End JWT token grabbing
+    if (disp_dict.context) {
+        store.dispatch({ type: 'SET_CONTEXT', payload: disp_dict.context });
+    }
+    if (disp_dict.href) {
+        store.dispatch({ type: 'SET_HREF', payload: disp_dict.href });
+    }
+    if (disp_dict.lastCSSBuildTime) {
+        store.dispatch({ type: 'SET_LAST_CSS_BUILD_TIME', payload: disp_dict.lastCSSBuildTime });
+    }
+    if (disp_dict.alerts) {
+        store.dispatch({ type: 'SET_ALERTS', payload: disp_dict.alerts });
+    }
 
-    store.dispatch({
-        type: disp_dict
-    });
-
-    var markup, AppWithReduxProps;
+    let AppWithReduxProps = connect(mapStateToProps)(App);
+    let markup;
 
     try {
-        AppWithReduxProps = connect(mapStateToProps)(App);
-        // TODO maybe in future: Try to utilize https://reactjs.org/docs/react-dom-server.html#rendertonodestream instead.
-        // would require big edits to subprocess-middleware, however (e.g. removing buffering, piping stream directly to process.stdout (?)).
-        markup = ReactDOMServer.renderToString(
-            <Provider store={store}>
-                <AppWithReduxProps />
-            </Provider>
-        );
+        markup = ReactDOMServer.renderToString(<Provider store={store}><AppWithReduxProps /></Provider>);
     } catch (err) {
         store.dispatch({
-            type: 'context',
-            value: {
+            type: 'SET_CONTEXT',
+            payload: {
                 '@type': ['RenderingError', 'error'],
                 'status': 'error',
                 'code': 500,

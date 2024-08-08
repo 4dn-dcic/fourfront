@@ -336,9 +336,7 @@ const AccessKeyTable = React.memo(function AccessKeyTable({ accessKeys, onDelete
 export default class UserView extends React.Component {
 
     static onEditableFieldSave(nextContext){
-        store.dispatch({
-            type: { 'context': nextContext }
-        });
+        store.dispatch({ type: 'SET_CONTEXT', payload: nextContext });
     }
 
     static propTypes = {

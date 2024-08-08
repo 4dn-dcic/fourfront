@@ -277,7 +277,9 @@ export class TabbedView extends React.PureComponent {
         const foundContent = Array.isArray(allContentObjs) && _.findWhere(allContentObjs, { 'key' : hash });
 
         if (!foundContent){
-            console.error('Could not find', hash);
+            if (hash) {
+                console.error('Could not find hash:', hash);
+            }
             return false;
         }
 
