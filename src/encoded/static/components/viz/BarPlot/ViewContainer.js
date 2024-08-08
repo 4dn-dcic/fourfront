@@ -208,8 +208,8 @@ class Bar extends React.PureComponent {
  */
 export class ViewContainer extends React.Component {
 
-    static Bar = Bar
-    static BarSection = BarSection
+    static Bar = Bar;
+    static BarSection = BarSection;
 
     static defaultProps = {
         'canBeHighlighted' : true
@@ -253,10 +253,10 @@ export class ViewContainer extends React.Component {
                 );
                 console.warn(warnMsg);
             }
-            // error-level message for sentry.io 
+            // error-level message for sentry.io
             const barAggregateTypeCount = _.reduce(bars, function (sum, bar) {
                 if (bar.bars && Array.isArray(bar.bars)) {
-                    _.forEach(bar.bars, (b) => { sum = sum + (b[aggregateType] || 0) });
+                    _.forEach(bar.bars, (b) => { sum = sum + (b[aggregateType] || 0); });
                 }
                 return sum;
             }, 0);
