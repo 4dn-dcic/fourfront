@@ -25,10 +25,10 @@ export class ExperimentSetDetailPane extends React.PureComponent {
 
     static propTypes = {
         'selectAllFilesInitially' : PropTypes.bool,
-        'result' : PropTypes.object.isRequired,
+        'result' : PropTypes.object,
         'containerWidth' : PropTypes.number,
         'paddingWidth' : PropTypes.number,
-        'windowWidth' : PropTypes.number.isRequired,
+        'windowWidth' : PropTypes.number,
         'href' : PropTypes.string.isRequired,
         'minimumWidth' : PropTypes.number,
         'initialStateCache' : PropTypes.object,
