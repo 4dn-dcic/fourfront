@@ -1784,7 +1784,7 @@ class BodyElement extends React.PureComponent {
 
         return (
             <body data-current-action={currentAction} onClick={onBodyClick} onSubmit={onBodySubmit} data-path={hrefParts.path}
-                data-pathname={hrefParts.pathname} className={this.bodyClassName()}>
+                data-pathname={hrefParts.pathname} className={this.bodyClassName()} suppressHydrationWarning={true}>
 
                 <script data-prop-name="lastCSSBuildTime" type="application/json" dangerouslySetInnerHTML={{ __html: lastCSSBuildTime }}/>
 
