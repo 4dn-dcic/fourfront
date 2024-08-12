@@ -360,7 +360,7 @@ export class ItemPageTableIndividualUrlLoader extends React.PureComponent {
     static propTypes = {
         'children' : PropTypes.element.isRequired,
         'itemUrls' : PropTypes.arrayOf(PropTypes.string).isRequired,
-        'windowWidth': PropTypes.number.isRequired,
+        'windowWidth': PropTypes.number,
         'maxToLoad' : PropTypes.number.isRequired
     };
 
