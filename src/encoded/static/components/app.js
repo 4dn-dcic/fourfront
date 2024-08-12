@@ -13,7 +13,7 @@ import { content_views as globalContentViews, portalConfig, getGoogleAnalyticsTr
 import ErrorPage from './static-pages/ErrorPage';
 import { NavigationBar } from './navigation/NavigationBar';
 import { Footer } from './Footer';
-import { store } from './../store';
+import { store, batchDispatch } from './../store';
 // import { NotLoggedInAlert } from './navigation/components/LoginNavItem';
 
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Alerts';
@@ -652,15 +652,12 @@ export default class App extends React.PureComponent {
                 this.currentNavigationRequest.abort();
                 this.currentNavigationRequest = null;
             }
-            // store.dispatch({
-            //     type: {
-            //         'href' : windowHref,
-            //         'context' : event.state
-            //     }
-            // });
 
-            store.dispatch({ type: 'SET_HREF', payload: windowHref });
-            store.dispatch({ type: 'SET_CONTEXT', payload: event.state });
+            const dispatchDict = {
+                href: windowHref,
+                context: event.state
+            };
+            batchDispatch(store, dispatchDict);
         }
 
         // Always async update in case of server side changes.
@@ -880,20 +877,8 @@ export default class App extends React.PureComponent {
                 if (!options.skipUpdateHref) {
                     reduxDispatchDict.href = targetHref + hashAppendage;
                 }
-                if (_.keys(reduxDispatchDict).length > 0){
-                    // store.dispatch({ 'type' : reduxDispatchDict });
-                    if (reduxDispatchDict.context) {
-                        store.dispatch({ type: 'SET_CONTEXT', payload: reduxDispatchDict.context });
-                    }
-                    if (reduxDispatchDict.href) {
-                        store.dispatch({ type: 'SET_HREF', payload: reduxDispatchDict.href });
-                    }
-                    if (reduxDispatchDict.lastCSSBuildTime) {
-                        store.dispatch({ type: 'SET_LAST_CSS_BUILD_TIME', payload: reduxDispatchDict.lastCSSBuildTime });
-                    }
-                    if (reduxDispatchDict.alerts) {
-                        store.dispatch({ type: 'SET_ALERTS', payload: reduxDispatchDict.alerts });
-                    }
+                if (_.keys(reduxDispatchDict).length > 0) {
+                    batchDispatch(store, reduxDispatchDict);
                 }
                 return false;
             }
@@ -961,20 +946,8 @@ export default class App extends React.PureComponent {
                     }
 
                     reduxDispatchDict.context = response;
-                    // store.dispatch({ 'type' : _.extend({}, reduxDispatchDict, includeReduxDispatch) });
                     const payloadReduxDispatchDict = _.extend({}, reduxDispatchDict, includeReduxDispatch);
-                    if (payloadReduxDispatchDict.context) {
-                        store.dispatch({ type: 'SET_CONTEXT', payload: payloadReduxDispatchDict.context });
-                    }
-                    if (payloadReduxDispatchDict.href) {
-                        store.dispatch({ type: 'SET_HREF', payload: payloadReduxDispatchDict.href });
-                    }
-                    if (payloadReduxDispatchDict.lastCSSBuildTime) {
-                        store.dispatch({ type: 'SET_LAST_CSS_BUILD_TIME', payload: payloadReduxDispatchDict.lastCSSBuildTime });
-                    }
-                    if (payloadReduxDispatchDict.alerts) {
-                        store.dispatch({ type: 'SET_ALERTS', payload: payloadReduxDispatchDict.alerts });
-                    }
+                    batchDispatch(store, payloadReduxDispatchDict);
                     return response;
                 })
                 .then((response) => { // Finalize - clean up `slowLoad : true` if in state, run callbacks and analytics.

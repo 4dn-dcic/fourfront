@@ -3,7 +3,7 @@
 import React from 'react';
 import ReactDOMServer from 'react-dom/server';
 import fs from 'fs';
-import { store, mapStateToProps } from './../store';
+import { store, mapStateToProps, batchDispatch } from './../store';
 import { Provider, connect } from 'react-redux';
 // We get a different console w. different methods & properties on server-side.
 import { console as browserConsole, object, JWT } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
@@ -48,18 +48,7 @@ export function appRenderFxn(body, res) {
         disp_dict.alerts.push(Alerts.LoggedOut);
     }
     // End JWT token grabbing
-    if (disp_dict.context) {
-        store.dispatch({ type: 'SET_CONTEXT', payload: disp_dict.context });
-    }
-    if (disp_dict.href) {
-        store.dispatch({ type: 'SET_HREF', payload: disp_dict.href });
-    }
-    if (disp_dict.lastCSSBuildTime) {
-        store.dispatch({ type: 'SET_LAST_CSS_BUILD_TIME', payload: disp_dict.lastCSSBuildTime });
-    }
-    if (disp_dict.alerts) {
-        store.dispatch({ type: 'SET_ALERTS', payload: disp_dict.alerts });
-    }
+    batchDispatch(store, disp_dict);
 
     let AppWithReduxProps = connect(mapStateToProps)(App);
     let markup;

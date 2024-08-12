@@ -74,7 +74,16 @@ const reducers = {
     }
 };
 
-const rootReducer = combineReducers(reducers);
+const rootReducer = (state, action) => {
+    switch (action.type) {
+        case 'BATCH_ACTIONS':
+            return action.payload.reduce((currentState, batchAction) => {
+                return rootReducer(currentState, batchAction);
+            }, state);
+        default:
+            return combineReducers(reducers)(state, action);
+    }
+};
 
 const store = configureStore({
     reducer: rootReducer
@@ -88,5 +97,35 @@ export function mapStateToProps(currStore){
     return _.object(_.map(_.keys(reducers), function(rfield){
         return [rfield, currStore[rfield]];
     }));
+}
+
+export function batchDispatch(store, dict) {
+    if (!store || !dict) {
+        return;
+    }
+
+    const actions = [];
+    if (dict.context) {
+        actions.push({ type: 'SET_CONTEXT', payload: dict.context });
+    }
+    if (dict.href) {
+        actions.push({ type: 'SET_HREF', payload: dict.href });
+    }
+    if (dict.lastCSSBuildTime) {
+        actions.push({ type: 'SET_LAST_CSS_BUILD_TIME', payload: dict.lastCSSBuildTime });
+    }
+    if (dict.alerts) {
+        actions.push({ type: 'SET_ALERTS', payload: dict.alerts });
+    }
+    if (typeof dict.slow === 'boolean') {
+        actions.push({ type: 'SET_SLOW', payload: dict.slow });
+    }
+    if (dict.browseBaseState) {
+        actions.push({ type: 'SET_BROWSE_BASE_STATE', payload: dict.browseBaseState });
+    }
+
+    if (actions.length > 0) {
+        store.dispatch({ type: 'BATCH_ACTIONS', payload: actions });
+    }
 }
 

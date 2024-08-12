@@ -7,7 +7,7 @@ import ReactDOM from 'react-dom/client';
 
 import App from './components';
 var domready = require('domready');
-import { store, mapStateToProps } from './store';
+import { store, mapStateToProps, batchDispatch } from './store';
 import { Provider, connect } from 'react-redux';
 import { patchedConsoleInstance as console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util/patched-console';
 import { logger }  from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
@@ -67,18 +67,7 @@ if (typeof window !== 'undefined' && window.document && !window.TEST_RUNNER) {
         var initialReduxStoreState = App.getRenderedProps(document);
         delete initialReduxStoreState.user_details; // Stored into localStorage.
 
-        if (initialReduxStoreState.context) {
-            store.dispatch({ type: 'SET_CONTEXT', payload: initialReduxStoreState.context });
-        }
-        if (initialReduxStoreState.href) {
-            store.dispatch({ type: 'SET_HREF', payload: initialReduxStoreState.href });
-        }
-        if (initialReduxStoreState.lastCSSBuildTime) {
-            store.dispatch({ type: 'SET_LAST_CSS_BUILD_TIME', payload: initialReduxStoreState.lastCSSBuildTime });
-        }
-        if (initialReduxStoreState.alerts) {
-            store.dispatch({ type: 'SET_ALERTS', payload: initialReduxStoreState.alerts });
-        }
+        batchDispatch(store, initialReduxStoreState);
 
         const AppWithReduxProps = connect(mapStateToProps)(App);
         let app;
