@@ -1,11 +1,8 @@
 'use strict';
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import _ from 'underscore';
-import url from 'url';
 import memoize from 'memoize-one';
-import ReactTooltip from 'react-tooltip';
 import { console, searchFilters, analytics, memoizedUrlParse,  } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { ActiveFiltersBar } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/ActiveFiltersBar';
 import { Filters, navigate, Schemas } from './../util';
@@ -205,7 +202,7 @@ export default class QuickInfoBar extends React.PureComponent {
     }
 
     renderHoverBar(){
-        const { context, browseBaseState, href, schemas } = this.props;
+        const { context, schemas } = this.props;
         const { show, reallyShow } = this.state;
         const browseBaseParams = navigate.getBrowseBaseParams();
         const filters = QuickInfoBar.contextFiltersToInclude(context.filters, browseBaseParams);
@@ -255,8 +252,7 @@ export default class QuickInfoBar extends React.PureComponent {
     }
 }
 
-const BrowseBaseStateToggleCol = React.memo(function(props){
-    const { browseBaseState, isLoading, onToggle } = props;
+const BrowseBaseStateToggleCol = React.memo(function({ browseBaseState, isLoading, onToggle }){
     const checked = browseBaseState === 'all';
     return (
         <div className="col-4 text-right browse-base-state-toggle-container">

@@ -277,15 +277,14 @@ export class ViewContainer extends React.Component {
      * @returns {Component[]} Array of 'Bar' React Components.
      */
     renderBars(){
-        var { bars, onNodeMouseEnter, onNodeMouseLeave, onNodeClick } = this.props,
-            barsToRender, currentBars;
+        const { bars, onNodeMouseEnter, onNodeMouseLeave, onNodeClick } = this.props;
 
         return _.map(bars.sort(function(a,b){ // key will be term or name, if available
             return (a.term || a.name) < (b.term || b.name) ? -1 : 1;
         }), (d,i,a) =>
             <CSSTransition classNames="barplot-transition" unmountOnExit timeout={{ enter: 10, exit: 750 }} key={d.term || d.name || i}>
                 <Bar key={d.term || d.name || i} node={d}
-                    showBarCount={true /*!allExpsBarDataContainer */}
+                    showBarCount={true}
                     {..._.pick(this.props, 'selectedParentTerm', 'selectedTerm', 'hoverParentTerm', 'hoverTerm', 'styleOptions',
                         'aggregateType', 'showType', 'canBeHighlighted')}
                     onBarPartMouseEnter={onNodeMouseEnter} onBarPartMouseLeave={onNodeMouseLeave} onBarPartClick={onNodeClick} />
@@ -294,7 +293,7 @@ export class ViewContainer extends React.Component {
     }
 
     render(){
-        var { topLevelField, width, height, bars } = this.props,
+        var { topLevelField, width, height, leftAxis, bottomAxis } = this.props,
             anyHiddenOtherTerms = topLevelField.other_doc_count || _.any(_.values(topLevelField.terms), function(tV){
                 return tV.other_doc_count;
             });
@@ -324,10 +323,10 @@ export class ViewContainer extends React.Component {
                         <p className="mb-0">* Only up to the top 30 terms are shown.</p>
                     </div>
                     : null }
-                { this.props.leftAxis }
+                { leftAxis }
                 {/* allExpsBarDataContainer && allExpsBarDataContainer.component */}
                 <TransitionGroup>{ this.renderBars() }</TransitionGroup>
-                { this.props.bottomAxis }
+                { bottomAxis }
             </div>
         );
 

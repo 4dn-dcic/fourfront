@@ -136,10 +136,6 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
 
         // Supplementary Files Tab
         if (ExperimentSetView.shouldShowSupplementaryFilesTabView(context)){
-            //const referenceFiles = SupplementaryFilesTabView.allReferenceFiles(context) || [];
-            //const opfCollections = SupplementaryFilesTabView.combinedOtherProcessedFiles(context) || [];
-            //const allOpfFiles = _.reduce(opfCollections, function (memo, coll) { return memo.concat(coll.files || []); }, []);
-            //const allFiles = referenceFiles.concat(allOpfFiles);
             tabs.push({
                 tab : <span><i className="icon icon-copy far icon-fw"/> Supplementary Files</span>,
                 key : 'supplementary-files',
