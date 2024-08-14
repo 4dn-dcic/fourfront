@@ -11,7 +11,9 @@
         "award": "1U01CA200059-01",
         "status": "released",
         "other_tags": ["DNA-DNA"],
-        "valid_item_types": ["ExperimentHiC"]
+        "valid_item_types": ["ExperimentHiC"],
+        "current_pipeline": "HiC_Pipeline_0.3.0",
+        "accepted_pipelines": ["HiC_Pipeline_0.2.6", "HiC_Pipeline_0.2.7"]
     },
     {
         "title": "Dilution Hi-C",

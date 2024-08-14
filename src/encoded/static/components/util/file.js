@@ -52,13 +52,14 @@ export function getLightSourceCenterMicroscopeSettingFromFile(channel, fileItem)
  * `{ from_experiment : { from_experiment_set : { accession }, accession }, from_experiment_set : { accession }`
  *
  */
-export function extendFile(file, experiment, experimentSet){
+export function extendFile(file, experiment, experimentSet, source){
     return _.extend(
         {}, file, {
             'from_experiment' : _.extend(
                 {}, experiment, { 'from_experiment_set' : experimentSet }
             ),
-            'from_experiment_set' : experimentSet
+            'from_experiment_set' : experimentSet,
+            'from_source': source || null
         }
     );
 }

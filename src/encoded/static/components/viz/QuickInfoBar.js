@@ -273,31 +273,24 @@ const StatsCol = React.memo(function StatsCol(props){
     const { total, current } = QuickInfoBar.getCountsFromProps(props);
     const expSetFilters = QuickInfoBar.expSetFilters((context && context.filters) || null, navigate.getBrowseBaseParams(browseBaseState));
 
-    // file counts including OPF
-    const totalFiles = total.files_all || 0;
-    const currentFiles = current ? (current.files_all || 0) : 0;
-    // file counts (only OPF)
-    const totalOtherProcessedFiles = (total.files_opf || 0);
-    const currentOtherProcessedFiles = current && typeof current.files_opf === 'number' ? (current.files_opf || 0) : 0;
-
     let stats, filesLongLabel;
     if (current && (typeof current.experiment_sets === 'number' || typeof current.experiments === 'number' || typeof current.files === 'number')) {
         stats = {
             'experiment_sets'   : <span>{ current.experiment_sets }<small> / { total.experiment_sets || 0 }</small></span>,
             'experiments'       : <span>{ current.experiments }<small> / {total.experiments || 0}</small></span>,
-            'files'             : <span>{ currentFiles }<small> / { totalFiles }</small></span>
+            'files'             : <span>{ current.files }<small> / {total.files || 0}</small></span>
         };
-        filesLongLabel = `Raw + Processed Files: (${current.files || 0}/${total.files || 0}), Supplementary Files: (${currentOtherProcessedFiles}/${totalOtherProcessedFiles})`;
+        filesLongLabel = `Raw Files: (${current.files_raw || 0}/${total.files_raw || 0}), Processed Files: (${current.files_processed || 0}/${total.files_processed || 0}), Supplementary Files: (${current.files_opf || 0}/${total.files_opf || 0})`;
     } else {
         stats = {
             'experiment_sets'   : total.experiment_sets || 0,
             'experiments'       : total.experiments || 0,
-            'files'             : totalFiles
+            'files'             : total.files || 0
         };
-        filesLongLabel = `Raw + Processed Files: ${total.files || 0}, Supplementary Files: ${totalOtherProcessedFiles}`;
+        filesLongLabel = `Raw Files: ${total.files_raw || 0}, Processed Files: ${total.files_processed || 0}, Supplementary Files: ${total.files_opf || 0}`;
     }
     // OPF extra stats are for Cypress 03d_browse_views_files_selection, we pass them as attributes like data-total_opf, data-current_opf
-    const files_extra = { 'total_opf': totalOtherProcessedFiles, 'current_opf': current && typeof current.files_opf === 'number' ? currentOtherProcessedFiles : null };
+    const files_extra = { 'total_opf': (total.files_opf || 0), 'current_opf': current && typeof current.files_opf === 'number' ? current.files_opf || 0 : null };
     const statProps = _.extend(_.pick(props, 'id', 'href', 'isLoadingChartData', 'browseBaseState'), { 'expSetFilters' : expSetFilters });
     return (
         <div className="col-8 left-side clearfix">

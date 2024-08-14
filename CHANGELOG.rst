@@ -6,11 +6,68 @@ fourfront
 Change Log
 ----------
 
-7.5.8
+7.10.2
 =====
 
 * Update DRS API to return JSON always
 * Update DRS download URLs to return direct downloads to Open Data where applicable
+
+
+7.10.1
+=====
+
+* Bug fix to revert schema version of workflow.json back to 7
+
+
+7.10.0
+=====
+
+* Add cumulative sum and date range options for submission statistics
+* Add cumulative sum and 60 days options for usage statistics
+* Update statistics page style and improve mobile UI
+* Add supplementary files table into /browse details
+* Add raw/processed/supplementary file download options into `Select All` button
+
+
+7.9.0
+=====
+
+* Added 'override_track_title' to file schema
+* Updated track_and_facet calcprop to use the new property if present
+* Added test cases
+
+
+7.8.0
+=====
+
+* Added 'tags' mixing to workflow schema
+* Added 'max_runtime' property to workflow schema
+* Added 'current pipeline' and 'accepted_pipelines' to experiment_type for the names
+  of completed pipelines used by foursight
+
+
+7.7.0
+=====
+
+* Updates related to Python 3.12.
+
+
+7.6.0
+=====
+
+`Add routes page  <https://github.com/4dn-dcic/fourfront/pull/1898>`_
+
+* Add routes page to list all endpoints
+* updated lock file
+
+
+7.5.8
+=====
+
+`Add ignored enum  <https://github.com/4dn-dcic/fourfront/pull/1897>`_
+
+* Add value to ignored_enum for file_type
+>>>>>>> master
 
 
 7.5.7
