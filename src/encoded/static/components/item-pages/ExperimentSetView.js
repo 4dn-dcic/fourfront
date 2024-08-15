@@ -450,7 +450,7 @@ class SupplementaryFilesOPFCollection extends React.PureComponent {
             return statuses;
         }
         return null;
-    }
+    };
 
     static getStatusAndColHeaders(columnHeaders, files) {
         const status = SupplementaryFilesOPFCollection.collectionStatus(files);
