@@ -214,7 +214,7 @@ class SelectedFilesDownloadModal extends React.PureComponent {
             action += '&' + modifiedSearch;
         }
         return (
-            <Modal show className="batch-files-download-modal" onHide={onHide} bsSize="large">
+            <Modal show className="batch-files-download-modal" onHide={onHide} size="lg">
 
                 <Modal.Header closeButton>
                     <Modal.Title>
