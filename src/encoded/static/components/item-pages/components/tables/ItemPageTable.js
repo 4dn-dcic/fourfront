@@ -141,7 +141,7 @@ SearchTableTitle.propTypes = {
     externalSearchLinkVisible: PropTypes.bool,
     title: PropTypes.string,
     titleSuffix: PropTypes.string,
-    headerElement: PropTypes.oneOf(['h1', 'h2', 'h3', 'h4', 'h5', 'h6']).isRequired,
+    headerElement: PropTypes.oneOf(['h1', 'h2', 'h3', 'h4', 'h5', 'h6']),
 };
 
 /** @deprecated */

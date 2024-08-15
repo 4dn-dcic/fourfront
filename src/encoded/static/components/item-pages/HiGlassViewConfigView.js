@@ -1277,9 +1277,3 @@ ConfirmModal.propTypes = {
     'confirmButtonVisible': PropTypes.bool,
     'cancelButtonVisible': PropTypes.bool
 };
-ConfirmModal.defaultProps = {
-    'confirmButtonText': 'OK',
-    'cancelButtonText': 'Cancel',
-    'confirmButtonVisible': true,
-    'cancelButtonVisible': true
-};
