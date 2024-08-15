@@ -219,6 +219,7 @@ export class ViewContainer extends React.Component {
         super(props);
         this.verifyCounts = this.verifyCounts.bind(this);
         this.renderBars = this.renderBars.bind(this);
+        this.nodeRef = React.createRef();
     }
 
     componentDidMount(){
@@ -282,7 +283,7 @@ export class ViewContainer extends React.Component {
         return _.map(bars.sort(function(a,b){ // key will be term or name, if available
             return (a.term || a.name) < (b.term || b.name) ? -1 : 1;
         }), (d,i,a) =>
-            <CSSTransition classNames="barplot-transition" unmountOnExit timeout={{ enter: 10, exit: 750 }} key={d.term || d.name || i}>
+            <CSSTransition classNames="barplot-transition" unmountOnExit timeout={{ enter: 10, exit: 750 }} key={d.term || d.name || i} nodeRef={this.nodeRef}>
                 <Bar key={d.term || d.name || i} node={d}
                     showBarCount={true}
                     {..._.pick(this.props, 'selectedParentTerm', 'selectedTerm', 'hoverParentTerm', 'hoverTerm', 'styleOptions',
