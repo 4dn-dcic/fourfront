@@ -100,7 +100,7 @@ class Term extends React.Component {
  * @prop {Object[]} terms - Terms which belong to this field, in the form of objects.
  */
 const Field = React.memo(function Field(props){
-    const { field, title, name, includeFieldTitle, terms } = props;
+    const { field, title, name, includeFieldTitle = true, terms } = props;
     return (
         <div className="field" data-field={field} onMouseLeave={vizUtil.unhighlightTerms.bind(this, field)}>
             { includeFieldTitle ?
@@ -114,7 +114,6 @@ const Field = React.memo(function Field(props){
         </div>
     );
 });
-Field.defaultProps = { 'includeFieldTitle' : true };
 
 
 class LegendViewContainer extends React.Component {
