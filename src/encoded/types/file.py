@@ -570,7 +570,7 @@ class File(Item):
     def track_and_facet_info(self, request, biosource_name=None):
         props = self.upgrade_properties()
         # order matters here at leat for last 2 fields
-        fields = ['experiment_type', 'assay_info', 'experimental_lab', 'dataset', 'condition', 
+        fields = ['experiment_type', 'assay_info', 'experimental_lab', 'dataset', 'condition',
                   'biosource_name', 'replicate_info', 'experiment_bucket', 'lab_name', 'track_title']
         # look for existing _props
         track_info = {field: props.get('override_' + field) for field in fields}
@@ -1724,7 +1724,8 @@ def drs(context, request):
                 'access_url': {
                     'url': open_data_url
                 },
-                'type': 'https'
+                'type': 'https',
+                'access_id': 'https'
             }
         ]
     }

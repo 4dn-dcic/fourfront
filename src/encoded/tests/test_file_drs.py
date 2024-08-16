@@ -49,6 +49,7 @@ def validate_drs_conversion(drs_obj, meta, uri=None):
     assert drs_obj['version'] == meta['md5sum']
     assert drs_obj['name'] == meta['filename']
     assert drs_obj['aliases'] == [meta['uuid']]
+    assert drs_obj['access_methods'][0]['access_id'] == 'https'
 
 
 def test_processed_file_drs_view(testapp, mcool_file_json):
