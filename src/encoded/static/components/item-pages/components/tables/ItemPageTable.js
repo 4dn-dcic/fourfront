@@ -273,10 +273,11 @@ export class ItemPageTable extends React.Component {
             <div className="item-page-table-container clearfix">
                 <HeadersRow mounted columnDefinitions={columnDefinitions} renderDetailPane={renderDetailPane} width={useWidth} />
                 { _.map(results, (result, rowIndex) => {
-                    var atId = object.atIdFromObject(result);
+                    const atId = object.atIdFromObject(result);
+                    const key = `row-${rowIndex}-${atId || ''}`;
                     return (
                         <ItemPageTableRow {...this.props} {...commonRowProps}
-                            key={atId || rowIndex} result={result} rowNumber={rowIndex} defaultOpen={
+                            key={key} result={result} rowNumber={rowIndex} defaultOpen={
                                 (Array.isArray(defaultOpenIndices) && _.contains(defaultOpenIndices, rowIndex))
                                 || (atId && Array.isArray(defaultOpenIds) && _.contains(defaultOpenIds, atId))
                             } />

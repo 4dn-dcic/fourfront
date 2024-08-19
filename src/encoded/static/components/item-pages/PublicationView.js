@@ -358,7 +358,7 @@ const PublicationViewTitle = React.memo(function PublicationViewTitle(props){
 
 function isReplicateExperimentSet(expSet) {
     if (!expSet) { return false; }
-    
+
     const { experimentset_type } = expSet;
     return object.itemUtil.atId(expSet) && schemaTransforms.getBaseItemType(expSet) === 'ExperimentSet' && experimentset_type === 'replicate';
 }
