@@ -92,6 +92,7 @@ export class WFRStepDetailBody extends React.PureComponent {
         this.state = {
             "wfr" : (this.props.step && this.props.step['@id']) || null
         };
+        this.nodeRef = React.createRef();
     }
 
     componentDidMount(){
@@ -175,7 +176,7 @@ export class WFRStepDetailBody extends React.PureComponent {
                 <hr/>
 
 
-                <Fade in={!!(wfr)} key="wfr-detail-container">
+                <Fade in={!!(wfr)} key="wfr-detail-container" nodeRef={this.nodeRef}>
                     <div>
                         <h3 className="tab-section-title">
                             <span>Details of Run</span>
