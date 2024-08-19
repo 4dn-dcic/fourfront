@@ -71,7 +71,20 @@ export function extendFile(file, experiment, experimentSet, source){
 
 /** Uses different defaultProps.canDownloadStatuses, specific to project */
 export function FileDownloadButtonAuto(props){
-    const { result, context = null, session = false } = props;
+    const {
+        result,
+        context = null,
+        session = false,
+        canDownloadStatuses = [
+            'uploaded',
+            'pre-release',
+            'released',
+            'replaced',
+            'submission in progress',
+            'released to project',
+            'archived'
+        ]
+    } = props;
     const onClick = useMemo(function(){
         return function(evt){
             if (session){
@@ -82,16 +95,5 @@ export function FileDownloadButtonAuto(props){
         };
     }, [result, context, session]);
     const tooltip = !session ? 'Log in or create an account to download this file' : null;
-    return <FileDownloadButtonAutoOriginal {...props} onClick={onClick} tooltip={tooltip} />;
+    return <FileDownloadButtonAutoOriginal {..._.omit(props, 'canDownloadStatuses')} canDownloadStatuses={canDownloadStatuses} onClick={onClick} tooltip={tooltip} />;
 }
-FileDownloadButtonAuto.defaultProps = {
-    'canDownloadStatuses' : [
-        'uploaded',
-        'pre-release',
-        'released',
-        'replaced',
-        'submission in progress',
-        'released to project',
-        'archived'
-    ]
-};
