@@ -1142,7 +1142,7 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
         'width' : PropTypes.number.isRequired,
         'mounted' : PropTypes.bool.isRequired,
         'renderRightPanel' : PropTypes.func,
-        'windowWidth' : PropTypes.number.isRequired,
+        'windowWidth' : PropTypes.number,
         'higlassItem' : PropTypes.object,
         'minOpenHeight' : PropTypes.number,
         'maxOpenHeight' : PropTypes.number,
