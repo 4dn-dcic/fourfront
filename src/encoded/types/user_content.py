@@ -1,5 +1,6 @@
 """Abstract collection for UserContent and sub-classes of StaticSection, HiglassViewConfig, etc."""
 
+from urllib.parse import urlparse
 from uuid import uuid4
 from snovault import (
     abstract_collection,
@@ -147,7 +148,7 @@ class StaticSection(UserContent):
             return None
 
         file_type = self.filetype(request, body, file, options)
-        convert_ext_links = request and request.domain and options and options.get('convert_ext_links', True)
+        convert_links = request and request.domain and options and options.get('convert_ext_links', True)
 
         if file_type == 'rst':
             # html header: range <h1> to <h6>, default <h2>
@@ -157,21 +158,18 @@ class StaticSection(UserContent):
                 'initial_header_level': initial_header_level
             }
             parts = publish_parts(content, writer_name='html', settings_overrides=settings_overrides)
-            
-            output = post_process_rst_html(parts["html_body"])
-            if convert_ext_links:
-                return convert_external_links(output, request.domain)
-            return output
-        elif file_type == 'html':
-            if convert_ext_links:
-                return convert_external_links(content, request.domain)
+            rst_html = parts["html_body"]
+            # post-process generated html to match portal requirements
+            return post_process_rst_html(rst_html, convert_links, request.domain)
         elif file_type == 'md':
-            # remove new line character
-            output = convert_markdown_to_html(content)
-            # output = output.replace('\n', '')
-            if output and convert_ext_links:
-                return convert_external_links(output, request.domain)
-            return output
+            # convert markdown to html including tables
+            md_html = markdown.markdown(content, extensions=['tables', 'fenced_code'])
+            # post-process generated html to match portal requirements
+            return post_process_markdown_html(md_html, convert_links, request.domain)
+        elif file_type == 'html':
+            if convert_links:
+                return convert_html_links(content, request.domain)
+
         return None
 
     @calculated_property(schema={
@@ -357,17 +355,18 @@ def get_remote_file_contents(uri):
     return resp.text
 
 
-def convert_markdown_to_html(markdown_text, custom_wrapper = 'div'):
-    # convert markdown to html including tables
-    html_output = markdown.markdown(markdown_text, extensions=['tables', 'fenced_code'])
+def post_process_markdown_html(markdown_html, convert_links, ref_domain, custom_wrapper = 'div'):
+    # default
+    output = markdown_html
 
     # check content has any header, if yes wrap it with custom tag
+    # TODO: replace Regex pattern with BeautifulSoup methods
     header_pattern = re.compile(r'<h[1-6]>.*?<\/h[1-6]>', re.IGNORECASE)
-    if header_pattern.search(html_output):
-        html_output = f'<{custom_wrapper} class="markdown-container">{html_output}</{custom_wrapper}>'
+    if header_pattern.search(output):
+        output = f'<{custom_wrapper} class="markdown-container">{output}</{custom_wrapper}>'
 
      # Parse the HTML content with BeautifulSoup
-    soup = BeautifulSoup(html_output, 'html.parser')
+    soup = BeautifulSoup(output, 'html.parser')
 
     # Find all <pre><code>XYZ</code></pre> patterns and convert to <pre>XYZ</pre>
     for code_tag in soup.find_all('code'):
@@ -380,32 +379,17 @@ def convert_markdown_to_html(markdown_text, custom_wrapper = 'div'):
             # Remove the <code> tag
             code_tag.decompose()
 
-    html_output = str(soup)
+    if convert_links:
+        convert_soup_links(soup, ref_domain)
 
-    return html_output
+    output = str(soup)
 
-
-def convert_external_links(content, reference_domain):
-    """
-    Seeks hyperlinks within string content and adds 'target="_blank"' and 'rel="noopener noreferrer"' attributes for external links.
-    """
-    reference_domain_lower = reference_domain.casefold()
-    matches = re.findall(r"(<a[^>]*href=[\"\']https?://(?P<domain>[\w\-\.]+)(?:\S*)[\"\'][^>]*>[^<]+</a>)", content, re.DOTALL)
-    
-    for match in matches:
-        match_domain_lower = match[1].casefold()
-        # compares the found links with domain (we have a special condition to check staging/data indexing)
-        # todo: replace hard-coded domain names with env. variables etc.
-        if (reference_domain_lower != match_domain_lower) and not (reference_domain_lower == 'staging.4dnucleome.org' and match_domain_lower == 'data.4dnucleome.org'):
-            external_link = re.sub(r'<a(?P<in_a>[^>]+)>(?P<in_link>[^<]+)</a>',r'<a\g<in_a> target="_blank" rel="noopener noreferrer">\g<in_link></a>', match[0])
-            content = content.replace(match[0], external_link)
-    
-    return content
+    return output
 
 
-def post_process_rst_html(raw_html):
+def post_process_rst_html(rst_html, convert_links, ref_domain):
     # Parse the HTML content with BeautifulSoup
-    soup = BeautifulSoup(raw_html, 'html.parser')
+    soup = BeautifulSoup(rst_html, 'html.parser')
 
     # rename default wrapper class
     document_div = soup.find('div', class_='document')
@@ -425,6 +409,9 @@ def post_process_rst_html(raw_html):
             code_tag.string = tt_tag.string
         tt_tag.replace_with(code_tag)
 
+    if convert_links:
+        convert_soup_links(soup, ref_domain)
+
     output = str(soup)
     
     # Find all <pre> tags with their attributes and content
@@ -438,3 +425,32 @@ def post_process_rst_html(raw_html):
         output = output.replace(f'<pre>{pre_match}</pre>', f'<pre>{pre_match}</pre>')
 
     return output
+
+
+def convert_html_links(html, reference_domain):
+    """
+    Seeks hyperlinks within string content and adds 'target="_blank"' and 'rel="noopener noreferrer"' attributes for external links.
+    """
+    # Parse the HTML content with BeautifulSoup
+    soup = BeautifulSoup(html, 'html.parser')
+    convert_soup_links(soup, reference_domain)
+
+    return str(soup)
+
+def convert_soup_links(soup, reference_domain):
+    """
+    Seeks hyperlinks within string content and adds 'target="_blank"' and 'rel="noopener noreferrer"' attributes for external links.
+    """
+    # Normalize the reference domain to lowercase
+    reference_domain_lower = reference_domain.casefold()
+
+    # Find all <a> tags
+    for a_tag in soup.find_all('a', href=True):
+        href = a_tag['href']
+        parsed_url = urlparse(href)
+
+        # Check if the link is an external link
+        if parsed_url.netloc and reference_domain_lower not in parsed_url.netloc.casefold():
+            # Add target="_blank" and rel="noopener noreferrer" attributes
+            a_tag['target'] = '_blank'
+            a_tag['rel'] = 'noopener noreferrer'
