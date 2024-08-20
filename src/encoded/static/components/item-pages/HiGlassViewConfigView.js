@@ -776,7 +776,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                     <i className={"icon icon-fw icon-" + (releaseLoading ? 'circle-notch fas icon-spin' : 'id-badge far')}/>&nbsp; Manage
                 </React.Fragment>
             ),
-            'pullRight'     : true
+            'align'         : 'end'
         };
 
         return (
