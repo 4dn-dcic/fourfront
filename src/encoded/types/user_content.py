@@ -364,7 +364,23 @@ def convert_markdown_to_html(markdown_text, custom_wrapper = 'div'):
     # check content has any header, if yes wrap it with custom tag
     header_pattern = re.compile(r'<h[1-6]>.*?<\/h[1-6]>', re.IGNORECASE)
     if header_pattern.search(html_output):
-        html_output = f'<{custom_wrapper}>{html_output}</{custom_wrapper}>'
+        html_output = f'<{custom_wrapper} class="markdown-container">{html_output}</{custom_wrapper}>'
+
+     # Parse the HTML content with BeautifulSoup
+    soup = BeautifulSoup(html_output, 'html.parser')
+
+    # Find all <pre><code>XYZ</code></pre> patterns and convert to <pre>XYZ</pre>
+    for code_tag in soup.find_all('code'):
+        # Find the nearest parent <pre> tag
+        pre_tag = code_tag.find_parent('pre')
+    
+        if pre_tag:
+            # Append the content of the <code> tag to the <pre> tag
+            pre_tag.append(code_tag.string)      
+            # Remove the <code> tag
+            code_tag.decompose()
+
+    html_output = str(soup)
 
     return html_output
 

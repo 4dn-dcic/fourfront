@@ -870,6 +870,7 @@
 	// since rst-to-html non-customizable,
 	// tweak some css rules to display h3/h4 like h4/h5 respectively
 	// use the same styles for raw HTML
+	.markdown-container,
 	.rst-container,
 	.html-container {
 		h3 {
