@@ -357,13 +357,7 @@ def get_remote_file_contents(uri):
 
 def post_process_markdown_html(markdown_html, convert_links, ref_domain, custom_wrapper = 'div'):
     # default
-    output = markdown_html
-
-    # check content has any header, if yes wrap it with custom tag
-    # TODO: replace Regex pattern with BeautifulSoup methods
-    header_pattern = re.compile(r'<h[1-6]>.*?<\/h[1-6]>', re.IGNORECASE)
-    if header_pattern.search(output):
-        output = f'<{custom_wrapper} class="markdown-container">{output}</{custom_wrapper}>'
+    output = f'<{custom_wrapper} class="markdown-container">{markdown_html}</{custom_wrapper}>'
 
      # Parse the HTML content with BeautifulSoup
     soup = BeautifulSoup(output, 'html.parser')
