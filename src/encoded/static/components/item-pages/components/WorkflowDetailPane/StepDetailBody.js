@@ -119,7 +119,15 @@ const analysisStepTypesExist = memoize(function(step){
 
 
 
-export const WorkflowStepTitleBox = React.memo(function WorkflowStepTitleBox({ step, node, isFullRow, label }){
+export const WorkflowStepTitleBox = React.memo(function WorkflowStepTitleBox(props){
+    const {
+        step,
+        node,
+        isFullRow = function (step) {
+            return !analysisStepTypesExist(step);
+        },
+        label = "Step Name"
+    } = props;
     const shouldBeFullRow = (typeof isFullRow === 'function' && isFullRow(step)) || (typeof isFullRow === 'boolean' && isFullRow) || false;
     const titleString     = step.display_title || step.name || node.name;
     const stepHref        = object.atIdFromObject(step) || null;
@@ -135,12 +143,6 @@ export const WorkflowStepTitleBox = React.memo(function WorkflowStepTitleBox({ s
         </div>
     );
 });
-WorkflowStepTitleBox.defaultProps = {
-    'isFullRow' : function(step){
-        return !analysisStepTypesExist(step);
-    },
-    'label' : "Step Name"
-};
 
 
 export const StepDetailBody = React.memo(function StepDetailBody({ step, node, minHeight }){

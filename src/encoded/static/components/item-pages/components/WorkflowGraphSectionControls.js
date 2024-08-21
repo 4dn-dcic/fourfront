@@ -212,5 +212,5 @@ RowSpacingTypeDropdown.propTypes = {
     'onSelect' : PropTypes.func.isRequired,
     'currentKey' : PropTypes.oneOf([ 'compact', 'wide', 'stacked' ]),
     'id' : PropTypes.string,
-    'titleMap' : PropTypes.objectOf(PropTypes.string).isRequired
+    'titleMap' : PropTypes.objectOf(PropTypes.string)
 };
