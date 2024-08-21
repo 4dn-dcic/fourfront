@@ -29,7 +29,7 @@ export class ExperimentSetDetailPane extends React.PureComponent {
         'containerWidth' : PropTypes.number,
         'paddingWidth' : PropTypes.number,
         'windowWidth' : PropTypes.number,
-        'href' : PropTypes.string.isRequired,
+        'href' : PropTypes.string,
         'minimumWidth' : PropTypes.number,
         'initialStateCache' : PropTypes.object,
         'updateFileSectionStateCache' : PropTypes.func,
