@@ -89,7 +89,7 @@ export class BasicUserContentBody extends React.PureComponent {
 
 
 export const EmbeddedHiglassActions = React.memo(function EmbeddedHiglassActions(props){
-    const { context, parentComponentType, showDescription, constrainDescription } = props;
+    const { context, parentComponentType = BasicUserContentBody, showDescription = true, constrainDescription = false } = props;
     let cls = "btn btn-outline-dark pull-right extra-info-higlass-btn";
 
     if (parentComponentType === BasicUserContentBody) {
@@ -112,11 +112,6 @@ export const EmbeddedHiglassActions = React.memo(function EmbeddedHiglassActions
         </div>
     );
 });
-EmbeddedHiglassActions.defaultProps = {
-    'parentComponentType' : BasicUserContentBody,
-    'showDescription' : true,
-    'constrainDescription' : false
-};
 
 
 export class ExpandableStaticHeader extends OverviewHeadingContainer {

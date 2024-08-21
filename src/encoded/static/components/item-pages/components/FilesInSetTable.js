@@ -54,7 +54,7 @@ const SubmitterLink = React.memo(function SubmitterLink({ user, labName, showLab
  * @prop {function} onMouseLeave - Callback for cursor leaving icon.
  */
 const LabIcon = React.memo(function LabIcon(props){
-    const { lab, onMouseEnter, onMouseLeave } = props;
+    const { lab, onMouseEnter = null, onMouseLeave = null } = props;
     const atId = lab && object.atIdFromObject(lab);
     if (!atId){
         logger.error("We need lab with @id.");
@@ -71,10 +71,6 @@ const LabIcon = React.memo(function LabIcon(props){
         </a>
     );
 });
-LabIcon.defaultProps = {
-    onMouseEnter : null,
-    onMouseLeave : null
-};
 
 /**
  * Renders a div element with '.row' Bootstrap class, containing details about a file.

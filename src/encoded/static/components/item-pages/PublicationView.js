@@ -87,7 +87,7 @@ class PublicationSummary extends React.PureComponent {
                         <p>
                             { _.map(authors, function(author, i){
                                 return (
-                                    <React.Fragment>
+                                    <React.Fragment key={'author-' + i}>
                                         <span className="text-nowrap">
                                             { author }
                                         </span>

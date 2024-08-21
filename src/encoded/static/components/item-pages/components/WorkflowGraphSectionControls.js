@@ -184,7 +184,15 @@ export class WorkflowGraphSectionControls extends React.PureComponent {
     }
 }
 
-const RowSpacingTypeDropdown = React.memo(function RowSpacingTypeDropdown({ currentKey, id, onSelect, titleMap }){
+const RowSpacingTypeDropdown = React.memo(function RowSpacingTypeDropdown(props){
+    const {
+        currentKey, id, onSelect,
+        titleMap = {
+            'stacked': 'Stack Nodes',
+            'compact': 'Center Nodes',
+            'wide': 'Spread Nodes'
+        }
+    } = props;
     const menuItems = _.map(_.keys(titleMap), function(k){
         return (
             <DropdownItem key={k} eventKey={k} active={currentKey === k}>
@@ -205,11 +213,4 @@ RowSpacingTypeDropdown.propTypes = {
     'currentKey' : PropTypes.oneOf([ 'compact', 'wide', 'stacked' ]),
     'id' : PropTypes.string,
     'titleMap' : PropTypes.objectOf(PropTypes.string).isRequired
-};
-RowSpacingTypeDropdown.defaultProps = {
-    'titleMap' : {
-        'stacked' : 'Stack Nodes',
-        'compact' : 'Center Nodes',
-        'wide' : 'Spread Nodes'
-    }
 };

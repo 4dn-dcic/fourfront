@@ -9,7 +9,7 @@ import { requestAnimationFrame as raf } from '@hms-dbmi-bgm/shared-portal-compon
 
 
 export const DraggableVerticalBorder = React.memo(function DraggableVerticalBorder(props){
-    const { xOffset, height, left, handleHeight } = props;
+    const { xOffset, height, left, handleHeight = 24 } = props;
     // workaround for "findDOMNode is deprecated in StrictMode" error: https://stackoverflow.com/a/63603903
     const nodeRef = useRef(null);
     return (
@@ -22,9 +22,6 @@ export const DraggableVerticalBorder = React.memo(function DraggableVerticalBord
         </Draggable>
     );
 });
-DraggableVerticalBorder.defaultProps = {
-    'handleHeight' : 24
-};
 
 
 /** This is pretty ugly. @todo refactor, reimplement, something... */
