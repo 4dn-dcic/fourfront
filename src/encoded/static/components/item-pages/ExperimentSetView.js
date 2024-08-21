@@ -336,9 +336,10 @@ class ProcessedFilesStackedTableSection extends React.PureComponent {
                 const nameTitle = (exp && typeof exp.display_title === 'string' && exp.display_title.replace(' - ' + exp.accession, '')) || exp.accession;
                 const experimentAtId = object.atIdFromObject(exp);
                 const replicateNumbersExists = exp && exp.bio_rep_no && exp.tec_rep_no;
+                const key = `${experimentAtId || 'exp-set'}-${replicateNumbersExists ? (exp.bio_rep_no + '-' + exp.tec_rep_no) : 'norep' }`;
 
                 return (
-                    <StackedBlockName className={replicateNumbersExists ? "double-line" : ""}>
+                    <StackedBlockName className={replicateNumbersExists ? "double-line" : ""} key={key}>
                         {replicateNumbersExists ? <div>Bio Rep <b>{exp.bio_rep_no}</b>, Tec Rep <b>{exp.tec_rep_no}</b></div> : <div />}
                         {experimentAtId ? <a href={experimentAtId} className="name-title text-500">{nameTitle}</a> : <div className="name-title">{nameTitle}</div>}
                     </StackedBlockName>
@@ -399,8 +400,8 @@ const ExperimentsWithoutFilesStackedTable = React.memo(function ExperimentsWitho
 
     const tableProps = { 'columnHeaders': ProcessedFilesStackedTableSection.expsNotAssociatedWithFileColumnHeaders };
     const expsWithReplicateExps = expFxn.combineWithReplicateNumbers(context.replicate_exps || [], expsNotAssociatedWithAnyFiles);
-    const experimentBlock = expsWithReplicateExps.map((exp) => {
-        const content = _.map(ProcessedFilesStackedTableSection.expsNotAssociatedWithFileColumnHeaders, function (col, idx) {
+    const experimentBlock = expsWithReplicateExps.map((exp, expIdx) => {
+        const content = _.map(ProcessedFilesStackedTableSection.expsNotAssociatedWithFileColumnHeaders, function (col, colIdx) {
             if (col.render && typeof col.render === 'function') { return col.render(exp); }
             else {
                 /**
@@ -410,15 +411,15 @@ const ExperimentsWithoutFilesStackedTable = React.memo(function ExperimentsWitho
                  * some props from parent element into 'div' element assuming it is a React component, in case it is not.
                  */
                 return (
-                    <React.Fragment>
-                        <div className={"col-" + col.columnClass + " item detail-col" + idx} style={{ flex: '1 0 ' + col.initialWidth + 'px' }}>{'-'}</div>
+                    <React.Fragment key={'no-renderer-' + colIdx}>
+                        <div className={"col-" + col.columnClass + " item detail-col" + colIdx} style={{ flex: '1 0 ' + col.initialWidth + 'px' }}>{'-'}</div>
                     </React.Fragment>
                 );
             }
         });
         return (
             <StackedBlock columnClass="experiment" hideNameOnHover={false}
-                key={exp.accession} label={
+                key={exp.accession + '-' + expIdx} label={
                     <StackedBlockNameLabel title={'Experiment'}
                         accession={exp.accession} subtitleVisible />
                 }>
