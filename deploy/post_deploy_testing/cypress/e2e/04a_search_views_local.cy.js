@@ -17,7 +17,7 @@ describe('Deployment/CI Search View Tests', function () {
         });
     }
 
-    context.skip('/search/?type=Item', function () {
+    context('/search/?type=Item', function () {
 
         before(function(){ // beforeAll
             cy.visit('/search/');
@@ -33,7 +33,7 @@ describe('Deployment/CI Search View Tests', function () {
 
     });
 
-    context.skip('/search/?type=Page', function(){
+    context('/search/?type=Page', function(){
 
         before(function(){ // beforeAll
             cy.visit('/pages'); // We should get redirected to ?type=Page
@@ -64,7 +64,7 @@ describe('Deployment/CI Search View Tests', function () {
 
     });
 
-    context.skip('Publications, Files', function(){
+    context('Publications, Files', function(){
         // These are similarly implemently to the BrowseView, we should have specific tests for these
 
         it('/publications/ should redirect to /search/?type=Publication', function(){
@@ -101,7 +101,7 @@ describe('Deployment/CI Search View Tests', function () {
         });
     });
 
-    context.skip('Microscope Configurations Collections', function(){
+    context('Microscope Configurations Collections', function(){
 
         let microscopeDescription;
         const standType = "Inverted";
