@@ -939,7 +939,7 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
                         {_.map(visibleMatches, function (m, index) {
                             const tooltip = m.Name && m.Name.length > tooltipHeaderLimit ? m.Name : null;
                             return (
-                                <div className={columClassName + " summary-title-column text-truncate"} data-tip={tooltip}>
+                                <div className={columClassName + " summary-title-column text-truncate"} data-tip={tooltip} key={m.ID || m.name}>
                                     {m.Name}
                                 </div>
                             );
@@ -1052,23 +1052,23 @@ const CollapsibleSubCategory = React.memo(function CollapsibleSubCategory(props)
 
     const itemRows = _.map(subCategoryProperties, function ([field, item]) {
         let hasValidColumn = false;
-        const itemCols = _.map(matches, function (match) {
+        const itemCols = _.map(matches, function (match, idx) {
             if (typeof match[field] === 'undefined' || match[field] === null) {
                 return (<div className={columClassName + " summary-item-column"}>&nbsp;</div>);
             }
             hasValidColumn = true;
             const tooltip = typeof match[field] === 'string' && match[field].length >= tooltipLimit ? match[field] : null;
             return (
-                <div className={columClassName + " summary-item-column"}>
+                <div className={columClassName + " summary-item-column"} key={match.ID || match.name || idx}>
                     <div className="text-truncate" data-tip={tooltip}>{match[field].toString()}</div>
                 </div>
             );
         });
 
         return hasValidColumn ? (
-            <div className="row summary-item-row">
+            <div className="row summary-item-row" key={field}>
                 <div className="col-4 col-lg-3 col-xl-3 summary-item-row-header">
-                    <object.TooltipInfoIconContainer title={field} tooltip={item.description} className="text-truncate" />
+                    <object.TooltipInfoIconContainer title={field} tooltip={item.description} className="text-truncate" key={'tooltip-' + field} />
                 </div>
                 {itemCols}
             </div>
