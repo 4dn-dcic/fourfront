@@ -166,9 +166,8 @@ class StaticSection(UserContent):
             md_html = markdown.markdown(content, extensions=['tables', 'fenced_code'])
             # post-process generated html to match portal requirements
             return post_process_markdown_html(md_html, convert_links, request.domain)
-        elif file_type == 'html':
-            if convert_links:
-                return convert_html_links(content, request.domain)
+        elif file_type == 'jsx' or file_type == 'html':
+            return post_process_plain_html(content, convert_links, request.domain, file_type)
 
         return None
 
@@ -418,6 +417,38 @@ def post_process_rst_html(rst_html, convert_links, ref_domain):
     for pre_match in pre_matches:
         output = output.replace(f'<pre>{pre_match}</pre>', f'<pre>{pre_match}</pre>')
 
+    return output
+
+def post_process_plain_html(plain_html, convert_links, ref_domain, file_type = 'html'):
+    # shortcut for jsx, lacks external link conversion
+    if file_type == 'jsx':
+        return '<div class="html-container">' + plain_html + '</div>'
+    
+    # Parse the content with BeautifulSoup
+    soup = BeautifulSoup(plain_html, 'html.parser')
+
+    # Check if the outermost element is a div
+    if soup.contents and soup.contents[0].name == 'div':
+        # If the outermost element is a div, add the "html-container" class
+        root_div = soup.contents[0]
+        root_div['class'] = root_div.get('class', []) + ['html-container']
+    else:
+        # If there is no outer div, create a new wrapping div with "html-container" class
+        new_wrapper = soup.new_tag("div", **{"class": "html-container"})
+    
+        # Add all content to the new div
+        new_wrapper.extend(soup.contents)
+    
+        # Clear the existing content and add the new wrapper
+        soup.clear()
+        soup.append(new_wrapper)
+
+    if convert_links:
+        convert_soup_links(soup, ref_domain)
+
+    # Convert the soup object to a string
+    output = str(soup)
+    
     return output
 
 
