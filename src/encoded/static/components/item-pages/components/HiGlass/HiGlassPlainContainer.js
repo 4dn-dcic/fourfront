@@ -248,6 +248,27 @@ export function scaleHiGlassViewConfig(originalViewConf, targetHeight){
     return viewConf;
 }
 
+/**
+ * Attention! this function works if only process.env.NODE_ENV is set
+ * @todo remove this function when HiGlass works correctly under <StrictMode> in React 18
+ */
+const isDevelopmentEnv = memoize(function (){
+    try {
+        return (process.env.NODE_ENV === 'development') || (process.env.NODE_ENV === 'quick') || false;
+    } catch {
+        return false;
+    }
+});
+/**
+ * @todo remove this function when HiGlass works correctly under <StrictMode> in React 18
+ */
+const getReactVersion = memoize(function () {
+    try {
+        return parseInt((React.version || '-1').split('.')[0]);
+    } catch {
+        return -1;
+    }
+});
 
 const HiGlassPlainContainerBody = React.forwardRef(function HiGlassPlainContainerBody(props, ref){
     const { viewConfig, options, hasRuntimeError, disabled, isValidating, mounted, higlassInitialized, width, height, mountCount, placeholder, style, className, packageLockJson } = props;
@@ -272,6 +293,7 @@ const HiGlassPlainContainerBody = React.forwardRef(function HiGlassPlainContaine
         hiGlassInstance = (
             <div className="text-center" key={outerKey} style={placeholderStyle}>
                 <h4 className="text-400">Runtime Error</h4>
+                {isDevelopmentEnv() && getReactVersion() >= 18 ? <div>HiGlass may not render appropriately under StrictMode in React 18 and later.</div> : null}
             </div>
         );
     } else {
