@@ -293,7 +293,7 @@ const HiGlassPlainContainerBody = React.forwardRef(function HiGlassPlainContaine
         hiGlassInstance = (
             <div className="text-center" key={outerKey} style={placeholderStyle}>
                 <h4 className="text-400">Runtime Error</h4>
-                {isDevelopmentEnv() && getReactVersion() >= 18 ? <div>HiGlass may not render appropriately under StrictMode in React 18 and later.</div> : null}
+                {isDevelopmentEnv() && getReactVersion() >= 18 ? <div>HiGlass may not render correctly under StrictMode in React 18 and later.</div> : null}
             </div>
         );
     } else {
