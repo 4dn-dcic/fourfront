@@ -141,7 +141,7 @@ SearchTableTitle.propTypes = {
     externalSearchLinkVisible: PropTypes.bool,
     title: PropTypes.string,
     titleSuffix: PropTypes.string,
-    headerElement: PropTypes.oneOf(['h1', 'h2', 'h3', 'h4', 'h5', 'h6']).isRequired,
+    headerElement: PropTypes.oneOf(['h1', 'h2', 'h3', 'h4', 'h5', 'h6']),
 };
 
 /** @deprecated */
@@ -273,10 +273,11 @@ export class ItemPageTable extends React.Component {
             <div className="item-page-table-container clearfix">
                 <HeadersRow mounted columnDefinitions={columnDefinitions} renderDetailPane={renderDetailPane} width={useWidth} />
                 { _.map(results, (result, rowIndex) => {
-                    var atId = object.atIdFromObject(result);
+                    const atId = object.atIdFromObject(result);
+                    const key = `row-${rowIndex}-${atId || ''}`;
                     return (
                         <ItemPageTableRow {...this.props} {...commonRowProps}
-                            key={atId || rowIndex} result={result} rowNumber={rowIndex} defaultOpen={
+                            key={key} result={result} rowNumber={rowIndex} defaultOpen={
                                 (Array.isArray(defaultOpenIndices) && _.contains(defaultOpenIndices, rowIndex))
                                 || (atId && Array.isArray(defaultOpenIds) && _.contains(defaultOpenIds, atId))
                             } />
@@ -360,7 +361,7 @@ export class ItemPageTableIndividualUrlLoader extends React.PureComponent {
     static propTypes = {
         'children' : PropTypes.element.isRequired,
         'itemUrls' : PropTypes.arrayOf(PropTypes.string).isRequired,
-        'windowWidth': PropTypes.number.isRequired,
+        'windowWidth': PropTypes.number,
         'maxToLoad' : PropTypes.number.isRequired
     };
 

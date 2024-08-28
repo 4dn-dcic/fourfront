@@ -87,7 +87,7 @@ class PublicationSummary extends React.PureComponent {
                         <p>
                             { _.map(authors, function(author, i){
                                 return (
-                                    <React.Fragment>
+                                    <React.Fragment key={'author-' + i}>
                                         <span className="text-nowrap">
                                             { author }
                                         </span>
@@ -358,7 +358,7 @@ const PublicationViewTitle = React.memo(function PublicationViewTitle(props){
 
 function isReplicateExperimentSet(expSet) {
     if (!expSet) { return false; }
-    
+
     const { experimentset_type } = expSet;
     return object.itemUtil.atId(expSet) && schemaTransforms.getBaseItemType(expSet) === 'ExperimentSet' && experimentset_type === 'replicate';
 }

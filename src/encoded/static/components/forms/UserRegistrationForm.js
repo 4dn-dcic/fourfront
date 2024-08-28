@@ -354,7 +354,7 @@ class LookupLabField extends React.PureComponent {
     static propTypes = {
         'onSelect' : PropTypes.func.isRequired,
         'onClear' : PropTypes.func.isRequired,
-        'loading' : PropTypes.bool.isRequired
+        'loading' : PropTypes.bool
     };
 
     constructor(props){

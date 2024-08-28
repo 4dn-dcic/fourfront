@@ -333,7 +333,7 @@ export class MicroMetaTabView extends React.PureComponent {
                     <i className={"icon icon-fw icon-" + (releaseLoading ? 'circle-notch fas icon-spin' : 'id-badge far')}/>&nbsp; Manage
                 </React.Fragment>
             ),
-            'pullRight'     : true
+            'align'         : 'end'
         };
 
         return (
@@ -562,6 +562,8 @@ export class MicroMetaTabView extends React.PureComponent {
         const width = isFullscreen ? windowWidth - 40 : layout.gridContainerWidth(windowWidth);
         const height = isFullscreen ? Math.max(800, windowHeight - 120) : Math.max(800, windowHeight / 2);
 
+        const microscopeConfig = JSON.parse(JSON.stringify(context.microscope || {}));
+
         return (
             <div className={"tabview-container-fullscreen-capable" + (isFullscreen ? ' full-screen-view' : ' overflow-hidden')}>
                 <h3 className="tab-section-title">
@@ -577,7 +579,7 @@ export class MicroMetaTabView extends React.PureComponent {
                 <div className="microscope-tab-view-contents">
                     <div className="micrometa-container-container" style={{ height }}>
                         <MicroMetaPlainContainer {..._.omit(this.props, 'context', 'microscope')}
-                            {...{ width, height, onSaveMicroscope: this.onSaveMicroscope, microscopeConfig: context.microscope }}
+                            {...{ width, height, onSaveMicroscope: this.onSaveMicroscope, microscopeConfig: microscopeConfig }}
                             ref={this.microMetaToolRef} zoomVisible={false} />
                     </div>
                 </div>
@@ -937,7 +939,7 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
                         {_.map(visibleMatches, function (m, index) {
                             const tooltip = m.Name && m.Name.length > tooltipHeaderLimit ? m.Name : null;
                             return (
-                                <div className={columClassName + " summary-title-column text-truncate"} data-tip={tooltip}>
+                                <div className={columClassName + " summary-title-column text-truncate"} data-tip={tooltip} key={m.ID || m.name}>
                                     {m.Name}
                                 </div>
                             );
@@ -1050,23 +1052,23 @@ const CollapsibleSubCategory = React.memo(function CollapsibleSubCategory(props)
 
     const itemRows = _.map(subCategoryProperties, function ([field, item]) {
         let hasValidColumn = false;
-        const itemCols = _.map(matches, function (match) {
+        const itemCols = _.map(matches, function (match, idx) {
             if (typeof match[field] === 'undefined' || match[field] === null) {
                 return (<div className={columClassName + " summary-item-column"}>&nbsp;</div>);
             }
             hasValidColumn = true;
             const tooltip = typeof match[field] === 'string' && match[field].length >= tooltipLimit ? match[field] : null;
             return (
-                <div className={columClassName + " summary-item-column"}>
+                <div className={columClassName + " summary-item-column"} key={match.ID || match.name || idx}>
                     <div className="text-truncate" data-tip={tooltip}>{match[field].toString()}</div>
                 </div>
             );
         });
 
         return hasValidColumn ? (
-            <div className="row summary-item-row">
+            <div className="row summary-item-row" key={field}>
                 <div className="col-4 col-lg-3 col-xl-3 summary-item-row-header">
-                    <object.TooltipInfoIconContainer title={field} tooltip={item.description} className="text-truncate" />
+                    <object.TooltipInfoIconContainer title={field} tooltip={item.description} className="text-truncate" key={'tooltip-' + field} />
                 </div>
                 {itemCols}
             </div>

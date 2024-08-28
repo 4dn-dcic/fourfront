@@ -21,7 +21,7 @@ import { generateAddressString, ContactPersonListItem } from './AttributionTabVi
  * @prop {string} [iconClass='book']- CSS class for icon to be displayed. Defaults to 'book'.
  */
 export const FormattedInfoWrapper =  React.memo(function FormattedInfoWrapper(props){
-    const { isSingleItem, className, singularTitle, iconClass, children, noDetails } = props;
+    const { isSingleItem = false, className = null, singularTitle = 'Publication', iconClass = 'book fas', children, noDetails = false } = props;
     const outerClassName = (
         "publications-block formatted-info-panel formatted-wrapper" +
         (isSingleItem ? ' single-item' : '') +
@@ -39,13 +39,6 @@ export const FormattedInfoWrapper =  React.memo(function FormattedInfoWrapper(pr
         </div>
     );
 });
-FormattedInfoWrapper.defaultProps = {
-    'isSingleItem'  : false,
-    'singularTitle' : 'Publication',
-    'iconClass'     : 'book fas',
-    'className'     : null,
-    'noDetails'     : false
-};
 
 
 export const WrappedListBlock = React.memo(function WrappedListBlock(props){

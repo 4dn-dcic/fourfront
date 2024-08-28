@@ -32,11 +32,11 @@ export default function FileSearchView (props){
 function FileTableWithSelectedFilesCheckboxes(props){
     const {
         // Common high-level props from Redux, or App.js, or App.js > BodyElement:
-        context, href, schemas, navigate: propNavigate,
+        context, href, schemas, navigate: propNavigate = navigate,
         windowHeight, windowWidth, registerWindowOnScrollHandler,
         toggleFullScreen, isFullscreen, session,
         selectedFiles, selectFile, unselectFile, resetSelectedFiles, selectedFilesUniqueCount,
-        columnExtensionMap,
+        columnExtensionMap = colExtensionMap4DN,
         currentAction
     } = props;
     const { total = 0 } = context;
@@ -113,10 +113,6 @@ FileTableWithSelectedFilesCheckboxes.propTypes = {
     'selectFile'                : PropTypes.func,
     'unselectFile'              : PropTypes.func,
     'selectedFiles'             : PropTypes.objectOf(PropTypes.object),
-};
-FileTableWithSelectedFilesCheckboxes.defaultProps = {
-    'navigate'  : navigate,
-    'columnExtensionMap' : colExtensionMap4DN
 };
 
 function AboveFacetList({ context, currentAction }){

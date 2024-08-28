@@ -6,6 +6,23 @@ fourfront
 Change Log
 ----------
 
+8.0.0
+=====
+
+* Upgrade: React v17 to v18
+* Upgrade: Redux v4 to v5 (there are breaking changes in store and dispatchers. SPC is updated to support both new and legacy usage)
+* Upgrade: HiGlass (React 18-compatible)
+* Upgrade: Vitessce (React 18-compatible)
+* Upgrade: MicroMeta App
+* Upgrade: auth0-Lock v11 to v12
+* Upgrade: gulp.js v4 to v5
+* Upgrade: react-workflow-viz (animation updates to eliminate findDOMNode errors)
+* Fix: User Content updates to fix markdown, jsx, and HTML static section rendering
+* Feature: Improve ExperimentSetDetailPane's raw/processed/supplementary file panels
+* Feature: Display react-workflow-viz version in /health
+* Upgrade: SlideCarousel and BasicCarousel updates upon nuka carousel's breaking changes
+
+
 7.10.1
 =====
 

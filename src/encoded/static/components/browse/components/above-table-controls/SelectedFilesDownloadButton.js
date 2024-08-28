@@ -71,7 +71,6 @@ export const BrowseViewSelectedFilesDownloadButton = React.memo(function BrowseV
 export class SelectedFilesDownloadButton extends React.PureComponent {
 
     static propTypes = {
-        'windowWidth' : PropTypes.number.isRequired,
         'id' : PropTypes.string,
         'selectedFiles' : PropTypes.object.isRequired,
         'filenamePrefix' : PropTypes.string.isRequired,
@@ -112,7 +111,7 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
     render(){
         const {
             selectedFiles, filenamePrefix, children, disabled,
-            windowWidth, context, analyticsAddFilesToCart, action, session,
+            context, analyticsAddFilesToCart, action, session,
             ...btnProps
         } = this.props;
         const { modalOpen } = this.state;
@@ -215,7 +214,7 @@ class SelectedFilesDownloadModal extends React.PureComponent {
             action += '&' + modifiedSearch;
         }
         return (
-            <Modal show className="batch-files-download-modal" onHide={onHide} bsSize="large">
+            <Modal show className="batch-files-download-modal" onHide={onHide} size="lg">
 
                 <Modal.Header closeButton>
                     <Modal.Title>

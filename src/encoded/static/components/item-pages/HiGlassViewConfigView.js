@@ -776,7 +776,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                     <i className={"icon icon-fw icon-" + (releaseLoading ? 'circle-notch fas icon-spin' : 'id-badge far')}/>&nbsp; Manage
                 </React.Fragment>
             ),
-            'pullRight'     : true
+            'align'         : 'end'
         };
 
         return (
@@ -1142,7 +1142,7 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
         'width' : PropTypes.number.isRequired,
         'mounted' : PropTypes.bool.isRequired,
         'renderRightPanel' : PropTypes.func,
-        'windowWidth' : PropTypes.number.isRequired,
+        'windowWidth' : PropTypes.number,
         'higlassItem' : PropTypes.object,
         'minOpenHeight' : PropTypes.number,
         'maxOpenHeight' : PropTypes.number,
@@ -1276,10 +1276,4 @@ ConfirmModal.propTypes = {
     'cancelButtonText': PropTypes.string,
     'confirmButtonVisible': PropTypes.bool,
     'cancelButtonVisible': PropTypes.bool
-};
-ConfirmModal.defaultProps = {
-    'confirmButtonText': 'OK',
-    'cancelButtonText': 'Cancel',
-    'confirmButtonVisible': true,
-    'cancelButtonVisible': true
 };

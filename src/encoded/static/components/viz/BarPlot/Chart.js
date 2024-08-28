@@ -379,7 +379,7 @@ export class Chart extends React.PureComponent {
             );
         }
 
-    }
+    };
 
     /**
      * Parses props.experiment_sets and/or props.filtered_experiment_sets, depending on props.showType, aggregates experiments into fields,
