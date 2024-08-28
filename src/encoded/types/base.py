@@ -59,6 +59,7 @@ static_content_embed_list = [
     "static_headers.*",            # Type: UserContent, may have differing properties
     "static_content.content.@type",
     "static_content.content.content",
+    "static_content.content.content_as_html",
     "static_content.content.name",
     "static_content.content.title",
     "static_content.content.status",
