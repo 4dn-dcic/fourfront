@@ -395,7 +395,10 @@
         "name" : "help.user-guide.data-organization.introduction",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b011",
         "file" : "/docs/source/introduction.rst",
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
+        "options": {
+            "convert_ext_links": true
+        }
     }, {
         "name" : "help.user-guide.data-organization.carousel-place-holder",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b012",
@@ -408,7 +411,10 @@
         "name" : "help.user-guide.data-organization.introduction2",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b013",
         "file" : "/docs/source/introduction2.rst",
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
+        "options": {
+            "convert_ext_links": true
+        }
     },
 
 
@@ -416,7 +422,10 @@
         "name" : "help.user-guide.account-creation.account_creation",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b014",
         "file" : "/docs/source/account_creation.rst",
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
+        "options": {
+            "convert_ext_links": true
+        }
     },
 
 
@@ -424,7 +433,10 @@
         "name" : "help.user-guide.getting-started.getting_started",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b015",
         "file" : "/docs/source/getting_started.md",
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
+        "options": {
+            "convert_ext_links": true
+        }
     },
 
 
@@ -432,7 +444,10 @@
         "name" : "help.submitter-guide.biosample-metadata.metadata",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b016",
         "file" : "/docs/source/biosample_metadata.md",
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
+        "options": {
+            "convert_ext_links": true
+        }
     },
 
 
@@ -440,7 +455,10 @@
         "name" : "help.submitter-guide.web-submission.web_submission",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b017",
         "file" : "/docs/source/web_submission.md",
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
+        "options": {
+            "convert_ext_links": true
+        }
     },
 
 
@@ -448,19 +466,28 @@
         "name" : "help.submitter-guide.spreadsheet.excel_submission",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b018",
         "file" : "/docs/source/excel_submission.md",
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
+        "options": {
+            "convert_ext_links": true
+        }
     },
     {
         "name" : "help.submitter-guide.spreadsheet.schema_info",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b019",
         "file" : "/docs/source/schema_info.md",
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
+        "options": {
+            "convert_ext_links": true
+        }
     },
     {
         "name" : "help.submitter-guide.rest-api.rest_api_submission",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b020",
         "file" : "/docs/source/rest_api_submission.md",
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
+        "options": {
+            "convert_ext_links": true
+        }
     },
 
 
@@ -471,7 +498,8 @@
         "title" : "in situ Hi-C / Dilution Hi-C",
         "body" : "Lorem ipsum dolor amet offal plaid readymade unicorn kombucha skateboard. Direct trade pop-up salvia organic. Truffaut lomo food truck man bun gastropub hella portland seitan post-ironic quinoa swag. Franzen flexitarian pour-over fam ennui. Freegan fanny pack tumeric vaporware tacos gluten-free quinoa +1 activated charcoal portland pok pok chartreuse actually. Church-key unicorn brooklyn migas paleo wolf.\n\nTaxidermy celiac scenester sustainable disrupt vaporware. Authentic chicharrones direct trade narwhal VHS iceland. Messenger bag intelligentsia seitan quinoa, hashtag YOLO cornhole VHS bitters. Gochujang sriracha messenger bag, mlkshk lyft authentic sartorial vinyl flexitarian godard green juice vice fam roof party jianbing.",
         "options" : {
-            "filetype" : "md"
+            "filetype" : "md",
+            "convert_ext_links": true
         },
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
@@ -481,7 +509,8 @@
         "title" : "DNase Hi-C / Micro-C",
         "body" : "Lorem ipsum dolor amet offal plaid readymade unicorn kombucha skateboard. Direct trade pop-up salvia organic. Truffaut lomo food truck man bun gastropub hella portland seitan post-ironic quinoa swag. Franzen flexitarian pour-over fam ennui. Freegan fanny pack tumeric vaporware tacos gluten-free quinoa +1 activated charcoal portland pok pok chartreuse actually. Church-key unicorn brooklyn migas paleo wolf.\n\nTaxidermy celiac scenester sustainable disrupt vaporware. Authentic chicharrones direct trade narwhal VHS iceland. Messenger bag intelligentsia seitan quinoa, hashtag YOLO cornhole VHS bitters. Gochujang sriracha messenger bag, mlkshk lyft authentic sartorial vinyl flexitarian godard green juice vice fam roof party jianbing.",
         "options" : {
-            "filetype" : "md"
+            "filetype" : "md",
+            "convert_ext_links": true
         },
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
@@ -491,7 +520,8 @@
         "title" : "CHIA-pet / PLAC-seq",
         "body" : "Lorem ipsum dolor amet offal plaid readymade unicorn kombucha skateboard. Direct trade pop-up salvia organic. Truffaut lomo food truck man bun gastropub hella portland seitan post-ironic quinoa swag. Franzen flexitarian pour-over fam ennui. Freegan fanny pack tumeric vaporware tacos gluten-free quinoa +1 activated charcoal portland pok pok chartreuse actually. Church-key unicorn brooklyn migas paleo wolf.\n\nTaxidermy celiac scenester sustainable disrupt vaporware. Authentic chicharrones direct trade narwhal VHS iceland. Messenger bag intelligentsia seitan quinoa, hashtag YOLO cornhole VHS bitters. Gochujang sriracha messenger bag, mlkshk lyft authentic sartorial vinyl flexitarian godard green juice vice fam roof party jianbing.",
         "options" : {
-            "filetype" : "md"
+            "filetype" : "md",
+            "convert_ext_links": true
         },
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
@@ -501,7 +531,8 @@
         "title" : "CHIP-seq / CUT&RUN",
         "body" : "Lorem ipsum dolor amet offal plaid readymade unicorn kombucha skateboard. Direct trade pop-up salvia organic. Truffaut lomo food truck man bun gastropub hella portland seitan post-ironic quinoa swag. Franzen flexitarian pour-over fam ennui. Freegan fanny pack tumeric vaporware tacos gluten-free quinoa +1 activated charcoal portland pok pok chartreuse actually. Church-key unicorn brooklyn migas paleo wolf.\n\nTaxidermy celiac scenester sustainable disrupt vaporware. Authentic chicharrones direct trade narwhal VHS iceland. Messenger bag intelligentsia seitan quinoa, hashtag YOLO cornhole VHS bitters. Gochujang sriracha messenger bag, mlkshk lyft authentic sartorial vinyl flexitarian godard green juice vice fam roof party jianbing.",
         "options" : {
-            "filetype" : "md"
+            "filetype" : "md",
+            "convert_ext_links": true
         },
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
@@ -511,7 +542,8 @@
         "title" : "ATAC-seq",
         "body" : "Lorem ipsum dolor amet offal plaid readymade unicorn kombucha skateboard. Direct trade pop-up salvia organic. Truffaut lomo food truck man bun gastropub hella portland seitan post-ironic quinoa swag. Franzen flexitarian pour-over fam ennui. Freegan fanny pack tumeric vaporware tacos gluten-free quinoa +1 activated charcoal portland pok pok chartreuse actually. Church-key unicorn brooklyn migas paleo wolf.\n\nTaxidermy celiac scenester sustainable disrupt vaporware. Authentic chicharrones direct trade narwhal VHS iceland. Messenger bag intelligentsia seitan quinoa, hashtag YOLO cornhole VHS bitters. Gochujang sriracha messenger bag, mlkshk lyft authentic sartorial vinyl flexitarian godard green juice vice fam roof party jianbing.",
         "options" : {
-            "filetype" : "md"
+            "filetype" : "md",
+            "convert_ext_links": true
         },
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
@@ -521,7 +553,8 @@
         "title" : "TrAC-loop",
         "body" : "Lorem ipsum dolor amet offal plaid readymade unicorn kombucha skateboard. Direct trade pop-up salvia organic. Truffaut lomo food truck man bun gastropub hella portland seitan post-ironic quinoa swag. Franzen flexitarian pour-over fam ennui. Freegan fanny pack tumeric vaporware tacos gluten-free quinoa +1 activated charcoal portland pok pok chartreuse actually. Church-key unicorn brooklyn migas paleo wolf.\n\nTaxidermy celiac scenester sustainable disrupt vaporware. Authentic chicharrones direct trade narwhal VHS iceland. Messenger bag intelligentsia seitan quinoa, hashtag YOLO cornhole VHS bitters. Gochujang sriracha messenger bag, mlkshk lyft authentic sartorial vinyl flexitarian godard green juice vice fam roof party jianbing.",
         "options" : {
-            "filetype" : "md"
+            "filetype" : "md",
+            "convert_ext_links": true
         },
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
@@ -531,7 +564,8 @@
         "title" : "RNA-seq",
         "body" : "Lorem ipsum dolor amet offal plaid readymade unicorn kombucha skateboard. Direct trade pop-up salvia organic. Truffaut lomo food truck man bun gastropub hella portland seitan post-ironic quinoa swag. Franzen flexitarian pour-over fam ennui. Freegan fanny pack tumeric vaporware tacos gluten-free quinoa +1 activated charcoal portland pok pok chartreuse actually. Church-key unicorn brooklyn migas paleo wolf.\n\nTaxidermy celiac scenester sustainable disrupt vaporware. Authentic chicharrones direct trade narwhal VHS iceland. Messenger bag intelligentsia seitan quinoa, hashtag YOLO cornhole VHS bitters. Gochujang sriracha messenger bag, mlkshk lyft authentic sartorial vinyl flexitarian godard green juice vice fam roof party jianbing.",
         "options" : {
-            "filetype" : "md"
+            "filetype" : "md",
+            "convert_ext_links": true
         },
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
@@ -541,7 +575,8 @@
         "title" : "NAD-seq",
         "body" : "Lorem ipsum dolor amet offal plaid readymade unicorn kombucha skateboard. Direct trade pop-up salvia organic. Truffaut lomo food truck man bun gastropub hella portland seitan post-ironic quinoa swag. Franzen flexitarian pour-over fam ennui. Freegan fanny pack tumeric vaporware tacos gluten-free quinoa +1 activated charcoal portland pok pok chartreuse actually. Church-key unicorn brooklyn migas paleo wolf.\n\nTaxidermy celiac scenester sustainable disrupt vaporware. Authentic chicharrones direct trade narwhal VHS iceland. Messenger bag intelligentsia seitan quinoa, hashtag YOLO cornhole VHS bitters. Gochujang sriracha messenger bag, mlkshk lyft authentic sartorial vinyl flexitarian godard green juice vice fam roof party jianbing.",
         "options" : {
-            "filetype" : "md"
+            "filetype" : "md",
+            "convert_ext_links": true
         },
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
@@ -551,7 +586,8 @@
         "title" : "DAM-ID-seq",
         "body" : "Lorem ipsum dolor amet offal plaid readymade unicorn kombucha skateboard. Direct trade pop-up salvia organic. Truffaut lomo food truck man bun gastropub hella portland seitan post-ironic quinoa swag. Franzen flexitarian pour-over fam ennui. Freegan fanny pack tumeric vaporware tacos gluten-free quinoa +1 activated charcoal portland pok pok chartreuse actually. Church-key unicorn brooklyn migas paleo wolf.\n\nTaxidermy celiac scenester sustainable disrupt vaporware. Authentic chicharrones direct trade narwhal VHS iceland. Messenger bag intelligentsia seitan quinoa, hashtag YOLO cornhole VHS bitters. Gochujang sriracha messenger bag, mlkshk lyft authentic sartorial vinyl flexitarian godard green juice vice fam roof party jianbing.",
         "options" : {
-            "filetype" : "md"
+            "filetype" : "md",
+            "convert_ext_links": true
         }
     },
     {
@@ -560,7 +596,8 @@
         "title" : "TSA-seq",
         "body" : "Lorem ipsum dolor amet offal plaid readymade unicorn kombucha skateboard. Direct trade pop-up salvia organic. Truffaut lomo food truck man bun gastropub hella portland seitan post-ironic quinoa swag. Franzen flexitarian pour-over fam ennui. Freegan fanny pack tumeric vaporware tacos gluten-free quinoa +1 activated charcoal portland pok pok chartreuse actually. Church-key unicorn brooklyn migas paleo wolf.\n\nTaxidermy celiac scenester sustainable disrupt vaporware. Authentic chicharrones direct trade narwhal VHS iceland. Messenger bag intelligentsia seitan quinoa, hashtag YOLO cornhole VHS bitters. Gochujang sriracha messenger bag, mlkshk lyft authentic sartorial vinyl flexitarian godard green juice vice fam roof party jianbing.",
         "options" : {
-            "filetype" : "md"
+            "filetype" : "md",
+            "convert_ext_links": true
         },
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
@@ -570,7 +607,8 @@
         "title" : "Repli-seq",
         "body" : "Lorem ipsum dolor amet offal plaid readymade unicorn kombucha skateboard. Direct trade pop-up salvia organic. Truffaut lomo food truck man bun gastropub hella portland seitan post-ironic quinoa swag. Franzen flexitarian pour-over fam ennui. Freegan fanny pack tumeric vaporware tacos gluten-free quinoa +1 activated charcoal portland pok pok chartreuse actually. Church-key unicorn brooklyn migas paleo wolf.\n\nTaxidermy celiac scenester sustainable disrupt vaporware. Authentic chicharrones direct trade narwhal VHS iceland. Messenger bag intelligentsia seitan quinoa, hashtag YOLO cornhole VHS bitters. Gochujang sriracha messenger bag, mlkshk lyft authentic sartorial vinyl flexitarian godard green juice vice fam roof party jianbing.",
         "options" : {
-            "filetype" : "md"
+            "filetype" : "md",
+            "convert_ext_links": true
         },
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
@@ -580,7 +618,8 @@
         "title" : "Capture Hi-C",
         "body" : "Lorem ipsum dolor amet offal plaid readymade unicorn kombucha skateboard. Direct trade pop-up salvia organic. Truffaut lomo food truck man bun gastropub hella portland seitan post-ironic quinoa swag. Franzen flexitarian pour-over fam ennui. Freegan fanny pack tumeric vaporware tacos gluten-free quinoa +1 activated charcoal portland pok pok chartreuse actually. Church-key unicorn brooklyn migas paleo wolf.\n\nTaxidermy celiac scenester sustainable disrupt vaporware. Authentic chicharrones direct trade narwhal VHS iceland. Messenger bag intelligentsia seitan quinoa, hashtag YOLO cornhole VHS bitters. Gochujang sriracha messenger bag, mlkshk lyft authentic sartorial vinyl flexitarian godard green juice vice fam roof party jianbing.",
         "options" : {
-            "filetype" : "md"
+            "filetype" : "md",
+            "convert_ext_links": true
         },
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
@@ -590,7 +629,8 @@
         "title" : "DNA-FiSH",
         "body" : "Lorem ipsum dolor amet offal plaid readymade unicorn kombucha skateboard. Direct trade pop-up salvia organic. Truffaut lomo food truck man bun gastropub hella portland seitan post-ironic quinoa swag. Franzen flexitarian pour-over fam ennui. Freegan fanny pack tumeric vaporware tacos gluten-free quinoa +1 activated charcoal portland pok pok chartreuse actually. Church-key unicorn brooklyn migas paleo wolf.\n\nTaxidermy celiac scenester sustainable disrupt vaporware. Authentic chicharrones direct trade narwhal VHS iceland. Messenger bag intelligentsia seitan quinoa, hashtag YOLO cornhole VHS bitters. Gochujang sriracha messenger bag, mlkshk lyft authentic sartorial vinyl flexitarian godard green juice vice fam roof party jianbing.",
         "options" : {
-            "filetype" : "md"
+            "filetype" : "md",
+            "convert_ext_links": true
         },
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
@@ -600,7 +640,8 @@
         "title" : "sci-Hi-C",
         "body" : "Lorem ipsum dolor amet offal plaid readymade unicorn kombucha skateboard. Direct trade pop-up salvia organic. Truffaut lomo food truck man bun gastropub hella portland seitan post-ironic quinoa swag. Franzen flexitarian pour-over fam ennui. Freegan fanny pack tumeric vaporware tacos gluten-free quinoa +1 activated charcoal portland pok pok chartreuse actually. Church-key unicorn brooklyn migas paleo wolf.\n\nTaxidermy celiac scenester sustainable disrupt vaporware. Authentic chicharrones direct trade narwhal VHS iceland. Messenger bag intelligentsia seitan quinoa, hashtag YOLO cornhole VHS bitters. Gochujang sriracha messenger bag, mlkshk lyft authentic sartorial vinyl flexitarian godard green juice vice fam roof party jianbing.",
         "options" : {
-            "filetype" : "md"
+            "filetype" : "md",
+            "convert_ext_links": true
         },
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
@@ -610,7 +651,8 @@
         "title" : "DNA SPRITE",
         "body" : "Lorem ipsum dolor amet offal plaid readymade unicorn kombucha skateboard. Direct trade pop-up salvia organic. Truffaut lomo food truck man bun gastropub hella portland seitan post-ironic quinoa swag. Franzen flexitarian pour-over fam ennui. Freegan fanny pack tumeric vaporware tacos gluten-free quinoa +1 activated charcoal portland pok pok chartreuse actually. Church-key unicorn brooklyn migas paleo wolf.\n\nTaxidermy celiac scenester sustainable disrupt vaporware. Authentic chicharrones direct trade narwhal VHS iceland. Messenger bag intelligentsia seitan quinoa, hashtag YOLO cornhole VHS bitters. Gochujang sriracha messenger bag, mlkshk lyft authentic sartorial vinyl flexitarian godard green juice vice fam roof party jianbing.",
         "options" : {
-            "filetype" : "md"
+            "filetype" : "md",
+            "convert_ext_links": true
         },
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
@@ -620,7 +662,8 @@
         "title" : "GAM",
         "body" : "Lorem ipsum dolor amet offal plaid readymade unicorn kombucha skateboard. Direct trade pop-up salvia organic. Truffaut lomo food truck man bun gastropub hella portland seitan post-ironic quinoa swag. Franzen flexitarian pour-over fam ennui. Freegan fanny pack tumeric vaporware tacos gluten-free quinoa +1 activated charcoal portland pok pok chartreuse actually. Church-key unicorn brooklyn migas paleo wolf.\n\nTaxidermy celiac scenester sustainable disrupt vaporware. Authentic chicharrones direct trade narwhal VHS iceland. Messenger bag intelligentsia seitan quinoa, hashtag YOLO cornhole VHS bitters. Gochujang sriracha messenger bag, mlkshk lyft authentic sartorial vinyl flexitarian godard green juice vice fam roof party jianbing.",
         "options" : {
-            "filetype" : "md"
+            "filetype" : "md",
+            "convert_ext_links": true
         },
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
@@ -635,7 +678,8 @@
         "body" : "There is no account registered with the provided email. Access is restricted to members of the 4DN consortium.<br/><b>New Users:</b> If you would like to get started submitting data, please see this Help section for <b><a href=\"/help/account-creation\">creating an account</a></b>.",
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
         "options" : {
-            "filetype" : "html"
+            "filetype" : "html",
+            "convert_ext_links": true
         }
     },
 
@@ -695,7 +739,8 @@
         "body" : "<ol class='text-small mb-0'><li><a href='https://data.4dnucleome.org/release-updates?update_tag=2018_01_internal_JA'>First Data Freeze (January 2018)</a></li><li><a href='https://data.4dnucleome.org/release-updates?update_tag=2018_01updates_internal_JA_toJune'>June Interim Update (January-June 2018)</a></li></ol>",
         "status" : "released",
         "options" : {
-            "filetype" : "html"
+            "filetype" : "html",
+            "convert_ext_links": true
         }
     },
 
