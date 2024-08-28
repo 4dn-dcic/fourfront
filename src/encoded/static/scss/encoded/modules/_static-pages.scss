@@ -842,7 +842,7 @@
     }
 }
 
-.static-section-entry {
+.static-section-entry, .static-content-item {
 
 	&:not([id]) .section-title > i.icon-link {
 		display: none;
