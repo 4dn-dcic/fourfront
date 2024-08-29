@@ -225,10 +225,10 @@ class SubscriptionEntry extends React.PureComponent {
             return null;
         }
         return (
-            <DropdownButton variant="outline-dark" title={SubscriptionEntry.typeOptionTitle(selectedItemType)} >
+            <DropdownButton variant="outline-dark" title={SubscriptionEntry.typeOptionTitle(selectedItemType)} onSelect={this.handleChangeType}>
                 {
                     availableTypes.map((itemType) =>
-                        <DropdownItem key={itemType} data-tip={itemType} eventKey={itemType} onSelect={this.handleChangeType}>
+                        <DropdownItem key={itemType} data-tip={itemType} eventKey={itemType}>
                             { SubscriptionEntry.typeOptionTitle(itemType) }
                         </DropdownItem>
                     )

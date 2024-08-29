@@ -344,14 +344,14 @@ const SelectItemTypeDropdownBtn = React.memo(function SelectItemTypeDropdownBtn(
     return (
         <div className="search-item-type-wrapper">
             <DropdownButton id="search-item-type-selector" size="l" variant="outline-light w-100" disabled={disabled}
-                title={!selectedItem ? 'Search in specific type ...' : selectedItem.text}>
+                title={!selectedItem ? 'Search in specific type ...' : selectedItem.text} onSelect={onChangeSearchType}>
                 {
                     _.pairs(AvailableSearchTypes).map(function (pair) {
                         const [key, item] = pair;
                         return (!isBrowseOrSearchPage && key === 'Within') ? null :
                             (
                                 <DropdownItem key={item.type} eventKey={item.type} data-key={item.type}
-                                    className="w-100" onSelect={onChangeSearchType} active={searchType == item.type}>
+                                    className="w-100" active={searchType == item.type}>
                                     {item.text}
                                 </DropdownItem>
                             );
