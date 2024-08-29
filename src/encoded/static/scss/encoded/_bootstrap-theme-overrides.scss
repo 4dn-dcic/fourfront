@@ -25,6 +25,23 @@
     }
 }
 
+/* Not present in Bootstrap 4, renamed as btn-close in React-Bootstrap v2 and used by us */
+.btn-close {
+    float: right;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+    color: #000;
+    text-shadow: 0 1px 0 #fff;
+    opacity: .5;
+    border: 0;
+    background-color: rgba(0, 0, 0, 0);
+
+    &::before {
+        content: '×';
+    }
+}
+
 .btn.btn-lg {
     // > i.icon {
     //    transform: translate3d(0, 2px, 0);
