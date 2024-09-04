@@ -6,6 +6,14 @@ fourfront
 Change Log
 ----------
 
+8.1.0
+=====
+
+* 2024-09-03/dmichaels
+  - Update snovault 11.22.0 for fix for running locally; oddity
+    with subprocess.Popen in elasticsearch_fixture; see snovault PR-304.
+
+
 8.0.0
 =====
 
