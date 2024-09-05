@@ -127,7 +127,7 @@ blockquote {
 
 	> .alerts {
 		margin-top: 20px;
-		.alert.no-close-button > button.close {
+		.alert.no-close-button > button.btn-close {
 			display: none;
 		}
 	}
@@ -562,22 +562,22 @@ $margin-util-sizes-mini: 1, 2, 3, 4, 5, 6, 7, 8; 		// * 1px
 
 // Margin left/right
 @each $util-size in $margin-util-sizes {
-	.ml-#{$util-size},
-	* > .ml-#{$util-size}{
+	.ms-#{$util-size},
+	* > .ms-#{$util-size}{
 		margin-left : $util-size * 10px !important;
 	}
-	.mr-#{$util-size},
-	* > .mr-#{$util-size}{
+	.me-#{$util-size},
+	* > .me-#{$util-size}{
 		margin-right : $util-size * 10px !important;
 	}
 
 	@each $util-mini-size in $margin-util-sizes-mini {
-		.ml-#{$util-size}#{$util-mini-size},
-		* > .ml-#{$util-size}#{$util-mini-size}{
+		.ms-#{$util-size}#{$util-mini-size},
+		* > .ms-#{$util-size}#{$util-mini-size}{
 			margin-left : ($util-size * 10px) + ($util-mini-size * 1px) !important;
 		}
-		.mr-#{$util-size}#{$util-mini-size},
-		* > .mr-#{$util-size}#{$util-mini-size}{
+		.me-#{$util-size}#{$util-mini-size},
+		* > .me-#{$util-size}#{$util-mini-size}{
 			margin-right : ($util-size * 10px) + ($util-mini-size * 1px) !important;
 		}
 	}
@@ -598,9 +598,9 @@ $margin-util-sizes-mini: 1, 2, 3, 4, 5, 6, 7, 8; 		// * 1px
 .text-900 { font-weight: 900 !important; }
 
 .text-normal { font-size: 1rem; } // Reset to default size.
-.text-small { font-size: 0.9rem; }
+.fs-6 { font-size: 0.9rem; }
 .text-smaller { font-size: 0.75rem; }
-.text-medium { font-size: 15px; font-size: 15.75px; }
+.fs-5 { font-size: 15px; font-size: 15.75px; }
 .text-large { font-size: 17.5px; }
 .text-larger { font-size: 20px; line-height: 25px; }
 

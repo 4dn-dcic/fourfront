@@ -141,7 +141,7 @@ class PublicationSummary extends React.PureComponent {
                                     Journal
                                 </h4>
                                 <h5 className="mb-02 text-400">{ journal }</h5>
-                                { ID ? <p className="text-small">{ ID }</p> : null }
+                                { ID ? <p className="fs-6">{ ID }</p> : null }
                             </React.Fragment>
                             : null }
                         { datePublished ?
@@ -161,7 +161,7 @@ class PublicationSummary extends React.PureComponent {
                                 </h4>
                                 {
                                     _.map(categories, (cat)=>
-                                        <a className="btn btn-xs btn-info mr-02 mb-02 text-capitalize"
+                                        <a className="btn btn-xs btn-info me-02 mb-02 text-capitalize"
                                             href={"/search/?type=Publication&categories=" + encodeURIComponent(cat) }>
                                             { cat }
                                         </a>

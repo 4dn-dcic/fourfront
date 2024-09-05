@@ -599,10 +599,10 @@ export class OverViewBodyItem extends React.PureComponent {
             const hasImagingRounds = imaging_rounds.length > 0 || _.any(fullObject.imaging_paths || [], function (imgPath) { const { path: { imaging_rounds = '' } = {} } = imgPath; return typeof imaging_rounds === 'string' && imaging_rounds.length > 0; });
             return (
                 <div className="imaging-path-item-wrapper row">
-                    <div className="index-num col-1 text-monospace text-500"><small>{ channel }</small></div>
-                    { hasImagingRounds ? <div className="index-num col-2 text-monospace text-500"><small>{ imaging_rounds || '-' }</small></div> : null }
+                    <div className="index-num col-1 font-monospace text-500"><small>{ channel }</small></div>
+                    { hasImagingRounds ? <div className="index-num col-2 font-monospace text-500"><small>{ imaging_rounds || '-' }</small></div> : null }
                     <div className={"imaging-path col-" + (matchingFile ? '8' : '9')}>{ object.itemUtil.generateLink(path, true) }</div>
-                    { matchingFile ? <div className="microscope-setting col-1 text-right" data-tip="Light Source Center Wavelength">{ fileUtil.getLightSourceCenterMicroscopeSettingFromFile(channel, matchingFile) }nm</div> : null }
+                    { matchingFile ? <div className="microscope-setting col-1 text-end" data-tip="Light Source Center Wavelength">{ fileUtil.getLightSourceCenterMicroscopeSettingFromFile(channel, matchingFile) }nm</div> : null }
                 </div>
             );
         },

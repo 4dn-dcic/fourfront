@@ -111,9 +111,9 @@ export default class StatisticsPageView extends React.PureComponent {
         const { browseBaseState } = this.props;
 
         const groupByOptions = {
-            'award.project' : <span><i className="icon icon-fw fas icon-university mr-1"/>Project</span>,
-            'experiments_in_set.processed_files.track_and_facet_info.experimental_lab' : <span><i className="icon icon-fw fas icon-university mr-1"/>Lab</span>,
-            'experiments_in_set.processed_files.track_and_facet_info.experiment_type' : <span><i className="icon icon-fw fas icon-university mr-1"/>Experiment Type</span>,
+            'award.project' : <span><i className="icon icon-fw fas icon-university me-1"/>Project</span>,
+            'experiments_in_set.processed_files.track_and_facet_info.experimental_lab' : <span><i className="icon icon-fw fas icon-university me-1"/>Lab</span>,
+            'experiments_in_set.processed_files.track_and_facet_info.experiment_type' : <span><i className="icon icon-fw fas icon-university me-1"/>Experiment Type</span>,
         };
 
         let initialGroupBy = 'award.project';
@@ -133,9 +133,9 @@ export default class StatisticsPageView extends React.PureComponent {
 
         if (browseBaseState !== 'all'){
             _.extend(groupByOptions, {
-                'award.center_title'                 : <span><i className="icon icon-fw fas icon-university mr-1"/>Center</span>,
-                'lab.display_title'                  : <span><i className="icon icon-fw fas icon-users mr-1"/>Lab</span>,
-                'experiments_in_set.experiment_type.display_title' : <span><i className="icon icon-fw fas icon-chart-bar mr-1"/>Experiment Type</span>
+                'award.center_title'                 : <span><i className="icon icon-fw fas icon-university me-1"/>Center</span>,
+                'lab.display_title'                  : <span><i className="icon icon-fw fas icon-users me-1"/>Lab</span>,
+                'experiments_in_set.experiment_type.display_title' : <span><i className="icon icon-fw fas icon-chart-bar me-1"/>Experiment Type</span>
             });
             initialGroupBy = 'award.center_title';
         }
@@ -178,14 +178,14 @@ export default class StatisticsPageView extends React.PureComponent {
                 <div className="col-sm-6">
                     <a className={"select-section-btn" + (currentTab === 'submissions' ? ' active' : '')}
                         href="#submissions" data-tip={currentTab === 'submissions' ? null : submissionsObj.tip} data-target-offset={110}>
-                        { submissionsObj.icon ? <i className={"mr-07 text-medium icon icon-fw icon-" + submissionsObj.icon}/> : null }
+                        { submissionsObj.icon ? <i className={"me-07 fs-5 icon icon-fw icon-" + submissionsObj.icon}/> : null }
                         { submissionsObj.title }
                     </a>
                 </div>
                 <div className="col-sm-6">
                     <a className={"select-section-btn" + (currentTab === 'usage' ? ' active' : '')}
                         href="#usage" data-tip={currentTab === 'usage' ? null : usageObj.tip} data-target-offset={100}>
-                        { usageObj.icon ? <i className={"mr-07 text-medium icon icon-fw icon-" + usageObj.icon}/> : null }
+                        { usageObj.icon ? <i className={"me-07 fs-5 icon icon-fw icon-" + usageObj.icon}/> : null }
                         { usageObj.title }
                     </a>
                 </div>

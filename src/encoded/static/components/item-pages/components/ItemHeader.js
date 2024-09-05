@@ -293,7 +293,7 @@ export class MiddleRow extends React.Component {
                 windowWidth={windowWidth}
                 description={textDescription || <em>No description provided.</em>}
                 className={baseClass}
-                textClassName="text-medium"
+                textClassName="fs-5"
                 defaultExpanded={expanded}
                 fitTo="self"
                 lineHeight={22}

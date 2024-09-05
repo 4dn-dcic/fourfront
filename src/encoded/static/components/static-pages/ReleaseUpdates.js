@@ -120,7 +120,7 @@ export default class ReleaseUpdates extends React.Component {
             subtitle = (
                 <div className="row release-update-static-section">
                     <BasicStaticSectionBody className="col-sm-11" content={sectionData.content} filetype={sectionData.options && sectionData.options.filetype} />
-                    <div className="col-sm-1 text-right">{editLink}</div>
+                    <div className="col-sm-1 text-end">{editLink}</div>
                 </div>
             );
         }
@@ -245,7 +245,7 @@ class SingleUpdate extends React.Component {
                         <div>
                             <div className="row mt-07 mb-07">
                                 <div className="col-sm-11">{updateData.comments || "No comments."}</div>
-                                <div className="col-sm-1 text-right">{editLink}</div>
+                                <div className="col-sm-1 text-end">{editLink}</div>
                             </div>
                             <table className="mb-1 table table-striped table-bordered table-condensed">
                                 <thead>

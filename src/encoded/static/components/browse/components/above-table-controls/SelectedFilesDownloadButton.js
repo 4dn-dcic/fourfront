@@ -57,7 +57,7 @@ export const BrowseViewSelectedFilesDownloadButton = React.memo(function BrowseV
     return (
         <SelectedFilesDownloadButton {...{ context, session, disabled }} selectedFiles={subSelectedFiles || selectedFiles} filenamePrefix="metadata_"
             id="browse-view-download-files-btn" data-tip={tooltip} className={cls} analyticsAddFilesToCart>
-            <i className="icon icon-download fas icon-fw mr-07"/>
+            <i className="icon icon-download fas icon-fw me-07"/>
             <span className="d-none d-lg-inline">Download </span>
             <span className="count-to-download-integer">{ countToShow }</span>
             <span className="d-none d-lg-inline text-400"> Selected Files</span>
@@ -264,8 +264,8 @@ class SelectedFilesDownloadModal extends React.PureComponent {
                         </div> : null }
 
                     { foundUnpublishedFiles && !disclaimerAccepted?
-                        <button type="button" className="btn btn-info mr-1 mt-1 btn-block-xs-only" onClick={this.handleAcceptDisclaimer}>
-                            <i className="icon icon-fw icon-check fas mr-1"/>
+                        <button type="button" className="btn btn-info me-1 mt-1 btn-block-xs-only" onClick={this.handleAcceptDisclaimer}>
+                            <i className="icon icon-fw icon-check fas me-1"/>
                             I have read and understand the notes.
                         </button>
                         :
@@ -355,9 +355,9 @@ const SelectedFilesDownloadStartButton = React.memo(function SelectedFilesDownlo
         <form method="POST" action={action} className="d-inline-block d-block-xs-only">
             <input type="hidden" name="accession_triples" value={JSON.stringify(accessionTripleArrays)} />
             <input type="hidden" name="download_file_name" value={JSON.stringify(suggestedFilename)} />
-            <button type="submit" name="Download" className="btn btn-primary mt-1 mr-1 btn-block-xs-only" onClick={onClick}
+            <button type="submit" name="Download" className="btn btn-primary mt-1 me-1 btn-block-xs-only" onClick={onClick}
                 data-tip="Details for each individual selected file delivered via a TSV spreadsheet.">
-                <i className="icon icon-fw icon-file-alt fas mr-1"/>Download metadata for files
+                <i className="icon icon-fw icon-file-alt fas me-1"/>Download metadata for files
             </button>
         </form>
     );

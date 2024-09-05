@@ -260,7 +260,7 @@ class SubscriptionEntry extends React.PureComponent {
                         <h3 className="col-auto text-400">{ this.displayToggle() }</h3>
                         <h3 className="col text-400 pt-01">
                             { title }
-                            { typeof total === "number" ? <span className="ml-1 text-300">{ "(" + total + ")" }</span> : null }
+                            { typeof total === "number" ? <span className="ms-1 text-300">{ "(" + total + ")" }</span> : null }
                         </h3>
                         <div className="col-auto">{ this.generateButtonToolbar() }</div>
                     </div>

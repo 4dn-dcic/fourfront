@@ -255,7 +255,7 @@ export default class QuickInfoBar extends React.PureComponent {
 const BrowseBaseStateToggleCol = React.memo(function({ browseBaseState, isLoading, onToggle }){
     const checked = browseBaseState === 'all';
     return (
-        <div className="col-4 text-right browse-base-state-toggle-container">
+        <div className="col-4 text-end browse-base-state-toggle-container">
             <div className="inner-more">
                 <Toggle disabled={isLoading} id="toggle-external-data-switch" checked={checked} onChange={onToggle} />
                 <small>Include External Data</small>
@@ -374,7 +374,7 @@ class Stat extends React.PureComponent {
         }
 
         return (
-            <a href={targetHref}>{ shortLabel }</a>
+            <a href={targetHref} className="link-underline link-underline-opacity-0">{shortLabel}</a>
         );
     }
 

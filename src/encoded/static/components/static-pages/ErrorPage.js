@@ -13,7 +13,7 @@ export default class ErrorPage extends React.PureComponent {
         if (status === 'invalid_login'){
             errorMessage = (
                 <div>
-                    <h3>The account you provided is not valid. <a href="/">Return</a> to the homepage.</h3>
+                    <h3>The account you provided is not valid. <a className="link-underline link-underline-opacity-0 link-underline-opacity-100-hover" href="/">Return</a> to the homepage.</h3>
                     <h5>
                         Please note: our authentication system will automatically
                         attempt to log you in through your selected provider if you are
@@ -25,11 +25,11 @@ export default class ErrorPage extends React.PureComponent {
                 </div>
             );
         } else if (status === 'not_found'){
-            errorMessage = <h3>{"The page you've requested does not exist."} <a href="/">Return</a> to the homepage.</h3>;
+            errorMessage = <h3>{"The page you've requested does not exist."} <a className="link-underline link-underline-opacity-0 link-underline-opacity-100-hover" href="/">Return</a> to the homepage.</h3>;
         } else if (status === 'forbidden'){
             return <HTTPForbiddenView/>;
         }else{
-            errorMessage = <h3>{"The page you've requested does not exist or you have found an error."} <a href="/">Return</a> to the homepage.</h3>;
+            errorMessage = <h3>{"The page you've requested does not exist or you have found an error."} <a className="link-underline link-underline-opacity-0 link-underline-opacity-100-hover" href="/">Return</a> to the homepage.</h3>;
         }
         return <div className="error-page text-center container" id="content">{ errorMessage }</div>;
     }
@@ -38,11 +38,11 @@ export default class ErrorPage extends React.PureComponent {
 
 const HTTPForbiddenView =  React.memo(function HTTPForbiddenView(props){
     return (
-        <div className="error-page text-left container" id="content">
+        <div className="error-page text-start container" id="content">
             <h2 className="text-400">Access was denied to this resource.</h2>
             <div className="content fourDN-content">
                 <p>
-                    If you have an account, please try logging in or return to the <a href="/">homepage</a>. <br /> For instructions on how to set up an account, please visit the help page for <a href="/help/account-creation">Creating an Account</a>.
+                    If you have an account, please try logging in or return to the <a className="link-underline link-underline-opacity-0 link-underline-opacity-100-hover" href="/">homepage</a>. <br /> For instructions on how to set up an account, please visit the help page for <a className="link-underline link-underline-opacity-0 link-underline-opacity-100-hover" href="/help/account-creation">Creating an Account</a>.
                 </p>
             </div>
         </div>

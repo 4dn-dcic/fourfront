@@ -210,7 +210,7 @@ const PublicationDetailRows = React.memo(function PublicationDetailRows({ public
             'content' : !externalURL ? externalID : (
                 <React.Fragment>
                     <a href={externalURL} target="_blank" rel="noopener noreferrer">{ externalID }</a>
-                    <i className="ml-07 icon icon-external-link-alt fas text-small"/>
+                    <i className="ms-07 icon icon-external-link-alt fas fs-6"/>
                 </React.Fragment>
             )
         });
@@ -226,7 +226,7 @@ const PublicationDetailRows = React.memo(function PublicationDetailRows({ public
     return details.map(function({ key, label, content }, idx){
         return (
             <div className="row details-row" key={ key || label || idx }>
-                <div className="col-3 col-md-2 col-lg-2 text-600 text-right label-col">{ label }</div>
+                <div className="col-3 col-md-2 col-lg-2 text-600 text-end label-col">{ label }</div>
                 <div className="col-9 col-md-10 col-lg-10">{ content }</div>
             </div>
         );

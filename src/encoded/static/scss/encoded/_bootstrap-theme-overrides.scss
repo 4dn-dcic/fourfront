@@ -25,23 +25,6 @@
     }
 }
 
-/* Not present in Bootstrap 4, renamed as btn-close in React-Bootstrap v2 and used by us */
-.btn-close {
-    float: right;
-    font-size: 1.5rem;
-    font-weight: 700;
-    line-height: 1;
-    color: #000;
-    text-shadow: 0 1px 0 #fff;
-    opacity: .5;
-    border: 0;
-    background-color: rgba(0, 0, 0, 0);
-
-    &::before {
-        content: '×';
-    }
-}
-
 .btn.btn-lg {
     // > i.icon {
     //    transform: translate3d(0, 2px, 0);
@@ -64,7 +47,7 @@
 /** Extending Bootstrap button w/ rounded & ext-padding class **/
 /** btn-xs was removed in Bootstrap v4 so we recreate it here **/
 .btn.btn-xs {
-    @include button-size(1px, 5px, 0.825rem, 1.5, $border-radius-small);
+    @include button-size(1px, 5px, 0.825rem, 1.5);
     font-weight: 400;
     padding-top: 2px;
     > i.icon:only-child {
@@ -277,7 +260,7 @@
 
 		> .modal-header {
 			padding-top: 1.125rem; // Overrides 1rem.
-			> button.close {
+			> button.btn-close {
 				margin-top: -0.875rem; // Overrides -1rem.
 			}
 		}

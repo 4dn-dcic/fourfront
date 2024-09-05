@@ -52,7 +52,7 @@ export class FileDetailBody extends React.PureComponent {
             fileTitle = object.itemUtil.getTitleStringFromContext(file);
             fileTitleFormatted = <a href={object.atIdFromObject(file) || '/' + file.uuid} className="d-inline-block">{ fileTitle }</a>;
             statusIndicator = file.status && (
-                <i className="item-status-indicator-dot mr-07" data-status={ file.status && file.status.toLowerCase() }
+                <i className="item-status-indicator-dot me-07" data-status={ file.status && file.status.toLowerCase() }
                     data-tip={"Status - " + file.status} />
             );
         }
@@ -111,7 +111,7 @@ export class FileDetailBody extends React.PureComponent {
                         windowWidth={windowWidth}
                         description={file.description || file.notes || <em>No description.</em>}
                         fitTo="self"
-                        textClassName="text-medium"
+                        textClassName="fs-5"
                         expanded={gridSize === 'xs' || gridSize === 'sm' || gridSize === 'md'}
                         dimensions={null}
                     />

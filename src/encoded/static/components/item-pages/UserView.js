@@ -144,7 +144,7 @@ class SyncedAccessKeyTable extends React.PureComponent {
                     <br/>(It might take a few minutes for the access key to show up in table after page refresh.)
 
                     <div className="row mt-15">
-                        <div className="col-4 text-600 text-right no-user-select">
+                        <div className="col-4 text-600 text-end no-user-select">
                             Access Key ID
                         </div>
                         <div className="col-8">
@@ -154,7 +154,7 @@ class SyncedAccessKeyTable extends React.PureComponent {
                         </div>
                     </div>
                     <div className="row mt-05">
-                        <div className="col-4 text-600 text-right no-user-select">
+                        <div className="col-4 text-600 text-end no-user-select">
                             Secret Access Key
                         </div>
                         <div className="col-8">
@@ -207,7 +207,7 @@ class SyncedAccessKeyTable extends React.PureComponent {
                     'modal' : (
                         <Modal show onHide={this.hideModal}>
                             <Modal.Header closeButton>
-                                <Modal.Title className="text-400">Access key <span className="text-monospace">{ foundItem.access_key_id }</span> has been deleted.</Modal.Title>
+                                <Modal.Title className="text-400">Access key <span className="font-monospace">{ foundItem.access_key_id }</span> has been deleted.</Modal.Title>
                             </Modal.Header>
                         </Modal>
                     )
@@ -459,7 +459,7 @@ function ProfileContactFields(props){
             schemas={schemas} href={href}>
 
             <EditableField label="Email" labelID="email" placeholder="name@example.com" fallbackText="No email address" fieldType="email" disabled={true}>
-                <ProfileContactFieldsIcon icon="envelope fas" />&nbsp; <a href={'mailto:' + email}>{ email }</a>
+                <ProfileContactFieldsIcon icon="envelope fas" />&nbsp; <a className="link-underline link-underline-opacity-0 link-underline-opacity-100-hover" href={'mailto:' + email}>{ email }</a>
             </EditableField>
 
             <EditableField label="Phone" labelID="phone1" placeholder="17775551234 x47" fallbackText="No phone number" fieldType="phone">
@@ -600,7 +600,7 @@ class ProfileWorkFields extends React.PureComponent {
                     <i className="icon icon-users icon-fw fas"/> Organizations
                 </h3>
                 <div className="row field-entry lab">
-                    <div className="col-md-3 text-right text-left-xs">
+                    <div className="col-md-3 text-end text-left-xs">
                         <label htmlFor="lab">Primary Lab</label>
                     </div>
                     <div id="lab" className="col-md-9 value text-500">
@@ -608,7 +608,7 @@ class ProfileWorkFields extends React.PureComponent {
                     </div>
                 </div>
                 <div className="row field-entry job_title">
-                    <div className="col-md-3 text-right text-left-xs">
+                    <div className="col-md-3 text-end text-left-xs">
                         <label htmlFor="job_title">Role</label>
                     </div>
                     <div id="job_title" className="col-md-9 value">
@@ -616,7 +616,7 @@ class ProfileWorkFields extends React.PureComponent {
                     </div>
                 </div>
                 <div className="row field-entry submits_for">
-                    <div className="col-md-3 text-right text-left-xs">
+                    <div className="col-md-3 text-end text-left-xs">
                         <label htmlFor="submits_for">Submits For</label>
                     </div>
                     <div className="col-md-9 value text-500">
@@ -630,7 +630,7 @@ class ProfileWorkFields extends React.PureComponent {
                     </div>
                 </div>
                 <div className="row field-entry awards">
-                    <div className="col-md-3 text-right text-left-xs">
+                    <div className="col-md-3 text-end text-left-xs">
                         <label htmlFor="awards">Awards</label>
                     </div>
                     <div className="col-md-9 value text-500">

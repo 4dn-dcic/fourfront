@@ -23,7 +23,7 @@ const WorkflowDetailsForWorkflowNodeRow = React.memo(function WorkflowDetailsFor
     if (workflow) {
         var link = object.atIdFromObject(workflow);
         title = workflow.display_title || workflow.title || workflow.name;
-        innerContent = <a href={link}>{ title }</a>;
+        innerContent = <a href={link} className="link-underline link-underline-opacity-0 link-underline-opacity-100-hover">{ title }</a>;
     } else {
         innerContent = <em>N/A</em>;
     }
@@ -66,7 +66,7 @@ const SoftwareDetailsForWorkflowNodeRow = React.memo(function SoftwareDetailsFor
     if (Array.isArray(softwareList) && softwareList.length > 0){
         softwareElements = _.map(softwareList, function(sw){
             var atId = object.atIdFromObject(sw);
-            return <a href={atId} key={atId}>{ sw.display_title }</a>;
+            return <a href={atId} className="link-underline link-underline-opacity-0 link-underline-opacity-100-hover" key={atId}>{ sw.display_title }</a>;
         });
     } else {
         softwareElements = <em>N/A</em>;
@@ -138,7 +138,7 @@ export class WFRStepDetailBody extends React.PureComponent {
             <div className="col-sm-6 box">
                 <span className="text-600">Workflow Run</span>
                 { stepHref ?
-                    <h3 className="text-500 text-truncate" data-tip={tipIfLongString(titleString)}><a href={stepHref}>{ titleString }</a></h3>
+                    <h3 className="text-500 text-truncate" data-tip={tipIfLongString(titleString)}><a className="link-underline link-underline-opacity-0 link-underline-opacity-100-hover" href={stepHref}>{ titleString }</a></h3>
                     :
                     <h3 className="text-300 text-truncate">{ titleString }</h3>
                 }

@@ -1019,11 +1019,11 @@ function HiGlassFileDetailPane(props) {
     });
 
     return (
-        <div className="mr-1" style={{ minWidth: '90%' }}>
+        <div className="me-1" style={{ minWidth: '90%' }}>
             {!viewConfigTracks ? null : (
                 <div className="flex-description-container">
-                    <h5><i className="icon icon-fw icon-align-left mr-08 fas" />Tracks</h5>
-                    <div className="row py-2 ml-27 mr-0">
+                    <h5><i className="icon icon-fw icon-align-left me-08 fas" />Tracks</h5>
+                    <div className="row py-2 ms-27 me-0">
                         <table className="w-100">
                             <thead>
                                 <tr>
@@ -1040,9 +1040,9 @@ function HiGlassFileDetailPane(props) {
                 </div>
             )}
             {/* <h5 className="text-500 mb-0 mt-16">
-                <i className="icon icon-fw icon-list fas mr-08" />Details
+                <i className="icon icon-fw icon-list fas me-08" />Details
             </h5>
-            <div className="item-page-detail ml-27">
+            <div className="item-page-detail ms-27">
                 <Detail context={result} open={false} schemas={schemas} excludedKeys={HiGlassFileDetailPane.excludedKeys} />
             </div> */}
         </div>
@@ -1115,7 +1115,7 @@ class AddFileButton extends React.PureComponent {
         return (
             <React.Fragment>
                 <button type="button" onClick={this.setIsSelecting} disabled={loading} data-tip={tooltip} style={style} className={cls}>
-                    <i className={"mr-08 icon icon-fw fas icon-" + (loading ? 'circle-notch icon-spin' : 'plus')}/>Add Data
+                    <i className={"me-08 icon icon-fw fas icon-" + (loading ? 'circle-notch icon-spin' : 'plus')}/>Add Data
                 </button>
                 <LinkToSelector isSelecting={isSelecting} onSelect={this.receiveFile} onCloseChildWindow={this.unsetIsSelecting} dropMessage={dropMessage} searchURL={searchURL} childWindowAlert={null} />
             </React.Fragment>
@@ -1258,11 +1258,11 @@ export const ConfirmModal = React.memo(function (props) {
             <Modal.Footer>
                 {confirmButtonVisible ?
                     <button type="button" onClick={handleConfirm} className="btn btn-success" ref={confirmButtonEl}>
-                        <i className="icon icon-fw icon-check mr-05 fas" />{confirmButtonText || 'OK'}
+                        <i className="icon icon-fw icon-check me-05 fas" />{confirmButtonText || 'OK'}
                     </button> : null}
                 {cancelButtonVisible ?
                     <button type="button" onClick={handleCancel} className="btn btn-outline-warning">
-                        <i className="icon icon-fw icon-times mr-05 fas" />{cancelButtonText || 'Cancel'}
+                        <i className="icon icon-fw icon-times me-05 fas" />{cancelButtonText || 'Cancel'}
                     </button> : null}
             </Modal.Footer>
         </Modal>

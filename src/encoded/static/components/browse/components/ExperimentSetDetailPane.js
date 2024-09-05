@@ -165,7 +165,7 @@ const RawFilesSection = React.memo(function RawFilesSection(props){
 
     const isTitleMuted = (typeof selectFile === 'function') && selectedFilesCount === 0;
     const selectedFilesCountText = (selectedFilesCount > 0) ?
-        (<sup className="ml-05">({`${selectedFilesCount} file${selectedFilesCount > 1 ? 's' : ''} selected`})</sup>) : null;
+        (<sup className="ms-05">({`${selectedFilesCount} file${selectedFilesCount > 1 ? 's' : ''} selected`})</sup>) : null;
 
     let innerTableContents = null;
     if (open) {
@@ -203,7 +203,7 @@ const ProcessedFilesSection = React.memo(function ProcessedFilesSection(props){
     }
     const isTitleMuted = (typeof selectFile === 'function') && selectedFilesCount === 0;
     const selectedFilesCountText = (selectedFilesCount > 0) ?
-        (<sup className="ml-05">({`${selectedFilesCount} file${selectedFilesCount > 1 ? 's' : ''} selected`})</sup>) : null;
+        (<sup className="ms-05">({`${selectedFilesCount} file${selectedFilesCount > 1 ? 's' : ''} selected`})</sup>) : null;
 
     let innerTableContents = null;
     if (open) {
@@ -235,7 +235,7 @@ const SupplementaryFilesSection = React.memo(function ProcessedFilesSection(prop
     }
     const isTitleMuted = (typeof selectFile === 'function') && selectedFilesCount === 0;
     const selectedFilesCountText = (selectedFilesCount > 0) ?
-        (<sup className="ml-05">({`${selectedFilesCount} file${selectedFilesCount > 1 ? 's' : ''} selected`})</sup>) : null;
+        (<sup className="ms-05">({`${selectedFilesCount} file${selectedFilesCount > 1 ? 's' : ''} selected`})</sup>) : null;
 
     let innerTableContents = null;
     if (open) {

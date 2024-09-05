@@ -400,11 +400,11 @@
 							color: #34646C;
 	
 							@include media-breakpoint-only(md) {
-								&.pl-4 {
+								&.ps-4 {
 									padding-left: 0.5rem !important;
 								}
 	
-								&.pr-4 {
+								&.pe-4 {
 									padding-right: 0.5rem !important;
 								}
 							}

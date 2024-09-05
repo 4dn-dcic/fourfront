@@ -2315,7 +2315,7 @@ div.user-profile-page {
 		}
 
 		// Override of prev CSS
-		.col-md-3.text-right.text-left-xs {
+		.col-md-3.text-end.text-left-xs {
 			@include media-breakpoint-down(sm){
 				text-align: left !important;
 			}
