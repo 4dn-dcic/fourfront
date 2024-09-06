@@ -72,12 +72,18 @@
 }
 
 .btn.btn-primary {
+    color: #fff;
+
     /* Using brand-primary-dark color in place of default "darken(...)" to match rest of UI more nicely. */
     /* border-color: $brand-primary-dark; */
     &:hover, &:active, &.active {
         background-color: $brand-primary-dark;
         border-color: $brand-primary-dark;
     }
+}
+
+.btn.btn-success {
+    color: #fff;
 }
 
 /* Light gray BG, more prominent button style than btn-default */
