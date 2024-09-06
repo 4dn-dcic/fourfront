@@ -382,7 +382,7 @@ class BadgeItem extends React.PureComponent {
                 titleToShow = <React.Fragment>{ parentTypeTitle } <span className="text-600">{ parentDisplayTitle }</span></React.Fragment>;
                 tooltip = parentItem.description || tooltip;
             }
-            linkMsg = <div className="mt-02"><a href={parentID} data-tip={tooltip}>View { titleToShow }</a></div>;
+            linkMsg = <div className="mt-02"><a href={parentID} className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover" data-tip={tooltip}>View { titleToShow }</a></div>;
         }
 
         const image = badge_icon && (<div className="text-center icon-container"><img src={badge_icon} /></div>);

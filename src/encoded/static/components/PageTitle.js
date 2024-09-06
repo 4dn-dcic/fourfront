@@ -339,7 +339,7 @@ export class StaticPageBreadcrumbs extends React.PureComponent {
         const { '@id' : ancestorID, display_title, name: ancestorPathName } = ancestor;
         const { context: { '@id' : contextID } } = this.props;
         const inner = ancestorID === contextID ? null : (
-            <a href={ancestorID}>{ display_title }</a>
+            <a href={ancestorID} className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover">{ display_title }</a>
         );
         return (
             <div className="static-breadcrumb" data-name={ancestorPathName} key={ancestorID}>
@@ -363,7 +363,7 @@ export class StaticPageBreadcrumbs extends React.PureComponent {
                 if (editAction && editAction.href){
                     return (
                         <div className="static-edit-button pull-right" style={_.pick(pageTitleStyle, 'marginTop')}>
-                            <i className="icon icon-fw icon-pencil fas"/> <a href={editAction.href} data-tip="Edit this Static Page">Edit</a>
+                            <i className="icon icon-fw icon-pencil fas"/> <a href={editAction.href} className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover" data-tip="Edit this Static Page">Edit</a>
                         </div>
                     );
                 }

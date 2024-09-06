@@ -459,7 +459,7 @@ function ProfileContactFields(props){
             schemas={schemas} href={href}>
 
             <EditableField label="Email" labelID="email" placeholder="name@example.com" fallbackText="No email address" fieldType="email" disabled={true}>
-                <ProfileContactFieldsIcon icon="envelope fas" />&nbsp; <a className="link-underline link-underline-opacity-0 link-underline-opacity-100-hover" href={'mailto:' + email}>{ email }</a>
+                <ProfileContactFieldsIcon icon="envelope fas" />&nbsp; <a className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover" href={'mailto:' + email}>{ email }</a>
             </EditableField>
 
             <EditableField label="Phone" labelID="phone1" placeholder="17775551234 x47" fallbackText="No phone number" fieldType="phone">

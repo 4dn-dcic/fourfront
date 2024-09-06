@@ -143,7 +143,7 @@ export default class DefaultItemView extends React.PureComponent {
                 }
                 Alerts.queue({
                     'title' : "Redirected",
-                    'message': <span>You have been redirected from <a href={ourOldItem['@id']}>{ redirected_from_accession }</a>, which this item ({ context.accession }) supercedes.</span>,
+                    'message': <span>You have been redirected from <a href={ourOldItem['@id']} className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover">{ redirected_from_accession }</a>, which this item ({ context.accession }) supercedes.</span>,
                     'style': 'warning'
                 });
             }, 'GET', (err)=>{
@@ -496,7 +496,7 @@ const EmbeddedItemWithImageAttachment = React.memo(function EmbeddedItemWithImag
     const linkProps = openInNewWindow ? { target: '_blank', rel: 'noreferrer' } : {};
 
     const imageElem = (
-        <a href={linkHref} className="image-wrapper" {...linkProps}>
+        <a href={linkHref} className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover image-wrapper" {...linkProps}>
             <img className="embedded-item-image" src={linkToItem + attachmentHref} />
         </a>
     );
@@ -508,8 +508,8 @@ const EmbeddedItemWithImageAttachment = React.memo(function EmbeddedItemWithImag
             <div className="inner">
                 { imageElem }
                 { captionText && <div className="caption">{ captionText }</div> }
-                { fileMicroscopyID && <a href={fileMicroscopyID}>View File Item - { item.microscopy_file.accession }</a> }
-                { !fileMicroscopyID && openInNewWindow && <a href={linkToItem} data-tip="View image item details">View Image Item</a> }
+                { fileMicroscopyID && <a href={fileMicroscopyID} className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover">View File Item - { item.microscopy_file.accession }</a> }
+                { !fileMicroscopyID && openInNewWindow && <a href={linkToItem} className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover" data-tip="View image item details">View Image Item</a> }
             </div>
         </div>
     );
@@ -540,10 +540,10 @@ const SampleBiosourceItem = React.memo(function SampleBiosourceItem(props) {
     const style = { 'overflowWrap': 'break-word' };
     if (biosources.length === 1) {
         const [bs] = biosources;
-        return <a href={bs.atId} style={style} data-tip="View Biosource Details">{item}</a>;
+        return <a href={bs.atId} className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover" style={style} data-tip="View Biosource Details">{item}</a>;
     } else if (biosources.length > 1) {
         const link = '/search/?type=Biosource&accession=' + _.pluck(biosources, 'accession').join('&accession=');
-        return <a href={link} style={style} data-tip="Multiple Biosources Found. View in Search Page.">{item}</a>;
+        return <a href={link} className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover" style={style} data-tip="Multiple Biosources Found. View in Search Page.">{item}</a>;
     }
 
     return item;
@@ -588,7 +588,7 @@ export class OverViewBodyItem extends React.PureComponent {
         },
         'url_string' : function(field, value, allowJSX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li', fullObject = null){
             if (typeof value !== 'string') return null;
-            return <a href={value} style={{ 'overflowWrap' : 'break-word' }}>{value}</a>;
+            return <a href={value} className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover" style={{ 'overflowWrap' : 'break-word' }}>{value}</a>;
         },
         'imaging_paths_from_exp': function(field, value, allowJSX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'div', fullObject = null){
             if (!value || typeof value !== 'object') return null;

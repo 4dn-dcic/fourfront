@@ -48,13 +48,13 @@ export const UserRegistrationModal = React.memo(function UserRegistrationModal(p
             <ul>
                 <li>
                     Please <span className="text-500">register below</span> or{' '}
-                    <a href="#" className="link-underline link-underline-opacity-0 link-underline-opacity-100-hover" onClick={onExitLinkClick}>use a different email address</a>{' '}
+                    <a href="#" className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover" onClick={onExitLinkClick}>use a different email address</a>{' '}
                     if you have an existing account.
                 </li>
                 { isEmailAGmail?
                     <li>
                         If you prefer, you can use your institutional email address as your account ID by creating a new google account at{' '}
-                        <a href="https://accounts.google.com/signup/v2" className="link-underline link-underline-opacity-0 link-underline-opacity-100-hover" target="_blank" rel="noopener noreferrer" onClick={onGoogleLinkClick}>
+                        <a href="https://accounts.google.com/signup/v2" className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover" target="_blank" rel="noopener noreferrer" onClick={onGoogleLinkClick}>
                             https://accounts.google.com/signup/v2
                         </a> and selecting &quot;Use my current email address instead&quot;.
                     </li>
