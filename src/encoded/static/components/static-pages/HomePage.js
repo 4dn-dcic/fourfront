@@ -405,7 +405,7 @@ const ToolsAndResourcesRow = React.memo(function ToolsAndResourcesRow(props) {
                                 </div>
                             </div>
                         </div>
-                        <div className="d-grid tools-and-resources-col-resources col-12 col-lg-4 ps-8 p-3 mt-sm-3 mt-lg-0 z-1">
+                        <div className="tools-and-resources-col-resources col-12 col-lg-4 ps-8 p-3 mt-sm-3 mt-lg-0 z-1 d-flex flex-wrap align-content-between">
                             <h2 className="homepage-section-title">Portal Resources</h2>
                             <div className="resource-detail p-3 d-flex flex-column">
                                 <a href="/resources/experimental-resources" className="link-underline link-underline-opacity-0">
