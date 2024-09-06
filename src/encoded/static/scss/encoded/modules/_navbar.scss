@@ -161,10 +161,10 @@ div#top-nav.navbar-fixed-top {
 
         padding: 0 10px;
 
-        // Container size for just XL -
-        @include media-breakpoint-up(xl){
+        // Container size for just XXL -
+        @include media-breakpoint-up(xxl){
             body:not(.is-full-screen) & {
-                max-width: map-get($container-max-widths, "xl");
+                max-width: map-get($container-max-widths, "xxl");
                 margin: 0 auto;
             }
         }
