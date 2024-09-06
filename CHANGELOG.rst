@@ -6,6 +6,12 @@ fourfront
 Change Log
 ----------
 
+8.1.1
+=====
+
+* Bug fix to handle non-array children in static content TOC
+
+
 8.1.0
 =====
 
