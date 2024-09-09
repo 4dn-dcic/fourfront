@@ -291,7 +291,7 @@ export default class UserRegistrationForm extends React.PureComponent {
                         <div>
                             <LookupLabField onSelect={this.onSelectLab} currentLabDetails={value_for_pending_lab_details} onClear={this.onClearLab} />
                         </div>
-                        <small className="d-inline text-muted">
+                        <small className="d-inline text-body-secondary">
                             Lab or Institute with which you are associated.
                         </small>
                     </div>
@@ -302,7 +302,7 @@ export default class UserRegistrationForm extends React.PureComponent {
                         <label htmlFor="contactEmail" className="form-label">Preferred Contact Email <span className="text-300">(Optional)</span></label>
                         <input name="preferred_email" type="text" onChange={this.onContactEmailChange}
                             className={"form-control" + (!isContactEmailValid ? " is-invalid" : "")} />
-                        <small className="d-inline text-muted">
+                        <small className="d-inline text-body-secondary">
                             { isContactEmailValid ? "Preferred contact email, if different from login/primary email." : "Please enter a valid e-mail address." }
                         </small>
                     </div>
