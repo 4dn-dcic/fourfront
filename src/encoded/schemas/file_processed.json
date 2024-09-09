@@ -119,7 +119,8 @@
                 "spt results, submitter format",
                 "filtered feature-barcode matrices",
                 "cell data",
-                "normalized contact intensities"
+                "normalized contact intensities",
+                "fragments"
             ]
         },
         "file_classification": {
