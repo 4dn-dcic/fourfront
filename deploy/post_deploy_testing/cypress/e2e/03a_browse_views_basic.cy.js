@@ -80,6 +80,7 @@ describe('Browse Views - Basic Tests', function () {
         it('Select a grouping term in Experiment Type facet, then check whether the sub-terms are also selected', function () {
 
             cy.visit('/browse').get('#slow-load-container').should('not.have.class', 'visible').end()
+                .get('.facet-charts.loading').should('not.exist')
                 .get(".facets-header .facets-title").should('have.text', 'Included Properties').end()
                 .get('.facet.closed[data-field="experiments_in_set.experiment_type.display_title"] > h5').scrollIntoView().should('be.visible').click().end()
                 .get('.facet.open[data-field="experiments_in_set.experiment_type.display_title"] .facet-list-element[data-is-grouping="true"] a').first().within(($term) => {
@@ -118,6 +119,7 @@ describe('Browse Views - Basic Tests', function () {
         it('Exclude a grouping term in Experiment Type facet, then check whether the sub-terms are also excluded', function () {
 
             cy.visit('/browse').get('#slow-load-container').should('not.have.class', 'visible').end()
+                .get('.facet-charts.loading').should('not.exist')
                 .get(".facets-header button").first().click().end()
                 .get(".facets-header .facets-title").should('have.text', 'Excluded Properties').end()
                 .get('.facet.closed[data-field="experiments_in_set.experiment_type.display_title"] > h5').scrollIntoView().should('be.visible').click().end()
