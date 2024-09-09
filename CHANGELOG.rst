@@ -6,6 +6,12 @@ fourfront
 Change Log
 ----------
 
+8.1.2
+=====
+
+* New value "fragments" added in ignored_enum for processed file schema.
+
+
 8.1.1
 =====
 
