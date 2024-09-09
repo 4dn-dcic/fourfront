@@ -823,7 +823,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     copyURLButton(){
         const { windowWidth, href } = this.props;
         const gridState = layout.responsiveGridState(windowWidth);
-        const isMobile = gridState !== 'lg' && gridState !== 'xl';
+        const isMobile = gridState !== 'lg' && gridState !== 'xl' && gridState !== 'xxl';
         return (
             <object.CopyWrapper data-tip="Copy view URL to clipboard to share with others." includeIcon={false} wrapperElement="button"
                 value={href} analyticsOnCopy maskAnalyticsValue={false}>
@@ -1224,7 +1224,7 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
         // Pass (almost) all props down so that re-renders are triggered of AdjustableDividerRow PureComponent
         const passProps = _.omit(this.props, 'higlassItem', 'minOpenHeight', 'maxOpenHeight', 'leftPanelCollapseWidth');
         const rgs = layout.responsiveGridState(windowWidth);
-        const leftPanelDefaultWidth = rgs === 'xl' ? 400 : 300;
+        const leftPanelDefaultWidth = rgs === 'xl' || rgs === 'xxl' ? 400 : 300;
 
         return (
             <AdjustableDividerRow {...passProps} height={minOpenHeight} leftPanelClassName="expset-higlass-panel" leftPanelDefaultWidth={leftPanelDefaultWidth}

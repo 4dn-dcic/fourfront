@@ -1265,7 +1265,7 @@ export class AreaChartContainer extends React.Component {
     static isExpanded(props){
         const { windowWidth, chartToggles, id } = props;
         const gridState = layout.responsiveGridState(windowWidth);
-        if (gridState && gridState !== 'xl') return false;
+        if (gridState && (gridState !== 'xl' || gridState !== 'xxl')) return false;
         return !!((chartToggles || {})[id]);
     }
 
