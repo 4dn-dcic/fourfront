@@ -21,7 +21,7 @@ describe('Biosample create page', function () {
                     expect(accountListItem.text()).to.contain('Cypress');
                 }).end();
             cy.visit('/search/?type=Biosample').get(".above-results-table-row .btn").should('contain', 'Create New')
-                .get("a.btn.btn-primary.btn").should('contain', 'Create New').scrollIntoView().click({ 'force': true }).end()
+                .get("a.btn.btn-primary.btn").should('contain', 'Create New').click({ 'force': true }).end()
                 .get('.submission-view-modal .modal-title').should('have.text', 'Give your new Biosample an alias');
 
             // Submit create biosample data name
@@ -44,7 +44,7 @@ describe('Biosample create page', function () {
             cy.get("@editButtons").find('button.btn').contains('Validate').click().end();
             cy.get("@editButtons").find('button.btn').contains('Submit').click().end();
             cy.get("@editButtons").find('button.btn').contains('Skip').click().end();
-            cy.get("h1.page-title").should('contain', "Biosample").end(); // Await until are at Biosample page. Then wait 1s to ensure we have new context.
+            cy.get(".indicator-item.item-status").should('contain', "in review by lab").end(); // Await until are at Biosample page. Then wait 1s to ensure we have new context.
 
             // Queue for deletion in subsequent test.
             cy.get('script[data-prop-name=context]').then(function($context){
