@@ -21,7 +21,7 @@ describe('Biosample create page', function () {
                     expect(accountListItem.text()).to.contain('Cypress');
                 }).end();
             cy.visit('/search/?type=Biosample').get(".above-results-table-row .btn").should('contain', 'Create New')
-                .get("a.btn.btn-primary.btn").should('contain', 'Create New').click().end()
+                .get("a.btn.btn-primary.btn").should('contain', 'Create New').scrollIntoView().click({ 'force': true }).end()
                 .get('.submission-view-modal .modal-title').should('have.text', 'Give your new Biosample an alias');
 
             // Submit create biosample data name
