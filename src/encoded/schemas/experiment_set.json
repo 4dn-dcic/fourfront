@@ -97,6 +97,13 @@
             "lookup": 20,
             "formInput": "textarea"
         },
+        "disease_name": {
+            "title": "Disease Name",
+            "description": "Ontology term for the disease name associated with the set.",
+            "type":  "string",
+            "lookup": 40,
+            "linkTo": "OntologyTerm"
+        },
         "dataset_group": {
             "title": "Dataset Group",
             "description": "An optional property to group datasets in a single row in the datasets summary table",
