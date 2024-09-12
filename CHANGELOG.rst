@@ -6,6 +6,12 @@ fourfront
 Change Log
 ----------
 
+8.1.3
+=====
+
+* Added disease_name property to experiment set schema.
+
+
 8.1.2
 =====
 
