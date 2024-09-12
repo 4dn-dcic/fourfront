@@ -97,12 +97,17 @@
             "lookup": 20,
             "formInput": "textarea"
         },
-        "disease_name": {
+        "disease_term": {
             "title": "Disease Name",
-            "description": "Ontology term for the disease name associated with the set.",
-            "type":  "string",
+            "description": "Ontology term for the disorder or disease name associated with the set.",
+            "type":  "array",
             "lookup": 40,
-            "linkTo": "OntologyTerm"
+            "items":{
+                "title": "Disorder/Disease Name",
+                "description": "Disorder/Disease ontology term(s)",
+                "type": "string",
+                "linkTo": "OntologyTerm"
+            }
         },
         "dataset_group": {
             "title": "Dataset Group",
