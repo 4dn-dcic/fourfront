@@ -31,7 +31,7 @@ describe('Vitessce display page', function () {
                     .get('div.rc-tabs span[data-tab-key="file-vitessce"]').should('contain', 'Vitessce').end();
                 cy.get('div.rc-tabs span[data-tab-key="file-vitessce"]').click({ 'force': true }).end();
                 cy.get("h3.tab-section-title, h4.tab-section-title").should('contain.text', 'Vitessce Visualization').end();
-                cy.get('div.vit2 div.vit3').each(function ($title, index) {
+                cy.get('.vit-makeStyles-title .vit-makeStyles-titleLeft').each(function ($title, index) {
                     if (index === 0) {
                         expect($title[0].innerText).to.eql('Spatial');
                     } else if (index == 1) {

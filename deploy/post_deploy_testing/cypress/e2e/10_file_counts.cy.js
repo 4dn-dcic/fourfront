@@ -187,7 +187,7 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
                             accession = $accesionText.text();
                         });
 
-                        cy.get('.embedded-search-view-outer-container .result-table-row .title-block a').scrollIntoView().click({ force: 'true' }).then(function($linkElem){
+                        cy.get('.embedded-search-view-outer-container .search-result-row[data-row-number="0"] .title-block a').scrollIntoView().click({ force: 'true' }).then(function($linkElem){
                             const [linkHref] = $linkElem.attr('href').split('#');
                             cy.location('pathname').should('equal', linkHref);
 
