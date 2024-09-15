@@ -1,4 +1,5 @@
 import encoded.project_defs
+import base64
 import hashlib
 import logging
 import json  # used only in Fourfront, not CGAP
@@ -6,9 +7,13 @@ import mimetypes
 import netaddr
 import os
 import pkg_resources
+import requests
 import sentry_sdk
 import subprocess
-
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.backends import default_backend
+from dcicutils.misc_utils import PRINT
 from codeguru_profiler_agent import Profiler
 from dcicutils.ecs_utils import ECSUtils
 from dcicutils.env_utils import EnvUtils, get_mirror_env_from_context
@@ -148,6 +153,58 @@ def init_code_guru(*, group_name, region=ECSUtils.REGION):
     Profiler(profiling_group_name=group_name, region_name=region).start()
 
 
+def jwk_to_pem(jwk):
+    """Converts JSON Web Key (JWK) to PEM format.
+
+    A JSON Web Key (JWK) contains various fields depending on the key type ('kty').
+    For an RSA key ('kty': 'RSA'), it must include:
+        - 'n': Base64url encoding of the RSA modulus (often called 'n' in mathematical terms).
+        - 'e': Base64url encoding of the RSA public exponent (often called 'e' in mathematical terms).
+
+    Args:
+        jwk (dict): JSON Web Key in dictionary format.
+
+    Returns:
+        bytes: PEM encoded key.
+
+    Raises:
+        ValueError: If the 'kty' field is missing or if the key type is unsupported.
+        ValueError: If the 'n' or 'e' fields are missing in the JWK for an RSA key.
+    """
+
+    # Example usage:
+    # jwk = {
+    #     "kty": "RSA",
+    #     "n": "base64_encoded_value_of_n",
+    #     "e": "base64_encoded_value_of_e"
+    # }
+    # pem_key = jwk_to_pem(jwk)
+    # print(pem_key.decode())
+
+    #TODO Move it into snovault for possible RAS integration of CGAP or SMaHT 
+
+    if 'kty' not in jwk:
+        raise ValueError("JWK must have a 'kty' field")
+    kty = jwk['kty']
+
+    if kty == 'RSA':
+        if 'n' not in jwk or 'e' not in jwk:
+            raise ValueError("JWK RSA key must have 'n' and 'e' fields")
+
+        n = int.from_bytes(base64.urlsafe_b64decode(jwk['n'] + '=='), byteorder='big')
+        e = int.from_bytes(base64.urlsafe_b64decode(jwk['e'] + '=='), byteorder='big')
+
+        public_key = rsa.RSAPublicNumbers(e, n).public_key(default_backend())
+        pem = public_key.public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo
+        )
+
+        return pem
+
+    # You can add more cases for other key types (e.g., 'EC' for elliptic curve keys)
+    raise ValueError("Unsupported 'kty': {}".format(kty))
+
 def main(global_config, **local_config):
     """
     This function returns a Pyramid WSGI application.
@@ -180,20 +237,42 @@ def main(global_config, **local_config):
     settings['auth0.domain'] = settings.get('auth0.domain', os.environ.get('Auth0Domain', DEFAULT_AUTH0_DOMAIN))
     settings['auth0.client'] = settings.get('auth0.client', os.environ.get('Auth0Client'))
     settings['auth0.secret'] = settings.get('auth0.secret', os.environ.get('Auth0Secret'))
-    settings['auth0.options'] = {
-        'auth': {
-            'sso': False,
-            'redirect': False,
-            'responseType': 'token',
-            'params': {
-                'scope': 'openid email',
-                'prompt': 'select_account'
+    
+    #options
+    if 'auth0' in settings['auth0.domain']: # Auth0     
+        settings['auth0.options'] = {
+            'auth': {
+                'sso': False,
+                'redirect': False,
+                'responseType': 'token',
+                'params': {
+                    'scope': 'openid email',
+                    'prompt': 'select_account'
+                }
+            },
+            'allowedConnections': ['github', 'google-oauth2'] # TODO: make at least this part configurable
+        }
+    elif 'nih.gov' in settings['auth0.domain']: # RAS    
+        # we are still keeping the Auth0 structure for compatibility (SPC)
+        settings['auth0.options'] = {
+            'auth': {
+                'responseType': 'code',
+                'params': {
+                    'scope': 'openid profile email ga4gh_passport_v1',
+                    'prompt': 'login consent'
+                }
             }
-        },
-        'allowedConnections': [  # TODO: make at least this part configurable
-            'github', 'google-oauth2'
-        ]
-    }
+        }
+        auth0Domain = settings['auth0.domain']
+         # get public key from jwks uri
+        response = requests.get(url=f'https://{auth0Domain}/openid/connect/jwks.json')
+        jwks = response.json()
+        # gives the set of jwks keys.the keys has to be passed as it is to jwt.decode() for signature verification.
+        settings['auth0.public.key'] = jwk_to_pem(jwks['keys'][0])
+    else:
+        # Unknown
+        settings['auth0.options'] = {}
+
     # ga4 api secret
     if 'IDENTITY' in os.environ:
         identity = assume_identity()
@@ -203,8 +282,8 @@ def main(global_config, **local_config):
         settings['ga4.secret'] = settings.get('ga4.secret', os.environ.get('GA4Secret'))
     # set google reCAPTCHA keys
     # TODO propagate from GAC
-    settings['g.recaptcha.key'] = os.environ.get('reCaptchaKey')
-    settings['g.recaptcha.secret'] = os.environ.get('reCaptchaSecret')
+    settings['g.recaptcha.key'] = settings.get('g.recaptcha.key', os.environ.get('reCaptchaKey'))
+    settings['g.recaptcha.secret'] = settings.get('g.recaptcha.secret', os.environ.get('reCaptchaSecret'))
     # enable invalidation scope
     settings[INVALIDATION_SCOPE_ENABLED] = True
 
@@ -223,6 +302,8 @@ def main(global_config, **local_config):
     config.include('pyramid_multiauth')  # must be before calling set_authorization_policy
     # Override default authz policy set by pyramid_multiauth
     config.set_authorization_policy(LocalRolesAuthorizationPolicy())
+
+    # This creates a session factory (from definition in Snovault/app.py)
     config.include(session)
 
     # must include, as tm.attempts was removed from pyramid_tm
@@ -252,6 +333,9 @@ def main(global_config, **local_config):
     if 'elasticsearch.server' in config.registry.settings:
         config.include('snovault.elasticsearch')
         config.include('.search')
+
+    if 'redis.server' in config.registry.settings:
+        config.include('snovault.redis')
 
     # this contains fall back url, so make sure it comes just before static_resoruces
     config.include('.types.page')

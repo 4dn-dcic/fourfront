@@ -1858,6 +1858,20 @@ files = [
 ]
 
 [[package]]
+name = "mirakuru"
+version = "2.5.2"
+description = "Process executor (not only) for tests."
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "mirakuru-2.5.2-py3-none-any.whl", hash = "sha256:90c2d90a8cf14349b2f33e6db30a16acd855499811e0312e56cf80ceacf2d3e5"},
+    {file = "mirakuru-2.5.2.tar.gz", hash = "sha256:41ca583d355eb7a6cfdc21c1aea549979d685c27b57239b88725434f115a7132"},
+]
+
+[package.dependencies]
+psutil = {version = ">=4.0.0", markers = "sys_platform != \"cygwin\""}
+
+[[package]]
 name = "mock"
 version = "5.1.0"
 description = "Rolling backport of unittest.mock for all Pythons"
@@ -2648,6 +2662,9 @@ files = [
     {file = "PyJWT-2.8.0.tar.gz", hash = "sha256:57e28d156e3d5c10088e0c68abb90bfac3df82b40a71bd0daa20c65ccd5c23de"},
 ]
 
+[package.dependencies]
+cryptography = {version = ">=3.4.0", optional = true, markers = "extra == \"crypto\""}
+
 [package.extras]
 crypto = ["cryptography (>=3.4.0)"]
 dev = ["coverage[toml] (==5.0.4)", "cryptography (>=3.4.0)", "pre-commit", "pytest (>=6.0.0,<7.0.0)", "sphinx (>=4.5.0,<5.0.0)", "sphinx-rtd-theme", "zope.interface"]
@@ -2854,6 +2871,26 @@ pytest = ">=6.2.5"
 
 [package.extras]
 dev = ["pre-commit", "pytest-asyncio", "tox"]
+
+[[package]]
+name = "pytest-redis"
+version = "2.4.0"
+description = "Redis fixtures and fixture factories for Pytest."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "pytest-redis-2.4.0.tar.gz", hash = "sha256:8a07520abed3cd341e8da1793059aa5717b02e56c43e7c76435db682cede10aa"},
+    {file = "pytest_redis-2.4.0-py3-none-any.whl", hash = "sha256:3cf00ad3f7241e38ce6f1bcb66af11b91956a889f1e216cfc026e81aa638a4e7"},
+]
+
+[package.dependencies]
+mirakuru = "*"
+port-for = ">=0.6.0"
+pytest = ">=6.2.0"
+redis = "*"
+
+[package.extras]
+tests = ["mock", "pytest-cov", "pytest-xdist"]
 
 [[package]]
 name = "pytest-timeout"

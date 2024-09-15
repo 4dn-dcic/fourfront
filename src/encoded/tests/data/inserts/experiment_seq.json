@@ -18,8 +18,7 @@
         "antibody_lot_id": "11111111",
         "average_fragment_size": 100,
         "fragmentation_method": "chemical",
-        "library_preparation_date": "2017-01-01",
-        "disease_term": "COVID-19"
+        "library_preparation_date": "2017-01-01"
     },
     {
         "accession":"4DNEXO6777B1",
