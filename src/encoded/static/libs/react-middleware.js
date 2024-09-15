@@ -3,7 +3,7 @@
 import React from 'react';
 import ReactDOMServer from 'react-dom/server';
 import fs from 'fs';
-import { store, mapStateToProps } from './../store';
+import { store, mapStateToProps, batchDispatch } from './../store';
 import { Provider, connect } from 'react-redux';
 // We get a different console w. different methods & properties on server-side.
 import { console as browserConsole, object, JWT } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
@@ -48,26 +48,17 @@ export function appRenderFxn(body, res) {
         disp_dict.alerts.push(Alerts.LoggedOut);
     }
     // End JWT token grabbing
+    batchDispatch(store, disp_dict);
 
-    store.dispatch({
-        type: disp_dict
-    });
-
-    var markup, AppWithReduxProps;
+    let AppWithReduxProps = connect(mapStateToProps)(App);
+    let markup;
 
     try {
-        AppWithReduxProps = connect(mapStateToProps)(App);
-        // TODO maybe in future: Try to utilize https://reactjs.org/docs/react-dom-server.html#rendertonodestream instead.
-        // would require big edits to subprocess-middleware, however (e.g. removing buffering, piping stream directly to process.stdout (?)).
-        markup = ReactDOMServer.renderToString(
-            <Provider store={store}>
-                <AppWithReduxProps />
-            </Provider>
-        );
+        markup = ReactDOMServer.renderToString(<Provider store={store}><AppWithReduxProps /></Provider>);
     } catch (err) {
         store.dispatch({
-            type: 'context',
-            value: {
+            type: 'SET_CONTEXT',
+            payload: {
                 '@type': ['RenderingError', 'error'],
                 'status': 'error',
                 'code': 500,

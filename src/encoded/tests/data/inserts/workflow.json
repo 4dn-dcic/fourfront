@@ -78,6 +78,8 @@
         "description": "GITAR Hi-C data processing pipeline",
         "lab": "4dn-dcic-lab",
         "name": "gitar",
+        "max_runtime": 200,
+        "tags": ["accepted"],
         "steps": [
             {
                 "inputs": [

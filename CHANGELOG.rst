@@ -6,6 +6,168 @@ fourfront
 Change Log
 ----------
 
+8.1.3
+=====
+
+* Added disease_name property to experiment set schema.
+
+
+8.1.2
+=====
+
+* New value "fragments" added in ignored_enum for processed file schema.
+
+
+8.1.1
+=====
+
+* Bug fix to handle non-array children in static content TOC
+
+
+8.1.0
+=====
+
+* 2024-09-03/dmichaels
+  - Update snovault 11.22.0 for fix for running locally; oddity
+    with subprocess.Popen in elasticsearch_fixture; see snovault PR-304.
+
+
+8.0.0
+=====
+
+* Upgrade: React v17 to v18
+* Upgrade: Redux v4 to v5 (there are breaking changes in store and dispatchers. SPC is updated to support both new and legacy usage)
+* Upgrade: HiGlass (React 18-compatible)
+* Upgrade: Vitessce (React 18-compatible)
+* Upgrade: MicroMeta App
+* Upgrade: auth0-Lock v11 to v12
+* Upgrade: gulp.js v4 to v5
+* Upgrade: react-workflow-viz (animation updates to eliminate findDOMNode errors)
+* Fix: User Content updates to fix markdown, jsx, and HTML static section rendering
+* Feature: Improve ExperimentSetDetailPane's raw/processed/supplementary file panels
+* Feature: Display react-workflow-viz version in /health
+* Upgrade: SlideCarousel and BasicCarousel updates upon nuka carousel's breaking changes
+
+
+7.10.1
+=====
+
+* Bug fix to revert schema version of workflow.json back to 7 
+
+
+7.10.0
+=====
+
+* Add cumulative sum and date range options for submission statistics
+* Add cumulative sum and 60 days options for usage statistics
+* Update statistics page style and improve mobile UI
+* Add supplementary files table into /browse details
+* Add raw/processed/supplementary file download options into `Select All` button
+
+
+7.9.0
+=====
+
+* Added 'override_track_title' to file schema
+* Updated track_and_facet calcprop to use the new property if present
+* Added test cases
+
+
+7.8.0
+=====
+
+* Added 'tags' mixing to workflow schema
+* Added 'max_runtime' property to workflow schema
+* Added 'current pipeline' and 'accepted_pipelines' to experiment_type for the names
+  of completed pipelines used by foursight
+
+
+7.7.0
+=====
+
+* Updates related to Python 3.12.
+
+
+7.6.0
+=====
+
+`Add routes page  <https://github.com/4dn-dcic/fourfront/pull/1898>`_
+
+* Add routes page to list all endpoints
+* updated lock file
+
+
+7.5.8
+=====
+
+`Add ignored enum  <https://github.com/4dn-dcic/fourfront/pull/1897>`_
+
+* Add value to ignored_enum for file_type
+
+
+7.5.7
+=====
+
+`Fix command to pull inserts <https://github.com/4dn-dcic/fourfront/pull/1894>`_
+
+* Update snovault and use its updated command to pull inserts
+* Delete nonfunctional command in this repo
+
+
+7.5.6
+=====
+
+`fix cypress 03d  <https://github.com/4dn-dcic/fourfront/pull/1893>`_
+
+* fixes cypress 03d's failing "Select All" step
+* adds OPF coun into Chart's files agg
+
+
+7.5.5
+=====
+
+* bug fix - button "Select All" not turns into "Deselect All" in /browse after QuickInfoBar updates in 7.5.0
+
+
+7.5.4
+=====
+
+* bug fix - analytics impression count calculation fails for the lists having 200+ items
+
+
+7.5.3
+=====
+
+`calcprop update  <https://github.com/4dn-dcic/fourfront/pull/1890>`_
+
+* Updated experiment_categorizer calcprop for ExperimentMic to deal with many targets in imaging paths
+
+
+7.5.2
+=====
+
+* adds two new props to object.CopyWrapper to allow/prevent sending analytics data into GA4
+
+
+7.5.1
+=====
+
+* grab ExpSet accession from source_experiment_sets instead of experiment_sets for FileView's metadata.tsv generation
+
+
+7.5.0
+=====
+
+* changes QuickInfoBar experiment and file links from /browse to /search
+* adds OPF to File counts
+
+
+7.4.2
+=====
+
+* Bug fix - LocalizedTime component cannot handle invalid dates and makes UI failing completely
+
+
 7.4.1
 =====
 

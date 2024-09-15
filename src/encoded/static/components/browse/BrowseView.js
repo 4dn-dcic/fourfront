@@ -52,7 +52,7 @@ class ExperimentSetCheckBox extends React.PureComponent {
     }
 
     static expSetFilesToObjectKeyedByAccessionTriples(expSet){
-        const allFiles = allFilesFromExperimentSet(expSet, true);
+        const allFiles = allFilesFromExperimentSet(expSet, true, true, true);
         const allFileAccessionTriples = filesToAccessionTriples(allFiles, true, true);
         return _.object(_.zip(allFileAccessionTriples, allFiles));
     }
@@ -217,11 +217,7 @@ export default class BrowseView extends React.PureComponent {
         const { query = {} } = hrefParts;
 
         if (query['award.project'] !== '4DN'){
-            store.dispatch({
-                'type' : {
-                    'browseBaseState' : 'all'
-                }
-            });
+            store.dispatch({ type: 'SET_BROWSE_BASE_STATE', payload: 'all' });
         }
 
         BrowseView.checkResyncChartData(hrefParts, context);
@@ -309,7 +305,7 @@ const NoResultsView = React.memo(function NoResultsView({ context, href, browseB
 function BrowseTableWithSelectedFilesCheckboxes(props){
     const {
         // Common high-level props from Redux, or App.js, or App.js > BodyElement:
-        context, href, browseBaseState, schemas, navigate: propNavigate,
+        context, href, browseBaseState, schemas, navigate: propNavigate = globalNavigate,
         windowHeight, windowWidth, registerWindowOnScrollHandler,
         toggleFullScreen, isFullscreen, session,
 
@@ -317,7 +313,7 @@ function BrowseTableWithSelectedFilesCheckboxes(props){
         selectedFiles, selectFile, unselectFile, resetSelectedFiles, selectedFilesUniqueCount,
 
         // Default prop / hardcoded (may become customizable later)
-        columnExtensionMap,
+        columnExtensionMap = colExtensionMap4DN,
     } = props;
     const { total = 0, notification = null } = context;
 
@@ -457,7 +453,7 @@ function BrowseTableWithSelectedFilesCheckboxes(props){
 BrowseTableWithSelectedFilesCheckboxes.propTypes = {
     // Props' type validation based on contents of this.props during render.
     'href'                      : PropTypes.string.isRequired,
-    'columnExtensionMap'        : PropTypes.object.isRequired,
+    'columnExtensionMap'        : PropTypes.object,
     'context'                   : PropTypes.shape({
         'columns'                   : PropTypes.objectOf(PropTypes.object).isRequired,
         'total'                     : PropTypes.number.isRequired,
@@ -467,18 +463,20 @@ BrowseTableWithSelectedFilesCheckboxes.propTypes = {
         'title'                     : PropTypes.string.isRequired
     })),
     'schemas'                   : PropTypes.object,
+    'navigate'                  : PropTypes.func,
+    'session'                   : PropTypes.bool,
     'browseBaseState'           : PropTypes.string.isRequired,
+    'windowHeight'              : PropTypes.number,
+    'windowWidth'               : PropTypes.number,
     'selectFile'                : PropTypes.func,
     'unselectFile'              : PropTypes.func,
     'selectedFiles'             : PropTypes.objectOf(PropTypes.object),
+    'toggleFullScreen'          : PropTypes.func,
+    'isFullscreen'              : PropTypes.bool,
+    'registerWindowOnScrollHandler': PropTypes.func,
+    'resetSelectedFiles'        : PropTypes.func,
+    'selectedFilesUniqueCount'  : PropTypes.number,
 };
-BrowseTableWithSelectedFilesCheckboxes.defaultProps = {
-    'navigate'  : globalNavigate,
-    'columnExtensionMap' : colExtensionMap4DN
-};
-
-
-
 
 
 const BrowseViewPageTitle = React.memo(function BrowseViewPageTitle(props) {

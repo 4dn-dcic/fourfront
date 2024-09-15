@@ -17,6 +17,17 @@ describe('Static Page & Content Tests', function () {
     it('Click & visit each page from menu, ensure ToC exists somewhere, ensure ToC works.', function(){
 
         cy.on('uncaught:exception', function(err, runnable){
+            // TODO: Investigate hydration errors occurring during SSR in Cypress tests.
+            // It appears that Cypress injects a prop into the div on the client side, which doesn't exist on the server side, leading to hydration issues.
+            // This suppression is temporary and should be removed once the issue is resolved.
+            // https://github.com/cypress-io/cypress/issues/27204
+            if (
+                /hydrat/i.test(err.message) ||
+                /Minified React error #418/.test(err.message) ||
+                /Minified React error #423/.test(err.message)
+            ) {
+                return false;
+            }
 
             expect(err.message).to.include("return response;");
 
@@ -57,7 +68,7 @@ describe('Static Page & Content Tests', function () {
                                 cy.get(helpNavBarItemSelectorStr).click().should('have.class', 'dropdown-open-for').then(()=>{
                                     //TODO: Remove wait() when a better workaround finds out
                                     //TODO: May apply possible solutions described in https://www.cypress.io/blog/2018/02/05/when-can-the-test-start
-                                    cy.get('div.big-dropdown-menu a#' + escapeElementWithNumericId(allLinkElementIDs[count])).wait(500).click().then(($nextListItem)=>{
+                                    cy.get('div.big-dropdown-menu a#' + escapeElementWithNumericId(allLinkElementIDs[count])).wait(1000).click().then(($nextListItem)=>{
                                         const linkHref = $nextListItem.attr('href');
                                         cy.location('pathname').should('equal', linkHref);
                                         testVisit();

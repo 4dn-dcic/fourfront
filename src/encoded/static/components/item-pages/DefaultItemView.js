@@ -797,7 +797,7 @@ export class OverViewBodyItem extends React.PureComponent {
 }
 
 export function WrapInColumn(props){
-    const { children, wrap, className, defaultWrapClassName } = props;
+    const { children, wrap = false, className, defaultWrapClassName = "col-6 col-md-4" } = props;
     if (!wrap) return children;
 
     let wrapClassName;
@@ -805,7 +805,3 @@ export function WrapInColumn(props){
     else if (typeof wrap === 'string')  wrapClassName = wrap;
     return <div className={wrapClassName + (className ? ' ' + className : '')}>{ children }</div>;
 }
-WrapInColumn.defaultProps = {
-    'wrap' : false,
-    'defaultWrapClassName' : "col-6 col-md-4"
-};

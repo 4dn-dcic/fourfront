@@ -80,8 +80,11 @@ export function genChartBarDims(
                         'height'    : barHeight
                     },
                     'experiment_sets' : termObj.experiment_sets,
-                    'experiments' : termObj.experiments,
-                    'files'     : termObj.files
+                    'experiments'       : termObj.experiments,
+                    'files'             : termObj.files,
+                    'files_raw'         : termObj.files_raw,
+                    'files_processed'   : termObj.files_processed,
+                    'files_opf'         : termObj.files_opf,
                 };
                 if (typeof termObj.field === 'string') {
                     barNode.bars = genBarData(termObj, { 'height' : barHeight }, barNode);
@@ -376,7 +379,7 @@ export class Chart extends React.PureComponent {
             );
         }
 
-    }
+    };
 
     /**
      * Parses props.experiment_sets and/or props.filtered_experiment_sets, depending on props.showType, aggregates experiments into fields,

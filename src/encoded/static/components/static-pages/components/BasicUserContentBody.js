@@ -50,7 +50,7 @@ export class BasicUserContentBody extends React.PureComponent {
     render(){
         const { context, markdownCompilerOptions, parentComponentType, windowWidth } = this.props;
         const { hasError } = this.state;
-        const { content, filetype } = context || {};
+        const { content, content_as_html, filetype } = context || {};
         if (hasError){
             return (
                 <div className="error">
@@ -61,7 +61,7 @@ export class BasicUserContentBody extends React.PureComponent {
 
         var itemType = this.itemType();
         if (itemType === 'StaticSection' || itemType === 'CustomSection') {
-            return <BasicStaticSectionBody {...{ content, filetype, markdownCompilerOptions, windowWidth, placeholderReplacementFxn }} />;
+            return <BasicStaticSectionBody {...{ content, content_as_html, filetype, markdownCompilerOptions, windowWidth, placeholderReplacementFxn }} />;
         } else if (itemType === 'HiglassViewConfig') {
             return (
                 <React.Fragment>
@@ -89,7 +89,7 @@ export class BasicUserContentBody extends React.PureComponent {
 
 
 export const EmbeddedHiglassActions = React.memo(function EmbeddedHiglassActions(props){
-    const { context, parentComponentType, showDescription, constrainDescription } = props;
+    const { context, parentComponentType = BasicUserContentBody, showDescription = true, constrainDescription = false } = props;
     let cls = "btn btn-outline-dark pull-right extra-info-higlass-btn";
 
     if (parentComponentType === BasicUserContentBody) {
@@ -112,11 +112,6 @@ export const EmbeddedHiglassActions = React.memo(function EmbeddedHiglassActions
         </div>
     );
 });
-EmbeddedHiglassActions.defaultProps = {
-    'parentComponentType' : BasicUserContentBody,
-    'showDescription' : true,
-    'constrainDescription' : false
-};
 
 
 export class ExpandableStaticHeader extends OverviewHeadingContainer {

@@ -52,13 +52,14 @@ export function getLightSourceCenterMicroscopeSettingFromFile(channel, fileItem)
  * `{ from_experiment : { from_experiment_set : { accession }, accession }, from_experiment_set : { accession }`
  *
  */
-export function extendFile(file, experiment, experimentSet){
+export function extendFile(file, experiment, experimentSet, source){
     return _.extend(
         {}, file, {
             'from_experiment' : _.extend(
                 {}, experiment, { 'from_experiment_set' : experimentSet }
             ),
-            'from_experiment_set' : experimentSet
+            'from_experiment_set' : experimentSet,
+            'from_source': source || null
         }
     );
 }
@@ -70,7 +71,20 @@ export function extendFile(file, experiment, experimentSet){
 
 /** Uses different defaultProps.canDownloadStatuses, specific to project */
 export function FileDownloadButtonAuto(props){
-    const { result, context = null, session = false } = props;
+    const {
+        result,
+        context = null,
+        session = false,
+        canDownloadStatuses = [
+            'uploaded',
+            'pre-release',
+            'released',
+            'replaced',
+            'submission in progress',
+            'released to project',
+            'archived'
+        ]
+    } = props;
     const onClick = useMemo(function(){
         return function(evt){
             if (session){
@@ -81,16 +95,5 @@ export function FileDownloadButtonAuto(props){
         };
     }, [result, context, session]);
     const tooltip = !session ? 'Log in or create an account to download this file' : null;
-    return <FileDownloadButtonAutoOriginal {...props} onClick={onClick} tooltip={tooltip} />;
+    return <FileDownloadButtonAutoOriginal {..._.omit(props, 'canDownloadStatuses')} canDownloadStatuses={canDownloadStatuses} onClick={onClick} tooltip={tooltip} />;
 }
-FileDownloadButtonAuto.defaultProps = {
-    'canDownloadStatuses' : [
-        'uploaded',
-        'pre-release',
-        'released',
-        'replaced',
-        'submission in progress',
-        'released to project',
-        'archived'
-    ]
-};

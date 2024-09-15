@@ -93,15 +93,11 @@ function MetricsViewItemIcon({ resultStr = "UNKNOWN", extraIconClassName = "" })
     }
 }
 
-export const MetricsView = React.memo(function MetricsView({ metrics }){
-    return (
-        <div className="metrics-view row">
-            { _.map(metrics || [], (m,i) => <MetricsViewItem metric={m} key={m.key || m.title || i} />) }
-        </div>
-    );
-});
-MetricsView.defaultProps = {
-    'metrics' : [
-        { 'key' : 'something', 'title' : 'Some Thing', 'result' : 'PASS' }
-    ]
-};
+export const MetricsView = React.memo(
+    function MetricsView({ metrics = [{ 'key': 'something', 'title': 'Some Thing', 'result': 'PASS' }] }) {
+        return (
+            <div className="metrics-view row">
+                {_.map(metrics || [], (m, i) => <MetricsViewItem metric={m} key={m.key || m.title || i} />)}
+            </div>
+        );
+    });

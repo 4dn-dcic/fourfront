@@ -6,15 +6,18 @@ import url from 'url';
 import queryString from 'query-string';
 import _ from 'underscore';
 import memoize from 'memoize-one';
+import Dropdown from 'react-bootstrap/esm/Dropdown';
+import Button from 'react-bootstrap/esm/Button'; // TODO: Use plain HTML w. bootstrap classNames in place of this.
+import ButtonGroup from 'react-bootstrap/esm/ButtonGroup';
 
 import { Checkbox } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/Checkbox';
 import { console, object, ajax, analytics, memoizedUrlParse, logger } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { requestAnimationFrame as raf } from '@hms-dbmi-bgm/shared-portal-components/es/components/viz/utilities';
 
-import { Schemas, typedefs } from './../../../util';
+import { Schemas, typedefs, navigate } from './../../../util';
 import { allFilesFromExperimentSet, filesToAccessionTriples, fileToAccessionTriple } from './../../../util/experiments-transforms';
 import { BrowseViewSelectedFilesDownloadButton } from './SelectedFilesDownloadButton';
-import { uniqueFileCount, SelectedFilesController } from './../SelectedFilesController';
+import { uniqueFileCount, uniqueFileCountBySource, SelectedFilesController } from './../SelectedFilesController';
 
 // eslint-disable-next-line no-unused-vars
 const { Item } = typedefs;
@@ -49,15 +52,30 @@ export class SelectAllFilesButton extends React.PureComponent {
         'experiments_in_set.processed_files.@id',
         'experiments_in_set.processed_files.@type',
         'experiments_in_set.processed_files.file_type_detailed',
+
+        'experiments_in_set.other_processed_files.files.accession',
+        'experiments_in_set.other_processed_files.files.display_title',
+        'experiments_in_set.other_processed_files.files.@id',
+        'experiments_in_set.other_processed_files.files.@type',
+        'experiments_in_set.other_processed_files.files.file_type_detailed',
+
+        'other_processed_files.files.accession',
+        'other_processed_files.files.display_title',
+        'other_processed_files.files.@id',
+        'other_processed_files.files.@type',
+        'other_processed_files.files.file_type_detailed',
     ];
 
     constructor(props){
         super(props);
         this.isAllSelected = this.isAllSelected.bind(this);
         this.handleSelectAll = this.handleSelectAll.bind(this);
+        this.handleSelectAllBySourceClick = this.handleSelectAllBySourceClick.bind(this);
+        this.menuItemIconClassName = this.menuItemIconClassName.bind(this);
         this.state = { 'selecting' : false };
         this.memoized = {
-            uniqueFileCount: memoize(uniqueFileCount)
+            uniqueFileCount: memoize(uniqueFileCount),
+            uniqueFileCountBySource: memoize(uniqueFileCountBySource)
         };
     }
 
@@ -78,8 +96,8 @@ export class SelectAllFilesButton extends React.PureComponent {
         return false;
     }
 
-    handleSelectAll(evt){
-        const { selectFile, selectedFiles, resetSelectedFiles, href, context, totalFilesCount } = this.props;
+    handleSelectAll(includeRawFiles = true, includeProcessedFiles = true, includeSupplementaryFiles = true){
+        const { selectFile, resetSelectedFiles, href, context } = this.props;
         if (typeof selectFile !== 'function' || typeof resetSelectedFiles !== 'function'){
             logger.error("No 'selectFiles' or 'resetSelectedFiles' function prop passed to SelectedFilesController.");
             throw new Error("No 'selectFiles' or 'resetSelectedFiles' function prop passed to SelectedFilesController.");
@@ -98,8 +116,7 @@ export class SelectAllFilesButton extends React.PureComponent {
                     let allExtendedFiles;
                     let filesToSelect;
                     if (extData.item_list_name === 'browse') {
-
-                        allExtendedFiles = _.reduce(resp['@graph'] || [], (m, v) => m.concat(allFilesFromExperimentSet(v, true)), []);
+                        allExtendedFiles = _.reduce(resp['@graph'] || [], (m, v) => m.concat(allFilesFromExperimentSet(v, includeRawFiles, includeProcessedFiles, includeSupplementaryFiles)), []);
                         filesToSelect = _.zip(filesToAccessionTriples(allExtendedFiles, true, true), allExtendedFiles);
                     } else {
                         allExtendedFiles =(resp['@graph'] || []);
@@ -132,26 +149,97 @@ export class SelectAllFilesButton extends React.PureComponent {
         });
     }
 
+    handleSelectAllBySourceClick(selectType){
+        const { resetSelectedFiles } = this.props;
+        switch (selectType) {
+            case 'clear':
+                resetSelectedFiles();
+                this.setState({ 'selecting' : false });
+                break;
+            case 'raw-files':
+                this.handleSelectAll(true, false, false);
+                break;
+            case 'processed-files':
+                this.handleSelectAll(false, true, false);
+                break;
+            case 'supplementary-files':
+                this.handleSelectAll(false, false, true);
+                break;
+            default:
+                this.handleSelectAll(true, true, true);
+                break;
+        }
+    }
+
+    menuItemIconClassName(allSelected){
+        const { selecting } = this.state;
+        return "mr-05 icon icon-fw icon-" + (selecting ? 'circle-notch icon-spin fas' : (!allSelected ? 'square far' : 'check-square far'));
+    }
+
     render(){
+        const { href, selectedFiles, totalRawFilesCount = 0, totalProcessedFilesCount = 0, totalOPFCount = 0 } = this.props;
         const { selecting } = this.state;
         const isAllSelected = this.isAllSelected();
+        const anySelected = selectedFiles && Object.keys(selectedFiles).length > 0;
+        let isAllRawFilesSelected = isAllSelected, isAllProcessedFilesSelected = isAllSelected, isAllSupplementaryFilesSelected = isAllSelected;
+        // get actual counts when it is necessary, e.g. some files selected but not all
+        if (!isAllSelected && anySelected) {
+            const countsBySource = this.memoized.uniqueFileCountBySource(selectedFiles);
+            isAllRawFilesSelected = totalRawFilesCount > 0 && ((countsBySource['raw'] || 0) === totalRawFilesCount);
+            isAllProcessedFilesSelected = totalProcessedFilesCount > 0 && ((countsBySource['processed'] || 0) === totalProcessedFilesCount);
+            isAllSupplementaryFilesSelected = totalOPFCount > 0 && ((countsBySource['supplementary'] || 0) === totalOPFCount);
+        }
         const isEnabled = this.isEnabled();
-        const iconClassName = (
-            "mr-05 icon icon-fw icon-" + (selecting ? 'circle-notch icon-spin fas' : (isAllSelected ? 'square far' : 'check-square far'))
+        const disabled = selecting || (!isAllSelected && !isEnabled);
+        const btnIconClassName = "mr-05 icon icon-fw icon-" + (selecting ? 'circle-notch icon-spin fas' : (isAllSelected ? 'square far' : 'check-square far'));
+        const hideToggle = !navigate.isBrowseHref(href);
+
+        let tooltip = null;
+        if (!isAllSelected && !isEnabled) {
+            tooltip = `"Select All" is disabled since the total file count exceeds the upper limit: ${SELECT_ALL_LIMIT}`;
+        } else if (!isAllSelected) {
+            tooltip = 'Select All Files';
+        }
+        const variant = isAllSelected ? 'outline-primary' : 'primary';
+
+        const title = (
+            <React.Fragment>
+                <i className={btnIconClassName} />
+                <span className="d-none d-md-inline text-400">{isAllSelected ? 'Deselect' : 'Select'} </span>
+                <span className="text-600">All</span>
+            </React.Fragment>
         );
-        const cls = "btn " + (isAllSelected ? "btn-outline-primary" : "btn-primary");
-        const tooltip = (!isAllSelected && !isEnabled) ? `"Select All" is disabled since the total file count exceeds the upper limit: ${SELECT_ALL_LIMIT}` : null;
+
+        let options = [
+            { label: `Select All Raw Files (${totalRawFilesCount})`, key: 'raw-files', iconClassName: this.menuItemIconClassName(isAllRawFilesSelected), hidden: totalRawFilesCount === 0 },
+            { label: `Select All Processed Files (${totalProcessedFilesCount})`, key: 'processed-files', iconClassName: this.menuItemIconClassName(isAllProcessedFilesSelected), hidden: totalProcessedFilesCount === 0 },
+            { label: `Select All Supplementary Files (${totalOPFCount})`, key: 'supplementary-files', iconClassName: this.menuItemIconClassName(isAllSupplementaryFilesSelected), hidden: totalOPFCount === 0 },
+            { label: 'Clear Selection', key: 'clear', iconClassName: 'mr-05 icon icon-fw far icon-times-circle', hidden: !anySelected, hasDivider: true },
+        ];
+        options = _.filter(options, function (opt) { return !opt.hidden; });
 
         return (
             <div className="pull-left box selection-buttons">
-                <div className="btn-group">
-                    <button type="button" id="select-all-files-button" disabled={selecting || (!isAllSelected && !isEnabled)}
-                        className={cls} onClick={this.handleSelectAll} data-tip={tooltip}>
-                        <i className={iconClassName}/>
-                        <span className="d-none d-md-inline text-400">{ isAllSelected ? 'Deselect' : 'Select' } </span>
-                        <span className="text-600">All</span>
-                    </button>
-                </div>
+                <Dropdown as={ButtonGroup}>
+                    <Button id="select-all-files-button" variant={variant} data-tip={tooltip} onClick={this.handleSelectAll} disabled={disabled}>{title}</Button>
+                    {!hideToggle &&
+                        <React.Fragment>
+                            <Dropdown.Toggle split variant={variant} disabled={disabled} />
+                            <Dropdown.Menu>
+                                {
+                                    options.map((item, index) => (
+                                        <React.Fragment key={item.key}>
+                                            { item.hasDivider === true ? <Dropdown.Divider key={"divider-" + item.key} /> : null }
+                                            <Dropdown.Item key={'item-' + item.key} disabled={item.disabled} onClick={() => this.handleSelectAllBySourceClick(item.key)}>
+                                                <span><i className={item.iconClassName || ''} />&nbsp;  {item.label}</span>
+                                            </Dropdown.Item>
+                                        </React.Fragment>
+                                    ))
+                                }
+                            </Dropdown.Menu>
+                        </React.Fragment>
+                    }
+                </Dropdown>
             </div>
         );
     }
@@ -288,26 +376,32 @@ export const SelectedFilesControls = React.memo(function SelectedFilesControls(p
     } = props;
     const selectedFileProps = SelectedFilesController.pick(props);
 
-    let totalUniqueFilesCount;
+    let totalUniqueAllFilesCount = 0, totalUniqueRawFilesCount = 0, totalUniqueProcessedFilesCount = 0, totalUniqueOPFCount = 0;
     if (Array.isArray(context['@type']) && context['@type'].indexOf('FileSearchResults') > -1) {
-        totalUniqueFilesCount = context.total || 0;
+        totalUniqueAllFilesCount = context.total || 0;
     } else {
         const barPlotData = (barplot_data_filtered || barplot_data_unfiltered);
         // This gets unique file count from ES aggs. In future we might be able to get total including
         // duplicates, in which case should change up logic downstream from this component for e.g. `isAllSelected`
         // in SelectAllFilesButton & similar.
-        totalUniqueFilesCount = (barPlotData && barPlotData.total && barPlotData.total.files) || 0;
+        if (barPlotData && barPlotData.total) {
+            totalUniqueAllFilesCount = barPlotData.total.files || 0;
+            totalUniqueRawFilesCount = barPlotData.total.files_raw || 0;
+            totalUniqueProcessedFilesCount = barPlotData.total.files_processed || 0;
+            totalUniqueOPFCount = barPlotData.total.files_opf || 0;
+        }
     }
 
     return (
         // This rendered within a row by AboveTableControlsBase.js
         // TODO maybe refactor some of this stuff to be simpler.
         <div className="col">
-            <SelectAllFilesButton {...selectedFileProps} {...{ href, context }} totalFilesCount={totalUniqueFilesCount} />
+            <SelectAllFilesButton {...selectedFileProps} {...{ href, context }} totalFilesCount={totalUniqueAllFilesCount}
+                totalRawFilesCount={totalUniqueRawFilesCount} totalProcessedFilesCount={totalUniqueProcessedFilesCount} totalOPFCount={totalUniqueOPFCount} />
             <div className="pull-left box selection-buttons">
                 <div className="btn-group">
-                    <BrowseViewSelectedFilesDownloadButton {...{ selectedFiles, subSelectedFiles, context, session }} totalFilesCount={totalUniqueFilesCount} />
-                    <SelectedFilesFilterByButton totalFilesCount={totalUniqueFilesCount} onFilterFilesByClick={props.panelToggleFxns.filterFilesBy}
+                    <BrowseViewSelectedFilesDownloadButton {...{ selectedFiles, subSelectedFiles, context, session }} totalFilesCount={totalUniqueAllFilesCount} />
+                    <SelectedFilesFilterByButton totalFilesCount={totalUniqueAllFilesCount} onFilterFilesByClick={props.panelToggleFxns.filterFilesBy}
                         active={currentOpenPanel === "filterFilesBy"} // <- must be boolean
                         {...selectedFileProps} {...{ currentFileTypeFilters, setFileTypeFilters, currentOpenPanel }} />
                 </div>

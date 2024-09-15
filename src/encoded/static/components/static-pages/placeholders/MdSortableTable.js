@@ -464,15 +464,17 @@ class SortableTableHeaderItem extends React.PureComponent {
         setHeaderWidths: PropTypes.func.isRequired,
         index: PropTypes.number.isRequired,
         width: PropTypes.number.isRequired,
-    }
+    };
 
     static defaultProps = {
         sortable: true
-    }
+    };
 
     constructor(props){
         super(props);
         _.bindAll(this, 'onDrag', 'onStop');
+        // workaround for "findDOMNode is deprecated in StrictMode" error: https://stackoverflow.com/a/63603903
+        this.nodeRef = React.createRef(null);
     }
 
     onDrag(event, res){
@@ -521,8 +523,8 @@ class SortableTableHeaderItem extends React.PureComponent {
                     <span className="column-title">{header}</span>
                     <span className={"column-sort-icon" + (['asc', 'desc'].indexOf(sorting) > -1 ? ' active' : '')}>{sortIcon}</span>
                 </div>
-                <Draggable position={{ x: width, y: 0 }} axis="x" onDrag={this.onDrag} onStop={this.onStop}>
-                    <div className="width-adjuster" />
+                <Draggable position={{ x: width, y: 0 }} axis="x" onDrag={this.onDrag} onStop={this.onStop} nodeRef={this.nodeRef}>
+                    <div className="width-adjuster" ref={this.nodeRef} />
                 </Draggable>
             </div>
         );

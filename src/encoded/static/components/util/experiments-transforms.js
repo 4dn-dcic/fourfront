@@ -200,6 +200,7 @@ export function allProcessedFilesFromExperiments(experiments){
     return _.reduce(experiments || [], function(m, exp){
         var processed_files_for_exp = _.map(exp.processed_files || [], function(pF){
             pF = _.clone(pF);
+            pF.from_source = 'processed';
             pF.from_experiment = exp;
             return pF;
         });
@@ -222,6 +223,7 @@ export function allProcessedFilesFromExperimentSet(experiment_set){
 
     return _.map(experiment_set.processed_files || [], function(pF){
         pF = _.clone(pF);
+        pF.from_source = 'processed';
         pF.from_experiment_set = experiment_set;
         if (typeof pF.from_experiment === 'undefined') {
             pF.from_experiment = {
@@ -233,6 +235,57 @@ export function allProcessedFilesFromExperimentSet(experiment_set){
         return pF;
     }).concat(
         allProcessedFilesFromExperiments(
+            _.map(experiment_set.experiments_in_set || [], function(exp){
+                if (typeof exp.from_experiment_set === 'undefined'){
+                    return _.extend({}, exp, { 'from_experiment_set' : experiment_set });
+                }
+                return exp;
+            })
+        )
+    );
+}
+
+export function allOtherProcessedFilesFromExperiments(experiments){
+    return _.reduce(experiments || [], function(m, exp){
+        const expOtherProcessedFiles = _.flatten(_.map(exp.other_processed_files || [], function (opf) {
+            return opf.files || [];
+        }));
+        var other_processed_files_for_exp = _.map(expOtherProcessedFiles || [], function(pF){
+            pF = _.clone(pF);
+            pF.from_source = 'supplementary';
+            pF.from_experiment = exp;
+            return pF;
+        });
+
+        return m.concat(other_processed_files_for_exp);
+    }, []);
+}
+
+export function allOtherProcessedFilesFromExperimentSet(experiment_set){
+
+    // Add in Exp Bio & Tec Rep Nos, if available.
+    if (Array.isArray(experiment_set.replicate_exps) && Array.isArray(experiment_set.experiments_in_set)){
+        experiment_set = combineExpsWithReplicateNumbersForExpSet(experiment_set);
+    }
+
+    const expSetOtherProcessedFiles = _.flatten(_.map(experiment_set.other_processed_files || [], function (opf) {
+        return opf.files || [];
+    }));
+
+    return _.map(expSetOtherProcessedFiles || [], function(pF){
+        pF = _.clone(pF);
+        pF.from_source = 'supplementary';
+        pF.from_experiment_set = experiment_set;
+        if (typeof pF.from_experiment === 'undefined') {
+            pF.from_experiment = {
+                // Extend w/ dummy experiment to make accession triples with (these will have NONE in place of (middle) exp accession).
+                'accession' : "NONE",
+                'from_experiment_set' : pF.from_experiment_set
+            };
+        }
+        return pF;
+    }).concat(
+        allOtherProcessedFilesFromExperiments(
             _.map(experiment_set.experiments_in_set || [], function(exp){
                 if (typeof exp.from_experiment_set === 'undefined'){
                     return _.extend({}, exp, { 'from_experiment_set' : experiment_set });
@@ -424,23 +477,19 @@ export function allFilesFromExperiment(experiment, includeProcessedFiles = false
         filesToReturn = filesToReturn.concat(allProcessedFilesFromExperiments([experiment]));
     }
     return _.map(filesToReturn, function(f){
-        return _.extend({}, f, { 'from_experiment' : f.from_experiment || experiment });
+        return _.extend({}, f, { 'from_experiment' : f.from_experiment || experiment, 'from_source': f.from_source || 'raw' });
     });
 }
 
 /**
  * Returns all files from an Experiment Set Item.
- * Excludes other_processed_files.
- *
- * @todo (Possibly) Add param/feature to include other processed files.
  */
-export function allFilesFromExperimentSet(expSet, includeProcessedFiles = false){
+export function allFilesFromExperimentSet(expSet, includeRawFiles = true, includeProcessedFiles = false, includeOtherProcessedFiles = false){
+    const rawFiles = includeRawFiles ? _.reduce(experimentsFromExperimentSet(expSet), function (m, exp) { return m.concat(allFilesFromExperiment(exp)); }, []) : [];
     const processedFiles = includeProcessedFiles ? reduceProcessedFilesWithExperimentsAndSets(allProcessedFilesFromExperimentSet(expSet)) : [];
-    const rawFiles = _.reduce(experimentsFromExperimentSet(expSet), function(m, exp){
-        return m.concat(allFilesFromExperiment(exp));
-    }, []);
+    const otherProcessedFiles = includeOtherProcessedFiles ? reduceProcessedFilesWithExperimentsAndSets(allOtherProcessedFilesFromExperimentSet(expSet)) : [];
 
-    return rawFiles.concat(processedFiles);
+    return rawFiles.concat(processedFiles).concat(otherProcessedFiles);
 }
 
 /** @deprecated ? */
@@ -487,11 +536,11 @@ export function groupExperimentsByBiosample(experiments){
 
 /**
  * append status column to columnHeaders if it is not included already and there are multiple status found in files
- * @param {{ columnClass: string, title: string, field: string, initialWidth: number }[]} columnHeaders 
- * @param {File[]} files 
+ * @param {{ columnClass: string, title: string, field: string, initialWidth: number }[]} columnHeaders
+ * @param {File[]} files
  * @returns object of { status, columnHeaders }. status field is string if all files have the same status otherwise string[]
  */
- export function addFilesStackedTableStatusColHeader(columnHeaders, files, collectionStatus) {
+export function addFilesStackedTableStatusColHeader(columnHeaders, files, collectionStatus) {
     if (Array.isArray(columnHeaders) && Array.isArray(collectionStatus) && !_.any(columnHeaders, (colHeader) => colHeader.field === 'status')) {
         return [ ...columnHeaders, {
             columnClass: 'file-detail', title: 'Status', initialWidth: 30, field: "status",

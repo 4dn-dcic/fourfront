@@ -203,7 +203,12 @@ Cypress.Commands.add('getQuickInfoBarCounts', function(options = { shouldNotEqua
                     const experiment_sets = parseInt(expsetCountElemText);
                     const experiments = parseInt(expCountElem.text());
                     const files = parseInt(fileCountElem.text());
-                    return { experiment_sets, experiments, files };
+                    const files_opf = parseInt(fileCountElem.attr('data-current_opf') || fileCountElem.attr('data-total_opf'));
+                    Cypress.log({
+                        'name' : "QuickInfoBar Counts",
+                        'message' : JSON.stringify({ experiment_sets, experiments, files, files_opf })
+                    });
+                    return { experiment_sets, experiments, files, files_opf };
                 });
             });
         });

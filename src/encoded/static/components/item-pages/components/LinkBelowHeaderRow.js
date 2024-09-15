@@ -19,17 +19,14 @@ export const SOPBelowHeaderRow = React.memo(function SOPBelowHeaderRow({ sop }){
 });
 
 
-export const LinkBelowHeaderRow = React.memo(function LinkBelowHeaderRow({ url, title, singularTitle, iconClass }){
-    if (!url) return null;
-    return (
-        <FormattedInfoWrapper isSingleItem {...{ singularTitle, iconClass }}>
-            <h5 className="block-title mt-1">
-                <a href={url} target="_blank" rel="noopener noreferrer">{ title || url }</a>
-            </h5>
-        </FormattedInfoWrapper>
-    );
-});
-LinkBelowHeaderRow.defaultProps = {
-    "singularTitle" : "Reference Protocol",
-    "iconClass" : "file fas"
-};
+export const LinkBelowHeaderRow = React.memo(
+    function LinkBelowHeaderRow({ url, title, singularTitle = "Reference Protocol", iconClass = "file fas" }) {
+        if (!url) return null;
+        return (
+            <FormattedInfoWrapper isSingleItem {...{ singularTitle, iconClass }}>
+                <h5 className="block-title mt-1">
+                    <a href={url} target="_blank" rel="noopener noreferrer">{title || url}</a>
+                </h5>
+            </FormattedInfoWrapper>
+        );
+    });

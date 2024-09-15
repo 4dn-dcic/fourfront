@@ -230,7 +230,7 @@ export class FileOverviewHeading extends React.PureComponent {
 
 
 export function FileViewDownloadButtonContainer(props){
-    const { className, size, file, context, result, session } = props;
+    const { className, size = null, file, context, result, session } = props;
     const fileToUse = file || context || result;
     return (
         <div className={"file-download-container" + (className ? " " + className : "")}>
@@ -238,7 +238,6 @@ export function FileViewDownloadButtonContainer(props){
         </div>
     );
 }
-FileViewDownloadButtonContainer.defaultProps = { "size" : null };
 
 
 export class ExternalVisualizationButtons extends React.PureComponent {

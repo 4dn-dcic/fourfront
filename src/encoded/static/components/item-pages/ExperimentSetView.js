@@ -99,7 +99,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
 
         const processedFiles = this.allProcessedFilesFromExperimentSet(context);
         const processedFilesUniqeLen = (processedFiles && processedFiles.length && ProcessedFilesStackedTableSection.allFilesUniqueCount(processedFiles)) || 0;
-        const rawFiles = this.allFilesFromExperimentSet(context, false);
+        const rawFiles = this.allFilesFromExperimentSet(context);
         const rawFilesUniqueLen = (rawFiles && rawFiles.length && RawFilesStackedTableSection.allFilesUniqueCount(rawFiles)) || 0;
         const width = this.getTabViewWidth();
 
@@ -136,10 +136,6 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
 
         // Supplementary Files Tab
         if (ExperimentSetView.shouldShowSupplementaryFilesTabView(context)){
-            //const referenceFiles = SupplementaryFilesTabView.allReferenceFiles(context) || [];
-            //const opfCollections = SupplementaryFilesTabView.combinedOtherProcessedFiles(context) || [];
-            //const allOpfFiles = _.reduce(opfCollections, function (memo, coll) { return memo.concat(coll.files || []); }, []);
-            //const allFiles = referenceFiles.concat(allOpfFiles);
             tabs.push({
                 tab : <span><i className="icon icon-copy far icon-fw"/> Supplementary Files</span>,
                 key : 'supplementary-files',
@@ -340,9 +336,10 @@ class ProcessedFilesStackedTableSection extends React.PureComponent {
                 const nameTitle = (exp && typeof exp.display_title === 'string' && exp.display_title.replace(' - ' + exp.accession, '')) || exp.accession;
                 const experimentAtId = object.atIdFromObject(exp);
                 const replicateNumbersExists = exp && exp.bio_rep_no && exp.tec_rep_no;
+                const key = `${experimentAtId || 'exp-set'}-${replicateNumbersExists ? (exp.bio_rep_no + '-' + exp.tec_rep_no) : 'norep' }`;
 
                 return (
-                    <StackedBlockName className={replicateNumbersExists ? "double-line" : ""}>
+                    <StackedBlockName className={replicateNumbersExists ? "double-line" : ""} key={key}>
                         {replicateNumbersExists ? <div>Bio Rep <b>{exp.bio_rep_no}</b>, Tec Rep <b>{exp.tec_rep_no}</b></div> : <div />}
                         {experimentAtId ? <a href={experimentAtId} className="name-title text-500">{nameTitle}</a> : <div className="name-title">{nameTitle}</div>}
                     </StackedBlockName>
@@ -403,8 +400,8 @@ const ExperimentsWithoutFilesStackedTable = React.memo(function ExperimentsWitho
 
     const tableProps = { 'columnHeaders': ProcessedFilesStackedTableSection.expsNotAssociatedWithFileColumnHeaders };
     const expsWithReplicateExps = expFxn.combineWithReplicateNumbers(context.replicate_exps || [], expsNotAssociatedWithAnyFiles);
-    const experimentBlock = expsWithReplicateExps.map((exp) => {
-        const content = _.map(ProcessedFilesStackedTableSection.expsNotAssociatedWithFileColumnHeaders, function (col, idx) {
+    const experimentBlock = expsWithReplicateExps.map((exp, expIdx) => {
+        const content = _.map(ProcessedFilesStackedTableSection.expsNotAssociatedWithFileColumnHeaders, function (col, colIdx) {
             if (col.render && typeof col.render === 'function') { return col.render(exp); }
             else {
                 /**
@@ -414,15 +411,15 @@ const ExperimentsWithoutFilesStackedTable = React.memo(function ExperimentsWitho
                  * some props from parent element into 'div' element assuming it is a React component, in case it is not.
                  */
                 return (
-                    <React.Fragment>
-                        <div className={"col-" + col.columnClass + " item detail-col" + idx} style={{ flex: '1 0 ' + col.initialWidth + 'px' }}>{'-'}</div>
+                    <React.Fragment key={'no-renderer-' + colIdx}>
+                        <div className={"col-" + col.columnClass + " item detail-col" + colIdx} style={{ flex: '1 0 ' + col.initialWidth + 'px' }}>{'-'}</div>
                     </React.Fragment>
                 );
             }
         });
         return (
             <StackedBlock columnClass="experiment" hideNameOnHover={false}
-                key={exp.accession} label={
+                key={exp.accession + '-' + expIdx} label={
                     <StackedBlockNameLabel title={'Experiment'}
                         accession={exp.accession} subtitleVisible />
                 }>
@@ -454,7 +451,7 @@ class SupplementaryFilesOPFCollection extends React.PureComponent {
             return statuses;
         }
         return null;
-    }
+    };
 
     static getStatusAndColHeaders(columnHeaders, files) {
         const status = SupplementaryFilesOPFCollection.collectionStatus(files);
@@ -621,7 +618,11 @@ class SupplementaryFilesTabView extends React.PureComponent {
         const collectionsFromExpSet = _.map(experiment_set.other_processed_files, function(collection){
             const { files : origFiles } = collection;
             const files = _.map(origFiles || [], function(file){
-                return _.extend({ 'from_experiment_set' : experiment_set, 'from_experiment' : { 'from_experiment_set' : experiment_set, 'accession' : 'NONE' } }, file);
+                return _.extend({
+                    'from_experiment_set': experiment_set,
+                    'from_experiment': { 'from_experiment_set': experiment_set, 'accession': 'NONE' },
+                    'from_source': 'supplementary'
+                }, file);
             });
             return _.extend({}, collection, { files });
         });

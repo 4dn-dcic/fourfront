@@ -101,7 +101,8 @@
                 "imputed signal fold change",
                 "spt results",
                 "stripe calls",
-                "tri-alignments"
+                "tri-alignments",
+                "fragments"
             ],
             "ignored_enum": [
                 "contact list-combined",
@@ -111,6 +112,7 @@
                 "image mask-cytoplasm",
                 "image mask-nucleus",
                 "locus distances, submitter format",
+                "read count ratios",
                 "read counts (minus)",
                 "read counts (plus)",
                 "reads-combined",

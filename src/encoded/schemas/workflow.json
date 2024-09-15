@@ -19,6 +19,7 @@
         { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/accession" },
         { "$ref": "mixins.json#/notes" },
+        { "$ref": "mixins.json#/tags" },
         { "$ref": "mixins.json#/static_embeds" }
     ],
     "mixinFacets" : [
@@ -80,6 +81,11 @@
             "title": "SBG CWL Path",
             "description": "Path to the SBG CWL file for the workflow - URL or directory path",
             "type": "string"
+        },
+        "max_runtime": {
+            "title": "Maximum Run Time",
+            "description": "The maximum time the workflow should run in hours (used by foursight)",
+            "type": "integer"
         },
         "app_name": {
             "title": "App name",
