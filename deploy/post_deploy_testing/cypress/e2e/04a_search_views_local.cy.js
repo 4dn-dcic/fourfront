@@ -449,7 +449,8 @@ describe('Deployment/CI Search View Tests', function () {
                     facetItemIndex = Math.min(1, parseInt(facetTotalCount / 3));
                 })
                 .get(".facets-body div.facet:not([data-field='']):nth-child(" + facetItemIndex + ") > h5").scrollToCenterElement().click({ force: true }).end()
-                .get(".facet.open .facet-list-element a.term .facet-item").first().click({ force: true }).end()
+                .get(".facet.open .facet-list-element a.term .facet-item").first().click({ force: true })
+                .get('.facet-list-element .facet-selector i').should('not.have.class', 'icon-spin').end()
                 .get("a#search-menu-item").click({ force: true }).end()
                 .get('form.navbar-search-form-container button#search-item-type-selector').click().end()
                 .get('form.navbar-search-form-container div.dropdown-menu a[data-key="Within"]').click().end()
