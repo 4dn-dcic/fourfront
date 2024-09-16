@@ -38,20 +38,21 @@ describe('Post-Deployment Search View Tests', function () {
         });
 
         it('Filter by "Type" filter icon within search results', function () {
-            cy.visit('/search/?type=Item').wait(1000);//required
-            let typeTitle;
+            cy.visit('/search/?type=Item');
+            cy.get('.facet-list li.facet-list-element[data-key="File"] .facet-item').should('have.text', 'Data file').end();
             cy.searchPageTotalResultCount().then((totalCountExpected) => {
                 const intervalCount = Math.floor(Math.random() * 5);//Math.min(5, parseInt(totalCountExpected / 25));
                 cy.get('.search-result-row.detail-closed[data-row-number="' + intervalCount + '"] .search-result-column-block[data-field="@type"] .item-type-title').then(function ($typeTitle) {
-                    typeTitle = $typeTitle.text().replace(/\s/g,'').replace(/([A-Z])/g, ' $1').replace('Hi Glass', 'HiGlass').trim();
-                    cy.log('typeTitle:' + typeTitle);
+                    const typeTitle = $typeTitle.text();
+                    const separator = typeTitle.includes(' ') ? ' ' : '';
 
                     cy.get('.search-result-row.detail-closed[data-row-number="' + intervalCount + '"] .search-result-column-block[data-field="@type"] .icon-container .icon').click({ force: true }).end();
-                    cy.get('#page-title-container .page-title').should('contain', typeTitle)
-                        .get('.facets-body .facet[data-field="type"] .term[data-selected=true] .facet-item').then(function ($selectedTypeTitle) {
-                            const selectedTypeTitle = $selectedTypeTitle.text().trim();
-                            cy.expect(typeTitle).equal(selectedTypeTitle);
-                        });
+                    cy.get('#slow-load-container').should('not.have.class', 'visible').end();
+                    cy.get('#page-title-container .page-title').should('contain', typeTitle).end();
+                    cy.get('.facets-body .facet[data-field="type"] .term[data-selected=true] .facet-item').should('contain', separator).then(function ($selectedTypeTitle) {
+                        const selectedTypeTitle = $selectedTypeTitle.text().trim();
+                        cy.expect(typeTitle).equal(selectedTypeTitle);
+                    });
                 }).end();
 
             });
