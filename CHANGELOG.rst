@@ -6,6 +6,13 @@ fourfront
 Change Log
 ----------
 
+
+8.1.4
+=====
+
+* Bug fix to correct disease_name test inserts used in local deploy
+
+
 8.1.3
 =====
 
