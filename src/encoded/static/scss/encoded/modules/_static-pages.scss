@@ -1,3 +1,4 @@
+@use "sass:math";
 
 /**********************************************************
 		Common static page components & styles
@@ -1600,7 +1601,7 @@ $carousel-height : 240px;
 
 .homepage-carousel-placeholder {
 	height: $carousel-height;
-	padding-top: (($carousel-height - 60px) / 2);
+	padding-top: math.div(($carousel-height - 60px), 2);
 	margin-top: 45px;
 	margin-bottom: 60px;
 	> i {
