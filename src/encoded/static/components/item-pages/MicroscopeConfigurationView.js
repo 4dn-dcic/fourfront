@@ -559,7 +559,7 @@ export class MicroMetaTabView extends React.PureComponent {
         const { isFullscreen, context, windowWidth, windowHeight } = this.props;
         const { modal } = this.state;
 
-        const width = isFullscreen ? windowWidth - 40 : layout.gridContainerWidth(windowWidth);
+        const width = isFullscreen ? windowWidth - 40 : (layout.gridContainerWidth(windowWidth) - 20);
         const height = isFullscreen ? Math.max(800, windowHeight - 120) : Math.max(800, windowHeight / 2);
 
         const microscopeConfig = JSON.parse(JSON.stringify(context.microscope || {}));
@@ -914,7 +914,7 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
                     <div className="row summary-sub-header">
                         <div className="col summary-title-column text-truncate">MetaData</div>
                         <div className={columClassName + " summary-title-column"}>
-                            <DropdownButton title={matches[firstVisibleMatchIndex].Name} variant="outline-secondary btn-block text-left"
+                            <DropdownButton title={matches[firstVisibleMatchIndex].Name} variant="outline-secondary btn-block text-start"
                                 size="md" className="w-100" onSelect={this.handleMatchSelection}>
                                 {
                                     _.map(matches, function (match, idx) {

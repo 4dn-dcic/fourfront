@@ -257,7 +257,7 @@ class RecentlyReleasedDataSets extends React.PureComponent {
                                         </div>
                                         <div className="search-result-column-block" data-col="lab">
                                             <div className="inner">
-                                                <span className="value text-left">{labs}</span>
+                                                <span className="value text-start">{labs}</span>
                                             </div>
                                         </div>
                                     </div>
