@@ -62,7 +62,7 @@ $navbar-link-active-background-color: #eee;
     }
 }
 @mixin navbar-static-position {
-    @include media-breakpoint-down(sm) {
+    @include media-breakpoint-down(md) {
         @content;
     }
 }

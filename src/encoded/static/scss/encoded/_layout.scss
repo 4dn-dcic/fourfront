@@ -262,7 +262,7 @@ h1.page-title {
 			display: inline-block;
 			vertical-align: middle;
 
-			@include media-breakpoint-down(sm){
+			@include media-breakpoint-down(md){
 				display: block;
 			}
 

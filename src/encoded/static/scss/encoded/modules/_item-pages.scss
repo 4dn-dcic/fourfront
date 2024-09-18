@@ -344,9 +344,9 @@ i.item-status-indicator-dot {
 			font-weight: 300;
 		}
 
-		@include media-breakpoint-down(sm){
+		@include media-breakpoint-down(md){
 	
-			.item-label-extra.text-right {
+			.item-label-extra.text-end {
 				text-align: left !important;
 			}
 	
@@ -364,7 +364,7 @@ i.item-status-indicator-dot {
 				align-items: center;
 
 		
-				@include media-breakpoint-down(sm){
+				@include media-breakpoint-down(md){
 					/* Becomes row (not col) at this size, move closer to title */
 					min-height: 50px;
 					padding-top: 5px;
@@ -395,7 +395,7 @@ i.item-status-indicator-dot {
 				justify-content: flex-end;
 				min-height: 40px;
 
-				@include media-breakpoint-down(sm){
+				@include media-breakpoint-down(md){
 					/* Becomes row (not col) at this size, move closer to title */
 					justify-content: flex-start;
 				}
@@ -779,7 +779,7 @@ i.item-status-indicator-dot {
 
 	}
 
-	@include media-breakpoint-down(sm){
+	@include media-breakpoint-down(md){
 		/* Deprecated ? */
 		.array-group .array-group-row.list-item:not(.first-item) {
 			.item-label {
@@ -984,7 +984,7 @@ pre.curl-command {
 }
 
 // Tablet & mobile screen size adjustments
-@include media-breakpoint-down(md){
+@include media-breakpoint-down(lg){
 	.files-in-set-table .row > .download-button {
 		margin-bottom: -50px;
 	}
@@ -1954,7 +1954,7 @@ $badge-item-min-height: 90px;
 				}
 
 				.download-button-container.exists + h3.node-file-title {
-					@include media-breakpoint-down(lg){
+					@include media-breakpoint-down(xl){
 						padding-right: 30px;
 					}
 				}
@@ -2162,7 +2162,7 @@ $badge-item-min-height: 90px;
 		height: 46px;
 		font-size: 1.25rem;
 		font-weight: 500;
-		@include media-breakpoint-down(sm){
+		@include media-breakpoint-down(md){
 			.text-truncate {
 				overflow-y: auto !important;
 			}
@@ -2204,7 +2204,7 @@ $badge-item-min-height: 90px;
 			background-color: #dedede;
 			padding-top: 10px;
 
-			@include media-breakpoint-down(sm){
+			@include media-breakpoint-down(md){
 				max-width: 33% !important;
 			}
 		}
@@ -2213,7 +2213,7 @@ $badge-item-min-height: 90px;
 			font-weight: 300;
 			border-right: 1px dotted rgba(0,0,0,.075);
 			
-			@include media-breakpoint-down(sm){
+			@include media-breakpoint-down(md){
 				max-width: 66% !important;
 			}
 		}
@@ -2316,7 +2316,7 @@ div.user-profile-page {
 
 		// Override of prev CSS
 		.col-md-3.text-end.text-left-xs {
-			@include media-breakpoint-down(sm){
+			@include media-breakpoint-down(md){
 				text-align: left !important;
 			}
 		}
@@ -2405,7 +2405,7 @@ div.user-profile-page {
 			}
 		}
 
-		@include media-breakpoint-down(sm){
+		@include media-breakpoint-down(md){
 
 			.user-title-col {
 				padding-top: 2px;
@@ -2454,7 +2454,7 @@ div.user-profile-page {
 				}
 			}
 
-			@include media-breakpoint-down(sm){
+			@include media-breakpoint-down(md){
 				img.gravatar {
 					width: 94px; /* Account for border */
 					height: 70px;

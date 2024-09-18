@@ -111,7 +111,7 @@ table.matrix {
 		margin-left: 5px;
 	}
 
-	@include media-breakpoint-down(sm){
+	@include media-breakpoint-down(md){
 		h3.tab-section-title .tab-section-subtitle {
 			display: none;
 		}
@@ -148,7 +148,7 @@ table.matrix {
 	.files-tables-container {
 
 		// Only when present on item page(s)
-		@include media-breakpoint-down(sm){
+		@include media-breakpoint-down(md){
 			.item-page-table-row-container & {
 				border-bottom: 1px solid #ddd;
 			}
@@ -158,7 +158,7 @@ table.matrix {
 		.processed-files-table-section {
 			border-top: 1px solid #ddd;
 
-			@include media-breakpoint-down(sm){
+			@include media-breakpoint-down(md){
 				h3.tab-section-title .tab-section-subtitle {
 					display: none;
 				}
