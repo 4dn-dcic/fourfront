@@ -53,7 +53,7 @@ class Body extends React.PureComponent {
         const renderedActions = _.map(actions, (action, i, a)=>{
             const title = typeof action.title === 'function' ? action.title(this.props) : action.title;
             const disabled = typeof action.disabled === 'function' ? action.disabled(this.props) : action.disabled;
-            const cls = "btn btn-primary btn-sm" + (a.length < 2 ? " btn-block" : "");
+            const cls = "btn btn-primary btn-sm" + (a.length < 2 ? " w-100" : "");
             return (
                 <div className={"button-container col-" + colWidth} key={title || i}>
                     <div className={a.length < 2 ? "d-grid gap-1" : ""}>

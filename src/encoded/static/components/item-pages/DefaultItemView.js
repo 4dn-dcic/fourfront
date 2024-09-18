@@ -442,7 +442,7 @@ const EmbeddedItemWithAttachment = React.memo(function EmbeddedItemWithAttachmen
     if (attachmentHref){
         viewAttachmentButton = (
             <ViewFileButton title="File" mimeType={attachmentType} filename={filename}
-                href={linkToItem + attachmentHref} disabled={!attachmentHref} className="text-truncate btn-block btn-sm btn-primary" />
+                href={linkToItem + attachmentHref} disabled={!attachmentHref} className="text-truncate w-100 btn-sm btn-primary" />
         );
     }
 

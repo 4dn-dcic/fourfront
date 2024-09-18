@@ -121,7 +121,7 @@ const FileMicOverViewBody = React.memo(function FileMicOverViewBody(props){
         }
     } else if (file.omerolink){
         thumbnailLink = (
-            <a className="btn btn-primary btn-block mt-2" href={file.omerolink} target="_blank" rel="noopener noreferrer">
+            <a className="btn btn-primary w-100 mt-2" href={file.omerolink} target="_blank" rel="noopener noreferrer">
                 View in OMERO
             </a>
         );

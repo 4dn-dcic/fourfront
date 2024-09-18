@@ -547,7 +547,7 @@ class VisualBody extends React.PureComponent {
             const linkHref = url.format(hrefParts);
 
             return (
-                <Button disabled={disabled} href={linkHref} target="_blank" bsStyle="primary" className="btn-block mt-1">View Experiment Sets</Button>
+                <Button disabled={disabled} href={linkHref} target="_blank" bsStyle="primary" className="w-100 mt-1">View Experiment Sets</Button>
             );
         }
 
@@ -558,7 +558,7 @@ class VisualBody extends React.PureComponent {
                 path = hrefParts.protocol + "//" + hrefParts.hostname + path;
             }// else will be abs path relative to current domain.
             return (
-                <Button disabled={disabled} href={path} target="_blank" bsStyle="primary" className="btn-block mt-1">View Experiment Set</Button>
+                <Button disabled={disabled} href={path} target="_blank" bsStyle="primary" className="w-100 mt-1">View Experiment Set</Button>
             );
         }
 

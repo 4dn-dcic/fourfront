@@ -278,10 +278,12 @@ const DatabaseCountsInfo = React.memo(function DatabaseCountsInfo(props){
 
     if (notYetLoaded) {
         return (
-            <button type="button" className="btn btn-block btn-lg btn-outline-dark refresh-counts-button btn-block mt-2"
-                onClick={getCounts}>
-                <i className="icon icon-fw fas icon-sync me-08"/>Get Database Counts
-            </button>
+            <div class="d-grid gap-1">
+                <button type="button" className="btn btn-lg btn-outline-dark refresh-counts-button mt-2"
+                    onClick={getCounts}>
+                    <i className="icon icon-fw fas icon-sync me-08" />Get Database Counts
+                </button>
+            </div>
         );
     }
 
@@ -307,10 +309,12 @@ const DatabaseCountsInfo = React.memo(function DatabaseCountsInfo(props){
         <React.Fragment>
             <h3 className="text-400 mb-2 mt-3">Database Counts</h3>
 
-            <button type="button" className="btn btn-outline-dark refresh-counts-button btn-block mt-2"
-                onClick={getCounts} disabled={db_es_total === 'loading...'}>
-                { btnTitle }
-            </button>
+            <div class="d-grid gap-1">
+                <button type="button" className="btn btn-outline-dark refresh-counts-button mt-2"
+                    onClick={getCounts} disabled={db_es_total === 'loading...'}>
+                    {btnTitle}
+                </button>
+            </div>
 
             <ItemDetailList {...{ excludedKeys, schemas }} context={{ db_es_compare, db_es_total }} hideButtons keyTitleDescriptionMap={keyTitleDescriptionMapCounts} />
 
