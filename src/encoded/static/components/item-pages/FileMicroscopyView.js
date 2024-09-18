@@ -217,7 +217,7 @@ function FileViewVitessce (props) {
     return (
         <div>
             <div className="row overview-blocks">
-                <VitesscePlainContainer height={800} width={1120} theme="light" config={config} />
+                <VitesscePlainContainer height={800} width={1320} theme="light" config={config} />
             </div>
         </div>
     );
