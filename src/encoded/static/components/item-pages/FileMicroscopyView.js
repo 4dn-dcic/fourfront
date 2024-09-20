@@ -4,7 +4,7 @@ import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
-import { isServerSide, console, object, ajax } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { isServerSide, console, object, ajax, layout } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { expFxn } from './../util';
 import { SearchTableTitle } from './components/tables/ItemPageTable';
 import { EmbeddedExperimentSetSearchTable } from './components/tables/ExperimentSetTables';
@@ -161,6 +161,9 @@ function FileViewVitessce (props) {
     const { context, windowWidth, width, schemas, href } = props;
     const { href: fileHref, display_title: name, description = null } = context || {};
 
+    const gridSize = layout.responsiveGridState(windowWidth);
+    const containerWidth = gridSize === 'xl' || gridSize === 'xxl' ? width : 1120;
+
     const config = useMemo(function () {
         const urlParts = url.parse(href, true);
         const baseHref = (urlParts.protocol && urlParts.host) ? urlParts.protocol + '//' + urlParts.host : '';
@@ -217,7 +220,7 @@ function FileViewVitessce (props) {
     return (
         <div>
             <div className="row overview-blocks">
-                <VitesscePlainContainer height={800} width={1320} theme="light" config={config} />
+                <VitesscePlainContainer height={800} width={containerWidth} theme="light" config={config} />
             </div>
         </div>
     );
