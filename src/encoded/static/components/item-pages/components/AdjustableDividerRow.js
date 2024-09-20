@@ -207,7 +207,7 @@ export class AdjustableDividerRow extends React.PureComponent {
         } : null;
 
         return (
-            <div className={"row adjustable-divider-row flex-nowrap" + (className ? ' ' + className : '')}>
+            <div className={"row adjustable-divider-row" + (className ? ' ' + className : '')}>
                 <div className={leftPanelCls} style={leftPanelStyle}>
                     { leftPanel }
                     { isDraggableSize ?

@@ -182,7 +182,7 @@ body.is-full-screen {
 		}
 	}
 
-	@include media-breakpoint-up(xxl){
+	@include media-breakpoint-up(xl){
 		.container {
 			width: auto;
 			max-width: none;

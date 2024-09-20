@@ -161,6 +161,14 @@ div#top-nav.navbar-fixed-top {
 
         padding: 0 10px;
 
+        // Container size for just XL -
+        @include media-breakpoint-up(xl){
+            body:not(.is-full-screen) & {
+                max-width: map-get($container-max-widths, "xl");
+                margin: 0 auto;
+            }
+        }
+
         // Container size for just XXL -
         @include media-breakpoint-up(xxl){
             body:not(.is-full-screen) & {
@@ -407,7 +415,7 @@ div#top-nav.navbar-fixed-top {
                             max-width: 100px;
                         }
 
-                        @include media-breakpoint-between(lg, xxl) {
+                        @include media-breakpoint-between(lg, xl) {
                             max-width: 150px;
                         }
 
