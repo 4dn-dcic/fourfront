@@ -7,6 +7,12 @@ Change Log
 ----------
 
 
+8.1.5
+=====
+
+* New enum "ATTO 550" in imaging_path labels.
+
+
 8.1.4
 =====
 
