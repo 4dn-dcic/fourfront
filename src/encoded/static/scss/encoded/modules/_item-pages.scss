@@ -1637,6 +1637,14 @@ $badge-item-min-height: 90px;
 						&:last-child {
 							border-bottom: none;
 						}
+
+						a {
+							text-decoration: none;
+
+							&:hover {
+								text-decoration: underline;
+							}
+						}
 					}
 
 					&.embedded-item-with-attachment-container {
