@@ -90,7 +90,7 @@ export class BasicUserContentBody extends React.PureComponent {
 
 export const EmbeddedHiglassActions = React.memo(function EmbeddedHiglassActions(props){
     const { context, parentComponentType = BasicUserContentBody, showDescription = true, constrainDescription = false } = props;
-    let cls = "btn btn-outline-dark pull-right extra-info-higlass-btn";
+    let cls = "btn btn-outline-dark pull-right extra-info-higlass-btn link-underline link-underline-opacity-0";
 
     if (parentComponentType === BasicUserContentBody) {
         cls += ' btn-sm';
