@@ -425,7 +425,7 @@ class LookupLabField extends React.PureComponent {
                         target="_blank" data-tip="View lab in new tab" rel="noopener noreferrer" style={{ verticalAlign: "middle" }}>
                         {currentLabDetails.display_title}
                     </a>
-                    &nbsp;&nbsp;<i className="icon icon-fw icon-external-link-alt fas fs-6" />
+                    &nbsp;&nbsp;<i className="icon icon-fw icon-external-link-alt fas text-small" />
                 </div>
             )
         ) || (

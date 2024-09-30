@@ -178,14 +178,14 @@ export default class StatisticsPageView extends React.PureComponent {
                 <div className="col-sm-6">
                     <a className={"link-underline link-underline-opacity-0 select-section-btn" + (currentTab === 'submissions' ? ' active' : '')}
                         href="#submissions" data-tip={currentTab === 'submissions' ? null : submissionsObj.tip} data-target-offset={110}>
-                        { submissionsObj.icon ? <i className={"me-07 fs-5 icon icon-fw icon-" + submissionsObj.icon}/> : null }
+                        { submissionsObj.icon ? <i className={"me-07 text-medium icon icon-fw icon-" + submissionsObj.icon}/> : null }
                         { submissionsObj.title }
                     </a>
                 </div>
                 <div className="col-sm-6">
                     <a className={"link-underline link-underline-opacity-0 select-section-btn" + (currentTab === 'usage' ? ' active' : '')}
                         href="#usage" data-tip={currentTab === 'usage' ? null : usageObj.tip} data-target-offset={100}>
-                        { usageObj.icon ? <i className={"me-07 fs-5 icon icon-fw icon-" + usageObj.icon}/> : null }
+                        { usageObj.icon ? <i className={"me-07 text-medium icon icon-fw icon-" + usageObj.icon}/> : null }
                         { usageObj.title }
                     </a>
                 </div>

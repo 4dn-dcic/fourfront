@@ -111,7 +111,7 @@ export class FileDetailBody extends React.PureComponent {
                         windowWidth={windowWidth}
                         description={file.description || file.notes || <em>No description.</em>}
                         fitTo="self"
-                        textClassName="fs-5"
+                        textClassName="text-medium"
                         expanded={gridSize === 'xs' || gridSize === 'sm' || gridSize === 'md'}
                         dimensions={null}
                     />

@@ -50,7 +50,7 @@ export class CollapsibleItemViewButtonToolbar extends React.PureComponent {
         const { mounted, open } = this.state;
         if (!mounted) {
             return (
-                <div className="pull-right pt-23 fs-5" key="loading-indicator">
+                <div className="pull-right pt-23 text-medium" key="loading-indicator">
                     <i className="icon icon-fw icon-circle-notch fas icon-spin"/>&nbsp;&nbsp;&nbsp;&nbsp;
                 </div>
             );

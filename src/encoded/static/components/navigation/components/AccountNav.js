@@ -118,7 +118,7 @@ function UserActionsMenu(props){
         }
         return (
             <div className={"level-1-title-container" + (isActive ? " active" : "")} key={actionID}>
-                <a className="link-underline link-underline-opacity-0 level-1-title fs-5 d-block" href={getActionURL(action, href)}
+                <a className="link-underline link-underline-opacity-0 level-1-title text-medium d-block" href={getActionURL(action, href)}
                     id={"menutree-linkto-" + targetHref.replace(/\//g, '_')} >
                     { prepend }
                     <span>{ actionTitle }</span>
@@ -160,7 +160,7 @@ function UserActionsMenu(props){
 function LogoutLink({ performLogout, isLoading = false }){
     return (
         <div className="level-1-title-container">
-            <a className="link-underline link-underline-opacity-0 level-1-title fs-5 d-block" onClick={performLogout} id="logoutbtn" href="#">
+            <a className="link-underline link-underline-opacity-0 level-1-title text-medium d-block" onClick={performLogout} id="logoutbtn" href="#">
                 <i className={"icon icon-fw fas me-07 icon-" + (isLoading ? "spin icon-circle-notch" : "sign-out-alt")} />
                 <span>Log Out</span>
             </a>

@@ -141,7 +141,7 @@ class PublicationSummary extends React.PureComponent {
                                     Journal
                                 </h4>
                                 <h5 className="mb-02 text-400">{ journal }</h5>
-                                { ID ? <p className="fs-6">{ ID }</p> : null }
+                                { ID ? <p className="text-small">{ ID }</p> : null }
                             </React.Fragment>
                             : null }
                         { datePublished ?

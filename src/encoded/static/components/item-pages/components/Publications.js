@@ -210,7 +210,7 @@ const PublicationDetailRows = React.memo(function PublicationDetailRows({ public
             'content' : !externalURL ? externalID : (
                 <React.Fragment>
                     <a href={externalURL} className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover" target="_blank" rel="noopener noreferrer">{ externalID }</a>
-                    <i className="ms-07 icon icon-external-link-alt fas fs-6"/>
+                    <i className="ms-07 icon icon-external-link-alt fas text-small"/>
                 </React.Fragment>
             )
         });

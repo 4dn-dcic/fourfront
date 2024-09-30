@@ -599,9 +599,9 @@ $margin-util-sizes-mini: 1, 2, 3, 4, 5, 6, 7, 8; 		// * 1px
 .text-900 { font-weight: 900 !important; }
 
 .text-normal { font-size: 1rem; } // Reset to default size.
-.fs-6 { font-size: 0.9rem; }
+.text-small { font-size: 0.9rem; }
 .text-smaller { font-size: 0.75rem; }
-.fs-5 { font-size: 15px; font-size: 15.75px; }
+.text-medium { font-size: 15px; font-size: 15.75px; }
 .text-large { font-size: 17.5px; }
 .text-larger { font-size: 20px; line-height: 25px; }
 

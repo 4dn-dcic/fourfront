@@ -93,7 +93,7 @@ class QualityMetricViewOverview extends React.PureComponent {
                         <QCMetricFromSummary title="Report" tooltip="Link to full quality metric report" value={
                             <React.Fragment>
                                 <a href={context.url} target="_blank" rel="noopener noreferrer">{valueTransforms.hrefToFilename(context.url)}</a>
-                                <i className="ms-05 icon icon-fw icon-external-link-alt fs-6 fas" />
+                                <i className="ms-05 icon icon-fw icon-external-link-alt text-small fas" />
                             </React.Fragment>
                         } />
                         : null}
@@ -329,7 +329,7 @@ export class QualityControlResults extends React.PureComponent {
                     <QCMetricFromSummary title="Report" tooltip="Link to full quality metric report" value={
                         <React.Fragment>
                             <a href={metricURL} target="_blank" rel="noopener noreferrer">{ valueTransforms.hrefToFilename(metricURL) }</a>
-                            <i className="ms-05 icon icon-fw icon-external-link-alt fs-6 fas"/>
+                            <i className="ms-05 icon icon-fw icon-external-link-alt text-small fas"/>
                         </React.Fragment>
                     } />
                     : null }
