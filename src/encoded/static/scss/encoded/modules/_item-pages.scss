@@ -1434,6 +1434,15 @@ $badge-item-min-height: 90px;
 				margin-top: 8px;
 			}
 		}
+
+		> .inner > .static-section-header a {
+			text-decoration: none;
+			text-underline-offset: 0.125em;
+				
+			&:hover {
+				text-decoration: underline !important;
+			}
+		}
 	}
 
 	.supplementary-files-section-part {
@@ -1521,7 +1530,18 @@ $badge-item-min-height: 90px;
 					padding-left: 30px;
 				}
 
+				a {
+					text-decoration: none;
+					text-underline-offset: 0.125em;
+				
+					&:hover {
+						text-decoration: underline !important;
+					}
+				}
+
 				a.btn {
+					text-decoration: none !important;
+
 					i.icon-external-link {
 						margin-left: 5px;
 						position: relative;
