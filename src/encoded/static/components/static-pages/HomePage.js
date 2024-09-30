@@ -63,7 +63,7 @@ const CollectionsRow = React.memo(function CollectionsRow(props) {
                                 <div className="row">
                                     <div className="col-12 col-md-6 text-center">
                                         <div className="browse-data-collection-block browse-all-data h-100 p-0">
-                                            <a href="/browse/?experimentset_type=replicate&type=ExperimentSetReplicate" className="h-100 d-flex flex-column link-underline link-underline-opacity-0">
+                                            <a href="/browse/?experimentset_type=replicate&type=ExperimentSetReplicate" className="h-100 d-flex flex-column">
                                                 <div className="mt-2"><i className="icon icon-database fas"></i></div>
                                                 <div className="browse-data-collection-block-title flex-grow-1 mt-2">Browse All Data</div>
                                                 <div className="browse-data-collection-block-desc mt-2 pt-2 pb-2 ps-4 pe-4">
@@ -74,7 +74,7 @@ const CollectionsRow = React.memo(function CollectionsRow(props) {
                                     </div>
                                     <div className="col-12 col-md-6 text-center">
                                         <div className="browse-data-collection-block browse-by-publication h-100 p-0">
-                                            <a href="/search/?type=Publication&sort=static_content.location&sort=-number_of_experiment_sets&number_of_experiment_sets.from=1" className="h-100 d-flex flex-column link-underline link-underline-opacity-0">
+                                            <a href="/search/?type=Publication&sort=static_content.location&sort=-number_of_experiment_sets&number_of_experiment_sets.from=1" className="h-100 d-flex flex-column">
                                                 <div className="mt-2"><i className="icon icon-book-open fas"></i></div>
                                                 <div className="browse-data-collection-block-title flex-grow-1 mt-2">Browse By Publication</div>
                                                 <div className="browse-data-collection-block-desc mt-2 pt-2 pb-2 ps-4 pe-4">
@@ -125,7 +125,7 @@ const DatasetsAndSocialMediaRow = React.memo(function DatasetsAndSocialMediaRow(
                     <div className="social-connections-container ms-0 me-0">
                         <div className="d-flex flex-column h-100">
                             <div className="p-0 flex-grow-1">
-                                <a href="https://doi.org/10.1038/s41467-022-29697-4" target="_blank" rel="noreferrer" className="h-100 link-underline link-underline-opacity-0">
+                                <a href="https://doi.org/10.1038/s41467-022-29697-4" target="_blank" rel="noreferrer" className="h-100">
                                     <div className="text-center w-100 pt-2 pb-2 social-connections-image"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-nature-communications.png" alt="4DN Paper on Nature Communications" /></div>
                                     <div className="social-connections-block-title mt-15">4DN Data Portal Paper</div>
                                     <div className="social-connections-desc mt-1">Learn more about the 4DN data portal on the<br/>Nature Communications website</div>
@@ -221,7 +221,7 @@ class RecentlyReleasedDataSets extends React.PureComponent {
                                 const labUrl = '/labs/' + encodeURIComponent(lab);
                                 labs = (
                                     <React.Fragment>
-                                        <i className="icon icon-fw icon-user far user-icon" data-html="true" data-tip={"Submitted by " + lab}></i> {lab ? (<a className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover" href={labUrl} data-tip={"Submitted by " + lab}>{lab}</a>) : '-'}
+                                        <i className="icon icon-fw icon-user far user-icon" data-html="true" data-tip={"Submitted by " + lab}></i> {lab ? (<a className="link-underline-hover" href={labUrl} data-tip={"Submitted by " + lab}>{lab}</a>) : '-'}
                                     </React.Fragment>);
                             } else if (propLabs.length > 1) {
                                 labs = (
@@ -231,7 +231,7 @@ class RecentlyReleasedDataSets extends React.PureComponent {
                                                 const labUrl = '/labs/' + encodeURIComponent(lab);
                                                 return (
                                                     <li key={"lab-" + index}>
-                                                        <i className="icon icon-fw icon-user far user-icon" data-html="true" data-tip={"Submitted by " + lab}></i> {lab ? (<a className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover" href={labUrl} data-tip={"Submitted by " + lab}>{lab}</a>) : '-'}
+                                                        <i className="icon icon-fw icon-user far user-icon" data-html="true" data-tip={"Submitted by " + lab}></i> {lab ? (<a className="link-underline-hover" href={labUrl} data-tip={"Submitted by " + lab}>{lab}</a>) : '-'}
                                                     </li>
                                                 );
                                             })
@@ -251,7 +251,7 @@ class RecentlyReleasedDataSets extends React.PureComponent {
                                         <div className="search-result-column-block" data-col="expset_count" data-exp-set-count={experiment_sets || 0}>
                                             <div className="inner text-center">
                                                 <span className="value text-truncate">
-                                                    <a className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover" href={searchUrl} data-tip={"Released on " + public_release}>{experiment_sets || '-'} Experiment Sets</a>
+                                                    <a className="link-underline-hover" href={searchUrl} data-tip={"Released on " + public_release}>{experiment_sets || '-'} Experiment Sets</a>
                                                 </span>
                                             </div>
                                         </div>
@@ -283,7 +283,7 @@ class RecentlyReleasedDataSets extends React.PureComponent {
                                         <div className="search-result-column-block w-100" style={{ fontSize: '16px' }}>
                                             <div className="inner">
                                                 <div className="title-block text-truncate">
-                                                    <a className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover" href={searchUrl} data-tip={datasetName + " (released on " + public_release + ")"}>{datasetName}</a>
+                                                    <a className="link-underline-hover" href={searchUrl} data-tip={datasetName + " (released on " + public_release + ")"}>{datasetName}</a>
                                                 </div>
                                             </div>
                                             <div className="inner" style={{ fontSize: '13px', height: '30px' }}>
@@ -368,7 +368,7 @@ const ToolsAndResourcesRow = React.memo(function ToolsAndResourcesRow(props) {
                         <div className="tools-and-resources-col-tools col-12 col-lg-8 z-1">
                             <div className="row mh-100 h-100 me-lg-1">
                                 <div className="tool-detail-col col-12 col-md-4 px-0 px-md-1 px-lg-2">
-                                    <a href="/tools/visualization" className="h-100 p-2 d-flex flex-column tool-detail link-underline link-underline-opacity-0">
+                                    <a href="/tools/visualization" className="h-100 p-2 d-flex flex-column tool-detail">
                                         <div className="text-center w-100 tool-image"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-tools-4dn-higlass.jpg" alt="HiGlass" /></div>
                                         <div className="mt-1 w-100 tool-logo"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-higlass-logo.png" alt="HiGlass logo" /></div>
                                         <div className="mt-1 ps-1 tool-detail-title">HiGlass</div>
@@ -380,7 +380,7 @@ const ToolsAndResourcesRow = React.memo(function ToolsAndResourcesRow(props) {
                                     </a>
                                 </div>
                                 <div className="tool-detail-col col-12 col-md-4 px-0 px-md-1 px-lg-2">
-                                    <a href="/tools/jupyterhub" className="h-100 p-2 d-flex flex-column tool-detail link-underline link-underline-opacity-0">
+                                    <a href="/tools/jupyterhub" className="h-100 p-2 d-flex flex-column tool-detail">
                                         <div className="text-center w-100 tool-image"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-tools-4dn-jupyter.jpg" alt="4DN Jupyter Hub" /></div>
                                         <div className="mt-1 w-100 tool-logo"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-jupyter-logo.png" alt="4DN Jupyter Hub logo" /></div>
                                         <div className="mt-1 ps-1 tool-detail-title">JupyterHub</div>
@@ -392,7 +392,7 @@ const ToolsAndResourcesRow = React.memo(function ToolsAndResourcesRow(props) {
                                     </a>
                                 </div>
                                 <div className="tool-detail-col col-12 col-md-4 px-0 px-md-1 px-lg-2">
-                                    <a href="/tools/micro-meta-app" className="h-100 p-2 d-flex flex-column tool-detail link-underline link-underline-opacity-0">
+                                    <a href="/tools/micro-meta-app" className="h-100 p-2 d-flex flex-column tool-detail">
                                         <div className="text-center w-100 tool-image"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-tools-4dn-micrometa.jpg" alt="Micro Meta App" /></div>
                                         <div className="mt-1 w-100 tool-logo"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-micrometa-logo.png" alt="Micro Meta App logo" /></div>
                                         <div className="mt-1 ps-1 tool-detail-title">MicroMeta</div>
@@ -408,7 +408,7 @@ const ToolsAndResourcesRow = React.memo(function ToolsAndResourcesRow(props) {
                         <div className="tools-and-resources-col-resources col-12 col-lg-4 ps-8 p-3 mt-sm-3 mt-lg-0 z-1 d-flex flex-wrap align-content-between">
                             <h2 className="homepage-section-title">Portal Resources</h2>
                             <div className="resource-detail p-3 d-flex flex-column">
-                                <a href="/resources/experimental-resources" className="link-underline link-underline-opacity-0">
+                                <a href="/resources/experimental-resources">
                                     <div className="row">
                                         <div className="col-3 text-center">
                                             <div className="mt-1"><i className="icon icon-flask fas"></i></div>
@@ -421,7 +421,7 @@ const ToolsAndResourcesRow = React.memo(function ToolsAndResourcesRow(props) {
                                 </a>
                             </div>
                             <div className="resource-detail data-analysis p-3 d-flex flex-column mt-1">
-                                <a href="/resources/data-analysis" className="link-underline link-underline-opacity-0">
+                                <a href="/resources/data-analysis">
                                     <div className="row">
                                         <div className="col-3 text-center">
                                             <div className="mt-1"><i className="icon icon-project-diagram fas"></i></div>
@@ -469,11 +469,11 @@ const HelpRow = React.memo(function HelpRow(props) {
                     <p>The data at the 4DN Data Portal is generated by the 4DN Network and made freely available to the scientific community.</p>
                     <ul>
                         <li>If you are intending to use these data for a publication, we ask that you please contact the data generating lab to discuss possible coordinated publication.</li>
-                        <li>In your manuscript, please cite <a href="https://doi.org/10.1038/nature23884" className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover" target="_blank" rel="noopener noreferrer"> the 4DN White Paper (doi:10.1038/nature23884) </a>
-                            and <a href="https://doi.org/10.1038/s41467-022-29697-4" className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover" target="_blank" rel="noopener noreferrer">the 4DN Data Portal Paper (doi:10.1038/s41467-022-29697-4)</a>, and please acknowledge the 4DN lab which generated the data.
+                        <li>In your manuscript, please cite <a href="https://doi.org/10.1038/nature23884" className="link-underline-hover" target="_blank" rel="noopener noreferrer"> the 4DN White Paper (doi:10.1038/nature23884) </a>
+                            and <a href="https://doi.org/10.1038/s41467-022-29697-4" className="link-underline-hover" target="_blank" rel="noopener noreferrer">the 4DN Data Portal Paper (doi:10.1038/s41467-022-29697-4)</a>, and please acknowledge the 4DN lab which generated the data.
                         </li>
                     </ul>
-                    <p>Please direct any questions to the <a href="mailto:support@4dnucleome.org" className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover">Data Coordination and Integration Center</a>.
+                    <p>Please direct any questions to the <a href="mailto:support@4dnucleome.org" className="link-underline-hover">Data Coordination and Integration Center</a>.
                     </p>
                 </div>
                 <div className="guidelines-and-help-col-help col-12 col-lg-5 pt-3 d-flex flex-column">
@@ -529,22 +529,22 @@ const ExternalLinksRow = React.memo(function LinksRow(props){
             <div className="homepage-links-row external-links">
                 <div className="links-wrapper row mb-2">
                     <div className="col-12 col-md-3">
-                        <a className="link-block link-underline link-underline-opacity-0 external-link" href="https://www.4dnucleome.org/" target="_blank" rel="noopener noreferrer">
+                        <a className="link-block external-link" href="https://www.4dnucleome.org/" target="_blank" rel="noopener noreferrer">
                             <span>Main 4DN Portal</span>
                         </a>
                     </div>
                     <div className="col-12 col-md-3">
-                        <a className="link-block link-underline link-underline-opacity-0 external-link" href="http://dcic.4dnucleome.org/" target="_blank" rel="noopener noreferrer">
+                        <a className="link-block external-link" href="http://dcic.4dnucleome.org/" target="_blank" rel="noopener noreferrer">
                             <span>4DN DCIC</span>
                         </a>
                     </div>
                     <div className="col-12 col-md-3">
-                        <a className="link-block link-underline link-underline-opacity-0 external-link" href="https://commonfund.nih.gov/4Dnucleome/index" target="_blank" rel="noopener noreferrer">
+                        <a className="link-block external-link" href="https://commonfund.nih.gov/4Dnucleome/index" target="_blank" rel="noopener noreferrer">
                             <span>NIH Common Fund</span>
                         </a>
                     </div>
                     <div className="col-12 col-md-3">
-                        <a className="link-block link-underline link-underline-opacity-0 external-link" href="https://commonfund.nih.gov/4Dnucleome/FundedResearch" target="_blank" rel="noopener noreferrer">
+                        <a className="link-block external-link" href="https://commonfund.nih.gov/4Dnucleome/FundedResearch" target="_blank" rel="noopener noreferrer">
                             <span>Centers and Labs</span>
                         </a>
                     </div>

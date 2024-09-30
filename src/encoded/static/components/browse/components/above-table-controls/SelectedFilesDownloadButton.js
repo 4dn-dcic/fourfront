@@ -229,9 +229,9 @@ class SelectedFilesDownloadModal extends React.PureComponent {
                             <li className="mb-05">
                                 <span className="text-danger">You must include an <b>access key</b> in your cURL command for bulk downloads.</span>
                             </li>
-                            <li className="mb-05">You can configure the access key in {session ? <a href={profileHref} target="_blank" rel="noopener noreferrer" className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover">your profile</a> : 'your profile'}, then use it in place of <em>{'<access_key_id>:<access_key_secret>'}</em>, below.</li>
+                            <li className="mb-05">You can configure the access key in {session ? <a href={profileHref} target="_blank" rel="noopener noreferrer" className="link-underline-hover">your profile</a> : 'your profile'}, then use it in place of <em>{'<access_key_id>:<access_key_secret>'}</em>, below.</li>
                             {!session ?
-                                <li>{"If you don't already have an account, you can "}<a onClick={onLoginNavItemClick} href="#loginbtn" className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover">log in</a>{" with your Google or GitHub credentials."}</li>
+                                <li>{"If you don't already have an account, you can "}<a onClick={onLoginNavItemClick} href="#loginbtn" className="link-underline-hover">log in</a>{" with your Google or GitHub credentials."}</li>
                                 : null}
                         </ul>
                     </div>
@@ -256,8 +256,8 @@ class SelectedFilesDownloadModal extends React.PureComponent {
                                 { foundUnpublishedFiles ?
                                     <li>
                                         For unpublished data sets, we ask that you please contact the data generating lab to discuss possible coordinated publication.
-                                        In your manuscript, please cite the 4DN White Paper (<a href="https://doi.org/10.1038/nature23884" target="_blank" rel="noopener noreferrer" className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover">doi:10.1038/nature23884</a>), and please acknowledge the 4DN lab which generated the data.
-                                        Please direct any questions to the <a href="mailto:support@4dnucleome.org" className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover">Data Coordination and Integration Center</a>.
+                                        In your manuscript, please cite the 4DN White Paper (<a href="https://doi.org/10.1038/nature23884" target="_blank" rel="noopener noreferrer" className="link-underline-hover">doi:10.1038/nature23884</a>), and please acknowledge the 4DN lab which generated the data.
+                                        Please direct any questions to the <a href="mailto:support@4dnucleome.org" className="link-underline-hover">Data Coordination and Integration Center</a>.
                                     </li>
                                     : null }
                             </ul>

@@ -138,7 +138,7 @@ class PublicationSearchResultTitle extends React.PureComponent {
                 <TableRowToggleOpenButton onClick={toggleDetailOpen} open={detailOpen} />
                 <div className="title-inner overflow-hidden">
                     <h5 className="mt-0 mb-0 text-500">
-                        <a href={id} className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover" onClick={this.onClickTrack}>{ title }</a>
+                        <a href={id} className="link-underline-hover" onClick={this.onClickTrack}>{ title }</a>
                     </h5>
                     <AuthorsBlock authors={authors} maxCharacters={titleMaxLen} />
                     <AbstractBlock enabled={showAbstractBlock} {...{ abstract, charsPerLine, titleLen, authors, colWidth, titleMaxLen }} />

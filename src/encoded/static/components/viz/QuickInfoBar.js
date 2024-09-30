@@ -374,7 +374,7 @@ class Stat extends React.PureComponent {
         }
 
         return (
-            <a href={targetHref} className="link-underline link-underline-opacity-0">{shortLabel}</a>
+            <a href={targetHref}>{shortLabel}</a>
         );
     }
 

@@ -31,7 +31,7 @@ export class TestWarning extends React.PureComponent {
                             The data displayed on this page is not official and only for testing purposes.
                         </div>
                         <div className="col-2 close-button-container">
-                            <a className="link-underline link-underline-opacity-0 test-warning-close icon icon-times fas" title="Hide" onClick={this.handleClose}/>
+                            <a className="test-warning-close icon icon-times fas" title="Hide" onClick={this.handleClose}/>
                         </div>
                     </div>
                 </div>

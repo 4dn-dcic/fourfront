@@ -46,7 +46,7 @@ export const WrappedListBlock = React.memo(function WrappedListBlock(props){
     const atId = object.itemUtil.atId(context);
     return (
         <li className={className} key={atId}>
-            <a className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover" href={atId}>{ context.display_title || context.title }</a>
+            <a className="link-underline-hover" href={atId}>{ context.display_title || context.title }</a>
         </li>
     );
 });
@@ -574,7 +574,7 @@ export class FormattedInfoBlock extends React.Component {
                     <div className={"details-col " + (iconClass ? "col-10 col-lg-11" : "col-sm-12") + (!detailContent && !children ? ' no-more-details' : '')}>
                         { title ?
                             titleHref ?
-                                <h5 className="block-title"><a href={ titleHref } className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover" title={title}>{ title }</a></h5>
+                                <h5 className="block-title"><a href={ titleHref } className="link-underline-hover" title={title}>{ title }</a></h5>
                                 : <h5 className="block-title no-link">{ title }</h5>
                             : null }
                         { detailContent || children ? <div className={"more-details " + extraDetailClassName} children={detailContent || children} /> : null }

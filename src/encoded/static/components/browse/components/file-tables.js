@@ -205,7 +205,7 @@ export function renderFileTitleColumn(file, field, detailIndex, fileEntryBlockPr
         }
     }
 
-    const className = 'link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover title-of-file' + (file.accession ? ' font-monospace' : '');
+    const className = 'link-underline-hover title-of-file' + (file.accession ? ' font-monospace' : '');
 
     /**
      * Allow these file rows to be dragged to other places.
@@ -654,14 +654,14 @@ export class RawFilesStackedTable extends React.PureComponent {
 
 
         const showMoreExtTitle = preventExpand && experimentSet ? (
-            <a href={object.itemUtil.atId(experimentSet)} className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover">(view in Experiment Set)</a>
+            <a href={object.itemUtil.atId(experimentSet)} className="link-underline-hover">(view in Experiment Set)</a>
         ) : null;
 
         return (
             <StackedBlock key={ experimentAtId || exp.tec_rep_no || i } hideNameOnHover={false} columnClass="experiment" stripe={this.cache.oddExpRow}
                 label={<StackedBlockNameLabel title="Experiment" accession={exp.accession} subtitleVisible />}>
                 <StackedBlockName relativePosition={expFxn.fileCountFromSingleExperiment(exp) > 6}>
-                    { experimentAtId ? <a href={experimentAtId} className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover name-title">{ linkTitle }</a> : <span className="name-title">{ linkTitle }</span> }
+                    { experimentAtId ? <a href={experimentAtId} className="link-underline-hover name-title">{ linkTitle }</a> : <span className="name-title">{ linkTitle }</span> }
                 </StackedBlockName>
                 <StackedBlockList {...{ collapseLimit, collapseShow, collapseLongLists, showMoreExtTitle, collapseShowMoreLimit, collapseItemsIncrement }} title={listTitle} className={contentsClassName}>
                     { contents }
@@ -684,7 +684,7 @@ export class RawFilesStackedTable extends React.PureComponent {
             <React.Fragment>
                 { appendCountStr }
                 { preventExpand ?
-                    <a href={object.itemUtil.atId(experimentSet)} className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover">(view in Experiment Set)</a>
+                    <a href={object.itemUtil.atId(experimentSet)} className="link-underline-hover">(view in Experiment Set)</a>
                     : null }
             </React.Fragment>
         );
@@ -695,7 +695,7 @@ export class RawFilesStackedTable extends React.PureComponent {
                 label={<StackedBlockNameLabel title="Biosample" subtitle={bioRepTitle} accession={biosample.accession} subtitleVisible/>}>
                 <StackedBlockName relativePosition={expsWithBiosample.length > 3 || expFxn.fileCountFromExperiments(expsWithBiosample) > 6}>
                     { biosampleAtId ?
-                        <a href={biosampleAtId} className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover name-title">{ biosampleTitle }</a>
+                        <a href={biosampleAtId} className="link-underline-hover name-title">{ biosampleTitle }</a>
                         : <span className="name-title">{ biosampleTitle }</span> }
                 </StackedBlockName>
                 <StackedBlockList className="experiments" title="Experiments" {...{ collapseLimit, collapseShow, showMoreExtTitle, collapseShowMoreLimit, collapseItemsIncrement }}>
@@ -741,7 +741,7 @@ export class RawFilesStackedTable extends React.PureComponent {
             <React.Fragment>
                 { appendCountStr }
                 { preventExpand ?
-                    <a href={object.itemUtil.atId(experimentSet)} className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover">(view in Experiment Set)</a>
+                    <a href={object.itemUtil.atId(experimentSet)} className="link-underline-hover">(view in Experiment Set)</a>
                     : null }
             </React.Fragment>
         );
@@ -943,7 +943,7 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
             const nameBlock = (
                 <StackedBlockName className={replicateNumbersExists ? "double-line" : ""}>
                     { replicateNumbersExists ? <div>Bio Rep <b>{ experiment.bio_rep_no }</b>, Tec Rep <b>{ experiment.tec_rep_no }</b></div> : <div/> }
-                    { experimentAtId ? <a href={experimentAtId} className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover name-title">{ nameTitle }</a> : <div className="name-title">{ nameTitle }</div> }
+                    { experimentAtId ? <a href={experimentAtId} className="link-underline-hover name-title">{ nameTitle }</a> : <div className="name-title">{ nameTitle }</div> }
                 </StackedBlockName>
             );
 
@@ -951,7 +951,7 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
             let showMoreExtTitle = null;
             if (preventExpand && expSetAccession) {
                 const expSetHref = object.itemUtil.atId(experiment.from_experiment_set) + (showMoreTargetTabKey ? '#' + showMoreTargetTabKey : '');
-                showMoreExtTitle = <a href={expSetHref} className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover">(view in Experiment Set)</a>;
+                showMoreExtTitle = <a href={expSetHref} className="link-underline-hover">(view in Experiment Set)</a>;
             }
 
             return (
@@ -1000,14 +1000,14 @@ export class RawFilesStackedTableExtendedColumns extends React.PureComponent {
             return (
                 <span>
                     <i className="icon icon-check success fas" style={{ 'color' : 'green' }}/>
-                    &nbsp; { linkToReport ? <a href={linkToReport} className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover" target="_blank" rel="noreferrer noopener">Pass</a> : "Pass"}
+                    &nbsp; { linkToReport ? <a href={linkToReport} className="link-underline-hover" target="_blank" rel="noreferrer noopener">Pass</a> : "Pass"}
                 </span>
             );
         } else if (val === 'FAIL'){
             return (
                 <span>
                     <i className="icon icon-times fas" style={{ 'color' : 'red' }}/>
-                    &nbsp; { linkToReport ? <a href={linkToReport} className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover" target="_blank" rel="noreferrer noopener">Fail</a> : "Fail"}
+                    &nbsp; { linkToReport ? <a href={linkToReport} className="link-underline-hover" target="_blank" rel="noreferrer noopener">Fail</a> : "Fail"}
                 </span>
             );
         } else {
@@ -1091,7 +1091,7 @@ export class QCMetricsTable extends React.PureComponent {
         return (
             <React.Fragment>
                 <div>{Schemas.Term.toName("file_type_detailed", file.file_type_detailed, true)}</div>
-                <a className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover name-title" href={fileAtId}>
+                <a className="link-underline-hover name-title" href={fileAtId}>
                     {fileTitleString}
                 </a>
             </React.Fragment>

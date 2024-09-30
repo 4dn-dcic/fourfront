@@ -38,7 +38,7 @@ export function BigDropdownBigLink(props){
     }
 
     return (
-        <a {...passProps} className={"link-underline link-underline-opacity-0 big-link" + (className? " " + className : "") + (isActive? " active" : "")}>
+        <a {...passProps} className={"big-link" + (className? " " + className : "") + (isActive? " active" : "")}>
             <div className="row align-items-center">
                 { iconCol }
                 { textCol }

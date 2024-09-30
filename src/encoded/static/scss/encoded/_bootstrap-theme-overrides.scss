@@ -256,6 +256,16 @@
 }
 */
 
+a {
+    text-decoration: none;
+    text-underline-offset: 0.125em;
+
+    &.link-underline-hover {
+        &:hover {
+            text-decoration: underline !important;
+        }
+    }
+}
 /** Modal Stuff **/
 
 .modal-dialog {

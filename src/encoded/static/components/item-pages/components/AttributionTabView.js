@@ -166,7 +166,7 @@ class LabsSection extends React.PureComponent {
         return (
             <div className={"lab" + (all.length === 1 && (!contactPersons || contactPersons.length === 0)  ? ' mt-1' : '')} key={atId || idx}>
                 <h5>
-                    <a className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover" href={atId}>{ lab.display_title }</a>
+                    <a className="link-underline-hover" href={atId}>{ lab.display_title }</a>
                 </h5>
                 { contactPersons && contactPersons.length > 0 ?
                     <ul className="mt-02">{ contactPersons }</ul>

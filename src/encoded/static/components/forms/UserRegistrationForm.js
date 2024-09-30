@@ -316,7 +316,7 @@ export default class UserRegistrationForm extends React.PureComponent {
                         </div>
                         <div className="col-12 col-lg-7">
                             <p>
-                                By signing up, you are agreeing to our <a className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover" href="/privacy-policy" target="_blank" rel="noreferrer noopener">Privacy Policy</a>.
+                                By signing up, you are agreeing to our <a className="link-underline-hover" href="/privacy-policy" target="_blank" rel="noreferrer noopener">Privacy Policy</a>.
                                 <br/>
                                 We may track your usage of the portal to help improve the quality of user experience and/or security assurance purposes.
                             </p>
@@ -421,7 +421,7 @@ class LookupLabField extends React.PureComponent {
         ) || (
             currentLabDetails && currentLabDetails['@id'] && currentLabDetails.display_title && (
                 <div style={LookupLabField.fieldTitleColStyle}>
-                    <a className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover" href={object.itemUtil.atId(currentLabDetails)}
+                    <a className="link-underline-hover" href={object.itemUtil.atId(currentLabDetails)}
                         target="_blank" data-tip="View lab in new tab" rel="noopener noreferrer" style={{ verticalAlign: "middle" }}>
                         {currentLabDetails.display_title}
                     </a>

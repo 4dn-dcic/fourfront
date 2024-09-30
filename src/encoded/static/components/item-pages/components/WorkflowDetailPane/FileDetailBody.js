@@ -50,7 +50,7 @@ export class FileDetailBody extends React.PureComponent {
             }
         } else { // Single File
             fileTitle = object.itemUtil.getTitleStringFromContext(file);
-            fileTitleFormatted = <a href={object.atIdFromObject(file) || '/' + file.uuid} className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover d-inline-block">{ fileTitle }</a>;
+            fileTitleFormatted = <a href={object.atIdFromObject(file) || '/' + file.uuid} className="link-underline-hover d-inline-block">{ fileTitle }</a>;
             statusIndicator = file.status && (
                 <i className="item-status-indicator-dot me-07" data-status={ file.status && file.status.toLowerCase() }
                     data-tip={"Status - " + file.status} />

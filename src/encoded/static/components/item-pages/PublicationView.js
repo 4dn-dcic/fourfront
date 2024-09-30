@@ -104,7 +104,7 @@ class PublicationSummary extends React.PureComponent {
                         <h4 className={"mt-" + (Array.isArray(authors) && authors.length > 0 ? '3' : '2') + " mb-1 text-500"}>
                             Link
                         </h4>
-                        <p><a href={url} className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover" target="_blank" rel="noopener noreferrer">{ url }</a></p>
+                        <p><a href={url} className="link-underline-hover" target="_blank" rel="noopener noreferrer">{ url }</a></p>
                     </React.Fragment>
                     : null }
 

@@ -128,7 +128,7 @@ export function ExternalReferenceLink({ uri, children }){
     }
 
     return (
-        <a href={uri} target="_blank" rel="noopener noreferrer" className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover external-reference">{ children }</a>
+        <a href={uri} target="_blank" rel="noopener noreferrer" className="link-underline-hover external-reference">{ children }</a>
     );
 }
 
@@ -193,7 +193,7 @@ export const ExternalReferencesStackedTable = React.memo(function ExternalRefere
         return (
             <React.Fragment>
                 <div>{Schemas.Term.toName("file_type_detailed", file_type_detailed, true)}</div>
-                <a className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover title-of-file font-monospace name-title" href={fileAtId}>
+                <a className="link-underline-hover title-of-file font-monospace name-title" href={fileAtId}>
                     {fileTitleString}
                 </a>
             </React.Fragment>);
@@ -282,7 +282,7 @@ export const ExternalReferencesStackedTable = React.memo(function ExternalRefere
                 label={experimentAtId ? <StackedBlockNameLabel title="Experiment" subtitle={null} accession={(experiment && experiment.accession) || null} subtitleVisible /> : null}>
                 <StackedBlockName relativePosition={true} className={experimentAtId ? '' : 'name-empty'}>
                     {replicateNumbersExists ? <div>Bio Rep <b>{experiment.bio_rep_no}</b>, Tec Rep <b>{experiment.tec_rep_no}</b></div> : <div />}
-                    {experimentAtId ? (<a href={experimentAtId} className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover name-title">{text}</a>) : (text ? (<div className="name-title">{text}</div>) : null)}
+                    {experimentAtId ? (<a href={experimentAtId} className="link-underline-hover name-title">{text}</a>) : (text ? (<div className="name-title">{text}</div>) : null)}
                 </StackedBlockName>
                 <StackedBlockList title="Files" collapseLongLists={false} collapseLimit={10}>
                     {fileBlocks}
@@ -301,7 +301,7 @@ export const ExternalReferencesStackedTable = React.memo(function ExternalRefere
                             <StackedBlock columnClass="experiment-set" hideNameOnHover={false} key="expset"
                                 label={<StackedBlockNameLabel title="Experiment Set" subtitle={null} accession={accession} subtitleVisible />}>
                                 <StackedBlockName relativePosition={true}>
-                                    <a href={context['@id']} className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover name-title">{accession}</a>
+                                    <a href={context['@id']} className="link-underline-hover name-title">{accession}</a>
                                 </StackedBlockName>
                                 <StackedBlockList title="Experiments" collapseLongLists={true} collapseLimit={10}>
                                     {experimentBlocks}

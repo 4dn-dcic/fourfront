@@ -17,7 +17,7 @@ export const DEFAULT_WIDTH_MAP = { 'lg' : 200, 'md' : 180, 'sm' : 120, 'xs' : 12
 function LabColumn(props){
     const { lab, submitterTitle } = props;
     if (!lab) return null;
-    const labLink = <a href={object.atIdFromObject(lab)} className="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-100-hover">{lab.display_title}</a>;
+    const labLink = <a href={object.atIdFromObject(lab)} className="link-underline-hover">{lab.display_title}</a>;
     if (!submitterTitle){
         return <span className="value">{ labLink }</span>;
     }
