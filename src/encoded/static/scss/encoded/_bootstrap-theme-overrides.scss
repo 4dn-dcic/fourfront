@@ -13,6 +13,7 @@
 
 .btn {
     font-weight: 500;
+    text-decoration: none !important;
 
     &:not(.btn-sm):not(.btn-xs):not(.btn-lg) {
         // overrides .375rem to better align inline text & icon fonts
@@ -256,16 +257,6 @@
 }
 */
 
-a {
-    text-decoration: none;
-    text-underline-offset: 0.125em;
-
-    &.link-underline-hover {
-        &:hover {
-            text-decoration: underline !important;
-        }
-    }
-}
 /** Modal Stuff **/
 
 .modal-dialog {
@@ -312,6 +303,21 @@ div[role="dialog"] {
 	position: relative;
 	> img {
 		max-width: 100%;
+	}
+}
+
+/**************************************
+ ************ Link Styles ***********
+ **************************************/
+
+ a {
+	text-decoration: none;
+	text-underline-offset: 0.125em;
+
+	&.link-underline-hover {
+		&:hover {
+			text-decoration: underline !important;
+		}
 	}
 }
 
