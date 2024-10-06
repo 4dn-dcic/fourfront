@@ -37,7 +37,7 @@ $dropdown-link-hover-bg: #ddd;
 
 
 // Override Bootstrap default variables:
-
+$border-radius:                             .25rem;
 $border-radius-base:                        3px;
 $border-radius-large:                       4px;
 $border-radius-small:                       2px;
@@ -97,6 +97,15 @@ $brand-primary: $primary;
 $brand-primary-dark: $primary-dark;
 $brand-secondary: $secondary;
 
+/* Popovers */
+$popover-border-color: #ebebeb;
+$popover-header-bg: #f7f7f7;
+$popover-body-padding-y: .5rem;
+$popover-body-padding-x: .75rem;
+
+/* Alerts */
+$alert-padding-y: .75rem;
+$alert-padding-x: 1.25rem;
 
 /** FontAwesome Icon Stuff **/
 $fa-font-path: "/static/font/fontawesome6" !default;
