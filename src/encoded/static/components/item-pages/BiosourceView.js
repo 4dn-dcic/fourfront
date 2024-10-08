@@ -144,10 +144,10 @@ export class IndividualItemTitle extends React.PureComponent {
         var life_stage = indv.life_stage || indv.mouse_life_stage || null;
         return (
             <div className="row">
-                <div className="col-sm-6 text-right">
+                <div className="col-sm-6 text-end">
                     <object.TooltipInfoIconContainerAuto property="age" result={indv} fallbackTitle="Age" itemType="IndividualHuman" schemas={this.props.schemas} />
                 </div>
-                <div className="col-sm-6 text-left">
+                <div className="col-sm-6 text-start">
                     {indv.age } { indv.age_units + (indv.age > 1 ? "s" : "") } { life_stage && "(" + life_stage + ")" }
                 </div>
             </div>
@@ -161,10 +161,10 @@ export class IndividualItemTitle extends React.PureComponent {
         }
         return (
             <div className="row">
-                <div className="col-sm-6 text-right">
+                <div className="col-sm-6 text-end">
                     <object.TooltipInfoIconContainerAuto property="ethnicity" fallbackTitle="Ethnicity" result={indv} itemType="IndividualHuman" schemas={this.props.schemas} />
                 </div>
-                <div className="col-sm-6 text-left">
+                <div className="col-sm-6 text-start">
                     { indv.ethnicity }
                 </div>
             </div>
@@ -178,10 +178,10 @@ export class IndividualItemTitle extends React.PureComponent {
         }
         return (
             <div className="row">
-                <div className="col-sm-6 text-right">
+                <div className="col-sm-6 text-end">
                     <object.TooltipInfoIconContainerAuto property="health_status" fallbackTitle="Health Status" result={indv} itemType="IndividualHuman" schemas={this.props.schemas} />
                 </div>
-                <div className="col-sm-6 text-left">
+                <div className="col-sm-6 text-start">
                     { indv.health_status }
                 </div>
             </div>
@@ -195,10 +195,10 @@ export class IndividualItemTitle extends React.PureComponent {
         }
         return (
             <div className="row">
-                <div className="col-sm-6 text-right">
+                <div className="col-sm-6 text-end">
                     <object.TooltipInfoIconContainerAuto property="mouse_strain" fallbackTitle="Mouse Strain" result={indv} itemType="IndividualMouse" schemas={this.props.schemas} />
                 </div>
-                <div className="col-sm-6 text-left">
+                <div className="col-sm-6 text-start">
                     { indv.mouse_strain }
                 </div>
             </div>
@@ -207,7 +207,7 @@ export class IndividualItemTitle extends React.PureComponent {
 
     toggleIcon(){
         if (!this.moreInfoExists()) return null;
-        return <i className={"icon clickable fas icon-caret-right" + (this.state.open ? " icon-rotate-90" : "")} onClick={this.toggle} />;
+        return <i className={"icon clickable fas icon-caret-end" + (this.state.open ? " icon-rotate-90" : "")} onClick={this.toggle} />;
     }
 
     moreInfoExists(){
@@ -252,8 +252,8 @@ export class IndividualItemTitle extends React.PureComponent {
 
         return (
             <div className="individual-organism">
-                { sex } { organism ? <span className={(object.isAccessionRegex(organism) ? "text-monospace" : null)}> { organism } - </span> : null }
-                <a href={href} className={object.isAccessionRegex(title) ? "text-monospace" : null}>{ title || null }</a> { this.toggleIcon() }
+                { sex } { organism ? <span className={(object.isAccessionRegex(organism) ? "font-monospace" : null)}> { organism } - </span> : null }
+                <a href={href} className={object.isAccessionRegex(title) ? "font-monospace" : null}>{ title || null }</a> { this.toggleIcon() }
                 { this.moreInfoExists() ? <Collapse in={this.state.open}>{ this.moreInfoPanel() }</Collapse> : null }
             </div>
         );

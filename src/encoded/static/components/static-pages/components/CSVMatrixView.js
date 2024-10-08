@@ -198,7 +198,7 @@ export const CSVParsingUtilities = {
                 });
                 extraStringShown = extraStringShown.replace(/(Link: ([^;]+;))/g, '').trim();
                 linksStr = '<div class="row" style="padding-top: 6px; padding-bottom: 8px;">' + _.map(links, function(link, i){
-                    return '<div class="col-sm-'+ (12 / Math.min(links.length, 4) ) + '"><a class="btn btn-sm btn-block btn-primary" href="' + link + '" target="_blank">'+ linkTitles[i] + '</a></div>';
+                    return '<div class="col-sm-'+ (12 / Math.min(links.length, 4) ) + '"><a class="btn btn-sm w-100 btn-primary" href="' + link + '" target="_blank">'+ linkTitles[i] + '</a></div>';
                 }).join(' ') + '</div>';
             }
         }

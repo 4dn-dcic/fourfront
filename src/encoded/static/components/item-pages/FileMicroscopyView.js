@@ -4,7 +4,7 @@ import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
-import { isServerSide, console, object, ajax } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { isServerSide, console, object, ajax, layout } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { expFxn } from './../util';
 import { SearchTableTitle } from './components/tables/ItemPageTable';
 import { EmbeddedExperimentSetSearchTable } from './components/tables/ExperimentSetTables';
@@ -109,8 +109,8 @@ const FileMicOverViewBody = React.memo(function FileMicOverViewBody(props){
         thumbnailSrc = thumbnailSrc.replace(/\/100\/(\?[ctz]=[\d]+)?$/g, "/360/$1");
         if (file.omerolink){
             thumbnailLink = (
-                <a href={file.omerolink} className="image-wrapper d-inline-block img-thumbnail" target="_blank"
-                    data-tip="View in OMERO" rel="noopener noreferrer">
+                <a href={file.omerolink} className="image-wrapper d-inline-block img-thumbnail link-underline-hover"
+                    target="_blank" data-tip="View in OMERO" rel="noopener noreferrer">
                     <img className="embedded-item-image" src={thumbnailSrc} alt="OMERO Thumbnail" />
                 </a>
             );
@@ -121,7 +121,7 @@ const FileMicOverViewBody = React.memo(function FileMicOverViewBody(props){
         }
     } else if (file.omerolink){
         thumbnailLink = (
-            <a className="btn btn-primary btn-block mt-2" href={file.omerolink} target="_blank" rel="noopener noreferrer">
+            <a className="btn btn-primary w-100 mt-2" href={file.omerolink} target="_blank" rel="noopener noreferrer">
                 View in OMERO
             </a>
         );
@@ -160,6 +160,9 @@ const FileMicOverViewBody = React.memo(function FileMicOverViewBody(props){
 function FileViewVitessce (props) {
     const { context, windowWidth, width, schemas, href } = props;
     const { href: fileHref, display_title: name, description = null } = context || {};
+
+    const gridSize = layout.responsiveGridState(windowWidth);
+    const containerWidth = gridSize === 'xl' || gridSize === 'xxl' ? width : 1120;
 
     const config = useMemo(function () {
         const urlParts = url.parse(href, true);
@@ -217,7 +220,7 @@ function FileViewVitessce (props) {
     return (
         <div>
             <div className="row overview-blocks">
-                <VitesscePlainContainer height={800} width={1120} theme="light" config={config} />
+                <VitesscePlainContainer height={800} width={containerWidth} theme="light" config={config} />
             </div>
         </div>
     );

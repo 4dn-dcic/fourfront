@@ -50,7 +50,7 @@ export class EmbeddedExperimentSetSearchTable extends React.PureComponent {
         const { windowWidth, href } = this.props;
         return (
             <ExperimentSetDetailPane {...{ result, href, windowWidth }} containerWidth={width || null} paddingWidthMap={{
-                'xs' : 0, 'sm' : 10, 'md' : 47, 'lg' : 47, 'xl' : 47
+                'xs' : 0, 'sm' : 10, 'md' : 47, 'lg' : 47, 'xl' : 47, 'xxl' : 47 
             }} updateFileSectionStateCache={this.updateDetailPaneFileSectionStateCache} />
         );
     }
@@ -144,7 +144,7 @@ export class ExperimentSetTables extends React.PureComponent {
         const { windowWidth, href } = this.props;
         return (
             <ExperimentSetDetailPane result={es} href={href} containerWidth={width || null} windowWidth={windowWidth} paddingWidthMap={{
-                'xs' : 0, 'sm' : 10, 'md' : 47, 'lg' : 47, 'xl' : 47
+                'xs' : 0, 'sm' : 10, 'md' : 47, 'lg' : 47, 'xl' : 47, 'xxl' : 47
             }} updateFileSectionStateCache={this.updateDetailPaneFileSectionStateCache} />
         );
     }

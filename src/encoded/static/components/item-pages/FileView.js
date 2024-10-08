@@ -255,7 +255,7 @@ export class ExternalVisualizationButtons extends React.PureComponent {
     renderJuiceboxBtn(fileHref){
         const btnHref = "http://aidenlab.org/juicebox/?hicUrl=" + fileHref;
         return (
-            <a href={btnHref} className="btn btn-primary mr-05" target="_blank" rel="noreferrer noopener">
+            <a href={btnHref} className="btn btn-primary me-05" target="_blank" rel="noreferrer noopener">
                 <span className="text-400">Visualize with</span> JuiceBox&nbsp;&nbsp;<i className="icon icon-fw icon-external-link-alt text-small fas align-baseline"/>
             </a>
         );
@@ -283,7 +283,7 @@ export class ExternalVisualizationButtons extends React.PureComponent {
         const btnHref = "http://epigenomegateway.wustl.edu/browser/?genome=" + genome + "&hicUrl=" + fileHref;
         return (
             <a href={btnHref} target="_blank" rel="noreferrer noopener" className="btn btn-primary">
-                <span className="text-400 ml-05">Visualize with</span> Epigenome Browser&nbsp;&nbsp;
+                <span className="text-400 ms-05">Visualize with</span> Epigenome Browser&nbsp;&nbsp;
                 <i className="icon icon-fw icon-external-link-alt text-small fas align-baseline"/>
             </a>
         );

@@ -173,7 +173,7 @@ export class SelectAllFilesButton extends React.PureComponent {
 
     menuItemIconClassName(allSelected){
         const { selecting } = this.state;
-        return "mr-05 icon icon-fw icon-" + (selecting ? 'circle-notch icon-spin fas' : (!allSelected ? 'square far' : 'check-square far'));
+        return "me-05 icon icon-fw icon-" + (selecting ? 'circle-notch icon-spin fas' : (!allSelected ? 'square far' : 'check-square far'));
     }
 
     render(){
@@ -191,7 +191,7 @@ export class SelectAllFilesButton extends React.PureComponent {
         }
         const isEnabled = this.isEnabled();
         const disabled = selecting || (!isAllSelected && !isEnabled);
-        const btnIconClassName = "mr-05 icon icon-fw icon-" + (selecting ? 'circle-notch icon-spin fas' : (isAllSelected ? 'square far' : 'check-square far'));
+        const btnIconClassName = "me-05 icon icon-fw icon-" + (selecting ? 'circle-notch icon-spin fas' : (isAllSelected ? 'square far' : 'check-square far'));
         const hideToggle = !navigate.isBrowseHref(href);
 
         let tooltip = null;
@@ -214,7 +214,7 @@ export class SelectAllFilesButton extends React.PureComponent {
             { label: `Select All Raw Files (${totalRawFilesCount})`, key: 'raw-files', iconClassName: this.menuItemIconClassName(isAllRawFilesSelected), hidden: totalRawFilesCount === 0 },
             { label: `Select All Processed Files (${totalProcessedFilesCount})`, key: 'processed-files', iconClassName: this.menuItemIconClassName(isAllProcessedFilesSelected), hidden: totalProcessedFilesCount === 0 },
             { label: `Select All Supplementary Files (${totalOPFCount})`, key: 'supplementary-files', iconClassName: this.menuItemIconClassName(isAllSupplementaryFilesSelected), hidden: totalOPFCount === 0 },
-            { label: 'Clear Selection', key: 'clear', iconClassName: 'mr-05 icon icon-fw far icon-times-circle', hidden: !anySelected, hasDivider: true },
+            { label: 'Clear Selection', key: 'clear', iconClassName: 'me-05 icon icon-fw far icon-times-circle', hidden: !anySelected, hasDivider: true },
         ];
         options = _.filter(options, function (opt) { return !opt.hidden; });
 
@@ -351,13 +351,13 @@ const SelectedFilesFilterByButton = React.memo(function SelectedFilesFilterByBut
     return (
         <button type="button" id="selected-files-file-type-filter-button" className={cls} onClick={onFilterFilesByClick}
             key="filter-selected-files-by" disabled={isDisabled} active={active.toString()} data-tip={tooltip} data-html>
-            <i className="icon icon-filter fas icon-fw mr-05" style={{ opacity : currentFiltersLength > 0 ? 1 : 0.75 }}/>
+            <i className="icon icon-filter fas icon-fw me-05" style={{ opacity : currentFiltersLength > 0 ? 1 : 0.75 }}/>
             {
                 currentFiltersLength > 0 ? <span>{ currentFiltersLength } </span> : (
                     <span className="d-none d-lg-inline">All </span>
                 )
             }
-            <span className="text-400 d-none d-lg-inline mr-05">{ "File Type" + (currentFiltersLength === 1 ? '' : 's') }</span>
+            <span className="text-400 d-none d-lg-inline me-05">{ "File Type" + (currentFiltersLength === 1 ? '' : 's') }</span>
             <i className="icon icon-angle-down icon-fw fas"/>
         </button>
     );

@@ -132,7 +132,7 @@ describe('Browse Views - Files Selection', function () {
             cy.getDownloadButton().click().end()
                 .get('div.modal-dialog .modal-body button.btn-info').should('have.length', 1).should('contain', 'I have read').click().end()
                 .get('div.modal-dialog .modal-body form[method="POST"] input[type="hidden"][name="accession_triples"]').should('have.length', 1).end()
-                .get('div.modal-dialog .modal-header button.close').click().end();
+                .get('div.modal-dialog .modal-header button.btn-close').click().end();
 
         });
 
@@ -178,7 +178,7 @@ describe('Browse Views - Files Selection', function () {
             cy.getDownloadButton().click().end()
                 .get('div.modal-dialog .modal-body button.btn-info').should('have.length', 1).should('contain', 'I have read').click().end()
                 .get('div.modal-dialog .modal-body form[method="POST"] input[type="hidden"][name="accession_triples"]').should('have.length', 1).end()
-                .get('div.modal-dialog .modal-header button.close').click().end();
+                .get('div.modal-dialog .modal-header button.btn-close').click().end();
         });
 
         it('"Deselect All Files" button works; checkboxes unchecked.', function () {
@@ -198,7 +198,7 @@ describe('Browse Views - Files Selection', function () {
             //Open multi-column sorter
             cy.get('#content div.above-results-table-row div.right-buttons button.btn[data-tip="Sort multiple columns"]').click().end()
                 //Remove existing sort column
-                .get('.btn.btn-outline-secondary.btn-sm.btn-block[data-tip="Remove sort column"]').click().end()
+                .get('.btn.btn-outline-secondary.btn-sm[data-tip="Remove sort column"]').click().end()
                 //Sort column 1 (asc)
                 .get('.multi-column-sort .dropdown-toggle').contains('Select a column to sort').click({ 'force': true }).end()
                 .get('.show.dropdown').contains('Title').click({ 'force': true }).end()
@@ -211,7 +211,7 @@ describe('Browse Views - Files Selection', function () {
                 .get('.multi-column-sort .dropdown-toggle').contains('Select a column to sort').click({ 'force': true }).end()
                 .get('.show.dropdown').contains('Condition').click({ 'force': true }).end()
                 //Click sorting
-                .get('.btn.btn-primary.btn-sm.btn-block[data-tip="Re-sort columns"]').click().end()
+                .get('.btn.btn-primary.btn-sm[data-tip="Re-sort columns"]').click().end()
                 .get('.headers-columns-overflow-container [data-field="display_title"] .active.column-sort-icon').then(function ($item) {
                     cy.expect(1).equal(parseInt($item.text()));
                     cy.expect(1).equal($item.children('i.icon-sort-up').length);

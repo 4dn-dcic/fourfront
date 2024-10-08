@@ -25,7 +25,7 @@ export const LeftNav = React.memo(function LeftNav(props){
     const isSearchBarOpen = (visibleDropdownID === 'search-menu-item');
     const passProps = isSearchBarOpen ? _.omit(_.extend({ 'active': false }, props), 'searchNavItemRef') : props;
     return (
-        <Nav className="mr-auto">
+        <Nav className="me-auto">
             <DataNavItem {...passProps} />
             <ToolsNavItem {...passProps} />
             <ResourcesNavItem {...passProps} />
@@ -117,7 +117,7 @@ function DataNavItem(props){
 
     const navLink = (
         <React.Fragment>
-            <i className="icon icon-fw icon-database fas mr-05 align-middle" />
+            <i className="icon icon-fw icon-database fas me-05 align-middle" />
             <span className="text-black">Data</span>
         </React.Fragment>
     );
@@ -344,14 +344,14 @@ const SelectItemTypeDropdownBtn = React.memo(function SelectItemTypeDropdownBtn(
     return (
         <div className="search-item-type-wrapper">
             <DropdownButton id="search-item-type-selector" size="l" variant="outline-light w-100" disabled={disabled}
-                title={!selectedItem ? 'Search in specific type ...' : selectedItem.text}>
+                title={!selectedItem ? 'Search in specific type ...' : selectedItem.text} onSelect={onChangeSearchType}>
                 {
                     _.pairs(AvailableSearchTypes).map(function (pair) {
                         const [key, item] = pair;
                         return (!isBrowseOrSearchPage && key === 'Within') ? null :
                             (
                                 <DropdownItem key={item.type} eventKey={item.type} data-key={item.type}
-                                    className="w-100" onSelect={onChangeSearchType} active={searchType == item.type}>
+                                    className="w-100" active={searchType == item.type}>
                                     {item.text}
                                 </DropdownItem>
                             );

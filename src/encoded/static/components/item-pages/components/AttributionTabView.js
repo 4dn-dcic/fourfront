@@ -56,7 +56,7 @@ export const ContactPersonListItem = React.memo(function ContactPersonListItem({
 
     const clickableItem = (
         <div className="d-inline-block clickable" data-html data-tip={dataTip} onClick={onClick}>
-            <i className="icon icon-fw icon-envelope far mr-05" />
+            <i className="icon icon-fw icon-envelope far me-05" />
             {display_title}
         </div>
     );
@@ -166,7 +166,7 @@ class LabsSection extends React.PureComponent {
         return (
             <div className={"lab" + (all.length === 1 && (!contactPersons || contactPersons.length === 0)  ? ' mt-1' : '')} key={atId || idx}>
                 <h5>
-                    <a className="text-500" href={atId}>{ lab.display_title }</a>
+                    <a className="link-underline-hover" href={atId}>{ lab.display_title }</a>
                 </h5>
                 { contactPersons && contactPersons.length > 0 ?
                     <ul className="mt-02">{ contactPersons }</ul>

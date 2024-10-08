@@ -413,7 +413,7 @@ export class UIControlsWrapper extends React.PureComponent {
                                 showType={showState} />
                         </div>
                         <div className="x-axis-right-label">
-                            <div className="row">
+                            <div className="row flex-nowrap">
                                 <div className="col-3" style={{ width : 51 }}>
                                     <h6 className="dropdown-heading">X Axis</h6>
                                 </div>

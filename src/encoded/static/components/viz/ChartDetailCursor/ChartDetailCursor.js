@@ -53,13 +53,15 @@ class Body extends React.PureComponent {
         const renderedActions = _.map(actions, (action, i, a)=>{
             const title = typeof action.title === 'function' ? action.title(this.props) : action.title;
             const disabled = typeof action.disabled === 'function' ? action.disabled(this.props) : action.disabled;
-            const cls = "btn btn-primary btn-sm" + (a.length < 2 ? " btn-block" : "");
+            const cls = "btn btn-primary btn-sm" + (a.length < 2 ? " w-100" : "");
             return (
                 <div className={"button-container col-" + colWidth} key={title || i}>
-                    <button type="button" className={cls} disabled={disabled || false}
-                        onClick={action.function.bind(action.function, this.props)}>
-                        { title }
-                    </button>
+                    <div className={a.length < 2 ? "d-grid gap-1" : ""}>
+                        <button type="button" className={cls} disabled={disabled || false}
+                            onClick={action.function.bind(action.function, this.props)}>
+                            { title }
+                        </button>
+                    </div>
                 </div>
             );
         });
@@ -91,7 +93,7 @@ class Body extends React.PureComponent {
             if (countPair[0] === 'files')           name = "Files";
 
             return (
-                <div key={countPair[0] || i} className={"text-right col-" + colSize}>
+                <div key={countPair[0] || i} className={"text-end col-" + colSize}>
                     { countPair[1] }<small> { name }</small>
                 </div>
             );
@@ -185,7 +187,7 @@ const Crumbs = React.memo(function Crumbs({ path, schemas, primaryCount }){
                             <div className="name col">
                                 { n.name || Schemas.Term.toName(n.field, n.term) }
                             </div>
-                            <div className="count col-auto pull-right text-right">
+                            <div className="count col-auto pull-right text-end">
                                 { n[primaryCount] || n.count }
                             </div>
                         </div>

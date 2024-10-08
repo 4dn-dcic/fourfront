@@ -218,9 +218,9 @@ const TopSearchBarItem = React.memo(function (props) {
     const isTablet = gridState === 'md';
 
     const largeBar = (
-        <div className="desktop-search-bar-icon border border-secondary rounded p-2 mr-lg-5" onClick={handleOpenSearchPanelClick}>
+        <div className="desktop-search-bar-icon border border-secondary rounded p-2 me-lg-5" onClick={handleOpenSearchPanelClick}>
             <span className="text-black">Search ...</span>
-            <i className="icon icon-fw icon-search fas align-middle ml-auto order-2" />
+            <i className="icon icon-fw icon-search fas align-middle ms-auto order-2" />
         </div>
     );
 

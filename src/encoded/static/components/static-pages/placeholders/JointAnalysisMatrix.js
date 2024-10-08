@@ -516,7 +516,7 @@ class VisualBody extends React.PureComponent {
             const linkHref = url.format(hrefParts);
 
             return (
-                <Button href={linkHref} target="_blank" bsStyle="primary" className="btn-block mt-1">View Experiment Sets</Button>
+                <Button href={linkHref} target="_blank" bsStyle="primary" className="w-100 mt-1">View Experiment Sets</Button>
             );
         }
 
@@ -524,7 +524,7 @@ class VisualBody extends React.PureComponent {
             let path = object.itemUtil.atId(data);
             if (data_source === 'ENCODE') path = 'https://encodeproject.org' + path; // Else will be abs path relative to current domain.
             return (
-                <Button href={path} target="_blank" bsStyle="primary" className="btn-block mt-1">View Experiment Set</Button>
+                <Button href={path} target="_blank" bsStyle="primary" className="w-100 mt-1">View Experiment Set</Button>
             );
         }
 

@@ -86,7 +86,7 @@ export class ItemFileAttachment extends React.PureComponent {
                 <div className={includeTitle ? 'mt-1' : null}>
                     <ViewFileButton filename={download || null}
                         href={object.itemUtil.atId(context) + attachHref} disabled={attachHref.length === 0}
-                        className="text-truncate mb-1 btn-block" />
+                        className="text-truncate mb-1 w-100" />
                     <div>
                         { this.size() }
                         { this.md5sum() }

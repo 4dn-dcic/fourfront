@@ -57,7 +57,7 @@ export const BrowseViewSelectedFilesDownloadButton = React.memo(function BrowseV
     return (
         <SelectedFilesDownloadButton {...{ context, session, disabled }} selectedFiles={subSelectedFiles || selectedFiles} filenamePrefix="metadata_"
             id="browse-view-download-files-btn" data-tip={tooltip} className={cls} analyticsAddFilesToCart>
-            <i className="icon icon-download fas icon-fw mr-07"/>
+            <i className="icon icon-download fas icon-fw me-07"/>
             <span className="d-none d-lg-inline">Download </span>
             <span className="count-to-download-integer">{ countToShow }</span>
             <span className="d-none d-lg-inline text-400"> Selected Files</span>
@@ -229,9 +229,9 @@ class SelectedFilesDownloadModal extends React.PureComponent {
                             <li className="mb-05">
                                 <span className="text-danger">You must include an <b>access key</b> in your cURL command for bulk downloads.</span>
                             </li>
-                            <li className="mb-05">You can configure the access key in {session ? <a href={profileHref} target="_blank" rel="noopener noreferrer">your profile</a> : 'your profile'}, then use it in place of <em>{'<access_key_id>:<access_key_secret>'}</em>, below.</li>
+                            <li className="mb-05">You can configure the access key in {session ? <a href={profileHref} target="_blank" rel="noopener noreferrer" className="link-underline-hover">your profile</a> : 'your profile'}, then use it in place of <em>{'<access_key_id>:<access_key_secret>'}</em>, below.</li>
                             {!session ?
-                                <li>{"If you don't already have an account, you can "}<a onClick={onLoginNavItemClick} href="#loginbtn">log in</a>{" with your Google or GitHub credentials."}</li>
+                                <li>{"If you don't already have an account, you can "}<a onClick={onLoginNavItemClick} href="#loginbtn" className="link-underline-hover">log in</a>{" with your Google or GitHub credentials."}</li>
                                 : null}
                         </ul>
                     </div>
@@ -256,16 +256,16 @@ class SelectedFilesDownloadModal extends React.PureComponent {
                                 { foundUnpublishedFiles ?
                                     <li>
                                         For unpublished data sets, we ask that you please contact the data generating lab to discuss possible coordinated publication.
-                                        In your manuscript, please cite the 4DN White Paper (<a href="https://doi.org/10.1038/nature23884" target="_blank" rel="noopener noreferrer">doi:10.1038/nature23884</a>), and please acknowledge the 4DN lab which generated the data.
-                                        Please direct any questions to the <a href="mailto:support@4dnucleome.org">Data Coordination and Integration Center</a>.
+                                        In your manuscript, please cite the 4DN White Paper (<a href="https://doi.org/10.1038/nature23884" target="_blank" rel="noopener noreferrer" className="link-underline-hover">doi:10.1038/nature23884</a>), and please acknowledge the 4DN lab which generated the data.
+                                        Please direct any questions to the <a href="mailto:support@4dnucleome.org" className="link-underline-hover">Data Coordination and Integration Center</a>.
                                     </li>
                                     : null }
                             </ul>
                         </div> : null }
 
                     { foundUnpublishedFiles && !disclaimerAccepted?
-                        <button type="button" className="btn btn-info mr-1 mt-1 btn-block-xs-only" onClick={this.handleAcceptDisclaimer}>
-                            <i className="icon icon-fw icon-check fas mr-1"/>
+                        <button type="button" className="btn btn-info me-1 mt-1 btn-block-xs-only" onClick={this.handleAcceptDisclaimer}>
+                            <i className="icon icon-fw icon-check fas me-1"/>
                             I have read and understand the notes.
                         </button>
                         :
@@ -355,9 +355,9 @@ const SelectedFilesDownloadStartButton = React.memo(function SelectedFilesDownlo
         <form method="POST" action={action} className="d-inline-block d-block-xs-only">
             <input type="hidden" name="accession_triples" value={JSON.stringify(accessionTripleArrays)} />
             <input type="hidden" name="download_file_name" value={JSON.stringify(suggestedFilename)} />
-            <button type="submit" name="Download" className="btn btn-primary mt-1 mr-1 btn-block-xs-only" onClick={onClick}
+            <button type="submit" name="Download" className="btn btn-primary mt-1 me-1 btn-block-xs-only" onClick={onClick}
                 data-tip="Details for each individual selected file delivered via a TSV spreadsheet.">
-                <i className="icon icon-fw icon-file-alt fas mr-1"/>Download metadata for files
+                <i className="icon icon-fw icon-file-alt fas me-1"/>Download metadata for files
             </button>
         </form>
     );

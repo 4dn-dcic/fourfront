@@ -127,7 +127,7 @@ export const SearchTableTitle = React.memo(function (props) {
                     externalSearchLinkVisible && currentSearchHref ?
                         (
                             <a href={currentSearchHref} className="btn btn-primary pull-right" style={{ marginTop: '-10px' }} data-tip="Run embedded search query in Browse/Search View">
-                                <i className="icon icon-fw fas icon-external-link-alt mr-07 align-baseline"></i>
+                                <i className="icon icon-fw fas icon-external-link-alt me-07 align-baseline"></i>
                                 {linkText}
                             </a>
                         ) : null

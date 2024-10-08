@@ -133,8 +133,8 @@ function AboveFacetList({ context, currentAction }){
         const addAction = _.findWhere(actions, { 'name': 'add' });
         if (addAction && typeof addAction.href === 'string') {
             addButton = (
-                <a className="btn btn-primary btn-xs ml-1" href={addAction.href} data-skiprequest="true">
-                    <i className="icon icon-fw icon-plus fas mr-03 fas" />Create New&nbsp;
+                <a className="btn btn-primary btn-xs ms-1" href={addAction.href} data-skiprequest="true">
+                    <i className="icon icon-fw icon-plus fas me-03 fas" />Create New&nbsp;
                 </a>
             );
         }

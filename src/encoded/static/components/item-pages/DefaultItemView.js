@@ -143,7 +143,7 @@ export default class DefaultItemView extends React.PureComponent {
                 }
                 Alerts.queue({
                     'title' : "Redirected",
-                    'message': <span>You have been redirected from <a href={ourOldItem['@id']}>{ redirected_from_accession }</a>, which this item ({ context.accession }) supercedes.</span>,
+                    'message': <span>You have been redirected from <a href={ourOldItem['@id']} className="link-underline-hover">{ redirected_from_accession }</a>, which this item ({ context.accession }) supercedes.</span>,
                     'style': 'warning'
                 });
             }, 'GET', (err)=>{
@@ -442,7 +442,7 @@ const EmbeddedItemWithAttachment = React.memo(function EmbeddedItemWithAttachmen
     if (attachmentHref){
         viewAttachmentButton = (
             <ViewFileButton title="File" mimeType={attachmentType} filename={filename}
-                href={linkToItem + attachmentHref} disabled={!attachmentHref} className="text-truncate btn-block btn-sm btn-primary" />
+                href={linkToItem + attachmentHref} disabled={!attachmentHref} className="text-truncate w-100 btn-sm btn-primary" />
         );
     }
 
@@ -496,7 +496,7 @@ const EmbeddedItemWithImageAttachment = React.memo(function EmbeddedItemWithImag
     const linkProps = openInNewWindow ? { target: '_blank', rel: 'noreferrer' } : {};
 
     const imageElem = (
-        <a href={linkHref} className="image-wrapper" {...linkProps}>
+        <a href={linkHref} className="link-underline-hover image-wrapper" {...linkProps}>
             <img className="embedded-item-image" src={linkToItem + attachmentHref} />
         </a>
     );
@@ -508,8 +508,8 @@ const EmbeddedItemWithImageAttachment = React.memo(function EmbeddedItemWithImag
             <div className="inner">
                 { imageElem }
                 { captionText && <div className="caption">{ captionText }</div> }
-                { fileMicroscopyID && <a href={fileMicroscopyID}>View File Item - { item.microscopy_file.accession }</a> }
-                { !fileMicroscopyID && openInNewWindow && <a href={linkToItem} data-tip="View image item details">View Image Item</a> }
+                { fileMicroscopyID && <a href={fileMicroscopyID} className="link-underline-hover">View File Item - { item.microscopy_file.accession }</a> }
+                { !fileMicroscopyID && openInNewWindow && <a href={linkToItem} className="link-underline-hover" data-tip="View image item details">View Image Item</a> }
             </div>
         </div>
     );
@@ -540,10 +540,10 @@ const SampleBiosourceItem = React.memo(function SampleBiosourceItem(props) {
     const style = { 'overflowWrap': 'break-word' };
     if (biosources.length === 1) {
         const [bs] = biosources;
-        return <a href={bs.atId} style={style} data-tip="View Biosource Details">{item}</a>;
+        return <a href={bs.atId} className="link-underline-hover" style={style} data-tip="View Biosource Details">{item}</a>;
     } else if (biosources.length > 1) {
         const link = '/search/?type=Biosource&accession=' + _.pluck(biosources, 'accession').join('&accession=');
-        return <a href={link} style={style} data-tip="Multiple Biosources Found. View in Search Page.">{item}</a>;
+        return <a href={link} className="link-underline-hover" style={style} data-tip="Multiple Biosources Found. View in Search Page.">{item}</a>;
     }
 
     return item;
@@ -588,7 +588,7 @@ export class OverViewBodyItem extends React.PureComponent {
         },
         'url_string' : function(field, value, allowJSX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li', fullObject = null){
             if (typeof value !== 'string') return null;
-            return <a href={value} style={{ 'overflowWrap' : 'break-word' }}>{value}</a>;
+            return <a href={value} className="link-underline-hover" style={{ 'overflowWrap' : 'break-word' }}>{value}</a>;
         },
         'imaging_paths_from_exp': function(field, value, allowJSX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'div', fullObject = null){
             if (!value || typeof value !== 'object') return null;
@@ -599,10 +599,10 @@ export class OverViewBodyItem extends React.PureComponent {
             const hasImagingRounds = imaging_rounds.length > 0 || _.any(fullObject.imaging_paths || [], function (imgPath) { const { path: { imaging_rounds = '' } = {} } = imgPath; return typeof imaging_rounds === 'string' && imaging_rounds.length > 0; });
             return (
                 <div className="imaging-path-item-wrapper row">
-                    <div className="index-num col-1 text-monospace text-500"><small>{ channel }</small></div>
-                    { hasImagingRounds ? <div className="index-num col-2 text-monospace text-500"><small>{ imaging_rounds || '-' }</small></div> : null }
+                    <div className="index-num col-1 font-monospace text-500"><small>{ channel }</small></div>
+                    { hasImagingRounds ? <div className="index-num col-2 font-monospace text-500"><small>{ imaging_rounds || '-' }</small></div> : null }
                     <div className={"imaging-path col-" + (matchingFile ? '8' : '9')}>{ object.itemUtil.generateLink(path, true) }</div>
-                    { matchingFile ? <div className="microscope-setting col-1 text-right" data-tip="Light Source Center Wavelength">{ fileUtil.getLightSourceCenterMicroscopeSettingFromFile(channel, matchingFile) }nm</div> : null }
+                    { matchingFile ? <div className="microscope-setting col-1 text-end" data-tip="Light Source Center Wavelength">{ fileUtil.getLightSourceCenterMicroscopeSettingFromFile(channel, matchingFile) }nm</div> : null }
                 </div>
             );
         },

@@ -914,7 +914,7 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
                     <div className="row summary-sub-header">
                         <div className="col summary-title-column text-truncate">MetaData</div>
                         <div className={columClassName + " summary-title-column"}>
-                            <DropdownButton title={matches[firstVisibleMatchIndex].Name} variant="outline-secondary btn-block text-left"
+                            <DropdownButton title={matches[firstVisibleMatchIndex].Name} variant="outline-secondary btn-block text-start"
                                 size="md" className="w-100" onSelect={this.handleMatchSelection}>
                                 {
                                     _.map(matches, function (match, idx) {
@@ -1030,7 +1030,7 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
                     <div className="col-12 col-md-7 col-lg-8 col-xl-9 micro-meta-summary-results">
                         <div className="row summary-header">
                             <div className="col summary-title-column text-truncate">
-                                <i className="icon icon-fw icon-microscope fas mr-08"/>
+                                <i className="icon icon-fw icon-microscope fas me-08"/>
                                 <h4 className="summary-title">{headerTitle}</h4>
                             </div>
                         </div>
@@ -1084,7 +1084,7 @@ const CollapsibleSubCategory = React.memo(function CollapsibleSubCategory(props)
             <div className="summary-section-container">
                 <div className="row summary-section-header">
                     <div className="col summary-title-column text-truncate" onClick={() => toggleExpand(expandKey)}>
-                        <i className={"icon icon-fw fas mr-06 " + (collapsed ? 'icon-plus' : 'icon-minus')} />
+                        <i className={"icon icon-fw fas me-06 " + (collapsed ? 'icon-plus' : 'icon-minus')} />
                         <h4 className="summary-title">{title}</h4>
                     </div>
                 </div>

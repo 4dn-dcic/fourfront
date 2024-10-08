@@ -339,7 +339,7 @@ class ExperimentRawFilesStackedTableSection extends React.PureComponent {
                     <div className="download-button-container pull-right" style={{ marginTop : -5 }}>
                         <SelectedFilesDownloadButton {...{ selectedFiles, filenamePrefix, context, session }} disabled={selectedFilesUniqueCount === 0}
                             id="exp-raw-files-download-files-btn" analyticsAddFilesToCart>
-                            <i className="icon icon-download fas icon-fw mr-07 align-baseline"/>
+                            <i className="icon icon-download fas icon-fw me-07 align-baseline"/>
                             <span className="d-none d-sm-inline">Download </span>
                             <span className="count-to-download-integer">{ selectedFilesUniqueCount }</span>
                             <span className="d-none d-sm-inline text-400"> Raw Files</span>
@@ -418,7 +418,7 @@ class ExperimentProcessedFilesStackedTableSection extends React.PureComponent {
                     <div className="download-button-container pull-right" style={{ marginTop: -5 }}>
                         <SelectedFilesDownloadButton {...{ selectedFiles, filenamePrefix, context, session }} disabled={selectedFilesUniqueCount === 0}
                             id="expset-processed-files-download-files-btn" analyticsAddFilesToCart>
-                            <i className="icon icon-download icon-fw fas mr-07 align-baseline" />
+                            <i className="icon icon-download icon-fw fas me-07 align-baseline" />
                             <span className="d-none d-sm-inline">Download </span>
                             <span className="count-to-download-integer">{selectedFilesUniqueCount}</span>
                             <span className="d-none d-sm-inline text-400"> Processed Files</span>
@@ -735,7 +735,7 @@ class ExperimentSupplementaryFilesTabView extends React.PureComponent {
                         <div className="download-button-container pull-right" style={{ marginTop: -5 }}>
                             <SelectedFilesDownloadButton {...{ selectedFiles, filenamePrefix, context, session }} disabled={selectedFilesUniqueCount === 0}
                                 id="expset-raw-files-download-files-btn" analyticsAddFilesToCart>
-                                <i className="icon icon-download fas icon-fw mr-07 align-baseline" />
+                                <i className="icon icon-download fas icon-fw me-07 align-baseline" />
                                 <span className="d-none d-sm-inline">Download </span>
                                 <span className="count-to-download-integer">{selectedFilesUniqueCount}</span>
                                 <span className="d-none d-sm-inline text-400"> Supplementary Files</span>
@@ -759,12 +759,12 @@ class ExperimentSupplementaryFilesTabView extends React.PureComponent {
 export function renderStatusIndicator(status) {
     if (!status) return null;
 
-    const outerClsName = "d-inline-block pull-right mr-12 ml-2 mt-1";
+    const outerClsName = "d-inline-block pull-right me-12 ms-2 mt-1";
     if (typeof status === 'string'){
         const capitalizedStatus = Schemas.Term.toName("status", status);
         return (
             <div data-tip={"Status for all files is " + capitalizedStatus} className={outerClsName}>
-                <i className="item-status-indicator-dot mr-07" data-status={status} />
+                <i className="item-status-indicator-dot me-07" data-status={status} />
                 { capitalizedStatus }
             </div>
         );
@@ -772,8 +772,8 @@ export function renderStatusIndicator(status) {
         const capitalizedStatuses = _.map(status, Schemas.Term.toName.bind(null, "status"));
         return (
             <div data-tip={"All files have one of the following statuses - " + capitalizedStatuses.join(', ')} className={outerClsName}>
-                <span className="indicators-collection d-inline-block mr-05">
-                    { _.map(status, function(s){ return <i className="item-status-indicator-dot mr-02" data-status={s} />; }) }
+                <span className="indicators-collection d-inline-block me-05">
+                    { _.map(status, function(s){ return <i className="item-status-indicator-dot me-02" data-status={s} />; }) }
                 </span>
                 Multiple
             </div>
