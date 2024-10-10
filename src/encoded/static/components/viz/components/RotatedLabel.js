@@ -35,8 +35,10 @@ const commonDefaultProps = {
 const RotatedLabelAxis = React.memo(function RotatedLabelAxis(props){
     const {
         placementWidth, placementHeight, angle, lineHeight, extraHeight, maxLabelWidth, append, debug,
-        labels, labelClassName, className, x, y, isMounted, deRotateAppend, term : propTerm, field : propField,
-        appendOffset
+        appendOffset, labelClassName = null, className = null, x, y, isMounted, deRotateAppend, term: propTerm, field: propField,
+        labels = [
+            { name: "Label1" }, { name: "Label 2 Extra Long Ok Maybe Longer", term: 'test2' }
+        ]
     } = props;
     const maxTextHeight = RotatedLabel.maxTextHeight(placementWidth, lineHeight, extraHeight || 0);
     const labelWidth = Math.min(RotatedLabel.maxHypotenuse(placementHeight, angle), maxLabelWidth || 1000);
@@ -68,14 +70,6 @@ const RotatedLabelAxis = React.memo(function RotatedLabelAxis(props){
             }) }
         </div>
     );
-});
-RotatedLabelAxis.defaultProps = _.extend({}, commonDefaultProps, {
-    'labels' : [
-        { name : "Label1" }, { name : "Label 2 Extra Long Ok Maybe Longer", term: 'test2' }
-    ],
-    'labelClassName' : null,
-    //'availWidth' : 200, // ToDo calculate X coord positions on labels along this 0...N range if not present.
-    'className' : null,
 });
 
 

@@ -127,6 +127,10 @@ export default class HealthView extends React.PureComponent {
                 title : "Shared Portal Components Version",
                 description : "Software version of shared-portal-components package being used."
             },
+            'react_workflow_viz_version': {
+                title : "React Workflow Viz",
+                description : "Software version of react-workflow-viz (component for visualizing CWL-like workflows and provenance graphs) package being used."
+            },
             'micro_meta_version': {
                 title : "MicroMeta Version",
                 description : "Software version of MicroMeta package being used."
@@ -231,6 +235,7 @@ export default class HealthView extends React.PureComponent {
         // since dependencies is depracated in npm v9, we extract the pkg versions from packages field - see https://docs.npmjs.com/cli/v9/configuring-npm/package-lock-json#dependencies
         const { packages: {
             'node_modules/@hms-dbmi-bgm/shared-portal-components': { version: spcVersion } = {},
+            'node_modules/@hms-dbmi-bgm/react-workflow-viz': { version: reactWorkflowVizVersion } = {},
             'node_modules/micro-meta-app-react': { version: microMetaVersion } = {},
             'node_modules/higlass': { version: higlassVersion } = {},
             'node_modules/vitessce': { version: vitessceVersion = {} }
@@ -239,6 +244,7 @@ export default class HealthView extends React.PureComponent {
         const context = {
             ...propContext,
             'spc_version': spcVersion || "-",
+            'react_workflow_viz_version': reactWorkflowVizVersion || "-",
             'micro_meta_version': microMetaVersion || "-",
             'higlass_version': higlassVersion || "-",
             'vitessce_version': vitessceVersion || "-"

@@ -111,7 +111,7 @@ export class ExperimentSetTables extends React.PureComponent {
     static propTypes = {
         'loading' : PropTypes.bool,
         'windowWidth' : PropTypes.number.isRequired,
-        'title' : PropTypes.string,
+        'title': PropTypes.oneOfType([PropTypes.string, PropTypes.element]),
         'href' : PropTypes.string,
         'results' : PropTypes.arrayOf(PropTypes.object),
         'experiment_sets' : PropTypes.arrayOf(PropTypes.object),

@@ -1,6 +1,6 @@
 'use strict';
 
-import React from 'react';
+import React, { useRef } from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import Draggable from 'react-draggable';
@@ -9,10 +9,12 @@ import { requestAnimationFrame as raf } from '@hms-dbmi-bgm/shared-portal-compon
 
 
 export const DraggableVerticalBorder = React.memo(function DraggableVerticalBorder(props){
-    const { xOffset, height, left, handleHeight } = props;
+    const { xOffset, height, left, handleHeight = 24 } = props;
+    // workaround for "findDOMNode is deprecated in StrictMode" error: https://stackoverflow.com/a/63603903
+    const nodeRef = useRef(null);
     return (
-        <Draggable axis="x" position={{ 'x': xOffset, 'y': 0 }} {..._.pick(props, 'onStart', 'onStop', 'onDrag', 'bounds')}>
-            <div className="draggable-border vertical-border" style={{ 'height' : height, 'left': left - 5 }}>
+        <Draggable axis="x" position={{ 'x': xOffset, 'y': 0 }} {..._.pick(props, 'onStart', 'onStop', 'onDrag', 'bounds')} nodeRef={nodeRef}>
+            <div className="draggable-border vertical-border" style={{ 'height' : height, 'left': left - 5 }} ref={nodeRef}>
                 <div className="inner">
                     <div className="drag-handle" style={{ 'height' : handleHeight, 'top' : (Math.max(height - handleHeight, 10) / 2) }}/>
                 </div>
@@ -20,9 +22,6 @@ export const DraggableVerticalBorder = React.memo(function DraggableVerticalBord
         </Draggable>
     );
 });
-DraggableVerticalBorder.defaultProps = {
-    'handleHeight' : 24
-};
 
 
 /** This is pretty ugly. @todo refactor, reimplement, something... */
@@ -54,7 +53,7 @@ export class AdjustableDividerRow extends React.PureComponent {
         'renderLeftPanelPlaceHolder'    : PropTypes.func,
         'height'                        : PropTypes.number.isRequired, // Pre-define this.
         'width'                         : PropTypes.number,
-        'windowWidth'                   : PropTypes.number.isRequired
+        'windowWidth'                   : PropTypes.number,
     };
 
     constructor(props){

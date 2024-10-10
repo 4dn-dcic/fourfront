@@ -6,11 +6,67 @@ fourfront
 Change Log
 ----------
 
-7.10.2
+8.2.0
 =====
 
+* Merged in master (2024-10-09)
 * Update DRS API to return JSON always
 * Update DRS download URLs to return direct downloads to Open Data where applicable
+
+
+8.1.5
+=====
+
+* New enum "ATTO 550" in imaging_path labels.
+
+
+8.1.4
+=====
+
+* Bug fix to correct disease_name test inserts used in local deploy
+
+
+8.1.3
+=====
+
+* Added disease_name property to experiment set schema.
+
+
+8.1.2
+=====
+
+* New value "fragments" added in ignored_enum for processed file schema.
+
+
+8.1.1
+=====
+
+* Bug fix to handle non-array children in static content TOC
+
+
+8.1.0
+=====
+
+* 2024-09-03/dmichaels
+  - Update snovault 11.22.0 for fix for running locally; oddity
+    with subprocess.Popen in elasticsearch_fixture; see snovault PR-304.
+
+
+8.0.0
+=====
+
+* Upgrade: React v17 to v18
+* Upgrade: Redux v4 to v5 (there are breaking changes in store and dispatchers. SPC is updated to support both new and legacy usage)
+* Upgrade: HiGlass (React 18-compatible)
+* Upgrade: Vitessce (React 18-compatible)
+* Upgrade: MicroMeta App
+* Upgrade: auth0-Lock v11 to v12
+* Upgrade: gulp.js v4 to v5
+* Upgrade: react-workflow-viz (animation updates to eliminate findDOMNode errors)
+* Fix: User Content updates to fix markdown, jsx, and HTML static section rendering
+* Feature: Improve ExperimentSetDetailPane's raw/processed/supplementary file panels
+* Feature: Display react-workflow-viz version in /health
+* Upgrade: SlideCarousel and BasicCarousel updates upon nuka carousel's breaking changes
 
 
 7.10.1
