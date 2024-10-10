@@ -26,18 +26,18 @@ def _award_viewing_group(award_uuid, root):
 
 # Item acls
 from ..acl import (
-    ALLOW_CURRENT_AND_SUBMITTER_EDIT_ACL, 
+    ALLOW_CURRENT_AND_SUBMITTER_EDIT_ACL,
     ALLOW_CURRENT_ACL,
     AWARD_MEMBER_ROLE,
     ALLOW_ANY_USER_ADD_ACL,
-    ALLOW_EVERYONE_VIEW_ACL, 
-    ALLOW_LAB_MEMBER_VIEW_ACL, 
-    ALLOW_LAB_SUBMITTER_EDIT_ACL, 
+    ALLOW_EVERYONE_VIEW_ACL,
+    ALLOW_LAB_MEMBER_VIEW_ACL,
+    ALLOW_LAB_SUBMITTER_EDIT_ACL,
     ALLOW_LAB_VIEW_ADMIN_EDIT_ACL,
     ALLOW_OWNER_EDIT_ACL,
     ALLOW_SUBMITTER_ADD_ACL,
-    ALLOW_VIEWING_GROUP_LAB_SUBMITTER_EDIT_ACL, 
-    ALLOW_VIEWING_GROUP_VIEW_ACL, 
+    ALLOW_VIEWING_GROUP_LAB_SUBMITTER_EDIT_ACL,
+    ALLOW_VIEWING_GROUP_VIEW_ACL,
     DELETED_ACL,
     LAB_MEMBER_ROLE,
     LAB_SUBMITTER_ROLE,
@@ -243,16 +243,6 @@ class Item(SnovaultItem):
             submitter = 'userid.%s' % properties['submitted_by']
             roles[submitter] = OWNER_ROLE
         return roles
-
-    def unique_keys(self, properties):
-        """smth."""
-        keys = super(Item, self).unique_keys(properties)
-        if 'accession' not in self.schema['properties']:
-            return keys
-        keys.setdefault('accession', []).extend(properties.get('alternate_accessions', []))
-        if properties.get('status') != 'replaced' and 'accession' in properties:
-            keys['accession'].append(properties['accession'])
-        return keys
 
     def _update(self, properties, sheets=None):
         props = {}
