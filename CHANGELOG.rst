@@ -7,6 +7,12 @@ Change Log
 ----------
 
 
+8.1.6
+=======
+* 2024-10-11/dmichaels
+* Updated dcicutils version (8.16.1) for vulnerabilities.
+
+
 8.1.5
 =====
 
