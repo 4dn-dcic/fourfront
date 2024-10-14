@@ -12,6 +12,12 @@ Change Log
 * Node 18 to 20 upgrade including GitHub actions
 
 
+8.1.5
+=====
+
+* New enum "ATTO 550" in imaging_path labels.
+
+
 8.1.4
 =====
 
