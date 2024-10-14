@@ -6,11 +6,16 @@ fourfront
 Change Log
 ----------
 
-
-8.1.6
+8.3.0
 =======
 * 2024-10-11/dmichaels
 * Updated dcicutils version (8.16.1) for vulnerabilities.
+
+
+8.2.0
+=====
+
+* Node 18 to 20 upgrade including GitHub actions
 
 
 8.1.5
