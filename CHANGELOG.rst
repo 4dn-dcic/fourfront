@@ -6,6 +6,12 @@ fourfront
 Change Log
 ----------
 
+8.3.0
+=======
+* 2024-10-11/dmichaels
+* Updated dcicutils version (8.16.1) for vulnerabilities.
+
+
 8.2.0
 =====
 
