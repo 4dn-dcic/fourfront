@@ -6,6 +6,11 @@ fourfront
 Change Log
 ----------
 
+8.2.0
+=====
+
+* Node 18 to 20 upgrade including GitHub actions
+
 
 8.1.5
 =====
