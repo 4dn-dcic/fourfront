@@ -1439,7 +1439,7 @@ $badge-item-min-height: 90px;
 			text-decoration: none;
 			text-underline-offset: 0.125em;
 				
-			&:hover {
+			&:not(.btn):hover {
 				text-decoration: underline !important;
 			}
 		}
@@ -1534,7 +1534,7 @@ $badge-item-min-height: 90px;
 					text-decoration: none;
 					text-underline-offset: 0.125em;
 				
-					&:hover {
+					&:not(.btn):hover {
 						text-decoration: underline !important;
 					}
 				}
