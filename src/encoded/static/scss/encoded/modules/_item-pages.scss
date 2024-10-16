@@ -2541,7 +2541,11 @@ div.user-profile-page {
 					background-color: #f8f8f8;
 				}
 				*/
+				th {
+					padding: .75rem;
+				}
 				td {
+					padding: .75rem;
 					border-bottom: 1px solid #eee;
 					&.access-key-buttons {
 						width: 140px;

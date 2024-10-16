@@ -96,6 +96,12 @@
     }
 }
 
+.btn-close {
+	&:focus {
+		box-shadow: none;
+	}
+}
+
 /* Styling dropdown menus */
 .dropdown-menu {
     background-color: #fafafa;
@@ -271,6 +277,12 @@
 			> button.btn-close {
 				margin-top: -0.875rem; // Overrides -1rem.
 			}
+            > .modal-title {
+                margin: 0;
+            }
+            > .btn-close {
+                font-size: 0.85rem;
+            }
 		}
 
 		.modal-body p {
