@@ -244,7 +244,7 @@ export class RawFilesStackedTableSection extends React.PureComponent {
                     <div className="download-button-container pull-right" style={{ marginTop : -5 }}>
                         <SelectedFilesDownloadButton {...{ selectedFiles, filenamePrefix, context, session }} disabled={selectedFilesUniqueCount === 0}
                             id="expset-raw-files-download-files-btn" analyticsAddFilesToCart>
-                            <i className="icon icon-download fas icon-fw mr-07 align-baseline"/>
+                            <i className="icon icon-download fas icon-fw me-07 align-baseline"/>
                             <span className="d-none d-sm-inline">Download </span>
                             <span className="count-to-download-integer">{ selectedFilesUniqueCount }</span>
                             <span className="d-none d-sm-inline text-400"> Raw Files</span>
@@ -331,7 +331,7 @@ class ProcessedFilesStackedTableSection extends React.PureComponent {
      */
     static expsNotAssociatedWithFileColumnHeaders = [
         {
-            columnClass: 'experiment', className: 'text-left', title: 'Experiment', initialWidth: 180,
+            columnClass: 'experiment', className: 'text-start', title: 'Experiment', initialWidth: 180,
             render: function (exp) {
                 const nameTitle = (exp && typeof exp.display_title === 'string' && exp.display_title.replace(' - ' + exp.accession, '')) || exp.accession;
                 const experimentAtId = object.atIdFromObject(exp);
@@ -377,7 +377,7 @@ const ProcessedFilesTableSectionHeader = React.memo(function ProcessedFilesTable
                 <div className="download-button-container pull-right" style={{ marginTop : -5 }}>
                     <SelectedFilesDownloadButton {...{ selectedFiles, filenamePrefix, context, session }} disabled={selectedFilesUniqueCount === 0}
                         id="expset-processed-files-download-files-btn" analyticsAddFilesToCart>
-                        <i className="icon icon-download icon-fw fas mr-07 align-baseline"/>
+                        <i className="icon icon-download icon-fw fas me-07 align-baseline"/>
                         <span className="d-none d-sm-inline">Download </span>
                         <span className="count-to-download-integer">{ selectedFilesUniqueCount }</span>
                         <span className="d-none d-sm-inline text-400"> Processed Files</span>
@@ -744,7 +744,7 @@ class SupplementaryFilesTabView extends React.PureComponent {
                         <div className="download-button-container pull-right" style={{ marginTop: -5 }}>
                             <SelectedFilesDownloadButton {...{ selectedFiles, filenamePrefix, context, session }} disabled={selectedFilesUniqueCount === 0}
                                 id="expset-raw-files-download-files-btn" analyticsAddFilesToCart>
-                                <i className="icon icon-download fas icon-fw mr-07 align-baseline" />
+                                <i className="icon icon-download fas icon-fw me-07 align-baseline" />
                                 <span className="d-none d-sm-inline">Download </span>
                                 <span className="count-to-download-integer">{selectedFilesUniqueCount}</span>
                                 <span className="d-none d-sm-inline text-400"> Supplementary Files</span>

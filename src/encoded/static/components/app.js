@@ -278,8 +278,8 @@ export default class App extends React.PureComponent {
                 'message' : (
                     <div>
                         <p className="mb-0">
-                            <a href="https://www.google.com/chrome/" rel="noopener noreferrer" target="_blank" className="text-500">Google Chrome</a>&nbsp;
-                            or <a href="https://www.mozilla.org/en-US/firefox/" rel="noopener noreferrer" target="_blank" className="text-500">Mozilla Firefox</a> are
+                            <a href="https://www.google.com/chrome/" rel="noopener noreferrer" target="_blank">Google Chrome</a>&nbsp;
+                            or <a href="https://www.mozilla.org/en-US/firefox/" rel="noopener noreferrer" target="_blank">Mozilla Firefox</a> are
                             the recommended browser(s) for using the 4DN Data Portal.
                         </p>
                         <p className="mb-0">

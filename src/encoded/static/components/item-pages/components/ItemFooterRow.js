@@ -128,7 +128,7 @@ export function ExternalReferenceLink({ uri, children }){
     }
 
     return (
-        <a href={uri} target="_blank" rel="noopener noreferrer" className="external-reference">{ children }</a>
+        <a href={uri} target="_blank" rel="noopener noreferrer" className="link-underline-hover external-reference">{ children }</a>
     );
 }
 
@@ -174,7 +174,7 @@ export const ExternalReferencesStackedTable = React.memo(function ExternalRefere
         const { file_type_detailed } = file;
         const fileAtId = object.atIdFromObject(file);
         if (!!fileAtId && fileAtId === '-') {
-            return (<span className="title-of-file text-monospace name-title" >&nbsp;</span>);
+            return (<span className="title-of-file font-monospace name-title" >&nbsp;</span>);
         }
 
         let fileTitleString;
@@ -193,18 +193,18 @@ export const ExternalReferencesStackedTable = React.memo(function ExternalRefere
         return (
             <React.Fragment>
                 <div>{Schemas.Term.toName("file_type_detailed", file_type_detailed, true)}</div>
-                <a className="title-of-file text-monospace name-title" href={fileAtId}>
+                <a className="link-underline-hover title-of-file font-monospace name-title" href={fileAtId}>
                     {fileTitleString}
                 </a>
             </React.Fragment>);
     };
     const renderExtRefColFunc = function (file, field, detailIndex, fileEntryBlockProps) {
         if (!file.external_references || !Array.isArray(file.external_references) || file.external_references.length === 0) {
-            return <span className="text-monospace">-</span>;
+            return <span className="font-monospace">-</span>;
         }
         const getExtRefLink = function (externalRef, file) {
             if (externalRef && typeof externalRef.ref === 'string') {
-                const innerText = (file.accession !== '-') ? externalRef.ref : (<span className="font-weight-bold">{externalRef.ref}</span>);
+                const innerText = (file.accession !== '-') ? externalRef.ref : (<span className="fw-bold">{externalRef.ref}</span>);
                 return <ExternalReferenceLink uri={externalRef.uri || null}>{innerText}</ExternalReferenceLink>;
             } else {
                 return { externalRef };
@@ -224,7 +224,7 @@ export const ExternalReferencesStackedTable = React.memo(function ExternalRefere
     };
 
     const columnHeaders = [
-        { columnClass: 'experiment', title: 'Experiment', initialWidth: 200, className: 'text-left' },
+        { columnClass: 'experiment', title: 'Experiment', initialWidth: 200, className: 'text-start' },
         { columnClass: 'file', title: 'File', initialWidth: 200, render: renderFileColFunc },
         { columnClass: 'file-detail', title: 'External References', initialWidth: 200, render: renderExtRefColFunc },
     ];
@@ -243,7 +243,7 @@ export const ExternalReferencesStackedTable = React.memo(function ExternalRefere
         //combine experiment sets w/ bio/tech replicate numbers
         experiments = expFxn.combineWithReplicateNumbers(replicate_exps, experiments_in_set);
         //add Experiment Set column
-        columnHeaders.splice(0, 0, { columnClass: 'experiment-set', title: 'Experiment Set', initialWidth: 200, className: 'text-left' });
+        columnHeaders.splice(0, 0, { columnClass: 'experiment-set', title: 'Experiment Set', initialWidth: 200, className: 'text-start' });
     } else {
         experiments = [context];//Currently, we do not add the replicate numbers for type 'Experiment'
     }
@@ -282,7 +282,7 @@ export const ExternalReferencesStackedTable = React.memo(function ExternalRefere
                 label={experimentAtId ? <StackedBlockNameLabel title="Experiment" subtitle={null} accession={(experiment && experiment.accession) || null} subtitleVisible /> : null}>
                 <StackedBlockName relativePosition={true} className={experimentAtId ? '' : 'name-empty'}>
                     {replicateNumbersExists ? <div>Bio Rep <b>{experiment.bio_rep_no}</b>, Tec Rep <b>{experiment.tec_rep_no}</b></div> : <div />}
-                    {experimentAtId ? (<a href={experimentAtId} className="name-title">{text}</a>) : (text ? (<div className="name-title">{text}</div>) : null)}
+                    {experimentAtId ? (<a href={experimentAtId} className="link-underline-hover name-title">{text}</a>) : (text ? (<div className="name-title">{text}</div>) : null)}
                 </StackedBlockName>
                 <StackedBlockList title="Files" collapseLongLists={false} collapseLimit={10}>
                     {fileBlocks}
@@ -301,7 +301,7 @@ export const ExternalReferencesStackedTable = React.memo(function ExternalRefere
                             <StackedBlock columnClass="experiment-set" hideNameOnHover={false} key="expset"
                                 label={<StackedBlockNameLabel title="Experiment Set" subtitle={null} accession={accession} subtitleVisible />}>
                                 <StackedBlockName relativePosition={true}>
-                                    <a href={context['@id']} className="name-title">{accession}</a>
+                                    <a href={context['@id']} className="link-underline-hover name-title">{accession}</a>
                                 </StackedBlockName>
                                 <StackedBlockList title="Experiments" collapseLongLists={true} collapseLimit={10}>
                                     {experimentBlocks}

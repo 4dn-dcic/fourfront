@@ -191,7 +191,7 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
                             const [linkHref] = $linkElem.attr('href').split('#');
                             cy.location('pathname').should('equal', linkHref);
 
-                            cy.get('.name-title.d-inline-block .title-of-file.text-monospace').then(function ($higlassAccesions) {
+                            cy.get('.name-title.d-inline-block .title-of-file.font-monospace').then(function ($higlassAccesions) {
                                 expect(Cypress._.find($higlassAccesions, function (item) {
                                     return item.outerText.trim() === accession.trim();
                                 })).not.to.equal(undefined);
@@ -301,7 +301,7 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
                         });
 
                         //qc metric name
-                        cy.get('.overview-list-elements-container .overview-list-element .col-4.text-right .mt-02').each(function ($el, idx) {
+                        cy.get('.overview-list-elements-container .overview-list-element .col-4.text-end .mt-02').each(function ($el, idx) {
                             if (idx < columnNames.length) {
                                 cy.get($el[0]).should('contain', columnNames[idx]);
                             }

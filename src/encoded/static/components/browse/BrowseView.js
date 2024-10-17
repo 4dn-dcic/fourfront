@@ -140,11 +140,11 @@ class ExternaDataExpSetsCount extends React.PureComponent {
             (browseBaseState === 'all' ? '' : ' available') + " in "
         );
         return (
-            <div className="above-results-table-row text-right text-truncate">
+            <div className="above-results-table-row text-end text-truncate">
                 <span className="d-inline-block mt-08">
                     <span className="text-600 text-large">{ countExternalSets }</span>
                     { midString }
-                    <a href="#" onClick={this.onBrowseStateToggle}>{ browseBaseState === 'all' ? '4DN-only Data' : 'External Data' }</a>.
+                    <a href="#" onClick={this.onBrowseStateToggle} className="link-underline-hover">{ browseBaseState === 'all' ? '4DN-only Data' : 'External Data' }</a>.
                 </span>
             </div>
         );

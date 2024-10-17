@@ -156,6 +156,14 @@ $search-results-above-results-row-height: 40px;
 
 		}
 	}
+
+	a {
+		text-decoration: none;
+
+		&:hover {
+			text-decoration: underline;
+		}
+	}
 }
 
 .search-result-row.detail-open > .columns .search-result-column-block {

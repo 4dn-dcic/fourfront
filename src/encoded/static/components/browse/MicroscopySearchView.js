@@ -147,7 +147,7 @@ export default class MicroscopySearchView extends React.PureComponent {
         };
         return (
             <React.Fragment>
-                <div className="d-inline-block ml-1">
+                <div className="d-inline-block ms-1">
                     <CreateNewConfigurationDropDownButton {...buttonProps} disabled={!mounted} />
                 </div>
                 <CreateNewConfigurationModal {...modalProps} />
@@ -420,7 +420,7 @@ const CreateNewConfigurationModal = React.memo(function (props) {
                     <i className={"icon icon-fw icon-" + (confirmLoading ? 'circle-notch icon-spin fas' : 'clone far')} />Submit
                 </button>
                 <button type="button" onClick={handleModalCancel} className="btn btn-outline-warning">
-                    <i className="icon icon-fw icon-times mr-05 fas" />Cancel
+                    <i className="icon icon-fw icon-times me-05 fas" />Cancel
                 </button>
             </Modal.Footer>
         </Modal>

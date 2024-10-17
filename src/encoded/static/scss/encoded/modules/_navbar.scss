@@ -169,6 +169,14 @@ div#top-nav.navbar-fixed-top {
             }
         }
 
+        // Container size for just XXL -
+        @include media-breakpoint-up(xxl){
+            body:not(.is-full-screen) & {
+                max-width: map-get($container-max-widths, "xxl");
+                margin: 0 auto;
+            }
+        }
+
         @include navbar-fixed-position {
 
             min-height: $navbar-small-height;
@@ -621,6 +629,7 @@ div#top-nav.navbar-fixed-top {
             padding-right: 8px;
             font-size: 1.5rem;
             border: none;
+            box-shadow: none;
 
             &:hover, &:active, &:focus {
                 background-color: rgba(0,0,0,0.125);
@@ -1115,6 +1124,7 @@ body[data-pathname="/search/"][data-current-action="multiselect"] {
                         h4 {
                             > a, > span {
                                 text-shadow: 0 0 0;
+                                text-decoration: none;
                                 &:after {
                                     opacity: 1;
                                 }
@@ -1168,6 +1178,7 @@ body[data-pathname="/search/"][data-current-action="multiselect"] {
                                 position: relative;
                                 > .level-1-title {
                                     text-shadow: 0 0 0;
+                                    text-decoration: none;
                                     &:before {
                                         font-family: $fa-font-family;
                                         font-weight: 900;

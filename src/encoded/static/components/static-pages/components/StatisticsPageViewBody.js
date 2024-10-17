@@ -853,31 +853,31 @@ class UsageChartsCountByDropdown extends React.PureComponent {
         const menuOptions = new Map();
 
         if (chartID === 'experiment_set_views'){
-            menuOptions.set('expset_detail_views', <React.Fragment><i className="icon fas icon-fw icon-eye mr-1"/>Detail View</React.Fragment>);
-            menuOptions.set('expset_list_views',   <React.Fragment><i className="icon fas icon-fw icon-list mr-1"/>Appearance in Search Results</React.Fragment>);
-            menuOptions.set('expset_clicks',       <React.Fragment><i className="icon far icon-fw icon-hand-point-up mr-1"/>Search Result Click</React.Fragment>);
+            menuOptions.set('expset_detail_views', <React.Fragment><i className="icon fas icon-fw icon-eye me-1"/>Detail View</React.Fragment>);
+            menuOptions.set('expset_list_views',   <React.Fragment><i className="icon fas icon-fw icon-list me-1"/>Appearance in Search Results</React.Fragment>);
+            menuOptions.set('expset_clicks',       <React.Fragment><i className="icon far icon-fw icon-hand-point-up me-1"/>Search Result Click</React.Fragment>);
         } else if (chartID === 'file_downloads'){
-            menuOptions.set('filetype',         <React.Fragment><i className="icon far icon-fw icon-file-alt mr-1"/>File Type</React.Fragment>);
-            menuOptions.set('experiment_type',  <React.Fragment><i className="icon far icon-fw icon-folder mr-1"/>Experiment Type</React.Fragment>);
-            menuOptions.set('top_files',        <React.Fragment><i className="icon far icon-fw icon-folder mr-1"/>Top 10 Files</React.Fragment>);
-            // menuOptions.set('geo_country',     <React.Fragment><i className="icon fas icon-fw icon-globe mr-1"/>Country</React.Fragment>);
+            menuOptions.set('filetype',         <React.Fragment><i className="icon far icon-fw icon-file-alt me-1"/>File Type</React.Fragment>);
+            menuOptions.set('experiment_type',  <React.Fragment><i className="icon far icon-fw icon-folder me-1"/>Experiment Type</React.Fragment>);
+            menuOptions.set('top_files',        <React.Fragment><i className="icon far icon-fw icon-folder me-1"/>Top 10 Files</React.Fragment>);
+            // menuOptions.set('geo_country',     <React.Fragment><i className="icon fas icon-fw icon-globe me-1"/>Country</React.Fragment>);
         } else if (chartID === 'file_views'){
-            menuOptions.set('file_detail_views',        <React.Fragment><i className="icon fas icon-fw icon-globe mr-1"/>Detail View</React.Fragment>);
-            menuOptions.set('file_list_views',          <React.Fragment><i className="icon fas icon-fw icon-globe mr-1"/>Appearance in Search Results</React.Fragment>);
-            menuOptions.set('file_clicks',              <React.Fragment><i className="icon far icon-fw icon-hand-point-up mr-1"/>Search Result Click</React.Fragment>);
-            menuOptions.set('metadata_tsv_by_country',  <React.Fragment><i className="icon fas icon-fw icon-globe mr-1"/>Metadata.tsv Files Count by Country</React.Fragment>);
+            menuOptions.set('file_detail_views',        <React.Fragment><i className="icon fas icon-fw icon-globe me-1"/>Detail View</React.Fragment>);
+            menuOptions.set('file_list_views',          <React.Fragment><i className="icon fas icon-fw icon-globe me-1"/>Appearance in Search Results</React.Fragment>);
+            menuOptions.set('file_clicks',              <React.Fragment><i className="icon far icon-fw icon-hand-point-up me-1"/>Search Result Click</React.Fragment>);
+            menuOptions.set('metadata_tsv_by_country',  <React.Fragment><i className="icon fas icon-fw icon-globe me-1"/>Metadata.tsv Files Count by Country</React.Fragment>);
         } else {
-            menuOptions.set('views',            <React.Fragment><i className="icon icon-fw fas icon-eye mr-1"/>View</React.Fragment>);
-            menuOptions.set('sessions',         <React.Fragment><i className="icon icon-fw fas icon-user mr-1"/>User Session</React.Fragment>);
+            menuOptions.set('views',            <React.Fragment><i className="icon icon-fw fas icon-eye me-1"/>View</React.Fragment>);
+            menuOptions.set('sessions',         <React.Fragment><i className="icon icon-fw fas icon-user me-1"/>User Session</React.Fragment>);
             if(chartID === 'sessions_by_country') {
-                menuOptions.set('device_category',  <React.Fragment><i className="icon icon-fw fas icon-user mr-1"/>Device Category</React.Fragment>);
+                menuOptions.set('device_category',  <React.Fragment><i className="icon icon-fw fas icon-user me-1"/>Device Category</React.Fragment>);
             }
         }
 
         const dropdownTitle = menuOptions.get(currCountBy);
 
         return (
-            <div className="d-inline-block mr-05">
+            <div className="d-inline-block me-05">
                 <DropdownButton size="sm" id={"select_count_for_" + chartID}
                     onSelect={this.handleSelection} title={dropdownTitle}>
                     {_.map([ ...menuOptions.entries() ], function([ k, title ]){
@@ -949,7 +949,7 @@ export function UsageStatsView(props){
 
             <GroupByDropdown {...{ groupByOptions, loadingStatus, handleGroupByChange, currentGroupBy }}
                 title="Show" outerClassName="dropdown-container mb-0 sticky-top">
-                <div className="d-inline-block ml-15 mr-15">
+                <div className="d-inline-block ms-15 me-15">
                     <Checkbox checked={smoothEdges} onChange={onSmoothEdgeToggle}>Smooth Edges</Checkbox>
                 </div>
                 <div className="d-inline-block">
@@ -976,17 +976,17 @@ export function UsageStatsView(props){
 
                     <AreaChartContainer {...commonContainerProps} id="file_downloads" defaultHeight={fileDownloadsChartHeight}
                         title={<h5 className="text-400 mt-0">Total File Count</h5>}
-                        subTitle={enableFileDownloadsChartTooltipItemClick && <h4 className="font-weight-normal text-secondary">Click bar to view details</h4>}>
+                        subTitle={enableFileDownloadsChartTooltipItemClick && <h4 className="fw-normal text-secondary">Click bar to view details</h4>}>
                         <AreaChart {...commonChartProps} data={file_downloads} showTooltipOnHover={!enableFileDownloadsChartTooltipItemClick} />
                     </AreaChartContainer>
 
                     <AreaChartContainer {...commonContainerProps} id="file_downloads_volume" defaultHeight={fileDownloadsChartHeight}
                         title={<h5 className="text-400 mt-0">Total File Size (GB)</h5>}
-                        subTitle={enableFileDownloadsChartTooltipItemClick && <h4 className="font-weight-normal text-secondary">Click bar to view details</h4>}>
+                        subTitle={enableFileDownloadsChartTooltipItemClick && <h4 className="fw-normal text-secondary">Click bar to view details</h4>}>
                         <AreaChart {...commonChartProps} data={file_downloads_volume} showTooltipOnHover={!enableFileDownloadsChartTooltipItemClick} yAxisLabel="GB" />
                     </AreaChartContainer>
 
-                    <p className="font-italic mt-2">Download tracking started in August 2018 | Re-Implemented in Feb 2020 and August 2023</p>
+                    <p className="fst-italic mt-2">Download tracking started in August 2018 | Re-Implemented in Feb 2020 and August 2023</p>
 
                 </ColorScaleProvider>
 
@@ -1176,7 +1176,7 @@ export function SubmissionsStatsView(props) {
         <div className="stats-charts-container" key="charts" id="submissions">
 
             <GroupByDropdown {...groupByProps} groupByTitle="Group Charts Below By" dateRangeTitle="Date" outerClassName="dropdown-container mb-15 sticky-top">
-                <div className="d-inline-block mr-15">
+                <div className="d-inline-block me-15">
                     <Checkbox checked={smoothEdges} onChange={onSmoothEdgeToggle}>Smooth Edges</Checkbox>
                 </div>
                 <div className="d-inline-block">
@@ -1209,7 +1209,7 @@ export function SubmissionsStatsView(props) {
             <ColorScaleProvider width={width} resetScalesWhenChange={expsets_released}>
 
                 {/* <GroupByDropdown {...{ currentGroupBy, groupByOptions, handleGroupByChange, loadingStatus }} title="Group Charts Below By">
-                    <div className="d-inline-block ml-15">
+                    <div className="d-inline-block ms-15">
                         <Checkbox checked={smoothEdges} onChange={onSmoothEdgeToggle}>Smooth Edges</Checkbox>
                     </div>
                 </GroupByDropdown>
@@ -1378,10 +1378,10 @@ function groupExternalChildren(children, externalTermMap){
 
 const ChartSubTitle = memoize(function ({ data, invalidDateRange }) {
     if (invalidDateRange === true) {
-        return <h4 className="font-weight-normal text-secondary">Invalid date range</h4>;
+        return <h4 className="fw-normal text-secondary">Invalid date range</h4>;
     }
     if (!data || (Array.isArray(data) && data.length === 0)) {
-        return <h4 className="font-weight-normal text-secondary">No data to display</h4>;
+        return <h4 className="fw-normal text-secondary">No data to display</h4>;
     }
     return null;
 });

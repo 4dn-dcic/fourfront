@@ -435,13 +435,13 @@ export class GroupByDropdown extends React.PureComponent {
             const buttonStyleOverriden = buttonStyle && _.extend({}, buttonStyle, { 'marginLeft': 0 });
             return (
                 <div className={outerClassName}>
-                    <div className="dropdown-container-col col-12 col-lg-3 align-top">
+                    <div className="dropdown-container-col col-12 col-lg-3 align-top ps-2 pe-2">
                         <div className="text-500 d-block mb-1">{groupByTitle}</div>
                         <DropdownButton id={groupById} title={selectedGroupByValueTitle} onSelect={this.onGroupBySelect} style={buttonStyleOverriden} disabled={groupByOptionItems.length < 2}>
                             {groupByOptionItems}
                         </DropdownButton>
                     </div>
-                    <div className="dropdown-container-col col-12 col-lg-6 align-top">
+                    <div className="dropdown-container-col col-12 col-lg-6 align-top ps-2 pe-2">
                         <div className="text-500 d-block mb-1">{dateRangeTitle}</div>
                         <div className="date-range">
                             {/* <span className="text-300 pt-05">Presets</span> */}
@@ -449,7 +449,7 @@ export class GroupByDropdown extends React.PureComponent {
                                 {dateRangeOptionItems}
                             </DropdownButton>
                             <div className="d-flex custom-date-range">
-                                <span className="text-300 pt-05 d-none d-md-inline-block mr-05">Custom:</span>
+                                <span className="text-300 pt-05 d-none d-md-inline-block me-05">Custom:</span>
                                 <input id="submission_data_range_from" type="date"
                                     className="form-control" value={tempDateRangeFrom || ''}
                                     onChange={(e) => { this.setState({ "tempDateRangeFrom": e.target.value }); }}
@@ -461,7 +461,7 @@ export class GroupByDropdown extends React.PureComponent {
                             </div>
                         </div>
                     </div>
-                    <div className="dropdown-container-col col-12 col-lg-3 align-top pl-2">
+                    <div className="dropdown-container-col col-12 col-lg-3 align-top ps-2">
                         <div className="text-500 d-block mb-1">Settings</div>
                         {children}
                     </div>
@@ -1085,7 +1085,7 @@ export class AreaChart extends React.PureComponent {
                 return (
                     <div className={"label-bg" + (isToLeft ? ' to-left' : '') + (hasCloseButton ? ' has-close-button' : '')}>
                         {hasCloseButton &&
-                            <button className="close float-left" type="button" onClick={(e) => { e.stopPropagation(); tProps.removeTooltip(); }}>
+                            <button className="btn-close float-start" type="button" onClick={(e) => { e.stopPropagation(); tProps.removeTooltip(); }}>
                                 <span>×</span>
                             </button>
                         }
@@ -1265,7 +1265,7 @@ export class AreaChartContainer extends React.Component {
     static isExpanded(props){
         const { windowWidth, chartToggles, id } = props;
         const gridState = layout.responsiveGridState(windowWidth);
-        if (gridState && gridState !== 'xl') return false;
+        if (gridState && ['lg', 'xl', 'xxl'].indexOf(gridState) === -1) return false;
         return !!((chartToggles || {})[id]);
     }
 
@@ -1316,7 +1316,7 @@ export class AreaChartContainer extends React.Component {
     expandButton(){
         const { windowWidth } = this.props;
         const gridState = layout.responsiveGridState(windowWidth);
-        if (['xs', 'sm'].indexOf(gridState) > -1) return null;
+        if (['xs', 'sm', 'md'].indexOf(gridState) > -1) return null;
         const expanded = AreaChartContainer.isExpanded(this.props);
         return (
             <button type="button" className="btn btn-outline-dark btn-sm" onClick={this.toggleExpanded}>
