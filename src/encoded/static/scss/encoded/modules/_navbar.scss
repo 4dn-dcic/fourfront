@@ -629,6 +629,7 @@ div#top-nav.navbar-fixed-top {
             padding-right: 8px;
             font-size: 1.5rem;
             border: none;
+            box-shadow: none;
 
             &:hover, &:active, &:focus {
                 background-color: rgba(0,0,0,0.125);
