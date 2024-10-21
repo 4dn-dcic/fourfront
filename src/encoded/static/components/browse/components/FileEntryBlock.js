@@ -200,7 +200,7 @@ export class FileEntryBlock extends React.PureComponent {
         }
 
         return (
-            <a className="title-of-file text-monospace name-title" href={fileAtId} onClick={this.onNameClick}>
+            <a className="title-of-file font-monospace name-title" href={fileAtId} onClick={this.onNameClick}>
                 { fileTitleString }
             </a>
         );
@@ -211,7 +211,7 @@ export class FileEntryBlock extends React.PureComponent {
         const { file,  columnHeaders, colWidthStyles, label, excludeCheckbox, selectedFiles } = this.props;
         const classList = ['name', 'col-file'];
         const colForFile = _.findWhere(columnHeaders || [], { 'columnClass' : 'file' }) || null;
-        if (file && file.accession && typeof colForFile.render !== 'function') classList.push('text-monospace');
+        if (file && file.accession && typeof colForFile.render !== 'function') classList.push('font-monospace');
         if (!excludeCheckbox && selectedFiles && SingleFileCheckbox.hasCheckbox(file)){
             classList.push('has-checkbox');
         }

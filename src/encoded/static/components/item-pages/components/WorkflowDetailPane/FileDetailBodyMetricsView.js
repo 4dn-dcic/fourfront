@@ -10,7 +10,7 @@ export class ViewMetricButton extends React.PureComponent {
     static defaultProps = {
         'title' : "View QC Report",
         'defaultBtnClassName' : 'btn-info',
-        'className' : 'btn-block'
+        'className' : 'w-100'
     };
 
     static openChildWindow(url){

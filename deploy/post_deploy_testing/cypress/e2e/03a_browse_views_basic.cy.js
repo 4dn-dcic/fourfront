@@ -43,7 +43,7 @@ describe('Browse Views - Basic Tests', function () {
                     expect(initialExpSetCount).to.be.greaterThan(0);
                 }).end()
                 .get(".facets-header .facets-title").should('have.text', 'Included Properties').end()
-                .get(".facets-header button").first().click().end()
+                .get(".facets-header button").first().click({ force: true }).end()
                 .get(".facets-header .facets-title").should('have.text', 'Excluded Properties').end()
                 .get('.facet.closed[data-field="award.project"] > h5').scrollToCenterElement().click({ force: true }).end()
                 .get('.facet[data-field="award.project"] .facet-list-element[data-key="External"] a').within(($term) => {
@@ -120,7 +120,7 @@ describe('Browse Views - Basic Tests', function () {
 
             cy.visit('/browse').get('#slow-load-container').should('not.have.class', 'visible').end()
                 .get('.facet-charts.loading').should('not.exist')
-                .get(".facets-header button").first().click().end()
+                .get(".facets-header button").first().click({ force: true }).end()
                 .get(".facets-header .facets-title").should('have.text', 'Excluded Properties').end()
                 .get('.facet.closed[data-field="experiments_in_set.experiment_type.display_title"] > h5').scrollIntoView().should('be.visible').click().end()
                 .get('.facet[data-field="experiments_in_set.experiment_type.display_title"] .facet-list-element[data-is-grouping="true"] a').eq(1).within(($term) => {

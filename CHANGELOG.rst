@@ -6,6 +6,14 @@ fourfront
 Change Log
 ----------
 
+8.4.0
+=====
+
+* Upgrade: Bootstrap v5
+* Upgrade: React-Bootstrap v2
+* Upgrade: FontAwesome v6
+
+
 8.3.0
 =======
 * 2024-10-11/dmichaels

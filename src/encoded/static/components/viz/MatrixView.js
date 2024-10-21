@@ -105,7 +105,7 @@ function XAxis(props){
                     </div>
                     : null }
                 { showXAxisTitle && xAxisTitle ?
-                    <div className="matrix-x-axis-title text-right">
+                    <div className="matrix-x-axis-title text-end">
                         <div><small className="text-300">Column<i className="icon icon-arrow-right fas"/></small></div>
                         { xAxisTitle }
                     </div>

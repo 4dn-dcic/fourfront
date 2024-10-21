@@ -74,7 +74,7 @@ export function BigDropdownPageTreeMenu(props) {
                     const active = (urlParts.pathname.indexOf(child.name) > -1 ? ' active' : '');
                     return (
                         <div className={"level-1-title-container" + (active? " active" : "")} key={child.name}>
-                            <a className="level-1-title text-medium" href={'/' + child.name} data-tip={child.description}
+                            <a className="text-medium level-1-title" href={'/' + child.name} data-tip={child.description}
                                 data-delay-show={500} id={"menutree-linkto-" + child.name.replace(/\//g, '_')} >
                                 <span>{ child.display_title }</span>
                             </a>
@@ -96,7 +96,7 @@ export function BigDropdownPageTreeMenu(props) {
         return (
             <div className={outerCls} key={childLevel1.name}>
                 <div className={"level-1-title-container" + (active ? " active" : "")}>
-                    <a className="level-1-title text-medium" href={'/' + childLevel1.name} data-tip={childLevel1.description}
+                    <a className="text-medium level-1-title" href={'/' + childLevel1.name} data-tip={childLevel1.description}
                         data-delay-show={500} id={"menutree-linkto-" + childLevel1.name.replace(/\//g, '_')} >
                         <span>{ childLevel1.display_title }</span>
                     </a>
@@ -104,7 +104,7 @@ export function BigDropdownPageTreeMenu(props) {
                 { hasChildren ?
                     level1Children.map(function(childLevel2){
                         return (
-                            <a className={"level-2-title text-small" + (urlParts.pathname.indexOf(childLevel2.name) > -1 ? ' active' : '')}
+                            <a className={"text-small level-2-title" + (urlParts.pathname.indexOf(childLevel2.name) > -1 ? ' active' : '')}
                                 href={'/' + childLevel2.name} data-tip={childLevel2.description} data-delay-show={500}
                                 key={childLevel2.name} id={"menutree-linkto-" + childLevel2.name.replace(/\//g, '_')}>
                                 { childLevel2.display_title }
