@@ -6,6 +6,12 @@ fourfront
 Change Log
 ----------
 
+8.4.1
+=====
+
+* New enum added "ATTO 550" for imaging_path/labels
+
+
 8.4.0
 =====
 
