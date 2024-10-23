@@ -9,6 +9,8 @@ Change Log
 8.4.2
 =====
 
+`Fix x-axis width issue on mobile <https://github.com/4dn-dcic/fourfront/pull/1914>`_
+
 * Fix an issue with the x-axis width affecting mobile layout, ensuring proper scaling and alignment on smaller screens.
 
 
