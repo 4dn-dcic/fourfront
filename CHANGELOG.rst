@@ -6,6 +6,14 @@ fourfront
 Change Log
 ----------
 
+8.4.2
+=====
+
+`Fix bar chart's x-axis dropdown width issue <https://github.com/4dn-dcic/fourfront/pull/1914>`_
+
+* Bug fix: The x-axis dropdown of the bar chart displayed on the home page and browse view is not correctly rendered on small and mid-size screens
+
+
 8.4.1
 =====
 
