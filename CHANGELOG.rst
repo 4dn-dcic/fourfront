@@ -9,9 +9,9 @@ Change Log
 8.4.2
 =====
 
-`Fix x-axis width issue on mobile <https://github.com/4dn-dcic/fourfront/pull/1914>`_
+`Fix bar chart's x-axis dropdown width issue <https://github.com/4dn-dcic/fourfront/pull/1914>`_
 
-* Fix an issue with the bar chart's x-axis width affecting mobile layout, ensuring proper scaling and alignment on smaller screens.
+* Bug fix: The x-axis dropdown of the bar chart displayed on the home page and browse view is not correctly rendered on small and mid-size screens
 
 
 8.4.1
