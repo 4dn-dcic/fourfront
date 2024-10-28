@@ -95,6 +95,7 @@ class TreatmentAgent(Treatment):
             )
             disp_title = "Transient transfection of " + plasmids + conditions
         elif treatment_type == "Biological":
+            disp_title = ''
             if biological_agent or constructs:
                 if biological_agent:
                     disp_title = biological_agent + " treatment" + conditions
@@ -109,6 +110,8 @@ class TreatmentAgent(Treatment):
                     )
                     const_str = const_str.rstrip(", ")
                     disp_title = const_str + suffix + " treatment" + conditions
+            else:
+                pass
         else:
             disp_title = treatment_type + conditions
         return disp_title
