@@ -6,6 +6,19 @@ fourfront
 Change Log
 ----------
 
+
+8.4.3
+=====
+
+`Update treatment item display title <https://github.com/4dn-dcic/fourfront/pull/>`_
+
+* Add 'override_treatment_title' property to Treatment items
+* Tweak the display_title calcprop to:
+  - use the override_treatment_title prop if present
+  - for biological treatments with constructs but no biological agent use construct names in treatment display_title
+* added tests
+
+
 8.4.2
 =====
 
