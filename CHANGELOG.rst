@@ -10,7 +10,7 @@ Change Log
 8.4.3
 =====
 
-`Update treatment item display title <https://github.com/4dn-dcic/fourfront/pull/>`_
+`Update treatment item display title <https://github.com/4dn-dcic/fourfront/pull/1915>`_
 
 * Add 'override_treatment_title' property to Treatment items
 * Tweak the display_title calcprop to:
