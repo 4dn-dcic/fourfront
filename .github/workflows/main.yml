@@ -17,7 +17,7 @@ on:
 jobs:
   # This workflow contains a single job called "build"
   build:
-    name: Test Suite for fourfront (Python 3.11, Node 18)
+    name: Test Suite for fourfront (Python 3.11, Node 20)
 
     # The type of runner that the job will run on
     runs-on: ubuntu-22.04
@@ -28,18 +28,18 @@ jobs:
         test_type: ['UNIT', 'NPM', 'Docker']
         # We are really not set up for these next two to be multiplicative, so be careful adding more.
         python_version: ['3.11']
-        node_version: ['18']
+        node_version: ['20']
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python_version }}
 
       # Per doc for node install at https://github.com/actions/setup-node#usage
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node_version }}
           check-latest: false
@@ -128,8 +128,8 @@ jobs:
           poetry run wipe-test-indices $TEST_JOB_ID search-fourfront-testing-opensearch-kqm7pliix4wgiu4druk2indorq.us-east-1.es.amazonaws.com:443
 
       - name: Docker Build
-        if: ${{ matrix.test_type == 'Docker' && matrix.node_version == '18' && matrix.python_version == '3.11' }}
+        if: ${{ matrix.test_type == 'Docker' && matrix.node_version == '20' && matrix.python_version == '3.11' }}
         run: |
-          # The docker_development.ini has node 18 and Python 3.11 wired into it.
+          # The docker_development.ini has node 20 and Python 3.11 wired into it.
           touch deploy/docker/local/docker_development.ini  # cheap substitute for prepare-docker to make ignored file
           docker build .

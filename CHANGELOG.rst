@@ -6,6 +6,58 @@ fourfront
 Change Log
 ----------
 
+9.0.0
+=====
+
+* RAS integration branch (ras_integration)
+
+
+8.4.2
+=====
+
+`Fix bar chart's x-axis dropdown width issue <https://github.com/4dn-dcic/fourfront/pull/1914>`_
+
+* Bug fix: The x-axis dropdown of the bar chart displayed on the home page and browse view is not correctly rendered on small and mid-size screens
+
+
+8.4.1
+=====
+
+* New enum added "ATTO 550" for imaging_path/labels
+
+
+8.4.0
+=====
+
+* Upgrade: Bootstrap v5
+* Upgrade: React-Bootstrap v2
+* Upgrade: FontAwesome v6
+
+
+8.3.0
+=======
+* 2024-10-11/dmichaels
+* Updated dcicutils version (8.16.1) for vulnerabilities.
+
+
+8.2.0
+=====
+
+* Node 18 to 20 upgrade including GitHub actions
+
+
+8.1.5
+=====
+
+* New enum "ATTO 550" in imaging_path labels.
+
+
+8.1.4
+=====
+
+* Bug fix to correct disease_name test inserts used in local deploy
+
+
 8.1.3
 =====
 

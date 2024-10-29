@@ -170,7 +170,7 @@ export const Small = React.memo(function Small({ files }){
                             <div className="col-12 col-md-6 description">
                                 { file.description }
                             </div>
-                            <div className="col-12 col-md-2 text-right download-button">
+                            <div className="col-12 col-md-2 text-end download-button">
                                 <a className="btn btn-sm btn-primary" href={downloadHref} download disabled={!downloadHref}>
                                     <i className="icon fas icon-download"/>
                                 </a>
@@ -292,7 +292,7 @@ export class FilesInSetTable extends React.PureComponent {
                     Accession
                 </div>
 
-                <div className="col-3 col-lg-2 text-right download-button-title pull-right">
+                <div className="col-3 col-lg-2 text-end download-button-title pull-right">
                     {/* <i className="icon icon-download"/> */}
                     <span className="file">Image Files</span>
                     <span className="docs">Doc</span>

@@ -76,7 +76,7 @@ export class AdjustableDividerRow extends React.PureComponent {
                 props.minLeftPanelWidth
             );
             const layoutSize = layout.responsiveGridState(props.windowWidth) || null;
-            if (layoutSize === 'lg' || layoutSize === 'xl'){
+            if (layoutSize === 'lg' || layoutSize === 'xl' || layoutSize === 'xxl') {
                 const leftPanelWidth = props.leftPanelDefaultWidth || 240;
                 this.state.xOffset = - leftPanelWidth + props.minLeftPanelWidth;
             }
@@ -152,7 +152,7 @@ export class AdjustableDividerRow extends React.PureComponent {
         let useHeight = height || null;
 
         const layoutSize = layout.responsiveGridState(windowWidth) || null;
-        const isDraggableSize = layoutSize === 'lg' || layoutSize === 'xl';
+        const isDraggableSize = layoutSize === 'lg' || layoutSize === 'xl' || layoutSize === 'xxl';
 
         // Original full width. Used for <= small layout size.
         this.rightPanelWidth = width;

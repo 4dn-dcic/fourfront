@@ -259,8 +259,8 @@ export default class UserRegistrationForm extends React.PureComponent {
 
                 <form method="POST" name="user-registration-form was-validated" ref={this.formRef} onSubmit={this.onFormSubmit}>
 
-                    <div className="form-group">
-                        <label htmlFor="email-address">Primary E-Mail or Username</label>
+                    <div className="mb-2">
+                        <label htmlFor="email-address" className="form-label">Primary E-Mail or Username</label>
                         <h4 id="email-address" className="text-300 mt-0">
                             { object.itemUtil.User.gravatar(unverifiedUserEmail, 36, { 'style' : { 'borderRadius': '50%', 'marginRight' : 10 } }, 'mm') }
                             { unverifiedUserEmail }
@@ -269,16 +269,16 @@ export default class UserRegistrationForm extends React.PureComponent {
 
                     <div className="row">
                         <div className="col-12 col-md-6">
-                            <div className="form-group">
-                                <label htmlFor="firstName">First Name <span className="text-danger">*</span></label>
+                            <div className="mb-2">
+                                <label htmlFor="firstName" className="form-label">First Name <span className="text-danger">*</span></label>
                                 <input name="first_name" type="text" onChange={this.onFirstNameChange}
                                     className={"form-control" + (value_for_first_name === '' ? " is-invalid" : "")} />
                                 <div className="invalid-feedback">First name cannot be blank</div>
                             </div>
                         </div>
                         <div className="col-12 col-md-6">
-                            <div className="form-group">
-                                <label htmlFor="lastName">Last Name <span className="text-danger">*</span></label>
+                            <div className="mb-2">
+                                <label htmlFor="lastName" className="form-label">Last Name <span className="text-danger">*</span></label>
                                 <input name="last_name" type="text" onChange={this.onLastNameChange}
                                     className={"form-control" + (value_for_last_name === '' ? " is-invalid" : "")} />
                                 <div className="invalid-feedback">Last name cannot be blank</div>
@@ -288,23 +288,23 @@ export default class UserRegistrationForm extends React.PureComponent {
 
                     <hr className="mt-1 mb-2" />
 
-                    <div className="form-group">
-                        <label htmlFor="pendingLab">Primary Lab <span className="text-300">(Optional)</span></label>
+                    <div className="mb-2">
+                        <label htmlFor="pendingLab" className="form-label">Primary Lab <span className="text-300">(Optional)</span></label>
                         <div>
                             <LookupLabField onSelect={this.onSelectLab} currentLabDetails={value_for_pending_lab_details} onClear={this.onClearLab} />
                         </div>
-                        <small className="form-text text-muted">
+                        <small className="d-inline text-body-secondary">
                             Lab or Institute with which you are associated.
                         </small>
                     </div>
 
                     <JobTitleField {...{ value_for_pending_lab, value_for_pending_lab_details, schemas }}  />
 
-                    <div className="form-group">
-                        <label htmlFor="contactEmail">Preferred Contact Email <span className="text-300">(Optional)</span></label>
+                    <div className="mb-2">
+                        <label htmlFor="contactEmail" className="form-label">Preferred Contact Email <span className="text-300">(Optional)</span></label>
                         <input name="preferred_email" type="text" onChange={this.onContactEmailChange}
                             className={"form-control" + (!isContactEmailValid ? " is-invalid" : "")} />
-                        <small className="form-text text-muted">
+                        <small className="d-inline text-body-secondary">
                             { isContactEmailValid ? "Preferred contact email, if different from login/primary email." : "Please enter a valid e-mail address." }
                         </small>
                     </div>
@@ -318,7 +318,7 @@ export default class UserRegistrationForm extends React.PureComponent {
                         </div>
                         <div className="col-12 col-lg-7">
                             <p>
-                                By signing up, you are agreeing to our <a href="/privacy-policy" target="_blank" rel="noreferrer noopener">Privacy Policy</a>.
+                                By signing up, you are agreeing to our <a className="link-underline-hover" href="/privacy-policy" target="_blank" rel="noreferrer noopener">Privacy Policy</a>.
                                 <br/>
                                 We may track your usage of the portal to help improve the quality of user experience and/or security assurance purposes.
                             </p>
@@ -327,9 +327,11 @@ export default class UserRegistrationForm extends React.PureComponent {
 
 
                     <div className="clearfix">
-                        <button type="submit" disabled={!(maySubmit)} className="btn btn-lg btn-primary text-300 btn-block mt-2">
-                            Sign Up
-                        </button>
+                        <div className="d-grid gap-1">
+                            <button type="submit" disabled={!(maySubmit)} className="btn btn-lg btn-primary text-300 mt-2">
+                                Sign Up
+                            </button>
+                        </div>
                     </div>
                 </form>
 
@@ -421,11 +423,11 @@ class LookupLabField extends React.PureComponent {
         ) || (
             currentLabDetails && currentLabDetails['@id'] && currentLabDetails.display_title && (
                 <div style={LookupLabField.fieldTitleColStyle}>
-                    <a href={object.itemUtil.atId(currentLabDetails)} target="_blank" data-tip="View lab in new tab"
-                        rel="noopener noreferrer" style={{ verticalAlign: "middle" }}>
-                        { currentLabDetails.display_title }
+                    <a className="link-underline-hover" href={object.itemUtil.atId(currentLabDetails)}
+                        target="_blank" data-tip="View lab in new tab" rel="noopener noreferrer" style={{ verticalAlign: "middle" }}>
+                        {currentLabDetails.display_title}
                     </a>
-                    &nbsp;&nbsp;<i className="icon icon-fw icon-external-link-alt fas text-small"/>
+                    &nbsp;&nbsp;<i className="icon icon-fw icon-external-link-alt fas text-small" />
                 </div>
             )
         ) || (
@@ -436,11 +438,11 @@ class LookupLabField extends React.PureComponent {
 
         return (
             <React.Fragment>
-                <div className="flexrow ml-0 mr-0">
+                <div className="flexrow ms-0 me-0">
                     { currLabTitle }
-                    <div className="field-buttons">
+                    <div className="field-buttons w-auto">
                         { currentLabDetails && currentLabDetails['@id'] ?
-                            <button type="button" onClick={onClear} className="btn btn-secondary mr-05">
+                            <button type="button" onClick={onClear} className="btn btn-secondary me-05">
                                 Clear
                             </button>
                             : null }

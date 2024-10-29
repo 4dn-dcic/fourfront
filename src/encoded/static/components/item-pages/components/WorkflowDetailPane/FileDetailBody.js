@@ -50,9 +50,9 @@ export class FileDetailBody extends React.PureComponent {
             }
         } else { // Single File
             fileTitle = object.itemUtil.getTitleStringFromContext(file);
-            fileTitleFormatted = <a href={object.atIdFromObject(file) || '/' + file.uuid} className="d-inline-block">{ fileTitle }</a>;
+            fileTitleFormatted = <a href={object.atIdFromObject(file) || '/' + file.uuid} className="link-underline-hover d-inline-block">{ fileTitle }</a>;
             statusIndicator = file.status && (
-                <i className="item-status-indicator-dot mr-07" data-status={ file.status && file.status.toLowerCase() }
+                <i className="item-status-indicator-dot me-07" data-status={ file.status && file.status.toLowerCase() }
                     data-tip={"Status - " + file.status} />
             );
         }

@@ -72,7 +72,7 @@ function DirectoryBodyGridItem(props){
                 { description ?
                     <div className={"page-description" + (childrenHaveChildren ? ' text-truncate' : '')}>{ description }</div> : null
                 }
-                { childrenHaveChildren && childPageCount ? <h6 className="section-page-count mt-07 mb-05 text-400 text-right">{ childPageCount }&nbsp; <i className={"icon icon-fw far icon-" + (childPageCount > 1 ? "copy" : "file")}/></h6> : null }
+                { childrenHaveChildren && childPageCount ? <h6 className="section-page-count mt-07 mb-05 text-400 text-end">{ childPageCount }&nbsp; <i className={"icon icon-fw far icon-" + (childPageCount > 1 ? "copy" : "file")}/></h6> : null }
             </a>
         </div>
     );

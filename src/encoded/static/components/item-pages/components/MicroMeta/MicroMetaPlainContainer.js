@@ -191,7 +191,7 @@ class MMPlainContainerBody extends React.PureComponent {
         const valueScalingFactor = Math.round(scalingFactor * 100);
         return (
             <div className="micro-meta-zoom">
-                <div className="mr-2">Zoom ({valueScalingFactor}%)</div>
+                <div className="me-2">Zoom ({valueScalingFactor}%)</div>
                 <div style={{ paddingTop: '5px' }}>
                     <input type="range" min="0" max="100" value={valueScalingFactor} onChange={this.handleZoomInOutChange} style={{ cursor: 'pointer' }} />
                 </div>

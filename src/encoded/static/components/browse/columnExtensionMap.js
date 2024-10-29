@@ -17,7 +17,7 @@ export const DEFAULT_WIDTH_MAP = { 'lg' : 200, 'md' : 180, 'sm' : 120, 'xs' : 12
 function LabColumn(props){
     const { lab, submitterTitle } = props;
     if (!lab) return null;
-    const labLink = <a href={object.atIdFromObject(lab)}>{ lab.display_title }</a>;
+    const labLink = <a href={object.atIdFromObject(lab)} className="link-underline-hover">{lab.display_title}</a>;
     if (!submitterTitle){
         return <span className="value">{ labLink }</span>;
     }
@@ -75,7 +75,7 @@ export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
             const { date_published = null } = result;
             if (!date_published) return null;
             return (
-                <span className="value text-right">
+                <span className="value text-end">
                     { formatPublicationDate(date_published) }
                 </span>
             );
@@ -88,7 +88,7 @@ export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
         'render' : function googleAnalyticsDate(result, props){
             if (!result.google_analytics || !result.google_analytics.for_date) return null;
             return (
-                <span className="value text-right">
+                <span className="value text-end">
                     <LocalizedTime timestamp={result.google_analytics.for_date} formatType="date-sm" localize={false} />
                 </span>
             );
@@ -102,7 +102,7 @@ export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
             const statusFormatted = Schemas.Term.toName('status', result.status);
             return (
                 <span className="value">
-                    <i className="item-status-indicator-dot mr-07" data-status={result.status}/>
+                    <i className="item-status-indicator-dot me-07" data-status={result.status}/>
                     { statusFormatted }
                 </span>
             );
@@ -210,7 +210,7 @@ export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
         'render' : function publicRelease(result, props){
             if (!result.public_release) return null;
             return (
-                <span className="value text-right">
+                <span className="value text-end">
                     <LocalizedTime timestamp={result.public_release} formatType="date-sm" />
                 </span>
             );

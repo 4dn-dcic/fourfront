@@ -136,7 +136,7 @@ export const WorkflowStepTitleBox = React.memo(function WorkflowStepTitleBox(pro
         <div className={"box col col-sm-" + (shouldBeFullRow ? '12' : '6')}>
             <span className="text-600">{ label }</span>
             { stepHref ?
-                <h3 className="text-400 text-truncate"><a href={stepHref}>{ titleString }</a></h3>
+                <h3 className="text-400"><a href={stepHref} className="link-underline-hover">{ titleString }</a></h3>
                 :
                 <h3 className="text-300 text-truncate">{ titleString }</h3>
             }

@@ -28,7 +28,7 @@ const DetailBlock = React.memo(function DetailBlock(props){
     return (
         <FormattedInfoWrapper singularTitle={singularTitle} isSingleItem>
             <h5 className="block-title">
-                <a href={publicationHref}>{ origTitle || shortAttribTitle }</a>
+                <a href={publicationHref} className="link-underline-hover">{ origTitle || shortAttribTitle }</a>
             </h5>
             <div className="details">{ children }</div>
         </FormattedInfoWrapper>
@@ -209,8 +209,8 @@ const PublicationDetailRows = React.memo(function PublicationDetailRows({ public
             'label' : 'External ID',
             'content' : !externalURL ? externalID : (
                 <React.Fragment>
-                    <a href={externalURL} target="_blank" rel="noopener noreferrer">{ externalID }</a>
-                    <i className="ml-07 icon icon-external-link-alt fas text-small"/>
+                    <a href={externalURL} className="link-underline-hover" target="_blank" rel="noopener noreferrer">{ externalID }</a>
+                    <i className="ms-07 icon icon-external-link-alt fas text-small"/>
                 </React.Fragment>
             )
         });
@@ -226,7 +226,7 @@ const PublicationDetailRows = React.memo(function PublicationDetailRows({ public
     return details.map(function({ key, label, content }, idx){
         return (
             <div className="row details-row" key={ key || label || idx }>
-                <div className="col-3 col-md-2 col-lg-2 text-600 text-right label-col">{ label }</div>
+                <div className="col-3 col-md-2 col-lg-2 text-600 text-end label-col">{ label }</div>
                 <div className="col-9 col-md-10 col-lg-10">{ content }</div>
             </div>
         );

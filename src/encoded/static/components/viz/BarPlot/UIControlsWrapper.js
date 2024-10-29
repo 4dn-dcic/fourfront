@@ -414,10 +414,10 @@ export class UIControlsWrapper extends React.PureComponent {
                         </div>
                         <div className="x-axis-right-label">
                             <div className="row">
-                                <div className="col-3" style={{ width : 51 }}>
+                                <div className="col-12 col-md-3">
                                     <h6 className="dropdown-heading">X Axis</h6>
                                 </div>
-                                <div className="col-9 pull-right" style={{ "width" : (layout.gridContainerWidth(windowWidth) * (windowGridSize !== 'xs' ? 0.25 : 1)) + 5 - 52 }}>
+                                <div className="col-12 col-md-9 pull-right">
                                     <DropdownButton id="select-barplot-field-0" onSelect={this.handleFirstFieldSelect}
                                         disabled={isLoadingChartData} title={xAxisDropdownTitle} variant={btnVariant}
                                         onToggle={this.handleDropDownXAxisFieldToggle}>

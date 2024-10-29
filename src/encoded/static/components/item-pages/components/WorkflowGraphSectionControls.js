@@ -165,7 +165,7 @@ export class WorkflowGraphSectionControls extends React.PureComponent {
         return (
             <Checkbox checked={!allRuns && !isAllRunsCheckboxDisabled} onChange={onToggleAllRuns}
                 disabled={isAllRunsCheckboxDisabled} className="checkbox-container" key="show-all-runs-checkbox">
-                { loading ? <i className="icon icon-spin icon-fw fas icon-circle-notch mr-05"/> : '' }
+                { loading ? <i className="icon icon-spin icon-fw fas icon-circle-notch me-05"/> : '' }
                 <span className="align-middle">Collapse Similar Runs</span>
             </Checkbox>
         );
