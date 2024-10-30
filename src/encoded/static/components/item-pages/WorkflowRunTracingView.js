@@ -252,6 +252,7 @@ export class FileViewGraphSection extends WorkflowGraphSection {
             nodes, edges, rowSpacingType,
             'isNodeDisabled' : FileViewGraphSection.isNodeDisabled,
             'columnSpacing' : 100,
+            'minimumHeight': 100,
             'isNodeCurrentContext' : (typeof isNodeCurrentContext === 'function' && isNodeCurrentContext) || this.isNodeCurrentContext
 
         };
