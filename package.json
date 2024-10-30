@@ -106,7 +106,7 @@
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.6.0",
-    "@hms-dbmi-bgm/react-workflow-viz": "0.1.11",
+    "@hms-dbmi-bgm/react-workflow-viz": "0.2.0-beta.1",
     "@hms-dbmi-bgm/shared-portal-components": "git+https://github.com/4dn-dcic/shared-portal-components#0.1.91",
     "@reduxjs/toolkit": "^2.2.6",
     "auth0-lock": "^12.5.1",
