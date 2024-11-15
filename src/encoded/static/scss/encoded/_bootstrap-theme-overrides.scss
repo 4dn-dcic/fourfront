@@ -24,6 +24,11 @@
         vertical-align: middle;
         transform: translate(0,-0.45px);
     }
+
+    &:disabled {
+        cursor: default;
+        pointer-events: auto;
+    }
 }
 
 .btn.btn-lg {
