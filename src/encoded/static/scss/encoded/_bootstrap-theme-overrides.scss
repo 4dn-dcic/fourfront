@@ -29,6 +29,10 @@
     &:disabled {
         cursor: default;
         pointer-events: auto;
+
+        &:active {
+            pointer-events: none;
+        }
     }
 }
 
