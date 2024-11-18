@@ -6,6 +6,31 @@ fourfront
 Change Log
 ----------
 
+
+8.4.4
+=====
+
+`Enable React Tooltip for Disabled Buttons <https://github.com/4dn-dcic/fourfront/pull/1916>`_
+
+* Resolved an issue where **React Tooltip** was not displayed for `button` elements with the `disabled` attribute.
+* Updated CSS for disabled buttons:
+    - `cursor` is now set to `default`.
+    - `pointer-events` is now set to `auto`.
+* Tooltips are now consistently visible for disabled buttons.
+
+
+8.4.3
+=====
+
+`Update treatment item display title <https://github.com/4dn-dcic/fourfront/pull/1915>`_
+
+* Add 'override_treatment_title' property to Treatment items
+* Tweak the display_title calcprop to:
+  - use the override_treatment_title prop if present
+  - for biological treatments with constructs but no biological agent use construct names in treatment display_title
+* added tests
+
+
 8.4.2
 =====
 

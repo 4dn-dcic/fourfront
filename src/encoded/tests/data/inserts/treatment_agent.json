@@ -43,5 +43,33 @@
         "submitted_by": "wrangler@wrangler.com",
         "temperature": 20,
         "status": "in review by lab"
+    },
+    {
+        "uuid": "05501f04-360a-438a-87d7-443311fc6831",
+        "aliases": ["dcic:ba-treatment-1"],
+        "description": "Biological treatment with agent",
+        "treatment_type": "Biological",
+        "biological_agent": "Green Virus",
+        "duration": 24,
+        "duration_units": "hour",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
+        "temperature": 37,
+        "status": "in review by lab"
+    },
+    {
+        "uuid": "dee3576a-5e03-4390-88c2-1b4f73cc294e",
+        "aliases": ["dcic:biol_w_constructs"],
+        "description": "Biological treatment with construct",
+        "treatment_type": "Biological",
+        "constructs": ["131106bc-8535-4448-903e-854af460b211"],
+        "duration": 24,
+        "duration_units": "hour",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
+        "temperature": 37,
+        "status": "in review by lab"
     }
 ]
