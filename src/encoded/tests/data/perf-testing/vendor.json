@@ -44,7 +44,8 @@
         "public_release": "2017-04-10", 
         "date_created": "2017-04-09T17:24:14.968417+00:00", 
         "aliases": [
-            "dcic:neb"
+            "dcic:neb",
+            "4dn-dcic-lab:neb"
         ], 
         "schema_version": "1"
     }

@@ -13,13 +13,13 @@
     {
         "title": "New England Biolabs",
         "name": "new-england-biolabs",
-        "aliases":["dcic:neb"],
+        "aliases":["dcic:neb", "4dn-dcic-lab:neb"],
         "description": "",
         "url": "https://www.neb.com",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
-        "uuid": "b31106bc-8535-4448-903e-854af460b21e"
+        "uuid": "11f94a17-51ed-4a0f-93b1-1cac2fd2844f"
     },
     {
         "title": "ThermoFisher Scientific",

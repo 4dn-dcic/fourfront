@@ -53,7 +53,7 @@
     },
     {
         "name": "DpnII",
-        "aliases":["dcic:dpnII_neb"],
+        "aliases":["4dn-dcic-lab:dpnII_neb", "dcic:dpnII_neb"],
         "enzyme_source": "new-england-biolabs",
         "catalog_number":"R0543",
         "recognition_sequence": "GATC",
@@ -63,7 +63,7 @@
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
         "url": "https://www.neb.com/products/r0543-dpnii",
-        "uuid": "557d7469-d1f6-4200-8ed4-c40374383dd3"
+        "uuid": "356a57a1-1f1d-463d-a972-27742f79a6a5"
     },
     {
         "name": "NcoI_MspI_BspHI",

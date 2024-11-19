@@ -9,7 +9,7 @@
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
         "status": "in review by lab",
-        "biosource_vendor": "b31106bc-8535-4448-903e-854af460b21e"
+        "biosource_vendor": "11f94a17-51ed-4a0f-93b1-1cac2fd2844f"
     },
     {
         "uuid": "331111bc-8535-4448-903e-854af460a254",
@@ -21,7 +21,7 @@
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
         "status": "in review by lab",
-        "biosource_vendor": "b31106bc-8535-4448-903e-854af460b21e"
+        "biosource_vendor": "11f94a17-51ed-4a0f-93b1-1cac2fd2844f"
     },
     {
         "uuid": "331111bc-8535-4448-903e-854ab460b254",
@@ -32,7 +32,7 @@
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
         "status": "in review by lab",
-        "biosource_vendor": "b31106bc-8535-4448-903e-854af460b21e"
+        "biosource_vendor": "11f94a17-51ed-4a0f-93b1-1cac2fd2844f"
     },
     {
         "uuid": "331111bc-8535-2248-903e-854af460b254",
@@ -43,7 +43,7 @@
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
-        "biosource_vendor": "b31106bc-8535-4448-903e-854af460b21e",
+        "biosource_vendor": "11f94a17-51ed-4a0f-93b1-1cac2fd2844f",
         "status": "in review by lab",
         "modifications": ["431106bc-8535-4448-903e-854af460b265"]
     },
@@ -56,7 +56,7 @@
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
         "status": "in review by lab",
-        "biosource_vendor": "b31106bc-8535-4448-903e-854af460b21e"
+        "biosource_vendor": "11f94a17-51ed-4a0f-93b1-1cac2fd2844f"
     },
     {
         "uuid": "111116bc-8535-4448-903e-854af460b254",
@@ -76,7 +76,7 @@
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
-        "biosource_vendor": "b31106bc-8535-4448-903e-854af460b21e"
+        "biosource_vendor": "11f94a17-51ed-4a0f-93b1-1cac2fd2844f"
     },
     {
         "uuid": "0f011b1e-b772-4f2a-8c24-cc55de28a994",
@@ -86,7 +86,7 @@
         "award": "1U01CA200059-01",
         "lab": "dcic-testing-lab",
         "submitted_by": "wrangler@wrangler.com",
-        "biosource_vendor": "b31106bc-8535-4448-903e-854af460b21e"
+        "biosource_vendor": "11f94a17-51ed-4a0f-93b1-1cac2fd2844f"
     },
     {
         "uuid": "c9165aa4-2ab5-428d-b5a7-db86dbb2d815",
