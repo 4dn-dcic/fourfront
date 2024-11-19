@@ -11,6 +11,7 @@ Change Log
 =====
 * 2024-11-18/dmichaels
 * Fixed up some inserts data to match 4dn/data/staging.
+* Updated dcicutils to latest version (8.16.4).
 
 
 8.4.4

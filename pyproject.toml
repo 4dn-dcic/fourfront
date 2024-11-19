@@ -50,7 +50,7 @@ colorama = "0.3.3"
 # of cryptography.hazmat.bindings._rust in cryptography package. 2023-04-21.
 # cryptography = "39.0.2"
 dcicsnovault = "^11.22.0"
-dcicutils = "^8.16.3"
+dcicutils = "^8.16.4"
 elasticsearch = "7.13.4"
 elasticsearch-dsl = "^7.0.0"  # TODO: port code from cgap-portal to get rid of uses
 execnet = "1.4.1"
