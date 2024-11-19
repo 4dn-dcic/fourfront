@@ -83,6 +83,19 @@ describe('Static Page & Content Tests', function () {
                             cy.title().should('equal', titleText + ' – 4DN Data Portal').end(); // Ensure <head>...<title>TITLE</title>...</head> matches.
                             prevTitle = titleText;
 
+                            // Verify the presence of <pre> elements and ensure each one is not empty.
+                            cy.document().then((doc) => {
+                                const elements = doc.querySelectorAll('.rst-container > div > pre, .html-container > div > pre');
+                                if (elements.length > 0) {
+                                    cy.get('.rst-container > div > pre, .html-container > div > pre').each(($pre) => {
+                                        const textContent = $pre.text().trim();
+                                        expect(textContent).to.not.be.empty;
+                                    });
+                                } else {
+                                    cy.log('No <pre> elements found under .rst-container > div or .html-container > div');
+                                }
+                            });
+
                             if (!haveWeSeenPageWithTableOfContents) {
                                 cy.window().then((w)=>{
                                     if (w.document.querySelectorAll('div.table-of-contents li.table-content-entry a').length > 0){
