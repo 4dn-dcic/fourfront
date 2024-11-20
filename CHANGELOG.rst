@@ -6,6 +6,13 @@ fourfront
 Change Log
 ----------
 
+8.4.5
+=====
+
+`PR 1917: Add tests to verify the presence and non-empty content of <pre> elements <https://github.com/4dn-dcic/fourfront/pull/1917>`_
+
+* Update: Added tests to verify the presence and non-empty content of `<pre>` elements inside static section
+
 
 8.4.4
 =====
