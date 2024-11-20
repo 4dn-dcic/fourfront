@@ -85,14 +85,14 @@ describe('Static Page & Content Tests', function () {
 
                             // Verify the presence of <pre> elements and ensure each one is not empty.
                             cy.document().then((doc) => {
-                                const elements = doc.querySelectorAll('.rst-container > div > pre, .html-container > div > pre');
+                                const elements = doc.querySelectorAll('.rst-container > div > pre, .html-container > div > pre, .markdown-container > div > pre');
                                 if (elements.length > 0) {
-                                    cy.get('.rst-container > div > pre, .html-container > div > pre').each(($pre) => {
+                                    cy.get('.rst-container > div > pre, .html-container > div > pre, .markdown-container > div > pre').each(($pre) => {
                                         const textContent = $pre.text().trim();
                                         expect(textContent).to.not.be.empty;
                                     });
                                 } else {
-                                    cy.log('No <pre> elements found under .rst-container > div or .html-container > div');
+                                    cy.log('No <pre> elements found under .rst-container > div or .html-container > div, .markdown-container > div > pre');
                                 }
                             });
 
