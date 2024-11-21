@@ -12,7 +12,8 @@
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b", 
         "public_release": "2017-04-10", 
         "aliases": [
-            "dcic:mboI_neb"
+            "dcic:mboI_neb",
+            "4dn-dcic-lab:mboI_neb"
         ], 
         "date_created": "2017-04-09T17:24:16.590926+00:00", 
         "cut_position": 0, 

@@ -1,7 +1,7 @@
 [
     {
         "name": "HindIII",
-        "aliases": ["dcic:hindIII_neb"],
+        "aliases": ["4dn-dcic-lab:hindIII_neb", "dcic:hindIII_neb"],
         "enzyme_source": "new-england-biolabs",
         "catalog_number":"R0104",
         "recognition_sequence": "AAGCTT",
@@ -11,7 +11,7 @@
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
         "url": "https://www.neb.com/products/r0104-hindiii",
-        "uuid": "4d44d12c-b37c-478b-9bc7-d843cba4bb91"
+        "uuid": "2ace2f00-c913-4bac-a6ef-0b316bc2108e"
     },
     {
         "name": "DNaseI",
@@ -27,7 +27,10 @@
     },
     {
         "name": "MboI",
-        "aliases":["dcic:mboI_neb"],
+        "aliases": [
+            "dcic:mboI_neb",
+            "4dn-dcic-lab:mboI_neb"
+        ],
         "enzyme_source": "new-england-biolabs",
         "catalog_number":"R0147",
         "recognition_sequence": "GATC",
@@ -37,7 +40,7 @@
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
         "url": "https://www.neb.com/products/r0147-mboi",
-        "uuid": "37750c1c-fce5-4ec5-baa7-ce7858f898ae"
+        "uuid": "d8da42d0-bc20-40e5-bacf-c263b8603e03"
     },
     {
         "name": "MNase",
@@ -67,17 +70,17 @@
     },
     {
         "name": "NcoI_MspI_BspHI",
-        "aliases":["dcic:3nzNMB_neb"],
+        "aliases":["dcic:3nzNMB_neb", "4dn-dcic-lab:3nzNMB_neb"],
         "enzyme_source": "new-england-biolabs",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
         "description": "Mixed Enzymes",
-        "uuid": "6b88eb35-92e7-46fd-87b8-a779cec40c31"
+        "uuid": "f57bbab4-acb9-4951-9099-a57b015b80c6"
     },
     {
         "name": "NcoI",
-        "aliases":["dcic:ncoI_neb"],
+        "aliases":["dcic:ncoI_neb", "4dn-dcic-lab:ncoI_neb"],
         "enzyme_source": "new-england-biolabs",
         "catalog_number":"R0193",
         "recognition_sequence": "CCATGG",
@@ -87,11 +90,11 @@
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
         "url": "https://www.neb.com/products/r0193-ncoi",
-        "uuid": "aa5ecd3d-69bf-478c-acbc-82f88b785f7c"
+        "uuid": "9ff58460-3e4c-4bb1-820d-81bc1127ac53"
     },
     {
         "name": "MspI",
-        "aliases":["dcic:mspI_neb"],
+        "aliases":["dcic:mspI_neb", "4dn-dcic-lab:mspI_neb"],
         "enzyme_source": "new-england-biolabs",
         "catalog_number":"R0106",
         "recognition_sequence": "CCGG",
@@ -101,7 +104,7 @@
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
         "url": "https://www.neb.com/products/r0106-mspi",
-        "uuid": "1ff66969-52bc-4226-a056-53b9b0541fe2"
+        "uuid": "bd56fbbe-9124-4431-8529-2918dc487385"
     },
     {
         "name": "Tn5 Transposase",
