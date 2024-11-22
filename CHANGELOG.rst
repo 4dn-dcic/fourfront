@@ -13,6 +13,8 @@ Change Log
 * Fixed up some inserts data to match 4dn/data/staging.
 * Updated dcicutils to latest version (8.16.4).
 * Updated dcicsnovault to latest version (11.23.0).
+* Added comments to base.ini on how to use the open sourch mitmproxy utility to observe OpenSearch
+  traffic easily when running locally for development; via the elasticsearch.server.actual_port property.
 
 
 8.4.4
