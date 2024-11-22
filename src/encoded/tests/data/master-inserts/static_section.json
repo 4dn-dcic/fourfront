@@ -310,7 +310,7 @@
 
 
     {
-        "name" : "resources.data-analysis.hi_c-processing-pipeline.alignment",
+        "name" : "resources.analysis.hi-c-pipeline.alignment",
         "uuid" : "10000000-0000-0000-0000-ffff00001000",
         "title" : "Alignment",
         "body" : "Lorem ipsum dolor amet offal plaid readymade unicorn kombucha skateboard. Direct trade pop-up salvia organic. Truffaut lomo food truck man bun gastropub hella portland seitan post-ironic quinoa swag. Franzen flexitarian pour-over fam ennui. Freegan fanny pack tumeric vaporware tacos gluten-free quinoa +1 activated charcoal portland pok pok chartreuse actually. Church-key unicorn brooklyn migas paleo wolf.\n\n### A Header\n\nTaxidermy celiac scenester sustainable disrupt vaporware. Authentic chicharrones direct trade narwhal VHS iceland. Messenger bag intelligentsia seitan quinoa, hashtag YOLO cornhole VHS bitters. Gochujang sriracha messenger bag, mlkshk lyft authentic sartorial vinyl flexitarian godard green juice vice fam roof party jianbing.",
@@ -321,7 +321,7 @@
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
     {
-        "name" : "resources.data-analysis.hi_c-processing-pipeline.filtering",
+        "name" : "resources.analysis.hi-c-pipeline.step-ii",
         "uuid" : "10000000-0000-0000-0000-ffff00001001",
         "title" : "Step II",
         "body" : "Lorem ipsum dolor amet offal plaid readymade unicorn kombucha skateboard. Direct trade pop-up salvia organic. Truffaut lomo food truck man bun gastropub hella portland seitan post-ironic quinoa swag. Franzen flexitarian pour-over fam ennui. Freegan fanny pack tumeric vaporware tacos gluten-free quinoa +1 activated charcoal portland pok pok chartreuse actually. Church-key unicorn brooklyn migas paleo wolf.\n\n### Header 4\n\nTaxidermy celiac scenester sustainable disrupt vaporware. Authentic chicharrones direct trade narwhal VHS iceland. Messenger bag intelligentsia seitan quinoa, hashtag YOLO cornhole VHS bitters. Gochujang sriracha messenger bag, mlkshk lyft authentic sartorial vinyl flexitarian godard green juice vice fam roof party jianbing.",
@@ -332,7 +332,7 @@
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
     {
-        "name" : "resources.data-analysis.hi_c-processing-pipeline.matrix-aggregation",
+        "name" : "resources.analysis.hi-c-pipeline.step-iii-options",
         "uuid" : "10000000-0000-0000-0000-ffff00001002",
         "title" : "Step III Options",
         "body" : "Lorem ipsum dolor amet offal plaid readymade unicorn kombucha skateboard. Direct trade pop-up salvia organic. Truffaut lomo food truck man bun gastropub hella portland seitan post-ironic quinoa swag. Franzen flexitarian pour-over fam ennui. Freegan fanny pack tumeric vaporware tacos gluten-free quinoa +1 activated charcoal portland pok pok chartreuse actually. Church-key unicorn brooklyn migas paleo wolf.\n\n### Header Five Maybe\n\nTaxidermy celiac scenester sustainable disrupt vaporware. Authentic chicharrones direct trade narwhal VHS iceland. Messenger bag intelligentsia seitan quinoa, hashtag YOLO cornhole VHS bitters. Gochujang sriracha messenger bag, mlkshk lyft authentic sartorial vinyl flexitarian godard green juice vice fam roof party jianbing.",
