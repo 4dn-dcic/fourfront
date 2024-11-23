@@ -695,6 +695,8 @@
         "source_ontologies": ["530016bc-8535-4448-903e-854af460b254"],
         "term_id": "UBERON:0002097",
         "term_name": "skin of body",
+        "preferred_name": "skin",
+        "synonyms": ["skin organ", "entire skin"],
         "term_url": "http://purl.obolibrary.org/obo/UBERON_0002097",
         "uuid": "111188bc-8535-4448-903e-854af460a233"
     },

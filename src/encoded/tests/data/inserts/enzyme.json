@@ -108,11 +108,14 @@
     },
     {
         "name": "Tn5 Transposase",
-        "aliases":["dcic:tn5transposase"],
+        "aliases": [
+            "dcic:transposase_illumina",
+            "4dn-dcic-lab:transposase_illumina"
+        ],
         "enzyme_source": "dcic:illumina",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
-        "uuid": "1ff66969-52bc-4226-a056-111110541fe2"
+        "uuid": "cac89b2d-6985-4b14-af7e-0808a5fd103b"
     }
 ]

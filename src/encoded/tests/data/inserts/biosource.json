@@ -80,6 +80,7 @@
     },
     {
         "uuid": "0f011b1e-b772-4f2a-8c24-cc55de28a994",
+        "accession": "4DNSRVWZS4XO",
         "description": "Homo sapiens GM12878 immortalized cell line",
         "biosource_type": "immortalized cell line",
         "individual":"4DNINOOOAAQ1",
