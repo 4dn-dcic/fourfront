@@ -12,7 +12,8 @@ import { LoginNavItem } from './LoginNavItem';
 import { BigDropdownNavItem, BigDropdownIntroductionWrapper } from './BigDropdown';
 
 
-const auth0Options = {
+/** Specific to 4DN */
+export const auth0Options = {
     auth: {
         sso: false,
         redirect: false,
@@ -50,6 +51,7 @@ const auth0Options = {
 export const AccountNav = React.memo(function AccountNav(props){
     const { session, updateAppSessionState, schemas, ...passProps } = props;
     const { windowWidth, href } = passProps;
+    updateAppSessionState();  // call this in an attempt before rendering the component
     if (!session) { // Render login button
 
         //TODO remove custom info after RAS transition completed
@@ -57,7 +59,7 @@ export const AccountNav = React.memo(function AccountNav(props){
 
         return (
             <Nav className="navbar-acct">
-                <LoginController {...{ updateAppSessionState, auth0Options, auth0PopupText }}>
+                <LoginController {...{ updateAppSessionState, auth0Options, auth0PopupText, href }}>
                     <LoginNavItem {...{ schemas, session, href, windowWidth }} key="login-register" className="user-account-item" />
                 </LoginController>
             </Nav>

@@ -6,6 +6,14 @@ fourfront
 Change Log
 ----------
 
+9.0.0
+=====
+
+* RAS integration branch (ras_integration)
+* 2024-10-29: merged in master branch (and ran poetry updte).
+* 2024-12-03: merged in master branch.
+
+
 8.4.5
 =====
 
