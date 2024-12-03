@@ -10,6 +10,40 @@ Change Log
 =====
 
 * RAS integration branch (ras_integration)
+* 2024-10-29: merged in master branch (and ran poetry updte).
+* 2024-12-03: merged in master branch.
+
+
+8.4.5
+=====
+
+`PR 1917: Add tests to verify the presence and non-empty content of <pre> elements <https://github.com/4dn-dcic/fourfront/pull/1917>`_
+
+* Update: Added tests to verify the presence and non-empty content of `<pre>` elements inside static section
+
+
+8.4.4
+=====
+
+`Enable React Tooltip for Disabled Buttons <https://github.com/4dn-dcic/fourfront/pull/1916>`_
+
+* Resolved an issue where **React Tooltip** was not displayed for `button` elements with the `disabled` attribute.
+* Updated CSS for disabled buttons:
+    - `cursor` is now set to `default`.
+    - `pointer-events` is now set to `auto`.
+* Tooltips are now consistently visible for disabled buttons.
+
+
+8.4.3
+=====
+
+`Update treatment item display title <https://github.com/4dn-dcic/fourfront/pull/1915>`_
+
+* Add 'override_treatment_title' property to Treatment items
+* Tweak the display_title calcprop to:
+  - use the override_treatment_title prop if present
+  - for biological treatments with constructs but no biological agent use construct names in treatment display_title
+* added tests
 
 
 8.4.2

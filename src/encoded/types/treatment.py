@@ -68,8 +68,11 @@ class TreatmentAgent(Treatment):
     def display_title(self, request, treatment_type=None, chemical=None,
                       biological_agent=None, constructs=None, duration=None,
                       duration_units=None, concentration=None,
-                      concentration_units=None, temperature=None):
+                      concentration_units=None, temperature=None,
+                      override_treatment_title=None):
         conditions = ""
+        if override_treatment_title:
+            return override_treatment_title
         if concentration and concentration_units:
             conditions += str(concentration) + " " + concentration_units
         if duration and duration_units:
@@ -91,8 +94,24 @@ class TreatmentAgent(Treatment):
                 [get_item_or_none(request, construct).get('name') for construct in constructs]
             )
             disp_title = "Transient transfection of " + plasmids + conditions
-        elif treatment_type == "Biological" and biological_agent:
-            disp_title = biological_agent + " treatment" + conditions
+        elif treatment_type == "Biological":
+            disp_title = ''
+            if biological_agent or constructs:
+                if biological_agent:
+                    disp_title = biological_agent + " treatment" + conditions
+                else:
+                    const_str = ''
+                    suffix = ''
+                    if len(constructs) > 3:
+                        suffix = ' and {} more'.format(len(constructs) - 3)
+                        constructs = constructs[0:3]
+                    const_str = ", ".join(
+                        [get_item_or_none(request, construct).get('display_title') for construct in constructs]
+                    )
+                    const_str = const_str.rstrip(", ")
+                    disp_title = const_str + suffix + " treatment" + conditions
+            else:
+                pass
         else:
             disp_title = treatment_type + conditions
         return disp_title
@@ -128,7 +147,9 @@ class TreatmentRnai(Treatment):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, request, rnai_type=None, target=None):
+    def display_title(self, request, rnai_type=None, target=None, override_treatment_title=None):
+        if override_treatment_title:
+            return override_treatment_title
         if rnai_type and target:
             tstring = ''
             for t in target:
