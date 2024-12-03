@@ -187,7 +187,7 @@
     },
     {
         "uuid": "111136bc-8535-4448-903e-854af460a233",
-        "preferred_name": "CNS",
+        "preferred_name": "central nervous system",
         "term_name": "central nervous system",
         "term_id": "UBERON:0001017",
         "source_ontologies": ["530016bc-8535-4448-903e-854af460b254"],
@@ -695,6 +695,8 @@
         "source_ontologies": ["530016bc-8535-4448-903e-854af460b254"],
         "term_id": "UBERON:0002097",
         "term_name": "skin of body",
+        "preferred_name": "skin",
+        "synonyms": ["skin organ", "entire skin"],
         "term_url": "http://purl.obolibrary.org/obo/UBERON_0002097",
         "uuid": "111188bc-8535-4448-903e-854af460a233"
     },
@@ -703,6 +705,7 @@
         "namespace": "http://www.ebi.ac.uk/efo",
         "term_id": "EFO:0000322",
         "term_name": "cell line",
+        "preferred_name": "cell line",
         "uuid": "111189bc-8535-4448-903e-854af460a233",
         "source_ontologies": ["530006bc-8535-4448-903e-854af460b254"],
         "term_url": "http://www.ebi.ac.uk/efo/EFO_0000322"

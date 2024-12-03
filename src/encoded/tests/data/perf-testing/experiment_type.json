@@ -6,7 +6,7 @@
         "assay_subclassification": "DNA-DNA Pairwise Interactions",
         "assay_subclass_short": "Hi-C",
         "raw_file_types": "Reads (fastq) provided by lab",
-        "uuid": "a17b17cd-544a-3a3b-abc3-17a544544b3c",
+        "uuid": "a2920a38-cdba-4ff0-b4f0-c6bb53257747",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "other_tags": ["DNA-DNA"],

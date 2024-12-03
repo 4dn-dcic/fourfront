@@ -11262,7 +11262,7 @@
         "uuid": "6fb021e9-858c-4561-8ce1-e0adc673e0b5"
     },
     {
-        "accession": "4DNWF2BBZ1E1",
+        "accession": "4DNWF2BBZ1EE",
         "app_name": "encode-atacseq-aln",
         "app_version": "1.1.1",
         "arguments": [
@@ -11658,7 +11658,7 @@
         "uuid": "d497c075-ab57-4c5b-8c65-7bb8410f26fa"
     },
     {
-        "accession": "4DNWF2VTG8I1",
+        "accession": "4DNWF2VTG8II",
         "app_name": "encode-atacseq-postaln",
         "app_version": "1.1.1",
         "arguments": [

@@ -39,7 +39,7 @@
         "ligation_time": 240.0,
         "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03",
         "fragment_size_selection_method": "SPRI beads",
-        "experiment_type": "a17b17cd-544a-3a3b-abc3-17a544544b3c",
+        "experiment_type": "a2920a38-cdba-4ff0-b4f0-c6bb53257747",
         "tagging_method": "bio-dATP"
     },
     {
@@ -82,7 +82,7 @@
         "ligation_time": 240.0,
         "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03",
         "fragment_size_selection_method": "SPRI beads",
-        "experiment_type": "a17b17cd-544a-3a3b-abc3-17a544544b3c",
+        "experiment_type": "a2920a38-cdba-4ff0-b4f0-c6bb53257747",
         "tagging_method": "bio-dATP"
     },
     {
@@ -125,7 +125,7 @@
         "ligation_time": 240.0,
         "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03",
         "fragment_size_selection_method": "SPRI beads",
-        "experiment_type": "a17b17cd-544a-3a3b-abc3-17a544544b3c",
+        "experiment_type": "a2920a38-cdba-4ff0-b4f0-c6bb53257747",
         "date_created": "2018-05-27T04:58:03.564710+00:00"
     },
     {
@@ -168,7 +168,7 @@
         "ligation_time": 240.0,
         "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03",
         "fragment_size_selection_method": "SPRI beads",
-        "experiment_type": "a17b17cd-544a-3a3b-abc3-17a544544b3c",
+        "experiment_type": "a2920a38-cdba-4ff0-b4f0-c6bb53257747",
         "date_created": "2018-05-27T04:58:07.673563+00:00"
     },
     {
@@ -211,7 +211,7 @@
         "ligation_time": 240.0,
         "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03",
         "fragment_size_selection_method": "SPRI beads",
-        "experiment_type": "a17b17cd-544a-3a3b-abc3-17a544544b3c",
+        "experiment_type": "a2920a38-cdba-4ff0-b4f0-c6bb53257747",
         "date_created": "2018-05-27T04:58:04.606757+00:00"
     },
     {
@@ -254,7 +254,7 @@
         "ligation_time": 240.0,
         "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03",
         "fragment_size_selection_method": "SPRI beads",
-        "experiment_type": "a17b17cd-544a-3a3b-abc3-17a544544b3c",
+        "experiment_type": "a2920a38-cdba-4ff0-b4f0-c6bb53257747",
         "date_created": "2018-05-27T04:58:08.674387+00:00"
     },
     {
@@ -297,7 +297,7 @@
         "ligation_time": 240.0,
         "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03",
         "fragment_size_selection_method": "SPRI beads",
-        "experiment_type": "a17b17cd-544a-3a3b-abc3-17a544544b3c",
+        "experiment_type": "a2920a38-cdba-4ff0-b4f0-c6bb53257747",
         "date_created": "2018-05-27T04:58:05.618160+00:00"
     },
     {
@@ -340,7 +340,7 @@
         "ligation_time": 240.0,
         "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03",
         "fragment_size_selection_method": "SPRI beads",
-        "experiment_type": "a17b17cd-544a-3a3b-abc3-17a544544b3c",
+        "experiment_type": "a2920a38-cdba-4ff0-b4f0-c6bb53257747",
         "date_created": "2018-05-27T04:58:09.669947+00:00"
     }
 ]

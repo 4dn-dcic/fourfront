@@ -13,7 +13,10 @@
     },
     {
         "name": "MboI",
-        "aliases": ["dcic:mboI_neb"],
+        "aliases": [
+            "dcic:mboI_neb",
+            "4dn-dcic-lab:mboI_neb"
+        ], 
         "enzyme_source": "thermofisher-scientific",
         "catalog_number": "R0147",
         "recognition_sequence": "GATC",
@@ -23,6 +26,6 @@
         "lab": "test-4dn-lab",
         "submitted_by": "wrangler@wrangler.com",
         "url": "https://www.neb.com/products/r0147-mboi",
-        "uuid": "37750c1c-fce5-4ec5-baa7-ce7858f898ae"
+        "uuid": "d8da42d0-bc20-40e5-bacf-c263b8603e03"
     }
 ]
