@@ -6,6 +6,15 @@ fourfront
 Change Log
 ----------
 
+
+8.4.6
+=====
+
+`PR 1919: Add suggested enum value to file_type <https://github.com/4dn-dcic/fourfront/pull/1919>`_
+
+* Add 'coverage' as a suggested_enum value for processed file file_type
+
+
 8.4.5
 =====
 
