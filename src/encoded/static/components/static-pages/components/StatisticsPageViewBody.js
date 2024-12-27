@@ -9,10 +9,15 @@ import * as d3 from 'd3';
 import { sub, add, startOfMonth, startOfDay, endOfMonth, endOfDay, toDate, format as formatDate } from 'date-fns';
 import DropdownItem from 'react-bootstrap/esm/DropdownItem';
 import DropdownButton from 'react-bootstrap/esm/DropdownButton';
+import Modal from 'react-bootstrap/esm/Modal';
 
 import { Checkbox } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/Checkbox';
 import { console, ajax, analytics, logger } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { navigate } from './../../util';
+import { Term } from './../../util/Schemas';
+import { ColumnCombiner, CustomColumnController, SortController } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/EmbeddedSearchView';
+import { ControlsAndResults } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/ControlsAndResults';
+import { ItemDetailList } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/ItemDetailList';
 import {
     StatsViewController, GroupByDropdown, ColorScaleProvider,
     AreaChart, AreaChartContainer, LoadingIcon, ErrorIcon, HorizontalD3ScaleLegend,
@@ -638,22 +643,26 @@ export const usageAggsToChartData = _.pick(aggregationsToChartData,
 
 export class UsageStatsViewController extends React.PureComponent {
 
-    static getSearchReqMomentsForTimePeriod(currentGroupBy = "daily60"){
+    static getSearchReqMomentsForTimePeriod(currentGroupBy = "daily:60") {
         let untilDate = new Date();
         let fromDate;
-        if (currentGroupBy === 'monthly'){ // 1 yr (12 mths)
-            untilDate = sub(startOfMonth(untilDate), { minutes: 1 }); // Last minute of previous month
-            fromDate = toDate(untilDate);
-            fromDate = sub(fromDate, { months: 12 }); // Go back 12 months
-        } else if (currentGroupBy === 'daily30'){ // 30 days
+
+        if (currentGroupBy.startsWith("daily:")) {
+            const days = parseInt(currentGroupBy.split(":")[1], 10); // Extract the number after 'daily:'
             untilDate = sub(untilDate, { days: 1 });
-            fromDate = toDate(untilDate);
-            fromDate = sub(fromDate, { days: 30 }); // Go back 30 days
-        }else if (currentGroupBy === 'daily60'){ // 60 days
-            untilDate = sub(untilDate, { days: 1 });
-            fromDate = toDate(untilDate);
-            fromDate = sub(fromDate, { days: 60 }); // Go back 60 days
+            fromDate = sub(untilDate, { days }); // Go back the specified number of days
+        } else if (currentGroupBy.startsWith("monthly:")) {
+            const [, months] = currentGroupBy.split(":");
+            if (months === "All") { // Special case for 'monthly:All'
+                fromDate = new Date("2018-08-01");
+                untilDate = sub(startOfMonth(untilDate), { minutes: 1 }); // Last minute of previous month
+            } else {
+                const numMonths = parseInt(months, 10); // Extract the number after 'monthly:'
+                untilDate = sub(startOfMonth(untilDate), { minutes: 1 }); // Last minute of previous month
+                fromDate = sub(untilDate, { months: numMonths }); // Go back the specified number of months
+            }
         }
+
         return { fromDate, untilDate };
     }
 
@@ -679,7 +688,7 @@ export class UsageStatsViewController extends React.PureComponent {
                     "for_date"
                 ];
 
-                const date_increment = currentGroupBy === 'monthly' ? 'monthly' : 'daily';
+                const date_increment = currentGroupBy.startsWith('monthly') ? 'monthly' : 'daily';
 
                 let uri = '/search/?type=TrackingItem&tracking_type=google_analytics&sort=-google_analytics.for_date&format=json';
 
@@ -914,15 +923,15 @@ export function UsageStatsView(props){
         // We want all charts to share the same x axis. Here we round to date boundary.
         // Minor issue is that file downloads are stored in UTC/GMT while analytics are in EST timezone..
         // TODO improve on this somehow, maybe pass prop to FileDownload chart re: timezone parsing of some sort.
-        if (currentGroupBy === 'daily30' || currentGroupBy === 'daily60') {
+        if (currentGroupBy.startsWith('daily:')) {
             fromDate = add(startOfDay(propFromDate), { minutes: 15 });
             untilDate = add(endOfDay(propUntilDate), { minutes: 45 });
             dateRoundInterval = 'day';
-        } else if (currentGroupBy === 'monthly') {
+        } else if (currentGroupBy.startsWith('monthly:')) {
             fromDate = endOfMonth(propFromDate); // Not rly needed.
             untilDate = sub(endOfMonth(propUntilDate), { days: 1 });
             dateRoundInterval = 'month';
-        } else if (currentGroupBy === 'yearly') { // Not yet implemented
+        } else if (currentGroupBy.startsWith('yearly')) { // Not yet implemented
             dateRoundInterval = 'year';
         }
         return {
