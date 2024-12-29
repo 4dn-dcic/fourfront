@@ -1,6 +1,6 @@
 'use strict';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import memoize from 'memoize-one';
@@ -248,7 +248,7 @@ export const commonParsingFxn = {
             const { google_analytics : {
                 reports : {
                     [reportName] : currentReport = []
-                }, // `currentReport` => List of JSON objects (report entries, 1 per unique dimension value) - Note: 1 per unique dimension may not be valid for post processing report items in smaht-foursight 
+                }, // `currentReport` => List of JSON objects (report entries, 1 per unique dimension value) - Note: 1 per unique dimension may not be valid for post processing report items in smaht-foursight
                 for_date
             } } = trackingItem;
 
@@ -272,7 +272,7 @@ export const commonParsingFxn = {
                     termsInAllItems.add(term);
                     termsInCurrenItem.add(term);
                 }
-                totalSessions += trackingItemItem[countKey]
+                totalSessions += trackingItemItem[countKey];
                 return { groupedTermsObj, totalSessions };
             }, { groupedTermsObj: {}, totalSessions: 0 });
 
@@ -901,7 +901,7 @@ class UsageChartsCountByDropdown extends React.PureComponent {
 
 export function UsageStatsView(props){
     const {
-        loadingStatus, mounted, session, groupByOptions, handleGroupByChange, currentGroupBy, windowWidth,
+        loadingStatus, mounted, href, session, schemas, groupByOptions, handleGroupByChange, currentGroupBy, windowWidth,
         changeCountByForChart, countBy,
         // Passed in from StatsChartViewAggregator:
         sessions_by_country, chartToggles, fields_faceted, /* fields_faceted_group_by, browse_search_queries, other_search_queries, */
@@ -917,6 +917,8 @@ export function UsageStatsView(props){
         return <div className="stats-charts-container" key="charts" id="usage"><LoadingIcon/></div>;
     }
 
+    const [transposed, setTransposed] = useState(true);
+    const [hideEmptyColumns, setHideEmptyColumns] = useState(true);
     const { anyExpandedCharts, commonXDomain, dateRoundInterval } = useMemo(function(){
         const { fromDate: propFromDate, untilDate: propUntilDate } = UsageStatsViewController.getSearchReqMomentsForTimePeriod(currentGroupBy);
         let fromDate, untilDate, dateRoundInterval;
@@ -935,7 +937,7 @@ export function UsageStatsView(props){
             dateRoundInterval = 'year';
         }
         return {
-            anyExpandedCharts: _.any(_.values(chartToggles)),
+            anyExpandedCharts: _.any(_.values(chartToggles.expanded || {})),
             commonXDomain: [fromDate, untilDate],
             dateRoundInterval
         };
@@ -953,16 +955,25 @@ export function UsageStatsView(props){
     const enableFileDownloadsChartTooltipItemClick = (countBy.file_downloads === 'top_files');
     const fileDownloadsChartHeight = enableFileDownloadsChartTooltipItemClick ? 350 : commonContainerProps.defaultHeight;
 
+    const isSticky = true; //!_.any(_.values(tableToggle), (v)=> v === true);
+    const commonTableProps = { windowWidth, href, session, schemas, transposed, dateRoundInterval, cumulativeSum, hideEmptyColumns, chartToggles };
+
     return (
         <div className="stats-charts-container" key="charts" id="usage">
 
             <GroupByDropdown {...{ groupByOptions, loadingStatus, handleGroupByChange, currentGroupBy }}
-                title="Show" outerClassName="dropdown-container mb-0 sticky-top">
+                title="Show" outerClassName={"dropdown-container mb-0" + (isSticky ? " sticky-top" : "")}>
                 <div className="d-inline-block ms-15 me-15">
-                    <Checkbox checked={smoothEdges} onChange={onSmoothEdgeToggle}>Smooth Edges</Checkbox>
+                    <Checkbox checked={smoothEdges} onChange={onSmoothEdgeToggle} data-tip="Toggle between smooth/sharp edges">Smooth Edges</Checkbox>
+                </div>
+                <div className="d-inline-block me-15">
+                    <Checkbox checked={cumulativeSum} onChange={onCumulativeSumToggle} data-tip="Show as cumulative sum">Cumulative Sum</Checkbox>
+                </div>
+                <div className="d-inline-block me-15">
+                    <Checkbox checked={transposed} onChange={() => setTransposed(!transposed)} data-tip="Transpose data table">Transpose Data</Checkbox>
                 </div>
                 <div className="d-inline-block">
-                    <Checkbox checked={cumulativeSum} onChange={onCumulativeSumToggle}>Show as cumulative sum</Checkbox>
+                    <Checkbox checked={hideEmptyColumns} onChange={() => setHideEmptyColumns(!hideEmptyColumns)} data-tip="Hide empty data table columns">Hide Empty Columns</Checkbox>
                 </div>
             </GroupByDropdown>
 
@@ -986,14 +997,33 @@ export function UsageStatsView(props){
                     <AreaChartContainer {...commonContainerProps} id="file_downloads" defaultHeight={fileDownloadsChartHeight}
                         title={<h5 className="text-400 mt-0">Total File Count</h5>}
                         subTitle={enableFileDownloadsChartTooltipItemClick && <h4 className="fw-normal text-secondary">Click bar to view details</h4>}>
-                        <AreaChart {...commonChartProps} data={file_downloads} showTooltipOnHover={!enableFileDownloadsChartTooltipItemClick} />
+                        {chartToggles.chart?.file_downloads ?
+                            <AreaChart {...commonChartProps} data={file_downloads} showTooltipOnHover={!enableFileDownloadsChartTooltipItemClick} />
+                            : <React.Fragment />}
                     </AreaChartContainer>
+
+                    {chartToggles.table?.file_downloads &&
+                        <StatisticsTable data={file_downloads}
+                            key={'dt_file_downloads'}
+                            {...commonTableProps}
+                            containerId="content_file_downloads" />
+                    }
 
                     <AreaChartContainer {...commonContainerProps} id="file_downloads_volume" defaultHeight={fileDownloadsChartHeight}
                         title={<h5 className="text-400 mt-0">Total File Size (GB)</h5>}
                         subTitle={enableFileDownloadsChartTooltipItemClick && <h4 className="fw-normal text-secondary">Click bar to view details</h4>}>
-                        <AreaChart {...commonChartProps} data={file_downloads_volume} showTooltipOnHover={!enableFileDownloadsChartTooltipItemClick} yAxisLabel="GB" />
+                        {chartToggles.chart?.file_downloads_volume ?
+                            <AreaChart {...commonChartProps} data={file_downloads_volume} showTooltipOnHover={!enableFileDownloadsChartTooltipItemClick} yAxisLabel="GB" />
+                            : <React.Fragment />}
                     </AreaChartContainer>
+
+                    {chartToggles.table?.file_downloads_volume &&
+                        <StatisticsTable data={file_downloads_volume}
+                            key={'dt_file_downloads_volume'}
+                            valueLabel="GB"
+                            {...commonTableProps}
+                            containerId="content_file_downloads_volume" />
+                    }
 
                     <p className="fst-italic mt-2">Download tracking started in August 2018 | Re-Implemented in Feb 2020 and August 2023</p>
 
@@ -1016,8 +1046,17 @@ export function UsageStatsView(props){
                         }
                         extraButtons={<UsageChartsCountByDropdown {...countByDropdownProps} chartID="file_views" />}
                         legend={<HorizontalD3ScaleLegend {...{ loadingStatus }} />}>
-                        <AreaChart {...commonChartProps} data={file_views} />
+                        {chartToggles.chart?.file_views ?
+                            <AreaChart {...commonChartProps} data={file_views} />
+                            : <React.Fragment />}
                     </AreaChartContainer>
+
+                    {chartToggles.table?.file_views &&
+                        <StatisticsTable data={file_views}
+                            key={'dt_file_views'}
+                            {...commonTableProps}
+                            containerId="content_file_views" />
+                    }
 
                 </ColorScaleProvider>
 
@@ -1037,8 +1076,17 @@ export function UsageStatsView(props){
                         }
                         extraButtons={<UsageChartsCountByDropdown {...countByDropdownProps} chartID="sessions_by_country" />}
                         legend={<HorizontalD3ScaleLegend {...{ loadingStatus }} />}>
-                        <AreaChart {...commonChartProps} data={sessions_by_country} />
+                        {chartToggles.chart?.sessions_by_country ?
+                            <AreaChart {...commonChartProps} data={sessions_by_country} />
+                            : <React.Fragment />}
                     </AreaChartContainer>
+
+                    {chartToggles.table?.sessions_by_country &&
+                        <StatisticsTable data={sessions_by_country}
+                            key={'dt_sessions_by_country'}
+                            {...commonTableProps}
+                            containerId="content_sessions_by_country" />
+                    }
 
 
                 </ColorScaleProvider>
@@ -1089,8 +1137,17 @@ export function UsageStatsView(props){
                         }
                         extraButtons={<UsageChartsCountByDropdown {...countByDropdownProps} chartID="experiment_set_views" />}
                         legend={<HorizontalD3ScaleLegend {...{ loadingStatus }} />}>
-                        <AreaChart {...commonChartProps} data={experiment_set_views} />
+                        {chartToggles.chart?.experiment_set_views ?
+                            <AreaChart {...commonChartProps} data={experiment_set_views} />
+                            : <React.Fragment />}
                     </AreaChartContainer>
+
+                    {chartToggles.table?.experiment_set_views &&
+                        <StatisticsTable data={experiment_set_views}
+                            key={'dt_experiment_set_views'}
+                            {...commonTableProps}
+                            containerId="content_experiment_set_views" />
+                    }
 
                 </ColorScaleProvider>
 
@@ -1110,8 +1167,17 @@ export function UsageStatsView(props){
                         }
                         extraButtons={<UsageChartsCountByDropdown {...countByDropdownProps} chartID="fields_faceted" />}
                         legend={<HorizontalD3ScaleLegend {...{ loadingStatus }} />}>
-                        <AreaChart {...commonChartProps} data={fields_faceted} />
+                        {chartToggles.chart?.fields_faceted ?
+                            <AreaChart {...commonChartProps} data={fields_faceted} />
+                            : <React.Fragment />}
                     </AreaChartContainer>
+
+                    {chartToggles.table?.fields_faceted &&
+                        <StatisticsTable data={fields_faceted}
+                            key={'dt_fields_faceted'}
+                            {...commonTableProps}
+                            containerId="content_fields_faceted" />
+                    }
 
                 </ColorScaleProvider>
 
@@ -1394,3 +1460,246 @@ const ChartSubTitle = memoize(function ({ data, invalidDateRange }) {
     }
     return null;
 });
+
+/**
+ * converts aggregates to SearchView-compatible context objects and displays in table
+ */
+const StatisticsTable = React.memo((props) => {
+    const {
+        data, valueLabel = null, session, schemas, containerId = '',
+        href, dateRoundInterval,  transposed = false, windowWidth, cumulativeSum, hideEmptyColumns,
+        limit = 0, excludeNones = false // limit and excludeNones are evaluated for only transposed data
+    } = props;
+    const [columns, setColumns] = useState({});
+    const [columnDefinitions, setColumnDefinitions] = useState([]);
+    const [graph, setGraph] = useState([]);
+    const [showModal, setShowModal] = useState(false);
+    const [modalForDate, setModalForDate] = useState();
+
+    const transposeData = (data) => {
+        const result = [];
+        const termMap = {};
+
+        data.forEach(({ date, children }) => {
+            children.forEach(({ term, count, total }) => {
+                // remove None-like values
+                if (excludeNones && ['N/A', 'None', '(not set)'].indexOf(term) !== -1) {
+                    return;
+                }
+
+                if (!termMap[term]) {
+                    termMap[term] = { term, count: 0, total: 0, children: [] };
+                    result.push(termMap[term]);
+                }
+
+                termMap[term].children.push({ date, count, total });
+                termMap[term].count += count;
+                termMap[term].total += total;
+            });
+        });
+
+        return _.sortBy(result, (r) => -r.total);
+    };
+
+    const roundValue = function (value, label, threshold = 0.01) {
+        if (value === 0) return value;
+        const roundedValue = (value >= threshold && value % 1 > 0) ? Math.round(value * 100) / 100 : (value >= threshold ? value : ('<' + threshold));
+        return label ? roundedValue + ' ' + label : roundedValue;
+    };
+
+    useEffect(() => {
+        if (!Array.isArray(data) || data.length === 0) {
+            return;
+        }
+
+        const processData = transposed ? transposeData(data).slice(0, limit > 0 ? limit : undefined) : data;
+
+        // date or term column based on transposed or not
+        let cols = {
+            'display_title': {
+                title: transposed ? 'Term' : 'Date',
+                type: 'string',
+                noSort: true,
+                widthMap: transposed ? { 'lg': 250, 'md': 200, 'sm': 200 } : { 'lg': 200, 'md': 200, 'sm': 200 },
+                render: function (result) {
+                    // overall sum
+                    const overallSum = roundValue(result.overall_sum || 0, valueLabel);
+                    const tooltip = `${result.display_title} (${overallSum})`;
+
+                    return transposed ? (
+                        <span className="value text-truncate text-start" data-tip={tooltip.length > 40 ? tooltip : null}>
+                            {result.display_title} <strong>({overallSum})</strong>
+                        </span>
+                    ) : (
+                        <a href="#"
+                            onClick={(e) => {
+                                setModalForDate(result.display_title);
+                                setShowModal(true);
+                                e.preventDefault();
+                            }}
+                            data-tip="Show details">
+                            {result.display_title} <strong>({overallSum})</strong>
+                        </a>
+                    );
+                }
+            }
+        };
+
+        // Function to check a vertical slice (column)
+        const hasNonZeroInColumn = (arrays, columnIndex) => _.any(arrays, (row) => row.children[columnIndex].count !== 0);
+
+        // create columns and columnExtensionMap
+        const [item] = processData;
+        if (item && Array.isArray(item.children) && item.children.length > 0) {
+            const keys = transposed ? _.pluck(item.children, 'date') : _.pluck(item.children, 'term');
+            cols = _.reduce(keys, (memo, dataKey, index) => {
+                if (hideEmptyColumns && !hasNonZeroInColumn(processData, index)) {
+                    return memo;
+                }
+                memo[dataKey] = {
+                    title: dataKey,
+                    type: 'integer',
+                    noSort: true,
+                    widthMap: { 'lg': 140, 'md': 120, 'sm': 120 },
+                    render: function (result) {
+                        if (result[dataKey] !== 0) {
+                            return (
+                                <a href="#"
+                                    onClick={(e) => {
+                                        setModalForDate(transposed ? dataKey : result.display_title);
+                                        setShowModal(true);
+                                        e.preventDefault();
+                                    }}
+                                    data-tip="Show details"
+                                    className="value text-end fw-bold">
+                                    {roundValue(result[dataKey], valueLabel)}
+                                </a>
+                            );
+                        } else {
+                            return (<span className="value text-end">0</span>);
+                        }
+                    }
+                };
+                return memo;
+            }, { ...cols });
+        }
+
+        setColumns(cols);
+        const colDefs = _.map(_.pairs(cols), function (p) { return { field: p[0], ...p[1] } });
+        setColumnDefinitions(colDefs);
+
+        // create @graph
+        const result = _.map(processData, function (d) {
+            return {
+                display_title: transposed ? (d.termDisplayAs || d.term) : d.date,
+                '@id': transposed ? d.term : d.date,
+                ..._.reduce(d.children, (memo2, c) => {
+                    memo2[transposed ? c.date : c.term] = c.count;
+                    return memo2;
+                }, {}),
+                '@type': ['Item'],
+                'overall_sum': !cumulativeSum ? (d.total || 0) : _.reduce(d.children, (memo, c) => memo + c.count, 0),
+                'date_created': transposed ? d.term : d.date
+            };
+        });
+        setGraph(result);
+    }, [data, transposed, hideEmptyColumns]);
+
+    const passProps = {
+        isFullscreen: false,
+        href,
+        context: {
+            '@graph': graph || [],
+            total: graph?.length || 0,
+            columns: columns || [],
+            facets: null
+        },
+        results: graph || [],
+        columns,
+        columnExtensionMap: columns,
+        columnDefinitions: columnDefinitions,
+        session,
+        maxHeight: 500,
+        maxResultsBodyHeight: 500,
+        tableColumnClassName: "col-12",
+        facetColumnClassName: "d-none",
+        defaultColAlignment: "text-end",
+        stickyFirstColumn: true,
+        isOwnPage: false,
+        termTransformFxn: Term.toName
+    };
+
+    const modalProps = {
+        ...{ dateRoundInterval, schemas },
+        forDate: modalForDate,
+        onTrackingItemViewerCancel: () => setShowModal(false)
+    };
+
+    return (
+        <React.Fragment>
+            <div className="container" id={containerId}>
+                <CustomColumnController {...{ windowWidth }} hiddenColumns={{}} columnDefinitions={columnDefinitions} context={passProps.context}>
+                    <SortController>
+                        <ControlsAndResults {...passProps} />
+                    </SortController>
+                </CustomColumnController>
+            </div>
+            {showModal && <TrackingItemViewer {...modalProps} />}
+        </React.Fragment>
+    );
+});
+
+/**
+ * displays relevant tracking item (fetched via ajax call) in item detail list
+ */
+const TrackingItemViewer = React.memo(function (props) {
+    const { schemas, forDate, dateRoundInterval='day', reportName, onTrackingItemViewerCancel } = props;
+
+    const [isLoading, setIsLoading] = useState(true);
+    const [trackingItem, setTrackingItem] = useState();
+    const dateIncrement = (dateRoundInterval === 'month') ? 'monthly' : 'daily';
+    const href=`/search/?type=TrackingItem&google_analytics.for_date=${forDate}&google_analytics.date_increment=${dateIncrement}`;
+
+    useEffect(() => {
+        ajax.load(
+            href,
+            (resp) => {
+                const graph = resp['@graph'] || [];
+                setTrackingItem(graph.length > 0 ? graph[0] : null);
+                setIsLoading(false);
+            },
+            'GET',
+            (err) => {
+                Alerts.queue({
+                    title: 'Fetching tracking items failed',
+                    message:
+                        'Check your internet connection or if you have been logged out due to expired session.',
+                    style: 'danger',
+                });
+                setIsLoading(false);
+            }
+        );
+    }, [forDate, dateRoundInterval, reportName]);
+
+    return (
+        <Modal show size="xl" onHide={onTrackingItemViewerCancel} className="tracking-item-viewer">
+            <Modal.Header closeButton>
+                <Modal.Title>{forDate}</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                {isLoading ?
+                    <span className="pull-right">
+                        <i className="account-icon icon icon-spin icon-circle-notch fas align-middle" />
+                    </span> :
+                    <ItemDetailList context={trackingItem} collapsed={false} schemas={schemas} />
+                }
+            </Modal.Body>
+        </Modal>
+    );
+});
+TrackingItemViewer.propTypes = {
+    forDate: PropTypes.string.isRequired,
+    dateRoundInterval: PropTypes.oneOf(['daily', 'monthly']),
+    onTrackingItemViewerCancel: PropTypes.func.isRequired,
+    schemas: PropTypes.object
+};
