@@ -160,10 +160,18 @@ export default class StatisticsPageView extends React.PureComponent {
             'monthly:18': <span>Previous 18 Months</span>,
             'monthly:All': <span>All</span>
         };
+        const dataKeys = _.keys(dynamicImports.usageAggsToChartData || {});
+        const initialChartToggles = {
+            'chart': dataKeys.reduce((acc, key) => { acc[key] = true; return acc; }, {}),
+            'table': dataKeys.reduce((acc, key) => { acc[key] = true; return acc; }, {}),
+            'expanded': dataKeys.reduce((acc, key) => { acc[key] = false; return acc; }, {})
+        };
+        // override
+        initialChartToggles.table['fields_faceted'] = false;
         return (
-            <dynamicImports.GroupByController groupByOptions={groupByOptions} initialGroupBy="monthly:6">
+            <dynamicImports.GroupByController groupByOptions={groupByOptions} initialGroupBy="daily:60">
                 <dynamicImports.UsageStatsViewController {..._.pick(this.props, 'session', 'windowWidth', 'href')}>
-                    <dynamicImports.StatsChartViewAggregator {...{ shouldReaggregate }} aggregationsToChartData={dynamicImports.usageAggsToChartData}>
+                    <dynamicImports.StatsChartViewAggregator {...{ shouldReaggregate }} aggregationsToChartData={dynamicImports.usageAggsToChartData} initialChartToggles={initialChartToggles}>
                         <dynamicImports.UsageStatsView />
                     </dynamicImports.StatsChartViewAggregator>
                 </dynamicImports.UsageStatsViewController>
