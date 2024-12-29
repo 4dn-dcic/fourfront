@@ -130,12 +130,23 @@ export class StatsChartViewAggregator extends React.PureComponent {
         'aggregationsToChartData' : PropTypes.object.isRequired,
         'shouldReaggregate' : PropTypes.func,
         'cumulativeSum': PropTypes.bool,
+        'initialChartToggles': PropTypes.shape({
+            'chart': PropTypes.object,
+            'table': PropTypes.object,
+            'expanded': PropTypes.object
+        }),
         'children' : PropTypes.node.isRequired
     };
 
     constructor(props){
         super(props);
-        const { cumulativeSum = false } = props;
+        const {
+            cumulativeSum = false,
+            initialChartToggles = {
+                chart: {},
+                table: {},
+                expanded: {}
+            } } = props;
 
         this.getRefWidth = this.getRefWidth.bind(this);
         this.handleToggle = this.handleToggle.bind(this);
@@ -143,7 +154,7 @@ export class StatsChartViewAggregator extends React.PureComponent {
         this.handleToggleCumulativeSum = this.handleToggleCumulativeSum.bind(this);
         this.generateAggsToState = this.generateAggsToState.bind(this);
         this.state = _.extend(this.generateAggsToState(props, {}), {
-            'chartToggles' : {},
+            'chartToggles' : initialChartToggles,
             'smoothEdges' : false,
             'cumulativeSum': cumulativeSum
         });
@@ -188,12 +199,13 @@ export class StatsChartViewAggregator extends React.PureComponent {
         return this.elemRef && this.elemRef.current && this.elemRef.current.clientWidth;
     }
 
-    handleToggle(key, cb){
+    handleToggle(id, typeKey, callbackFunc){
         this.setState(function(currState){
-            var nextTogglesState = _.extend({}, currState.chartToggles);
-            nextTogglesState[key] = !(nextTogglesState[key]);
+            // deep clone
+            var nextTogglesState =JSON.parse(JSON.stringify(currState.chartToggles));
+            nextTogglesState[typeKey][id] = !(nextTogglesState[typeKey][id]);
             return { 'chartToggles' : nextTogglesState };
-        }, cb);
+        }, callbackFunc);
     }
 
     handleToggleSmoothEdges(smoothEdges, cb){
@@ -1262,11 +1274,18 @@ ErrorIcon.defaultProps = { 'children' : "Loading failed. Please try again later.
 
 export class AreaChartContainer extends React.Component {
 
-    static isExpanded(props){
-        const { windowWidth, chartToggles, id } = props;
-        const gridState = layout.responsiveGridState(windowWidth);
-        if (gridState && ['lg', 'xl', 'xxl'].indexOf(gridState) === -1) return false;
-        return !!((chartToggles || {})[id]);
+    static isToggled(props, typeKey){
+        const { windowWidth, chartToggles = {}, id } = props;
+
+        const value = chartToggles[typeKey][id];
+        switch(typeKey) {
+            case 'expanded':
+                const gridState = layout.responsiveGridState(windowWidth);
+                if (gridState && ['lg', 'xl', 'xxl'].indexOf(gridState) === -1) return false;
+                return !!value;
+            default:
+                return !!value
+        }
     }
 
     static defaultProps = {
@@ -1278,8 +1297,8 @@ export class AreaChartContainer extends React.Component {
     constructor(props){
         super(props);
         this.buttonSection = this.buttonSection.bind(this);
-        this.toggleExpanded = _.throttle(this.toggleExpanded.bind(this), 1000);
-        this.expandButton = this.expandButton.bind(this);
+        this.toggleExpanded = _.throttle(this.toggleButton.bind(this), 1000);
+        this.commonButtons = this.commonButtons.bind(this);
 
         this.elemRef = React.createRef();
     }
@@ -1296,7 +1315,7 @@ export class AreaChartContainer extends React.Component {
         const { defaultColSize, width } = this.props;
         if (
             !(typeof width === 'number' && width) &&
-            (pastProps.defaultColSize !== defaultColSize || AreaChartContainer.isExpanded(pastProps) !== AreaChartContainer.isExpanded(this.props))
+            (pastProps.defaultColSize !== defaultColSize || AreaChartContainer.isToggled(pastProps, 'expanded') !== AreaChartContainer.isToggled(this.props, 'expanded'))
         ){
             setTimeout(()=>{ // Update w. new width.
                 this.forceUpdate();
@@ -1304,33 +1323,56 @@ export class AreaChartContainer extends React.Component {
         }
     }
 
-    toggleExpanded(e){
+    toggleButton(e, typeKey){
         const { onToggle, id } = this.props;
-        return typeof onToggle === 'function' && id && onToggle(id);
+        return typeof onToggle === 'function' && id && onToggle(id, typeKey);
     }
 
     getRefWidth(){
         return this.elemRef && this.elemRef.current && this.elemRef.current.clientWidth;
     }
 
-    expandButton(){
-        const { windowWidth } = this.props;
+    commonButtons(){
+        const { windowWidth, id, hideChartButton = false, hideTableButton = false } = this.props;
+        const buttons = [];
+
+        if (!hideChartButton) {
+            const toggled = AreaChartContainer.isToggled(this.props, 'chart');
+            const className = "btn btn-sm me-05 " + (toggled ? "btn-primary" : "btn-outline-dark");
+            buttons.push(
+                <button type="button" className={className} onClick={(e) => this.toggleButton(e, 'chart')} data-tip="Toggle chart view" key={id + '_chart'}>
+                    <i className="icon icon-fw fas icon-chart-bar" />
+                </button>
+            );
+        }
+        if (!hideTableButton) {
+            const toggled = AreaChartContainer.isToggled(this.props, 'table');
+            const className = "btn btn-sm me-05 " + (toggled ? "btn-primary" : "btn-outline-dark");
+            buttons.push(
+                <button type="button" className={className} onClick={(e) => this.toggleButton(e, 'table')} data-tip="Toggle data table view" key={id + '_table'}>
+                    <i className="icon icon-fw fas icon-table" />
+                </button>
+            );
+        }
         const gridState = layout.responsiveGridState(windowWidth);
-        if (['xs', 'sm', 'md'].indexOf(gridState) > -1) return null;
-        const expanded = AreaChartContainer.isExpanded(this.props);
-        return (
-            <button type="button" className="btn btn-outline-dark btn-sm" onClick={this.toggleExpanded}>
-                <i className={"icon icon-fw fas icon-search-" + (expanded ? 'minus' : 'plus')}/>
-            </button>
-        );
+        if (['xs', 'sm', 'md'].indexOf(gridState) === -1) {
+            const toggled = AreaChartContainer.isToggled(this.props, 'expanded');
+            const className = "btn btn-sm me-05 " + (toggled ? "btn-primary" : "btn-outline-dark");
+            buttons.push(
+                <button type="button" className={className} onClick={(e) => this.toggleButton(e, 'expanded')} data-tip="Toggle full width" key={id + '_expanded'}>
+                    <i className="icon icon-fw fas icon-search-plus" />
+                </button>
+            );
+        }
+        return buttons;
     }
 
     buttonSection(){
         const { extraButtons } = this.props;
         return (
-            <div className="pull-right mt-07">
+            <div className="pull-right mt-05">
                 { extraButtons }
-                { this.expandButton() }
+                { this.commonButtons() }
             </div>
         );
     }
@@ -1338,7 +1380,7 @@ export class AreaChartContainer extends React.Component {
     render(){
         const { title, subTitle, children, width, defaultHeight, colorScale, chartMargin, updateColorStore, legend } = this.props;
 
-        const expanded = AreaChartContainer.isExpanded(this.props);
+        const expanded = AreaChartContainer.isToggled(this.props, 'expanded');
         const useWidth = width || this.getRefWidth();
         const chartInnerWidth = expanded ? useWidth * 3 : useWidth;
         const useHeight = expanded ? 500 : (defaultHeight || AreaChart.defaultProps.height);
