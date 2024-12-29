@@ -1399,7 +1399,35 @@ $workflow-node-color-type-global-context: #ffb3b3;
             .dropdown .btn {
                 margin-top: 10px;
             }
-        }   
+        }
+
+        .chart-group h5 {
+            font-weight: 600 !important;
+        }
+
+        .search-view-controls-and-results {
+            .above-results-table-row {
+                .right-buttons button[data-tip="Sort multiple columns"],
+                .right-buttons button[data-tip="Configure visible columns"] {
+                    display: none;
+                }
+            }
+            .search-headers-column-block {
+                &[data-first-visible-column=true] {
+                    .column-title {
+                        color: #ffffff !important;
+                    }
+                }
+            }
+            .search-result-column-block[data-field="display_title"] {
+                padding-left: 0px !important;
+            }
+            .search-result-column-block {
+                .inner {
+                    height: 30px !important;
+                }
+            }
+        }
     }
 
 }
