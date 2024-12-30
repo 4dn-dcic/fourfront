@@ -1656,7 +1656,7 @@ const StatisticsTable = React.memo((props) => {
                     widthMap: { 'lg': 140, 'md': 120, 'sm': 120 },
                     render: function (result) {
                         if (result[dataKey] !== 0) {
-                            return (
+                            return session ? (
                                 <a href="#"
                                     onClick={(e) => {
                                         setModalForDate(transposed ? dataKey : result.display_title);
@@ -1667,7 +1667,7 @@ const StatisticsTable = React.memo((props) => {
                                     className="value text-end fw-bold">
                                     {roundValue(result[dataKey], valueLabel)}
                                 </a>
-                            );
+                            ) : (<span className="value text-end">{roundValue(result[dataKey], valueLabel)}</span>);
                         } else {
                             return (<span className="value text-end">0</span>);
                         }
