@@ -232,7 +232,7 @@ export const commonParsingFxn = {
 
         return aggsList;
     },
-    'analytics_to_buckets' : function(resp, reportName, termBucketField, countKey, cumulativeSum, topCount = 0){
+    'analytics_to_buckets' : function(resp, reportName, termBucketField, countKey, cumulativeSum, termDisplayAsFunc = null, topCount = 0){
         const termsInAllItems = new Set();
 
         // De-dupe -- not particularly necessary as D3 handles this, however nice to have well-formatted data.
@@ -248,7 +248,7 @@ export const commonParsingFxn = {
             const { google_analytics : {
                 reports : {
                     [reportName] : currentReport = []
-                }, // `currentReport` => List of JSON objects (report entries, 1 per unique dimension value) - Note: 1 per unique dimension may not be valid for post processing report items in smaht-foursight
+                } = {}, // `currentReport` => List of JSON objects (report entries, 1 per unique dimension value) - Note: 1 per unique dimension may not be valid for post processing report items in smaht-foursight 
                 for_date
             } } = trackingItem;
 
@@ -265,6 +265,7 @@ export const commonParsingFxn = {
                 } else {
                     groupedTermsObj[term] = {
                         'term': term,
+                        'termDisplayAs': typeof termDisplayAsFunc === 'function' ? termDisplayAsFunc(trackingItemItem) : null,
                         'count': trackingItemItem[countKey],
                         'total': trackingItemItem[countKey],
                         'date': for_date
@@ -287,7 +288,7 @@ export const commonParsingFxn = {
                     if (cumulativeSum) {
                         let { count = 0, total = 0 } = termTotals[termItem.term] || {};
                         total += (termItem.total || 0);
-                        count += (termItem.count || 0);
+                        count = (termItem.count || 0);
                         termTotals[termItem.term] = { total, count };
 
                         cloned.count = count;
@@ -303,7 +304,8 @@ export const commonParsingFxn = {
                     if (!termsInCurrenItem.has(term)) {
                         currentItem.children.push({
                             'term': term,
-                            'count': termTotals[term].count,
+                            'termDisplayAs': typeof termDisplayAsFunc === 'function' ? termDisplayAsFunc(term) : null,
+                            'count': 0,
                             'total': termTotals[term].total,
                             'date': for_date
                         });
@@ -317,11 +319,32 @@ export const commonParsingFxn = {
 
             return currentItem;
 
-        }); // We get these in decrementing order from back-end
+        });
 
         commonParsingFxn.fillMissingChildBuckets(aggsList, Array.from(termsInAllItems));
 
-        return aggsList;
+        // remove children term if all is zero
+        const filterZeroTotalTerms = (list) => {
+            const termTotals = {};
+
+            list.forEach((item) => {
+                item.children.forEach((child) => {
+                    if (!termTotals[child.term]) {
+                        termTotals[child.term] = 0;
+                    }
+                    termTotals[child.term] += child.total;
+                });
+            });
+
+            return list.map((item) => {
+                return {
+                    ...item,
+                    children: item.children.filter((child) => termTotals[child.term] !== 0),
+                };
+            });
+        };
+
+        return filterZeroTotalTerms(aggsList);
     }
 };
 
@@ -961,6 +984,11 @@ export function UsageStatsView(props){
     const isSticky = true; //!_.any(_.values(tableToggle), (v)=> v === true);
     const commonTableProps = { windowWidth, href, session, schemas, transposed, dateRoundInterval, cumulativeSum, hideEmptyColumns, chartToggles };
 
+    let topFileLimit = 0;
+    if (countBy.file_downloads && countBy.file_downloads.indexOf('top_files') === 0) {
+        topFileLimit = 10; // parseInt(countBy.file_downloads.substring('top_files_'.length));
+    }
+
     return (
         <div className="stats-charts-container" key="charts" id="usage">
 
@@ -1029,7 +1057,8 @@ export function UsageStatsView(props){
                         <StatisticsTable data={file_downloads}
                             key={'dt_file_downloads'}
                             {...commonTableProps}
-                            containerId="content_file_downloads" />
+                            containerId="content_file_downloads"
+                            limit={topFileLimit} />
                     }
 
                     <AreaChartContainer {...commonContainerProps} id="file_downloads_volume" defaultHeight={fileDownloadsChartHeight}
@@ -1045,7 +1074,8 @@ export function UsageStatsView(props){
                             key={'dt_file_downloads_volume'}
                             valueLabel="GB"
                             {...commonTableProps}
-                            containerId="content_file_downloads_volume" />
+                            containerId="content_file_downloads_volume"
+                            limit={topFileLimit} />
                     }
 
                     <p className="fst-italic mt-2">Download tracking started in August 2018 | Re-Implemented in Feb 2020 and August 2023</p>
@@ -1510,8 +1540,8 @@ const ChartSubTitle = memoize(function ({ data, invalidDateRange }) {
  */
 const StatisticsTable = React.memo((props) => {
     const {
-        data, valueLabel = null, session, schemas, containerId = '',
-        href, dateRoundInterval,  transposed = false, windowWidth, cumulativeSum, hideEmptyColumns,
+        data, termColHeader = null, valueLabel = null, session, schemas, containerId = '',
+        href, dateRoundInterval, transposed = false, windowWidth, cumulativeSum, hideEmptyColumns,
         limit = 0, excludeNones = false, // limit and excludeNones are evaluated for only transposed data
         rowHeight = 31
     } = props;
@@ -1562,10 +1592,10 @@ const StatisticsTable = React.memo((props) => {
         // date or term column based on transposed or not
         let cols = {
             'display_title': {
-                title: transposed ? 'Term' : 'Date',
+                title: transposed ? (termColHeader || 'Term') : 'Date',
                 type: 'string',
                 noSort: true,
-                widthMap: transposed ? { 'lg': 250, 'md': 200, 'sm': 200 } : { 'lg': 200, 'md': 200, 'sm': 200 },
+                widthMap: transposed ? { 'lg': 400, 'md': 200, 'sm': 200 } : { 'lg': 200, 'md': 200, 'sm': 200 },
                 render: function (result) {
                     // overall sum
                     const overallSum = roundValue(result.overall_sum || 0, valueLabel);
@@ -1630,7 +1660,7 @@ const StatisticsTable = React.memo((props) => {
         }
 
         setColumns(cols);
-        const colDefs = _.map(_.pairs(cols), function (p) { return { field: p[0], ...p[1] } });
+        const colDefs = _.map(_.pairs(cols), function (p) { return { field: p[0], ...p[1] }; });
         setColumnDefinitions(colDefs);
 
         // create @graph
@@ -1643,7 +1673,7 @@ const StatisticsTable = React.memo((props) => {
                     return memo2;
                 }, {}),
                 '@type': ['Item'],
-                'overall_sum': !cumulativeSum ? (d.total || 0) : _.reduce(d.children, (memo, c) => memo + c.count, 0),
+                'overall_sum': !cumulativeSum ? (d.total || 0) : _.reduce(d.children, (memo, c) => memo + c.count, 0),
                 'date_created': transposed ? d.term : d.date
             };
         });
@@ -1678,7 +1708,7 @@ const StatisticsTable = React.memo((props) => {
     const modalProps = {
         ...{ dateRoundInterval, schemas },
         forDate: modalForDate,
-        onTrackingItemViewerCancel: () => setShowModal(false)
+        onHide: () => setShowModal(false)
     };
 
     return (
@@ -1696,10 +1726,10 @@ const StatisticsTable = React.memo((props) => {
 });
 
 /**
- * displays relevant tracking item (fetched via ajax call) in item detail list
+ * displays tracking item ajax-fetched in ItemDetailList
  */
 const TrackingItemViewer = React.memo(function (props) {
-    const { schemas, forDate, dateRoundInterval='day', reportName, onTrackingItemViewerCancel } = props;
+    const { schemas, forDate, dateRoundInterval='day', reportName, onHide } = props;
 
     const [isLoading, setIsLoading] = useState(true);
     const [trackingItem, setTrackingItem] = useState();
@@ -1728,7 +1758,7 @@ const TrackingItemViewer = React.memo(function (props) {
     }, [forDate, dateRoundInterval, reportName]);
 
     return (
-        <Modal show size="xl" onHide={onTrackingItemViewerCancel} className="tracking-item-viewer">
+        <Modal show size="xl" onHide={onHide} className="tracking-item-viewer">
             <Modal.Header closeButton>
                 <Modal.Title>{forDate}</Modal.Title>
             </Modal.Header>
@@ -1746,6 +1776,6 @@ const TrackingItemViewer = React.memo(function (props) {
 TrackingItemViewer.propTypes = {
     forDate: PropTypes.string.isRequired,
     dateRoundInterval: PropTypes.oneOf(['daily', 'monthly']),
-    onTrackingItemViewerCancel: PropTypes.func.isRequired,
+    onHide: PropTypes.func.isRequired,
     schemas: PropTypes.object
 };
