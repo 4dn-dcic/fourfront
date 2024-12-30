@@ -767,7 +767,7 @@ export class AreaChart extends React.PureComponent {
         'stackChildren'         : true,
         'height'                : 300,
         'yAxisLabel'            : 'Count',
-        'yAxisScale'            : 'Linear', // Must be one of 'Linear', 'Log', 'Pow'
+        'yAxisScale'            : 'Pow', // Must be one of 'Linear', 'Log', 'Pow'
         'yAxisPower'            : null,
         'xDomain'               : [ new Date('2017-03-01'), null ],
         'yDomain'               : [ 0, null ],
@@ -909,6 +909,8 @@ export class AreaChart extends React.PureComponent {
         const scale = d3['scale' + yAxisScale]().rangeRound([height, 0]).domain(yExtents);
         if (yAxisScale === 'Pow' && yAxisPower !== null){
             scale.exponent(yAxisPower);
+        } else if (yAxisScale === 'Symlog' && yAxisPower !== null){
+            scale.constant(yAxisPower);
         }
         return scale;
     }
