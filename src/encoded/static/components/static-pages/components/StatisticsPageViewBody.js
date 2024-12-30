@@ -99,7 +99,7 @@ export const commonParsingFxn = {
                 'date' : todayAsString,
                 'count' : 0,
                 'children' : aggsList[aggsList.length - 1].children.map(function(c){
-                    return _.extend({}, c, { 'date' : todayAsString, 'count' : 0 });
+                    return _.extend({}, c, { 'date' : todayAsString, 'count' : 0, 'total': 0 });
                 })
             });
         }
