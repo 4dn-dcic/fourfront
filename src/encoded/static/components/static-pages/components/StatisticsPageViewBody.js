@@ -1512,7 +1512,8 @@ const StatisticsTable = React.memo((props) => {
     const {
         data, valueLabel = null, session, schemas, containerId = '',
         href, dateRoundInterval,  transposed = false, windowWidth, cumulativeSum, hideEmptyColumns,
-        limit = 0, excludeNones = false // limit and excludeNones are evaluated for only transposed data
+        limit = 0, excludeNones = false, // limit and excludeNones are evaluated for only transposed data
+        rowHeight = 31
     } = props;
     const [columns, setColumns] = useState({});
     const [columnDefinitions, setColumnDefinitions] = useState([]);
@@ -1665,6 +1666,7 @@ const StatisticsTable = React.memo((props) => {
         session,
         maxHeight: 500,
         maxResultsBodyHeight: 500,
+        rowHeight,
         tableColumnClassName: "col-12",
         facetColumnClassName: "d-none",
         defaultColAlignment: "text-end",
