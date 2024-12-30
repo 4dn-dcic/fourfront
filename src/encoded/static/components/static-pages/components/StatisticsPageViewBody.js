@@ -1613,7 +1613,7 @@ const StatisticsTable = React.memo((props) => {
                 title: transposed ? (termColHeader || 'Term') : 'Date',
                 type: 'string',
                 noSort: true,
-                widthMap: transposed ? { 'lg': 400, 'md': 200, 'sm': 200 } : { 'lg': 200, 'md': 200, 'sm': 200 },
+                widthMap: transposed ? { 'lg': 300, 'md': 200, 'sm': 200 } : { 'lg': 200, 'md': 200, 'sm': 200 },
                 render: function (result) {
                     // overall sum
                     const overallSum = roundValue(result.overall_sum || 0, valueLabel);
