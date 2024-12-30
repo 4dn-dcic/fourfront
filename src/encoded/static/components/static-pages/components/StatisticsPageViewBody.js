@@ -932,14 +932,6 @@ export function UsageStatsView(props){
         smoothEdges, onChartToggle, onSmoothEdgeToggle, cumulativeSum, onCumulativeSumToggle
     } = props;
 
-    if (loadingStatus === 'failed'){
-        return <div className="stats-charts-container" key="charts" id="usage"><ErrorIcon/></div>;
-    }
-
-    if (!mounted || (loadingStatus === 'loading' && (!file_downloads && !sessions_by_country))){
-        return <div className="stats-charts-container" key="charts" id="usage"><LoadingIcon/></div>;
-    }
-
     const [transposed, setTransposed] = useState(true);
     const [hideEmptyColumns, setHideEmptyColumns] = useState(true);
     const [ scale, setScale ] = useState({ yAxisScale: 'Pow', yAxisPower: 0.7 });
@@ -989,44 +981,65 @@ export function UsageStatsView(props){
         topFileLimit = 10; // parseInt(countBy.file_downloads.substring('top_files_'.length));
     }
 
+    const settings = () => (
+        <GroupByDropdown {...{ groupByOptions, loadingStatus, handleGroupByChange, currentGroupBy }}
+            title="Show" outerClassName={"dropdown-container mb-0" + (isSticky ? " sticky-top" : "")}>
+            <div className="d-inline-block ms-15 me-15">
+                <Checkbox checked={smoothEdges} onChange={onSmoothEdgeToggle} data-tip="Toggle between smooth/sharp edges">Smooth Edges</Checkbox>
+            </div>
+            <div className="d-inline-block me-15">
+                <Checkbox checked={cumulativeSum} onChange={onCumulativeSumToggle} data-tip="Show as cumulative sum">Cumulative Sum</Checkbox>
+            </div>
+            <div className="d-inline-block me-15">
+                <Checkbox checked={transposed} onChange={() => setTransposed(!transposed)} data-tip="Transpose data table">Transpose Data</Checkbox>
+            </div>
+            <div className="d-inline-block me-15">
+                <Checkbox checked={hideEmptyColumns} onChange={() => setHideEmptyColumns(!hideEmptyColumns)} data-tip="Hide empty data table columns">Hide Empty Columns</Checkbox>
+            </div>
+            <div className="d-inline-block mt-06">
+                <div className="d-md-flex">
+                    <span className="text-500 me-1">Y-Axis scale:</span>
+                    <div className="me-05">
+                        <DropdownButton size="sm"
+                            title={(scale && scale['yAxisScale'] && UsageStatsView.yScaleLabels[scale['yAxisScale']]) || '-'}
+                            onSelect={(e) => setScale({ yAxisScale: e, yAxisPower: e === 'Pow' ? 0.5 : 50 })}>
+                            <DropdownItem eventKey={'Linear'} key={'scale-linear'} >{UsageStatsView.yScaleLabels['Linear']}</DropdownItem>
+                            <DropdownItem eventKey={'Pow'} key={'scale-pow'} >{UsageStatsView.yScaleLabels['Pow']}</DropdownItem>
+                            <DropdownItem eventKey={'Symlog'} key={'scale-log'} >{UsageStatsView.yScaleLabels['Symlog']}</DropdownItem>
+                        </DropdownButton>
+                    </div>
+                    <div className={"ms-md-15" + (showScaleRange ? " d-block d-md-inline-block" : " d-none")}>
+                        <input type="range" id="input_range_y_scale_power" className="w-75"
+                            min={scaleRangeMin} max={scaleRangeMax} step={scaleRangeStep} value={scale['yAxisPower']} data-tip={scaleRangeTooltip}
+                            onChange={(e) => setScale({ yAxisScale: scale['yAxisScale'], yAxisPower: e.target.valueAsNumber })} />
+                        <span className="ms-05">{scale['yAxisPower']}</span>
+                    </div>
+                </div>
+            </div>
+        </GroupByDropdown>
+    );
+
+    if (loadingStatus === 'failed'){
+        return (
+            <div className="stats-charts-container" key="charts" id="usage">
+                {settings()}
+                <ErrorIcon />
+            </div>
+        );
+    }
+
+    if (!mounted || (loadingStatus === 'loading' && (!file_downloads && !sessions_by_country))){
+        return (
+            <div className="stats-charts-container" key="charts" id="usage">
+                <LoadingIcon />
+            </div>
+        );
+    }
+
     return (
         <div className="stats-charts-container" key="charts" id="usage">
 
-            <GroupByDropdown {...{ groupByOptions, loadingStatus, handleGroupByChange, currentGroupBy }}
-                title="Show" outerClassName={"dropdown-container mb-0" + (isSticky ? " sticky-top" : "")}>
-                <div className="d-inline-block ms-15 me-15">
-                    <Checkbox checked={smoothEdges} onChange={onSmoothEdgeToggle} data-tip="Toggle between smooth/sharp edges">Smooth Edges</Checkbox>
-                </div>
-                <div className="d-inline-block me-15">
-                    <Checkbox checked={cumulativeSum} onChange={onCumulativeSumToggle} data-tip="Show as cumulative sum">Cumulative Sum</Checkbox>
-                </div>
-                <div className="d-inline-block me-15">
-                    <Checkbox checked={transposed} onChange={() => setTransposed(!transposed)} data-tip="Transpose data table">Transpose Data</Checkbox>
-                </div>
-                <div className="d-inline-block me-15">
-                    <Checkbox checked={hideEmptyColumns} onChange={() => setHideEmptyColumns(!hideEmptyColumns)} data-tip="Hide empty data table columns">Hide Empty Columns</Checkbox>
-                </div>
-                <div className="d-inline-block mt-06">
-                    <div className="d-md-flex">
-                        <span className="text-500 me-1">Y-Axis scale:</span>
-                        <div className="me-05">
-                            <DropdownButton size="sm"
-                                title={(scale && scale['yAxisScale'] && UsageStatsView.yScaleLabels[scale['yAxisScale']]) || '-'}
-                                onSelect={(e) => setScale({ yAxisScale: e, yAxisPower: e === 'Pow' ? 0.5 : 50 })}>
-                                <DropdownItem eventKey={'Linear'} key={'scale-linear'} >{UsageStatsView.yScaleLabels['Linear']}</DropdownItem>
-                                <DropdownItem eventKey={'Pow'} key={'scale-pow'} >{UsageStatsView.yScaleLabels['Pow']}</DropdownItem>
-                                <DropdownItem eventKey={'Symlog'} key={'scale-log'} >{UsageStatsView.yScaleLabels['Symlog']}</DropdownItem>
-                            </DropdownButton>
-                        </div>
-                        <div className={"ms-md-15" + (showScaleRange ? " d-block d-md-inline-block" : " d-none")}>
-                            <input type="range" id="input_range_y_scale_power" className="w-75"
-                                min={scaleRangeMin} max={scaleRangeMax} step={scaleRangeStep} value={scale['yAxisPower']} data-tip={scaleRangeTooltip}
-                                onChange={(e) => setScale({ yAxisScale: scale['yAxisScale'], yAxisPower: e.target.valueAsNumber })} />
-                            <span className="ms-05">{scale['yAxisPower']}</span>
-                        </div>
-                    </div>
-                </div>
-            </GroupByDropdown>
+            {settings()}
 
             { session && file_downloads ?
 
@@ -1345,7 +1358,8 @@ export function SubmissionsStatsView(props) {
                                 <span className="text-300">internal vs public release</span>
                             </h3>
                         }
-                        subTitle={<ChartSubTitle invalidDateRange={invalidDateRange} data={expsets_released_vs_internal} />}>
+                        subTitle={<ChartSubTitle invalidDateRange={invalidDateRange} data={expsets_released_vs_internal} />}
+                        hideChartButton hideTableButton>
                         <AreaChart {...commonChartProps} data={expsets_released_vs_internal} />
                     </AreaChartContainer>
 
@@ -1374,7 +1388,8 @@ export function SubmissionsStatsView(props) {
                             <span className="text-300 d-none d-sm-inline"> - </span>
                             <span className="text-300">{session ? 'publicly released' : 'released'}</span>
                         </h3>}
-                    subTitle={<ChartSubTitle invalidDateRange={invalidDateRange} data={expsets_released} />}>
+                    subTitle={<ChartSubTitle invalidDateRange={invalidDateRange} data={expsets_released} />}
+                    hideChartButton hideTableButton>
                     <AreaChart {...commonChartProps} data={expsets_released} />
                 </AreaChartContainer>
 
@@ -1387,7 +1402,8 @@ export function SubmissionsStatsView(props) {
                                 <span className="text-300">released (public or within 4DN)</span>
                             </h3>
                         }
-                        subTitle={<ChartSubTitle invalidDateRange={invalidDateRange} data={expsets_released_internal} />}>
+                        subTitle={<ChartSubTitle invalidDateRange={invalidDateRange} data={expsets_released_internal} />}
+                        hideChartButton hideTableButton>
                         <AreaChart {...commonChartProps} data={expsets_released_internal} />
                     </AreaChartContainer>
                     : null }
@@ -1400,7 +1416,8 @@ export function SubmissionsStatsView(props) {
                             <span className="text-300">{session ? 'publicly released' : 'released'}</span>
                         </h3>
                     }
-                    subTitle={<ChartSubTitle invalidDateRange={invalidDateRange} data={files_released} />}>
+                    subTitle={<ChartSubTitle invalidDateRange={invalidDateRange} data={files_released} />}
+                    hideChartButton hideTableButton>
                     <AreaChart {...commonChartProps} data={files_released} />
                 </AreaChartContainer>
 
@@ -1412,7 +1429,8 @@ export function SubmissionsStatsView(props) {
                             <span className="text-300">{session ? 'publicly released' : 'released'}</span>
                         </h3>
                     }
-                    subTitle={<ChartSubTitle invalidDateRange={invalidDateRange} data={file_volume_released} />}>
+                    subTitle={<ChartSubTitle invalidDateRange={invalidDateRange} data={file_volume_released} />}
+                    hideChartButton hideTableButton>
                     <AreaChart {...commonChartProps} data={file_volume_released} yAxisLabel="GB" />
                 </AreaChartContainer>
 
