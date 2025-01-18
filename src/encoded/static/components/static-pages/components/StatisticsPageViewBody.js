@@ -669,11 +669,13 @@ export class UsageStatsViewController extends React.PureComponent {
     static getSearchReqMomentsForTimePeriod(currentGroupBy = "daily:60") {
         let untilDate = new Date();
         let fromDate;
+        let dateIncrement = '';
 
         if (currentGroupBy.startsWith("daily:")) {
             const days = parseInt(currentGroupBy.split(":")[1], 10); // Extract the number after 'daily:'
             untilDate = sub(untilDate, { days: 1 });
             fromDate = sub(untilDate, { days }); // Go back the specified number of days
+            dateIncrement = 'daily';
         } else if (currentGroupBy.startsWith("monthly:")) {
             const [, months] = currentGroupBy.split(":");
             if (months === "All") { // Special case for 'monthly:All'
@@ -684,9 +686,10 @@ export class UsageStatsViewController extends React.PureComponent {
                 untilDate = sub(startOfMonth(untilDate), { minutes: 1 }); // Last minute of previous month
                 fromDate = sub(untilDate, { months: numMonths }); // Go back the specified number of months
             }
+            dateIncrement = 'monthly';
         }
 
-        return { fromDate, untilDate };
+        return { fromDate, untilDate, dateIncrement };
     }
 
     static defaultProps = {
@@ -779,8 +782,6 @@ export class UsageStatsViewController extends React.PureComponent {
 }
 
 
-
-
 export class SubmissionStatsViewController extends React.PureComponent {
 
     static createFileSearchUri(props, date_histogram) {
@@ -862,7 +863,6 @@ export class SubmissionStatsViewController extends React.PureComponent {
 }
 
 
-
 class UsageChartsCountByDropdown extends React.PureComponent {
 
     constructor(props){
@@ -934,47 +934,45 @@ export function UsageStatsView(props){
 
     const [transposed, setTransposed] = useState(true);
     const [hideEmptyColumns, setHideEmptyColumns] = useState(true);
-    const [ scale, setScale ] = useState({ yAxisScale: 'Pow', yAxisPower: 0.7 });
-    const { anyExpandedCharts, commonXDomain, dateRoundInterval } = useMemo(function(){
-        const { fromDate: propFromDate, untilDate: propUntilDate } = UsageStatsViewController.getSearchReqMomentsForTimePeriod(currentGroupBy);
-        let fromDate, untilDate, dateRoundInterval;
+    const [yAxisScale, setYAxisScale] = useState('Pow');
+    const [yAxisPower, setYAxisPower] = useState(0.7);
+    const handleAxisScaleChange = (scale, power) => { setYAxisScale(scale); setYAxisPower(power); };
+    const { anyExpandedCharts, commonXDomain, dateIncrement } = useMemo(function(){
+        const { fromDate: propFromDate, untilDate: propUntilDate, dateIncrement } = UsageStatsViewController.getSearchReqMomentsForTimePeriod(currentGroupBy);
+        let fromDate, untilDate;
         // We want all charts to share the same x axis. Here we round to date boundary.
         // Minor issue is that file downloads are stored in UTC/GMT while analytics are in EST timezone..
         // TODO improve on this somehow, maybe pass prop to FileDownload chart re: timezone parsing of some sort.
         if (currentGroupBy.startsWith('daily:')) {
             fromDate = add(startOfDay(propFromDate), { minutes: 15 });
             untilDate = add(endOfDay(propUntilDate), { minutes: 45 });
-            dateRoundInterval = 'day';
         } else if (currentGroupBy.startsWith('monthly:')) {
             fromDate = endOfMonth(propFromDate); // Not rly needed.
             untilDate = sub(endOfMonth(propUntilDate), { days: 1 });
-            dateRoundInterval = 'month';
-        } else if (currentGroupBy.startsWith('yearly')) { // Not yet implemented
-            dateRoundInterval = 'year';
+        } else if (currentGroupBy.startsWith('yearly')) {
+            // Not yet implemented
         }
         return {
             anyExpandedCharts: _.any(_.values(chartToggles.expanded || {})),
             commonXDomain: [fromDate, untilDate],
-            dateRoundInterval
+            dateIncrement
         };
     }, [ currentGroupBy, anyExpandedCharts ]);
 
     const commonContainerProps = { 'onToggle' : onChartToggle, chartToggles, windowWidth, 'defaultColSize' : '12', 'defaultHeight' : anyExpandedCharts ? 200 : 250 };
     const commonChartProps = {
-        dateRoundInterval,
+        dateRoundInterval: dateIncrement === 'daily' ? 'day' : (dateIncrement === 'yearly' ? 'year' : 'month'),
         'xDomain': commonXDomain,
         'curveFxn': smoothEdges ? d3.curveMonotoneX : d3.curveStepAfter,
-        cumulativeSum: cumulativeSum
+        cumulativeSum, yAxisScale, yAxisPower
     };
     const countByDropdownProps = { countBy, changeCountByForChart };
 
     const enableFileDownloadsChartTooltipItemClick = (countBy.file_downloads === 'top_files');
     const fileDownloadsChartHeight = enableFileDownloadsChartTooltipItemClick ? 350 : commonContainerProps.defaultHeight;
 
-    const { showScaleRange, scaleRangeTooltip, scaleRangeMin, scaleRangeMax, scaleRangeStep } = UsageStatsView.getYScaleDefaults(scale['yAxisScale']);
-
     const isSticky = true; //!_.any(_.values(tableToggle), (v)=> v === true);
-    const commonTableProps = { windowWidth, href, session, schemas, transposed, dateRoundInterval, cumulativeSum, hideEmptyColumns, chartToggles };
+    const commonTableProps = { windowWidth, href, session, schemas, transposed, dateIncrement, cumulativeSum, hideEmptyColumns, chartToggles };
 
     let topFileLimit = 0;
     if (countBy.file_downloads && countBy.file_downloads.indexOf('top_files') === 0) {
@@ -997,24 +995,7 @@ export function UsageStatsView(props){
                 <Checkbox checked={hideEmptyColumns} onChange={() => setHideEmptyColumns(!hideEmptyColumns)} data-tip="Hide empty data table columns">Hide Empty Columns</Checkbox>
             </div>
             <div className="d-inline-block mt-06">
-                <div className="d-md-flex">
-                    <span className="text-500 me-1">Y-Axis scale:</span>
-                    <div className="me-05">
-                        <DropdownButton size="sm"
-                            title={(scale && scale['yAxisScale'] && UsageStatsView.yScaleLabels[scale['yAxisScale']]) || '-'}
-                            onSelect={(e) => setScale({ yAxisScale: e, yAxisPower: e === 'Pow' ? 0.5 : 50 })}>
-                            <DropdownItem eventKey={'Linear'} key={'scale-linear'} >{UsageStatsView.yScaleLabels['Linear']}</DropdownItem>
-                            <DropdownItem eventKey={'Pow'} key={'scale-pow'} >{UsageStatsView.yScaleLabels['Pow']}</DropdownItem>
-                            <DropdownItem eventKey={'Symlog'} key={'scale-log'} >{UsageStatsView.yScaleLabels['Symlog']}</DropdownItem>
-                        </DropdownButton>
-                    </div>
-                    <div className={"ms-md-15" + (showScaleRange ? " d-block d-md-inline-block" : " d-none")}>
-                        <input type="range" id="input_range_y_scale_power" className="w-75"
-                            min={scaleRangeMin} max={scaleRangeMax} step={scaleRangeStep} value={scale['yAxisPower']} data-tip={scaleRangeTooltip}
-                            onChange={(e) => setScale({ yAxisScale: scale['yAxisScale'], yAxisPower: e.target.valueAsNumber })} />
-                        <span className="ms-05">{scale['yAxisPower']}</span>
-                    </div>
-                </div>
+                <AxisScale scale={yAxisScale} power={yAxisPower} onChange={handleAxisScaleChange} label="Y-Axis scale" />
             </div>
         </GroupByDropdown>
     );
@@ -1062,7 +1043,7 @@ export function UsageStatsView(props){
                         title={<h5 className="text-400 mt-0">Total File Count</h5>}
                         subTitle={enableFileDownloadsChartTooltipItemClick && <h4 className="fw-normal text-secondary">Click bar to view details</h4>}>
                         {chartToggles.chart?.file_downloads ?
-                            <AreaChart {...commonChartProps} data={file_downloads} {...scale} showTooltipOnHover={!enableFileDownloadsChartTooltipItemClick} />
+                            <AreaChart {...commonChartProps} data={file_downloads} showTooltipOnHover={!enableFileDownloadsChartTooltipItemClick} />
                             : <React.Fragment />}
                     </AreaChartContainer>
 
@@ -1078,7 +1059,7 @@ export function UsageStatsView(props){
                         title={<h5 className="text-400 mt-0">Total File Size (GB)</h5>}
                         subTitle={enableFileDownloadsChartTooltipItemClick && <h4 className="fw-normal text-secondary">Click bar to view details</h4>}>
                         {chartToggles.chart?.file_downloads_volume ?
-                            <AreaChart {...commonChartProps} data={file_downloads_volume} {...scale} showTooltipOnHover={!enableFileDownloadsChartTooltipItemClick} yAxisLabel="GB" />
+                            <AreaChart {...commonChartProps} data={file_downloads_volume} showTooltipOnHover={!enableFileDownloadsChartTooltipItemClick} yAxisLabel="GB" />
                             : <React.Fragment />}
                     </AreaChartContainer>
 
@@ -1113,7 +1094,7 @@ export function UsageStatsView(props){
                         extraButtons={<UsageChartsCountByDropdown {...countByDropdownProps} chartID="file_views" />}
                         legend={<HorizontalD3ScaleLegend {...{ loadingStatus }} />}>
                         {chartToggles.chart?.file_views ?
-                            <AreaChart {...commonChartProps} data={file_views} {...scale} />
+                            <AreaChart {...commonChartProps} data={file_views} />
                             : <React.Fragment />}
                     </AreaChartContainer>
 
@@ -1143,7 +1124,7 @@ export function UsageStatsView(props){
                         extraButtons={<UsageChartsCountByDropdown {...countByDropdownProps} chartID="sessions_by_country" />}
                         legend={<HorizontalD3ScaleLegend {...{ loadingStatus }} />}>
                         {chartToggles.chart?.sessions_by_country ?
-                            <AreaChart {...commonChartProps} data={sessions_by_country} {...scale} />
+                            <AreaChart {...commonChartProps} data={sessions_by_country} />
                             : <React.Fragment />}
                     </AreaChartContainer>
 
@@ -1204,7 +1185,7 @@ export function UsageStatsView(props){
                         extraButtons={<UsageChartsCountByDropdown {...countByDropdownProps} chartID="experiment_set_views" />}
                         legend={<HorizontalD3ScaleLegend {...{ loadingStatus }} />}>
                         {chartToggles.chart?.experiment_set_views ?
-                            <AreaChart {...commonChartProps} data={experiment_set_views} {...scale} />
+                            <AreaChart {...commonChartProps} data={experiment_set_views} />
                             : <React.Fragment />}
                     </AreaChartContainer>
 
@@ -1234,7 +1215,7 @@ export function UsageStatsView(props){
                         extraButtons={<UsageChartsCountByDropdown {...countByDropdownProps} chartID="fields_faceted" />}
                         legend={<HorizontalD3ScaleLegend {...{ loadingStatus }} />}>
                         {chartToggles.chart?.fields_faceted ?
-                            <AreaChart {...commonChartProps} data={fields_faceted} {...scale} />
+                            <AreaChart {...commonChartProps} data={fields_faceted} />
                             : <React.Fragment />}
                     </AreaChartContainer>
 
@@ -1279,28 +1260,6 @@ UsageStatsView.titleExtensions = {
         'sessions': 'by unique users'
     }
 };
-UsageStatsView.getYScaleDefaults = function (yScale) {
-    let showScaleRange = true;
-    let scaleRangeTooltip = '';
-    let scaleRangeMin, scaleRangeMax, scaleRangeStep;
-    //set defaults
-    if (yScale === 'Pow') {
-        scaleRangeMin = 0; scaleRangeMax = 1; scaleRangeStep = 0.1;
-        scaleRangeTooltip = 'exponent';
-    } else if (yScale === 'Symlog') {
-        scaleRangeMin = 0; scaleRangeMax = 100; scaleRangeStep = 0.5;
-        scaleRangeTooltip = 'constant';
-    } else {
-        showScaleRange = false;
-    }
-    return { showScaleRange, scaleRangeTooltip, scaleRangeMin, scaleRangeMax, scaleRangeStep };
-};
-UsageStatsView.yScaleLabels = {
-    'Linear': 'Linear',
-    'Symlog': 'Log',
-    'Pow': 'Pow'
-};
-
 
 export function SubmissionsStatsView(props) {
     const {
@@ -1559,7 +1518,7 @@ const ChartSubTitle = memoize(function ({ data, invalidDateRange }) {
 const StatisticsTable = React.memo((props) => {
     const {
         data, termColHeader = null, valueLabel = null, session, schemas, containerId = '',
-        href, dateRoundInterval, transposed = false, windowWidth, cumulativeSum, hideEmptyColumns,
+        href, dateIncrement, transposed = false, windowWidth, cumulativeSum, hideEmptyColumns,
         limit = 0, excludeNones = false, // limit and excludeNones are evaluated for only transposed data
         rowHeight = 31
     } = props;
@@ -1724,7 +1683,7 @@ const StatisticsTable = React.memo((props) => {
     };
 
     const modalProps = {
-        ...{ dateRoundInterval, schemas },
+        ...{ dateIncrement, schemas },
         forDate: modalForDate,
         onHide: () => setShowModal(false)
     };
@@ -1747,11 +1706,10 @@ const StatisticsTable = React.memo((props) => {
  * displays tracking item ajax-fetched in ItemDetailList
  */
 const TrackingItemViewer = React.memo(function (props) {
-    const { schemas, forDate, dateRoundInterval='day', reportName, onHide } = props;
+    const { schemas, forDate, dateIncrement='daily', reportName, onHide } = props;
 
     const [isLoading, setIsLoading] = useState(true);
     const [trackingItem, setTrackingItem] = useState();
-    const dateIncrement = (dateRoundInterval === 'month') ? 'monthly' : 'daily';
     const href=`/search/?type=TrackingItem&google_analytics.for_date=${forDate}&google_analytics.date_increment=${dateIncrement}`;
 
     useEffect(() => {
@@ -1793,7 +1751,53 @@ const TrackingItemViewer = React.memo(function (props) {
 });
 TrackingItemViewer.propTypes = {
     forDate: PropTypes.string.isRequired,
-    dateRoundInterval: PropTypes.oneOf(['daily', 'monthly']),
+    dateIncrement: PropTypes.oneOf(['daily', 'monthly', 'yearly']),
     onHide: PropTypes.func.isRequired,
     schemas: PropTypes.object
+};
+
+export const AxisScale = React.memo(function ({ scale, power, onChange, label = 'N/A' }) {
+    const labelPairs = _.pairs(AxisScale.labels);
+    const { showRange, rangeTooltip, rangeMin, rangeMax, rangeStep, defaultPower } = AxisScale.getDefaults(scale);
+    return (
+        <div className="d-md-flex">
+            <label className="me-1">{label}:</label>
+            <div className="mb-15">
+                <DropdownButton size="sm" title={(scale && AxisScale.labels[scale]) || '-'} onSelect={(e) => onChange(e, defaultPower)}>
+                    {
+                        labelPairs.map(([key, val]) => (
+                            <DropdownItem eventKey={key} key={key}>{val}</DropdownItem>
+                        ))
+                    }
+                </DropdownButton>
+            </div>
+            <div className={"ms-05" + (showRange ? " d-block d-md-inline-block" : " d-none")}>
+                <input type="range" id="input_range_scale_power" className="w-75"
+                    min={rangeMin} max={rangeMax} step={rangeStep} value={power} data-tip={rangeTooltip}
+                    onChange={(e) => onChange(scale, e.target.valueAsNumber)} />
+                <span className="ms-05">{power}</span>
+            </div>
+        </div>
+    );
+});
+AxisScale.labels = {
+    'Linear': 'Linear',
+    'Pow': 'Pow',
+    'Symlog': 'Log'
+};
+AxisScale.getDefaults = function (scale) {
+    let showRange = true;
+    let rangeTooltip = '';
+    let rangeMin, rangeMax, rangeStep, defaultPower;
+    //set defaults
+    if (scale === 'Pow') {
+        rangeMin = 0; rangeMax = 1; rangeStep = 0.1; defaultPower = 0.5;
+        rangeTooltip = 'exponent';
+    } else if (scale === 'Symlog') {
+        rangeMin = 0; rangeMax = 100; rangeStep = 0.5; defaultPower = 50;
+        rangeTooltip = 'constant';
+    } else {
+        showRange = false;
+    }
+    return { showRange, rangeTooltip, rangeMin, rangeMax, rangeStep, defaultPower };
 };

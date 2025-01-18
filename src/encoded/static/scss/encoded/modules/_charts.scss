@@ -1445,7 +1445,10 @@ body[data-path="/statistics"] {
                     font-size: 110%;
                 }
             }
-        } 
+        }
+        .detail-embedded-table-container {
+            max-height: none !important;
+        }
     }
 }
 

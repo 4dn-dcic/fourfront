@@ -483,11 +483,16 @@ export class GroupByDropdown extends React.PureComponent {
 
         return (
             <div className={outerClassName}>
-                <span className="text-500">{groupByTitle}</span>
-                <DropdownButton id={groupById} title={selectedGroupByValueTitle} onSelect={this.onGroupBySelect} style={buttonStyle} disabled={groupByOptionItems.length < 2}>
-                    {groupByOptionItems}
-                </DropdownButton>
-                {children}
+                <div className="dropdown-container-col col-12 col-lg-3 align-top">
+                    <span className="text-500 d-block mb-1">{groupByTitle}</span>
+                    <DropdownButton id={groupById} title={selectedGroupByValueTitle} onSelect={this.onGroupBySelect} style={buttonStyle} disabled={groupByOptionItems.length < 2}>
+                        {groupByOptionItems}
+                    </DropdownButton>
+                </div>
+                <div className="dropdown-container-col col-12 col-lg-9 align-top ps-1">
+                    <div className="text-500 d-block mb-1">Settings</div>
+                    {children}
+                </div>
             </div>
         );
     }
