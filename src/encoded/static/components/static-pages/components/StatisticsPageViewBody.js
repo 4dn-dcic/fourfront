@@ -112,9 +112,9 @@ export const commonParsingFxn = {
      * @param {Object.<string>} [externalTermMap] - Object which maps external terms to true (external data) or false (internal data).
      * @param {boolean} [excludeChildren=false] - If true, skips aggregating up children to increase performance very slightly.
      */
-    'bucketDocCounts' : function(intervalBuckets, groupByField, externalTermMap, excludeChildren = false){
+    'bucketDocCounts' : function(intervalBuckets, groupByField, externalTermMap, fromDate, toDate, interval, excludeChildren = false){
         const subBucketKeysToDate = new Set();
-        const aggsList = intervalBuckets.map(function(bucket, index){
+        let aggsList = intervalBuckets.map(function(bucket, index){
             const {
                 doc_count,
                 key_as_string,
@@ -154,8 +154,10 @@ export const commonParsingFxn = {
             subBucketKeysToDate.add(null);
         }
 
+        aggsList = commonParsingFxn.add_missing_dates(aggsList, fromDate, toDate, interval, 'submission');
+
         // Ensure each datum has all child terms, even if blank.
-        commonParsingFxn.fillMissingChildBuckets(aggsList, _.difference([ ...subBucketKeysToDate ], (externalTermMap && _.keys(externalTermMap)) || [] ));
+        commonParsingFxn.fillMissingChildBuckets(aggsList, [...subBucketKeysToDate]/*_.difference([ ...subBucketKeysToDate ], (externalTermMap && _.keys(externalTermMap)) || [] )*/);
 
         return aggsList;
     },
@@ -166,9 +168,9 @@ export const commonParsingFxn = {
      * @param {{ key_as_string: string, doc_count: number, group_by?: { buckets: { doc_count: number, key: string  }[] } }[]} intervalBuckets - Raw aggregation results returned from ElasticSearch
      * @param {Object.<string>} [externalTermMap] - Object which maps external terms to true (external data) or false (internal data).
      */
-    'bucketTotalFilesCounts' : function(intervalBuckets, groupByField, externalTermMap){
+    'bucketTotalFilesCounts' : function(intervalBuckets, groupByField, externalTermMap, fromDate, toDate, interval){
         const subBucketKeysToDate = new Set();
-        const aggsList = intervalBuckets.map(function(bucket, index){
+        let aggsList = intervalBuckets.map(function(bucket, index){
             const {
                 key_as_string,
                 total_files : { value: totalFiles = 0 } = {},
@@ -183,7 +185,7 @@ export const commonParsingFxn = {
                 const subBucket = _.findWhere(subBuckets, { 'key' : term });
                 const count = ((subBucket && subBucket.total_files && subBucket.total_files.value) || 0);
 
-                return { term, count };
+                return { term, count, total: count };
             });
 
             return {
@@ -193,15 +195,17 @@ export const commonParsingFxn = {
             };
         });
 
+        aggsList = commonParsingFxn.add_missing_dates(aggsList, fromDate, toDate, interval, 'submission');
+
         // Ensure each datum has all child terms, even if blank.
-        commonParsingFxn.fillMissingChildBuckets(aggsList, _.difference([ ...subBucketKeysToDate ], (externalTermMap && _.keys(externalTermMap)) || [] ));
+        commonParsingFxn.fillMissingChildBuckets(aggsList, [...subBucketKeysToDate]/*_.difference([ ...subBucketKeysToDate ], (externalTermMap && _.keys(externalTermMap)) || [] )*/);
 
         return aggsList;
     },
-    'bucketTotalFilesVolume' : function(intervalBuckets, groupByField, externalTermMap){
+    'bucketTotalFilesVolume' : function(intervalBuckets, groupByField, externalTermMap, fromDate, toDate, interval){
         const gigabyte = 1024 * 1024 * 1024;
         const subBucketKeysToDate = new Set();
-        const aggsList = intervalBuckets.map(function(bucket, index){
+        let aggsList = intervalBuckets.map(function(bucket, index){
             const {
                 key_as_string,
                 total_files_volume : { value: totalFilesVolume = 0 } = {},
@@ -227,18 +231,24 @@ export const commonParsingFxn = {
             };
         });
 
+        aggsList = commonParsingFxn.add_missing_dates(aggsList, fromDate, toDate, interval, 'submission');
+
         // Ensure each datum has all child terms, even if blank.
-        commonParsingFxn.fillMissingChildBuckets(aggsList, _.difference(Array.from(subBucketKeysToDate), (externalTermMap && _.keys(externalTermMap)) || [] ));
+        commonParsingFxn.fillMissingChildBuckets(aggsList, [...subBucketKeysToDate]/*_.difference(Array.from(subBucketKeysToDate), (externalTermMap && _.keys(externalTermMap)) || [] )*/);
 
         return aggsList;
     },
-    'analytics_to_buckets' : function(resp, reportName, termBucketField, countKey, cumulativeSum, termDisplayAsFunc = null, topCount = 0){
+    'analytics_to_buckets' : function(resp, reportName, termBucketField, countKey, cumulativeSum, currentGroupBy, termDisplayAsFunc = null, topCount = 0){
         const termsInAllItems = new Set();
 
         // De-dupe -- not particularly necessary as D3 handles this, however nice to have well-formatted data.
-        const trackingItems = _.uniq(resp['@graph'], true, function(trackingItem){
+        let trackingItems = _.uniq(resp['@graph'], true, function(trackingItem){
             return trackingItem.google_analytics.for_date;
         }).reverse(); // We get these in decrementing order from back-end
+
+        // add missing dates
+        const { fromDate, untilDate, dateIncrement } = UsageStatsViewController.getSearchReqMomentsForTimePeriod(currentGroupBy);
+        trackingItems = commonParsingFxn.add_missing_dates(trackingItems, fromDate, untilDate, dateIncrement, 'google_analytics');
 
         let totalSessionsToDate = 0;
         const termTotals = {}; // e.g. { 'USA': { count: 5, total: 5 }, 'China': { count: 2, total: 2 } }
@@ -345,6 +355,98 @@ export const commonParsingFxn = {
         };
 
         return filterZeroTotalTerms(aggsList);
+    },
+    'add_missing_dates': function (data, fromDate, untilDate, dateIncrement = "daily", type = "google_analytics") {
+        const forAnalytics = type === "google_analytics";
+
+        const sortedData = data; // Already sorted, skip re-sorting again
+        // // Sort the data by ascending order of date
+        // const sortedData = data.sort(
+        //     (a, b) => new Date(a.google_analytics.for_date) - new Date(b.google_analytics.for_date)
+        // );
+
+        // Collect all existing dates into a Set for quick lookup
+        const existingDates = new Set(sortedData.map((d) => forAnalytics ? d.google_analytics.for_date : d.date ));
+
+        // Utility function to add days to a date
+        const addDays = function (date, days) {
+            const newDate = new Date(date);
+            newDate.setDate(newDate.getDate() + days);
+            return newDate;
+        };
+
+        // Utility function to get the next occurrence of a specific weekday
+        const getNextWeekday = function (startDate, targetWeekday) {
+            const resultDate = new Date(startDate);
+            while (resultDate.getDay() !== targetWeekday) {
+                resultDate.setDate(resultDate.getDate() + 1);
+            }
+            return resultDate;
+        };
+
+        // Initialize the current date and the end date
+        const startDate = new Date(fromDate);
+        const endDate = new Date(untilDate);
+
+        // For weekly, align the start date to the nearest matching weekday with existing data
+        let currentDate;
+        if (dateIncrement === "weekly") {
+            // Find the day of the week for the first available data point
+            const firstExistingDate = sortedData.length > 0
+                ? new Date(forAnalytics ? sortedData[0].google_analytics.for_date : sortedData[0].date)
+                : startDate;
+            const targetWeekday = firstExistingDate.getDay();
+            currentDate = getNextWeekday(startDate, targetWeekday);
+        } else {
+            currentDate = new Date(fromDate);
+        }
+
+        // Copy the existing data to a new array
+        const completeData = [...sortedData];
+
+        // Function to choose the date increment logic
+        const incrementFunc =
+            dateIncrement === "daily"
+                ? (date) => addDays(date, 1)
+                : dateIncrement === "weekly"
+                    ? (date) => addDays(date, 7)
+                    : (date) => {
+                        const newDate = new Date(date);
+                        newDate.setMonth(newDate.getMonth() + 1);
+                        return newDate;
+                    };
+
+        while (currentDate <= endDate) {
+            const currentDateString = formatDate(currentDate, 'yyyy-MM-dd');
+
+            // If the date is missing, add a placeholder entry
+            if (!existingDates.has(currentDateString)) {
+                if (forAnalytics) {
+                    completeData.push({
+                        uuid: "uuid_for_missing_date_" + currentDateString, // Generate a unique (dummy) UUID for missing dates
+                        tracking_type: "google_analytics",
+                        google_analytics: {
+                            reports: {}, // Placeholder for missing data
+                            for_date: currentDateString,
+                            date_increment: dateIncrement
+                        }
+                    });
+                } else {
+                    completeData.push({
+                        date: currentDateString,
+                        count: 0,
+                        children: []
+                    });
+                }
+            }
+            // Move to the next increment (daily, weekly, monthly)
+            currentDate = incrementFunc(currentDate);
+        }
+
+        // Return the data sorted in descending order (newest to oldest)
+        return completeData.sort(
+            (a, b) => new Date(forAnalytics ? a.google_analytics.for_date : a.date) - new Date(forAnalytics ? b.google_analytics.for_date : b.date)
+        );
     }
 };
 
@@ -354,51 +456,50 @@ const aggregationsToChartData = {
         'requires'  : 'ExperimentSetReplicatePublic',
         'function'  : function(resp, props){
             if (!resp || !resp.aggregations) return null;
-            const { aggregations : {
-                weekly_interval_public_release : { buckets: publicBuckets = [] } = {}
-            } } = resp;
+            const { interval: [interval], from_date, to_date } = resp;
+            const agg = interval + "_interval_public_release";
+            const buckets = resp && resp.aggregations[agg] && resp.aggregations[agg].buckets;
 
-            // if (publicBuckets.length < 2) return null;
+            if (!Array.isArray(buckets)) return null;
 
-            return commonParsingFxn.countsToTotals(
-                commonParsingFxn.bucketDocCounts(publicBuckets, props.currentGroupBy, props.externalTermMap),
-                props.cumulativeSum
-            );
+            const counts = commonParsingFxn.bucketDocCounts(buckets, props.currentGroupBy, props.externalTermMap, from_date, to_date, interval);
+
+            return commonParsingFxn.countsToTotals(counts, props.cumulativeSum);
         }
     },
     'expsets_released_internal' : {
         'requires'  : 'ExperimentSetReplicateInternal',
         'function'  : function(resp, props){
             if (!resp || !resp.aggregations) return null;
-            const { aggregations : {
-                weekly_interval_project_release : { buckets: internalBuckets = [] } = {}
-            } } = resp;
+            const { interval: [interval], from_date, to_date } = resp;
+            const agg = interval + "_interval_project_release";
+            const buckets = resp && resp.aggregations[agg] && resp.aggregations[agg].buckets;
 
-            // if (internalBuckets.length < 2) return null;
+            if (!Array.isArray(buckets)) return null;
 
-            return commonParsingFxn.countsToTotals(
-                commonParsingFxn.bucketDocCounts(internalBuckets, props.currentGroupBy, props.externalTermMap),
-                props.cumulativeSum
-            );
+            const counts = commonParsingFxn.bucketDocCounts(buckets, props.currentGroupBy, props.externalTermMap, from_date, to_date, interval);
+
+            return commonParsingFxn.countsToTotals(counts, props.cumulativeSum);
         }
     },
     'expsets_released_vs_internal' : {
         'requires' : 'ExperimentSetReplicatePublicAndInternal',
         'function'  : function(resp, props){
             if (!resp || !resp.aggregations) return null;
+            const { interval: [interval], from_date, to_date } = resp;
+            const publicAgg = interval + "_interval_public_release";
+            const internalAgg = interval + "_interval_project_release";
 
-            const { aggregations : {
-                weekly_interval_project_release : { buckets: internalBuckets = [] } = {},
-                weekly_interval_public_release : { buckets: publicBuckets = [] } = {}
-            } } = resp;
+            const publicBuckets = resp && resp.aggregations[publicAgg] && resp.aggregations[publicAgg].buckets;
+            const internalBuckets = resp && resp.aggregations[internalAgg] && resp.aggregations[internalAgg].buckets;
 
-            // if (internalBuckets.length < 2) return null;
-            // if (publicBuckets.length < 2) return null;
+            if (!Array.isArray(publicBuckets)) return null;
+            if (!Array.isArray(internalBuckets)) return null;
 
             function makeDatePairFxn(bkt){ return [ bkt.date, bkt ]; }
 
-            const internalList        = commonParsingFxn.bucketDocCounts(internalBuckets, props.externalTermMap, true);
-            const publicList          = commonParsingFxn.bucketDocCounts(publicBuckets,   props.externalTermMap, true);
+            const internalList        = commonParsingFxn.bucketDocCounts(internalBuckets, props.currentGroupBy, props.externalTermMap, from_date, to_date, interval, true);
+            const publicList          = commonParsingFxn.bucketDocCounts(publicBuckets, props.currentGroupBy,   props.externalTermMap, from_date, to_date, interval, true);
             const allDates            = _.uniq(_.pluck(internalList, 'date').concat(_.pluck(publicList, 'date'))).sort(); // Used as keys to zip up the non-index-aligned lists.
             const internalKeyedByDate = _.object(internalList.map(makeDatePairFxn));
             const publicKeyedByDate   = _.object(publicList.map(makeDatePairFxn));
@@ -438,32 +539,28 @@ const aggregationsToChartData = {
         'requires'  : 'ExperimentSetReplicatePublic',
         'function'  : function(resp, props){
             if (!resp || !resp.aggregations) return null;
-            const { aggregations : {
-                weekly_interval_public_release : { buckets: publicBuckets = [] } = {}
-            } } = resp;
+            const { interval: [interval], from_date, to_date } = resp;
+            const agg = interval + "_interval_public_release";
+            const buckets = resp && resp.aggregations[agg] && resp.aggregations[agg].buckets;
+            if (!Array.isArray(buckets)) return null;
 
-            // if (publicBuckets.length < 2) return null;
+            const counts = commonParsingFxn.bucketTotalFilesCounts(buckets, props.currentGroupBy, props.externalTermMap, from_date, to_date, interval);
 
-            return commonParsingFxn.countsToTotals(
-                commonParsingFxn.bucketTotalFilesCounts(publicBuckets, props.currentGroupBy, props.externalTermMap),
-                props.cumulativeSum
-            );
+            return commonParsingFxn.countsToTotals(counts, props.cumulativeSum);
         }
     },
     'file_volume_released' : {
         'requires'  : 'ExperimentSetReplicatePublic',
         'function'  : function(resp, props){
             if (!resp || !resp.aggregations) return null;
-            const { aggregations : {
-                weekly_interval_public_release : { buckets: publicBuckets = [] } = {}
-            } } = resp;
+            const { interval: [interval], from_date, to_date } = resp;
+            const agg = interval + "_interval_public_release";
+            const buckets = resp && resp.aggregations[agg] && resp.aggregations[agg].buckets;
+            if (!Array.isArray(buckets)) return null;
 
-            // if (publicBuckets.length < 2) return null;
+            const volumes = commonParsingFxn.bucketTotalFilesVolume(buckets, props.currentGroupBy, props.externalTermMap, from_date, to_date, interval);
 
-            return commonParsingFxn.countsToTotals(
-                commonParsingFxn.bucketTotalFilesVolume(publicBuckets, props.currentGroupBy, props.externalTermMap),
-                props.cumulativeSum
-            );
+            return commonParsingFxn.countsToTotals(volumes, props.cumulativeSum);
         }
     },
     'fields_faceted' : {
@@ -478,7 +575,7 @@ const aggregationsToChartData = {
             if (props.fields_faceted_group_by === 'term') groupingKey = 'ga:dimension4';
             if (props.fields_faceted_group_by === 'field+term') groupingKey = 'ga:eventLabel';
 
-            return commonParsingFxn.analytics_to_buckets(resp, 'fields_faceted', groupingKey, countKey, props.cumulativeSum);
+            return commonParsingFxn.analytics_to_buckets(resp, 'fields_faceted', groupingKey, countKey, props.cumulativeSum, props.currentGroupBy);
         }
     },
     'sessions_by_country' : {
@@ -496,7 +593,7 @@ const aggregationsToChartData = {
                 countKey = (props.countBy.sessions_by_country === 'sessions') ? 'ga:sessions' : 'ga:pageviews';
             }
 
-            return commonParsingFxn.analytics_to_buckets(resp, useReport, termBucketField, countKey, props.cumulativeSum);
+            return commonParsingFxn.analytics_to_buckets(resp, useReport, termBucketField, countKey, props.cumulativeSum, props.currentGroupBy);
         }
     },
     /*
@@ -535,7 +632,7 @@ const aggregationsToChartData = {
             if (props.countBy.experiment_set_views === 'expset_list_views') countKey = 'ga:productListViews';
             else if (props.countBy.experiment_set_views === 'expset_clicks') countKey = 'ga:productListClicks';
 
-            return commonParsingFxn.analytics_to_buckets(resp, 'views_by_experiment_set', termBucketField, countKey, props.cumulativeSum);
+            return commonParsingFxn.analytics_to_buckets(resp, 'views_by_experiment_set', termBucketField, countKey, props.cumulativeSum, props.currentGroupBy);
         }
     },
     /**
@@ -570,7 +667,7 @@ const aggregationsToChartData = {
             //if (props.file_downloads_by_experiment_type_group_by === 'term') groupingKey = 'ga:dimension4';
             //if (props.file_downloads_by_experiment_type_group_by === 'field+term') groupingKey = 'ga:eventLabel';
 
-            return commonParsingFxn.analytics_to_buckets(resp, useReport, groupingKey, countKey, props.cumulativeSum, topCount);
+            return commonParsingFxn.analytics_to_buckets(resp, useReport, groupingKey, countKey, props.cumulativeSum, props.currentGroupBy, topCount);
 
             // if (!resp || !resp.aggregations || !props.countBy || !props.countBy.file_downloads) return null;
             // const dateAggBucket = props.currentGroupBy && (props.currentGroupBy + '_interval_date_created');
@@ -611,7 +708,7 @@ const aggregationsToChartData = {
 
             //convert volume to GB
             const gigabyte = 1024 * 1024 * 1024;
-            const result = commonParsingFxn.analytics_to_buckets(resp, useReport, groupingKey, countKey, props.cumulativeSum, topCount);
+            const result = commonParsingFxn.analytics_to_buckets(resp, useReport, groupingKey, countKey, props.cumulativeSum, props.currentGroupBy, topCount);
             if (result && Array.isArray(result) && result.length > 0) {
                 _.forEach(result, (r) => {
                     r.total = r.total / gigabyte;
@@ -646,7 +743,7 @@ const aggregationsToChartData = {
                 else if (countBy === 'file_clicks') countKey = 'ga:productListClicks';
             }
 
-            return commonParsingFxn.analytics_to_buckets(resp, useReport, termBucketField, countKey, props.cumulativeSum);
+            return commonParsingFxn.analytics_to_buckets(resp, useReport, termBucketField, countKey, props.cumulativeSum, props.currentGroupBy);
         }
     },
 };
@@ -793,6 +890,9 @@ export class SubmissionStatsViewController extends React.PureComponent {
             else
                 params.date_range = `custom|${props.currentDateRangeFrom || ''}|${props.currentDateRangeTo || ''}`;
         }
+        if (props.currentDateHistogramInterval) {
+            params.date_histogram_interval = props.currentDateHistogramInterval;
+        }
         if (date_histogram) {
             params.date_histogram = Array.isArray(date_histogram) ? date_histogram : [date_histogram];
         }
@@ -820,7 +920,8 @@ export class SubmissionStatsViewController extends React.PureComponent {
                 pastProps.currentGroupBy !== nextProps.currentGroupBy ||
                 pastProps.currentDateRangePreset !== nextProps.currentDateRangePreset ||
                 pastProps.currentDateRangeFrom !== nextProps.currentDateRangeFrom ||
-                pastProps.currentDateRangeTo !== nextProps.currentDateRangeTo
+                pastProps.currentDateRangeTo !== nextProps.currentDateRangeTo ||
+                pastProps.currentDateHistogramInterval !== nextProps.currentDateHistogramInterval
             );
         }
     };
@@ -1265,6 +1366,7 @@ export function SubmissionsStatsView(props) {
     const {
         loadingStatus, mounted, session, currentGroupBy, groupByOptions, handleGroupByChange, windowWidth,
         currentDateRangePreset, currentDateRangeFrom, currentDateRangeTo, dateRangeOptions, handleDateRangeChange,
+        currentDateHistogramInterval, dateHistogramIntervalOptions, handleDateHistogramIntervalChange,
         // Passed in from StatsChartViewAggregator:
         expsets_released, expsets_released_internal, files_released, file_volume_released,
         expsets_released_vs_internal, chartToggles, smoothEdges, width, onChartToggle, onSmoothEdgeToggle,
@@ -1289,7 +1391,8 @@ export function SubmissionsStatsView(props) {
     const commonChartProps = { 'curveFxn' : smoothEdges ? d3.curveMonotoneX : d3.curveStepAfter, cumulativeSum: cumulativeSum, xDomain };
     const groupByProps = {
         currentGroupBy, groupByOptions, handleGroupByChange,
-        currentDateRangePreset, currentDateRangeFrom, currentDateRangeTo, dateRangeOptions, handleDateRangeChange, loadingStatus
+        currentDateRangePreset, currentDateRangeFrom, currentDateRangeTo, dateRangeOptions, handleDateRangeChange, loadingStatus,
+        currentDateHistogramInterval, dateHistogramIntervalOptions, handleDateHistogramIntervalChange,
     };
     const invalidDateRange = currentDateRangeFrom && currentDateRangeTo && currentDateRangeFrom > currentDateRangeTo;
 
