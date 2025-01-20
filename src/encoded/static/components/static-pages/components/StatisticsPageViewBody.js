@@ -12,7 +12,7 @@ import DropdownButton from 'react-bootstrap/esm/DropdownButton';
 import Modal from 'react-bootstrap/esm/Modal';
 
 import { Checkbox } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/Checkbox';
-import { console, ajax, analytics, logger } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { console, ajax, JWT, analytics, logger } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { navigate } from './../../util';
 import { Term } from './../../util/Schemas';
 import { ColumnCombiner, CustomColumnController, SortController } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/EmbeddedSearchView';
@@ -1072,8 +1072,14 @@ export function UsageStatsView(props){
     const enableFileDownloadsChartTooltipItemClick = (countBy.file_downloads === 'top_files');
     const fileDownloadsChartHeight = enableFileDownloadsChartTooltipItemClick ? 350 : commonContainerProps.defaultHeight;
 
+    let enableDetail = false;
+    const userGroups = (session && JWT.getUserGroups()) || null;
+    if (userGroups && userGroups.indexOf('admin') !== -1) {
+        enableDetail = true
+    }
+
     const isSticky = true; //!_.any(_.values(tableToggle), (v)=> v === true);
-    const commonTableProps = { windowWidth, href, session, schemas, transposed, dateIncrement, cumulativeSum, hideEmptyColumns, chartToggles };
+    const commonTableProps = { windowWidth, href, session, schemas, transposed, dateIncrement, cumulativeSum, hideEmptyColumns, chartToggles, enableDetail };
 
     let topFileLimit = 0;
     if (countBy.file_downloads && countBy.file_downloads.indexOf('top_files') === 0) {
@@ -1620,9 +1626,9 @@ const ChartSubTitle = memoize(function ({ data, invalidDateRange }) {
  */
 const StatisticsTable = React.memo((props) => {
     const {
-        data, termColHeader = null, valueLabel = null, session, schemas, containerId = '',
+        data, termColHeader = null, valueLabel = null, schemas, containerId = '',
         href, dateIncrement, transposed = false, windowWidth, cumulativeSum, hideEmptyColumns,
-        limit = 0, excludeNones = false, // limit and excludeNones are evaluated for only transposed data
+        session, enableDetail = false, limit = 0, excludeNones = false, // limit and excludeNones are evaluated for only transposed data
         rowHeight = 31
     } = props;
     const [columns, setColumns] = useState({});
@@ -1681,7 +1687,7 @@ const StatisticsTable = React.memo((props) => {
                     const overallSum = roundValue(result.overall_sum || 0, valueLabel);
                     const tooltip = `${result.display_title} (${overallSum})`;
 
-                    return transposed ? (
+                    return transposed || !enableDetail  ? (
                         <span className="value text-truncate text-start" data-tip={tooltip.length > 40 ? tooltip : null}>
                             {result.display_title} <strong>({overallSum})</strong>
                         </span>
@@ -1718,7 +1724,7 @@ const StatisticsTable = React.memo((props) => {
                     widthMap: { 'lg': 140, 'md': 120, 'sm': 120 },
                     render: function (result) {
                         if (result[dataKey] !== 0) {
-                            return session ? (
+                            return enableDetail ? (
                                 <a href="#"
                                     onClick={(e) => {
                                         setModalForDate(transposed ? dataKey : result.display_title);
@@ -1804,6 +1810,23 @@ const StatisticsTable = React.memo((props) => {
         </React.Fragment>
     );
 });
+StatisticsTable.propTypes = {
+    data: PropTypes.array.isRequired,
+    termColHeader: PropTypes.string,
+    valueLabel: PropTypes.string,
+    schemas: PropTypes.object,
+    containerId: PropTypes.string,
+    href: PropTypes.string,
+    dateIncrement: PropTypes.oneOf(['daily', 'monthly', 'yearly']),
+    transposed: PropTypes.bool,
+    cumulativeSum: PropTypes.bool,
+    hideEmptyColumns: PropTypes.bool,
+    session: PropTypes.object,
+    enableDetail: PropTypes.bool,
+    limit: PropTypes.number,
+    excludeNones: PropTypes.bool,
+    windowWidth: PropTypes.number
+};
 
 /**
  * displays tracking item ajax-fetched in ItemDetailList
