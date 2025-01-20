@@ -280,8 +280,8 @@ export class StatsChartViewAggregator extends React.PureComponent {
 export class GroupByController extends React.PureComponent {
 
     static getDerivedStateFromProps(props, state){
-        const { groupByOptions, initialGroupBy, dateRangeOptions, initialDateRangePreset } = props;
-        const { currentGroupBy, currentDateRangePreset } = state;
+        const { groupByOptions, initialGroupBy, dateRangeOptions, initialDateRangePreset, dateHistogramIntervalOptions, initialDateHistogramInterval } = props;
+        const { currentGroupBy, currentDateRangePreset, currentDateHistogramInterval } = state;
 
         const stateObj = {};
         if (typeof groupByOptions[currentGroupBy] === 'undefined') {
@@ -298,6 +298,14 @@ export class GroupByController extends React.PureComponent {
                 throw new Error('Changed props.dateRangeOptions but state.currentDateRangePreset and props.initialDateRangePreset are now both invalid.');
             } else {
                 _.extend(stateObj, { 'currentDateRangePreset': initialDateRangePreset });
+            }
+        }
+        if (dateHistogramIntervalOptions && typeof dateHistogramIntervalOptions[currentDateHistogramInterval] === 'undefined') {
+            if (typeof dateHistogramIntervalOptions[initialDateHistogramInterval] === 'undefined') {
+                logger.error('Changed props.dateHistogramIntervalOptions but state.currentDateHistogramInterval and props.initialDateHistogramInterval are now both invalid.');
+                throw new Error('Changed props.dateHistogramIntervalOptions but state.currentDateHistogramInterval and props.initialDateHistogramInterval are now both invalid.');
+            } else {
+                _.extend(stateObj, { 'currentDateHistogramInterval': initialDateHistogramInterval });
             }
         }
 
@@ -319,11 +327,13 @@ export class GroupByController extends React.PureComponent {
         super(props);
         this.handleGroupByChange = this.handleGroupByChange.bind(this);
         this.handleDateRangeChange = this.handleDateRangeChange.bind(this);
+        this.handleDateHistogramIntervalChange = this.handleDateHistogramIntervalChange.bind(this);
         this.state = {
             'currentGroupBy': props.initialGroupBy,
             'currentDateRangePreset': props.initialDateRangePreset,
             'currentDateRangeFrom': props.initialDateRangeFrom || null,
-            'currentDateRangeTo': props.initialDateRangeTo || null
+            'currentDateRangeTo': props.initialDateRangeTo || null,
+            'currentDateHistogramInterval': props.initialDateHistogramInterval,
         };
     }
 
@@ -351,16 +361,27 @@ export class GroupByController extends React.PureComponent {
         });
     }
 
+    handleDateHistogramIntervalChange(interval){
+        this.setState(function(currState){
+            if (currState.currentDateHistogramInterval === interval){
+                return null;
+            }
+            return { 'currentDateHistogramInterval' : interval };
+        });
+    }
+
     render(){
         const { children } = this.props;
-        const { currentGroupBy, currentDateRangePreset, currentDateRangeFrom, currentDateRangeTo } = this.state;
+        const { currentGroupBy, currentDateRangePreset, currentDateRangeFrom, currentDateRangeTo, currentDateHistogramInterval } = this.state;
         const childProps = _.extend(
             _.omit(this.props, 'children', 'initialGroupBy', 'initialDateRangePreset', 'initialDateRangeFrom', 'initialDateRangeTo'),
             {
                 currentGroupBy,
                 'handleGroupByChange': this.handleGroupByChange,
                 currentDateRangePreset, currentDateRangeFrom, currentDateRangeTo,
-                'handleDateRangeChange': this.handleDateRangeChange
+                'handleDateRangeChange': this.handleDateRangeChange,
+                currentDateHistogramInterval,
+                'handleDateHistogramIntervalChange': this.handleDateHistogramIntervalChange
             });
 
         if (Array.isArray(children)){
@@ -390,6 +411,7 @@ export class GroupByDropdown extends React.PureComponent {
         super(props);
         this.onGroupBySelect = _.throttle(this.onGroupBySelect.bind(this), 1000);
         this.onDateRangeSelect = this.onDateRangeSelect.bind(this);
+        this.onDateHistogramIntervalSelect = this.onDateHistogramIntervalSelect.bind(this);
         //used as workaround to fix input type="date" unwanted reset bug
         this.state = {
             'tempDateRangeFrom': '',
@@ -426,12 +448,22 @@ export class GroupByDropdown extends React.PureComponent {
         handleDateRangeChange(presetField, from, to);
     }
 
+    onDateHistogramIntervalSelect(eventKey, evt){
+        const { handleDateHistogramIntervalChange } = this.props;
+        if (typeof handleDateHistogramIntervalChange !== 'function'){
+            throw new Error("No handleDateHistogramIntervalChange function passed to GroupByDropdown.");
+        }
+        handleDateHistogramIntervalChange(eventKey);
+    }
+
     render(){
         const {
             groupByOptions, currentGroupBy, groupByTitle,
             dateRangeOptions, currentDateRangePreset, currentDateRangeFrom, currentDateRangeTo, dateRangeTitle,
+            dateHistogramIntervalOptions, currentDateHistogramInterval,
             loadingStatus, buttonStyle, outerClassName, children,
-            groupById, dateRangeId } = this.props;
+            groupById, dateRangeId, dateHistogramIntervalId
+        } = this.props;
         const { tempDateRangeFrom, tempDateRangeTo } = this.state;
         // group by
         const groupByOptionItems = _.map(_.pairs(groupByOptions), ([field, title]) =>
@@ -444,20 +476,24 @@ export class GroupByDropdown extends React.PureComponent {
                 <DropdownItem eventKey={field} key={field} active={field === currentDateRangePreset}>{title}</DropdownItem>
             );
             const selectedDateRangeValueTitle = (loadingStatus === 'loading' ? <i className="icon icon-fw icon-spin fas icon-circle-notch" /> : dateRangeOptions[currentDateRangePreset]);
-            const buttonStyleOverriden = buttonStyle && _.extend({}, buttonStyle, { 'marginLeft': 0 });
+            // date histogram interval
+            const dateHistogramInvervalOptionItems = _.map(_.pairs(dateHistogramIntervalOptions), ([interval, title]) =>
+                <DropdownItem eventKey={interval} key={interval} active={interval === currentDateHistogramInterval}>{title}</DropdownItem>
+            );
+            const selectedDateHistogramIntervalValueTitle = loadingStatus === 'loading' ? <i className="icon icon-fw icon-spin fas icon-circle-notch" /> : dateHistogramIntervalOptions[currentDateHistogramInterval];
             return (
                 <div className={outerClassName}>
-                    <div className="dropdown-container-col col-12 col-lg-3 align-top ps-2 pe-2">
+                    <div className="dropdown-container-col col-12 col-lg-2 align-top ps-2 pe-2">
                         <div className="text-500 d-block mb-1">{groupByTitle}</div>
-                        <DropdownButton id={groupById} title={selectedGroupByValueTitle} onSelect={this.onGroupBySelect} style={buttonStyleOverriden} disabled={groupByOptionItems.length < 2}>
+                        <DropdownButton id={groupById} title={selectedGroupByValueTitle} onSelect={this.onGroupBySelect} style={buttonStyle} disabled={groupByOptionItems.length < 2} size="sm">
                             {groupByOptionItems}
                         </DropdownButton>
                     </div>
-                    <div className="dropdown-container-col col-12 col-lg-6 align-top ps-2 pe-2">
+                    <div className="dropdown-container-col col-12 col-lg-5 align-top ps-2 pe-2">
                         <div className="text-500 d-block mb-1">{dateRangeTitle}</div>
                         <div className="date-range">
                             {/* <span className="text-300 pt-05">Presets</span> */}
-                            <DropdownButton id={dateRangeId} title={selectedDateRangeValueTitle} onSelect={(e) => this.onDateRangeSelect(e, null, null)} style={buttonStyleOverriden}>
+                            <DropdownButton id={dateRangeId} title={selectedDateRangeValueTitle} onSelect={(e) => this.onDateRangeSelect(e, null, null)} style={buttonStyle} size="sm">
                                 {dateRangeOptionItems}
                             </DropdownButton>
                             <div className="d-flex custom-date-range">
@@ -473,6 +509,13 @@ export class GroupByDropdown extends React.PureComponent {
                             </div>
                         </div>
                     </div>
+                    <div className="dropdown-container-col col-12 col-lg-2 align-top">
+                        <div className="text-500 d-block mb-1">{'Histogram Interval'}</div>
+                        <DropdownButton id={dateHistogramIntervalId} title={selectedDateHistogramIntervalValueTitle}
+                            onSelect={this.onDateHistogramIntervalSelect} style={buttonStyle} disabled={dateHistogramIntervalOptions.length < 2} size="sm">
+                            {dateHistogramInvervalOptionItems}
+                        </DropdownButton>
+                    </div>
                     <div className="dropdown-container-col col-12 col-lg-3 align-top ps-2">
                         <div className="text-500 d-block mb-1">Settings</div>
                         {children}
@@ -485,7 +528,7 @@ export class GroupByDropdown extends React.PureComponent {
             <div className={outerClassName}>
                 <div className="dropdown-container-col col-12 col-lg-3 align-top">
                     <span className="text-500 d-block mb-1">{groupByTitle}</span>
-                    <DropdownButton id={groupById} title={selectedGroupByValueTitle} onSelect={this.onGroupBySelect} style={buttonStyle} disabled={groupByOptionItems.length < 2}>
+                    <DropdownButton id={groupById} title={selectedGroupByValueTitle} onSelect={this.onGroupBySelect} style={buttonStyle} disabled={groupByOptionItems.length < 2} size="sm">
                         {groupByOptionItems}
                     </DropdownButton>
                 </div>
