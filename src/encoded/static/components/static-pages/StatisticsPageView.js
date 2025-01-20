@@ -131,6 +131,13 @@ export default class StatisticsPageView extends React.PureComponent {
         };
         const initialDateRangePreset = 'all';
 
+        const dateHistogramIntervalOptions = {
+            'daily'     : <span>Daily</span>,
+            'weekly'    : <span>Weekly</span>,
+            'monthly'   : <span>Monthly</span>,
+        };
+        const initialDateHistogramInterval = 'weekly';
+
         if (browseBaseState !== 'all'){
             _.extend(groupByOptions, {
                 'award.center_title'                 : <span><i className="icon icon-fw fas icon-university me-1"/>Center</span>,
@@ -140,7 +147,7 @@ export default class StatisticsPageView extends React.PureComponent {
             initialGroupBy = 'award.center_title';
         }
         return (
-            <dynamicImports.GroupByController {...{ groupByOptions, initialGroupBy, dateRangeOptions, initialDateRangePreset }}>
+            <dynamicImports.GroupByController {...{ groupByOptions, initialGroupBy, dateRangeOptions, initialDateRangePreset, dateHistogramIntervalOptions, initialDateHistogramInterval }}>
                 <dynamicImports.SubmissionStatsViewController {..._.pick(this.props, 'session', 'browseBaseState', 'windowWidth')}>
                     <dynamicImports.StatsChartViewAggregator {...{ shouldReaggregate }} aggregationsToChartData={dynamicImports.submissionsAggsToChartData} cumulativeSum={true}>
                         <dynamicImports.SubmissionsStatsView />
