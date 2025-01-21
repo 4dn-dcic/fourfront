@@ -1088,7 +1088,7 @@ export function UsageStatsView(props){
 
     const settings = () => (
         <GroupByDropdown {...{ groupByOptions, loadingStatus, handleGroupByChange, currentGroupBy }}
-            title="Show" outerClassName={"dropdown-container mb-0" + (isSticky ? " sticky-top" : "")}>
+            groupByTitle="Show" outerClassName={"dropdown-container mb-0" + (isSticky ? " sticky-top" : "")}>
             <div className="d-inline-block ms-15 me-15">
                 <Checkbox checked={smoothEdges} onChange={onSmoothEdgeToggle} data-tip="Toggle between smooth/sharp edges">Smooth Edges</Checkbox>
             </div>
