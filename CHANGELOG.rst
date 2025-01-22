@@ -18,6 +18,7 @@ Change Log
 * Enhanced table-full-size toggles for usage statistics
 * New histogram interval options for submission statistics
 * Chart section header styles updated
+* Hide QC HTML Report Links after removal of bulk html reports already generated
 
 
 8.4.6
