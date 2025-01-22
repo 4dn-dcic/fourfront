@@ -1097,8 +1097,13 @@ export class QCMetricsTable extends React.PureComponent {
             </React.Fragment>
         );
     }
-
-    static generateAlignedColumnHeaders(fileGroups) {
+    /**
+     * Generates column headers for QCMetricsTable including render functions for each column
+     * @param {*} fileGroups file groups
+     * @param {*} canShowMetricURL 2025-01-22: added to hide QC HTML Report Links after removal of bulk html reports already generated
+     * @returns columnHeaders for QCMetricsTable including render functions for each column
+     */
+    static generateAlignedColumnHeaders(fileGroups, canShowMetricURL = false) {
         return fileGroups.map(function (fileGroup) {
             const titleTooltipsByQMSTitle = QCMetricsTable.qcSummaryItemTitleTooltipsByTitle(fileGroup);
             const columnHeaders = [ // Static / present-for-each-table headers
@@ -1125,7 +1130,7 @@ export class QCMetricsTable extends React.PureComponent {
                 return f && f.quality_metric && f.quality_metric.url;
             });
 
-            if (anyFilesWithMetricURL) {
+            if (anyFilesWithMetricURL && canShowMetricURL) {
                 columnHeaders.push({ columnClass: 'file-detail', title: 'Report', initialWidth: 35, render: renderFileQCReportLinkButton });
                 columnHeaders.push({ columnClass: 'file-detail', title: 'Details', initialWidth: 35, render: renderFileQCDetailLinkButton });
             } else {
@@ -1235,8 +1240,11 @@ export class QCMetricsTable extends React.PureComponent {
 }
 
 export function QCMetricFromSummary(props){
-    const { title } = props;
+    const { title, field } = props;
     const { value, tooltip } = QCMetricFromSummary.formatByNumberType(props);
+
+    // 2025-01-22: added to hide QC HTML Report Links after removal of bulk html reports already generated
+    if (field === 'url') { return null; }
 
     return (
         <div className="overview-list-element">
