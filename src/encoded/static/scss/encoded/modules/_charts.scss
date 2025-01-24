@@ -1177,6 +1177,10 @@ $workflow-node-color-type-global-context: #ffb3b3;
             }
         }
 
+        #select_charts_date_histogram_interval {
+            min-width: 60%
+        }
+
         // .btn-primary {
         //     border: 1px solid #0B62BA;
         // }

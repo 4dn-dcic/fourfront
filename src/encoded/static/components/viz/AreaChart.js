@@ -399,12 +399,13 @@ export class GroupByDropdown extends React.PureComponent {
         'groupByTitle' : "Group By",
         'dateRangeTitle' : "Date",
         'buttonStyle' : {
-            'marginLeft' : 12,
+            'marginLeft' : 0,
             'textAlign' : 'left'
         },
         'outerClassName' : "dropdown-container mb-15",
-        'groupById' : "select_primary_charts_group_by",
-        'dateRangeId' : "select_primary_charts_date_range"
+        'groupById' : "select_charts_group_by",
+        'dateRangeId' : "select_charts_date_range",
+        "dateHistogramIntervalId" : "select_charts_date_histogram_interval"
     };
 
     constructor(props){
@@ -489,7 +490,7 @@ export class GroupByDropdown extends React.PureComponent {
                             {groupByOptionItems}
                         </DropdownButton>
                     </div>
-                    <div className="dropdown-container-col col-12 col-lg-5 align-top ps-2 pe-2">
+                    <div className="dropdown-container-col col-12 col-lg-6 align-top ps-2 pe-2">
                         <div className="text-500 d-block mb-1">{dateRangeTitle}</div>
                         <div className="date-range">
                             {/* <span className="text-300 pt-05">Presets</span> */}
@@ -516,7 +517,7 @@ export class GroupByDropdown extends React.PureComponent {
                             {dateHistogramInvervalOptionItems}
                         </DropdownButton>
                     </div>
-                    <div className="dropdown-container-col col-12 col-lg-3 align-top ps-2">
+                    <div className="dropdown-container-col col-12 col-lg-2 align-top ps-2">
                         <div className="text-500 d-block mb-1">Settings</div>
                         {children}
                     </div>
@@ -1410,7 +1411,7 @@ export class AreaChartContainer extends React.Component {
             const className = "btn btn-sm me-05 " + (toggled ? "btn-primary" : "btn-outline-dark");
             buttons.push(
                 <button type="button" className={className} onClick={(e) => this.toggleButton(e, 'expanded')} data-tip="Toggle full width" key={id + '_expanded'}>
-                    <i className="icon icon-fw fas icon-search-plus" />
+                    <i className="icon icon-fw fas icon-expand-alt" />
                 </button>
             );
         }
