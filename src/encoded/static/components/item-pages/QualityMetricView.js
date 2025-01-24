@@ -90,7 +90,7 @@ class QualityMetricViewOverview extends React.PureComponent {
                 <div className="overview-list-elements-container">
                     {_.map(quality_metric_summary, function (qmsItem) { return <QCMetricFromSummary {...qmsItem} key={qmsItem.title} />; })}
                     {context.url ?
-                        <QCMetricFromSummary title="Report" tooltip="Link to full quality metric report" value={
+                        <QCMetricFromSummary title="Report" tooltip="Link to full quality metric report" field="url" value={
                             <React.Fragment>
                                 <a href={context.url} target="_blank" rel="noopener noreferrer">{valueTransforms.hrefToFilename(context.url)}</a>
                                 <i className="ms-05 icon icon-fw icon-external-link-alt text-small fas" />
@@ -190,6 +190,9 @@ class QCMetricFromEmbed extends React.PureComponent {
     render() {
         const { metric, qcProperty, schemaItem, schemas, fallbackTitle, tips, percent } = this.props;
         const { open, closing } = this.state;
+
+        // 2025-01-22: added to hide QC HTML Report Links after removal of bulk html reports already generated
+        if (qcProperty === "url") return null;
 
         const { qc_order = null, title = null, description: tip = null } = schemaItem || {};
         if (schemaItem && typeof qc_order !== 'number') return null;
@@ -326,7 +329,7 @@ export class QualityControlResults extends React.PureComponent {
             <div className="overview-list-elements-container">
                 { _.map(file.quality_metric.quality_metric_summary, function(qmsItem){ return <QCMetricFromSummary {...qmsItem} key={qmsItem.title} />; }) }
                 { metricURL ?
-                    <QCMetricFromSummary title="Report" tooltip="Link to full quality metric report" value={
+                    <QCMetricFromSummary title="Report" tooltip="Link to full quality metric report" field="url" value={
                         <React.Fragment>
                             <a href={metricURL} target="_blank" rel="noopener noreferrer">{ valueTransforms.hrefToFilename(metricURL) }</a>
                             <i className="ms-05 icon icon-fw icon-external-link-alt text-small fas"/>

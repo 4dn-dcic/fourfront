@@ -100,14 +100,14 @@
     "string-replace-loader": "^3.1.0",
     "terser-webpack-plugin": "^5.3.6",
     "utf-8-validate": "^5.0.9",
-    "webpack": "5.92.1",
+    "webpack": "5.94.0",
     "webpack-bundle-analyzer": "^4.5.0",
     "webpack-deadcode-plugin": "^0.1.15"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.6.0",
     "@hms-dbmi-bgm/react-workflow-viz": "0.1.11",
-    "@hms-dbmi-bgm/shared-portal-components": "git+https://github.com/4dn-dcic/shared-portal-components#0.1.91",
+    "@hms-dbmi-bgm/shared-portal-components": "git+https://github.com/4dn-dcic/shared-portal-components#0.1.92",
     "@reduxjs/toolkit": "^2.2.6",
     "auth0-lock": "^12.5.1",
     "d3": "^7.5.0",
@@ -142,9 +142,13 @@
     "underscore": "^1.13.6",
     "url": "^0.11.0",
     "uuid": "^8.3.2",
-    "vitessce": "3.4.9"
+    "vitessce": "3.4.14"
   },
   "optionalDependencies": {
     "cypress": "^13.7.0"
+  },
+  "overrides": {
+    "cross-spawn@<7.0.5": "^7.0.5",
+    "nanoid@<3.3.8": "^3.3.8"
   }
 }

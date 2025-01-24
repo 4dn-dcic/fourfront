@@ -131,6 +131,13 @@ export default class StatisticsPageView extends React.PureComponent {
         };
         const initialDateRangePreset = 'all';
 
+        const dateHistogramIntervalOptions = {
+            'daily'     : <span>Daily</span>,
+            'weekly'    : <span>Weekly</span>,
+            'monthly'   : <span>Monthly</span>,
+        };
+        const initialDateHistogramInterval = 'weekly';
+
         if (browseBaseState !== 'all'){
             _.extend(groupByOptions, {
                 'award.center_title'                 : <span><i className="icon icon-fw fas icon-university me-1"/>Center</span>,
@@ -140,7 +147,7 @@ export default class StatisticsPageView extends React.PureComponent {
             initialGroupBy = 'award.center_title';
         }
         return (
-            <dynamicImports.GroupByController {...{ groupByOptions, initialGroupBy, dateRangeOptions, initialDateRangePreset }}>
+            <dynamicImports.GroupByController {...{ groupByOptions, initialGroupBy, dateRangeOptions, initialDateRangePreset, dateHistogramIntervalOptions, initialDateHistogramInterval }}>
                 <dynamicImports.SubmissionStatsViewController {..._.pick(this.props, 'session', 'browseBaseState', 'windowWidth')}>
                     <dynamicImports.StatsChartViewAggregator {...{ shouldReaggregate }} aggregationsToChartData={dynamicImports.submissionsAggsToChartData} cumulativeSum={true}>
                         <dynamicImports.SubmissionsStatsView />
@@ -153,14 +160,25 @@ export default class StatisticsPageView extends React.PureComponent {
     renderUsageSection(){
         const { shouldReaggregate } = StatisticsPageView.viewOptions.usage;
         const groupByOptions = {
-            'monthly'   : <span>Previous 12 Months</span>,
-            'daily30'     : <span>Previous 30 Days</span>,
-            'daily60'     : <span>Previous 60 Days</span>
+            'daily:30': <span>Previous 30 Days</span>,
+            'daily:60': <span>Previous 60 Days</span>,
+            'monthly:6': <span>Previous 6 Months</span>,
+            'monthly:12': <span>Previous 12 Months</span>,
+            'monthly:18': <span>Previous 18 Months</span>,
+            'monthly:All': <span>All</span>
         };
+        const dataKeys = _.keys(dynamicImports.usageAggsToChartData || {});
+        const initialChartToggles = {
+            'chart': dataKeys.reduce((acc, key) => { acc[key] = true; return acc; }, {}),
+            'table': dataKeys.reduce((acc, key) => { acc[key] = true; return acc; }, {}),
+            'expanded': dataKeys.reduce((acc, key) => { acc[key] = false; return acc; }, {})
+        };
+        // override
+        initialChartToggles.table['fields_faceted'] = false;
         return (
-            <dynamicImports.GroupByController groupByOptions={groupByOptions} initialGroupBy="daily60">
+            <dynamicImports.GroupByController groupByOptions={groupByOptions} initialGroupBy="daily:60">
                 <dynamicImports.UsageStatsViewController {..._.pick(this.props, 'session', 'windowWidth', 'href')}>
-                    <dynamicImports.StatsChartViewAggregator {...{ shouldReaggregate }} aggregationsToChartData={dynamicImports.usageAggsToChartData}>
+                    <dynamicImports.StatsChartViewAggregator {...{ shouldReaggregate }} aggregationsToChartData={dynamicImports.usageAggsToChartData} initialChartToggles={initialChartToggles}>
                         <dynamicImports.UsageStatsView />
                     </dynamicImports.StatsChartViewAggregator>
                 </dynamicImports.UsageStatsViewController>

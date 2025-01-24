@@ -6,6 +6,20 @@ fourfront
 Change Log
 ----------
 
+8.5.0
+=====
+
+`PR 1920: npm security updates + statistics page improvements <https://github.com/4dn-dcic/fourfront/pull/1920>`_
+
+* Critical npm package updates for security vulnerabilities
+* New usage statistics table shows daily counts in tabular form
+* New TrackingItem viewer triggered by usage statistics table cell click (admin-only)
+* New Y-Axis scaling for usage statistics
+* Enhanced table-full-size toggles for usage statistics
+* New histogram interval options for submission statistics
+* Chart section header styles updated
+* Hide QC HTML Report Links after removal of bulk html reports already generated
+
 
 8.4.6
 =====

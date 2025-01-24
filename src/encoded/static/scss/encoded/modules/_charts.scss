@@ -1177,6 +1177,10 @@ $workflow-node-color-type-global-context: #ffb3b3;
             }
         }
 
+        #select_charts_date_histogram_interval {
+            min-width: 60%
+        }
+
         // .btn-primary {
         //     border: 1px solid #0B62BA;
         // }
@@ -1213,7 +1217,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
 
             @include media-breakpoint-up(xl) {
                 .custom-date-range {
-                    margin-left: 45px;
+                    margin-left: 15px;
 
                     .form-control {
                         margin-right: 20px;
@@ -1369,7 +1373,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
         margin-bottom: 20px;
         padding: 10px 10px;
         border-bottom: 2px solid #f4f4f4;
-        background-color: #F1F9FF;
+        background-color: #eff7f8;
     }
     &#submissions {
         .date-range .dropdown button {
@@ -1399,9 +1403,57 @@ $workflow-node-color-type-global-context: #ffb3b3;
             .dropdown .btn {
                 margin-top: 10px;
             }
-        }   
+        }
+
+        .chart-group h5 {
+            font-weight: 600 !important;
+        }
+
+        .search-view-controls-and-results {
+            .above-results-table-row {
+                .right-buttons button[data-tip="Sort multiple columns"],
+                .right-buttons button[data-tip="Configure visible columns"] {
+                    display: none;
+                }
+            }
+            .search-headers-column-block {
+                &[data-first-visible-column=true] {
+                    .column-title {
+                        color: #ffffff !important;
+                    }
+                }
+            }
+            .search-result-column-block[data-field="display_title"] {
+                padding-left: 0px !important;
+            }
+            .search-result-column-block {
+                .inner {
+                    height: 30px !important;
+                }
+            }
+        }
     }
 
+}
+
+body[data-path="/statistics"] {
+    .tracking-item-viewer {
+        div[data-for-field="reports"] + div.data-display {
+            .list-item {
+                .item-label, .item-value {
+                    max-width: 100% !important;
+                    flex: 0 0 100% !important;
+                }
+                .item-label {
+                    margin-top: 20px;
+                    font-size: 110%;
+                }
+            }
+        }
+        .detail-embedded-table-container {
+            max-height: none !important;
+        }
+    }
 }
 
 

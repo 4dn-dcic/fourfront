@@ -130,12 +130,23 @@ export class StatsChartViewAggregator extends React.PureComponent {
         'aggregationsToChartData' : PropTypes.object.isRequired,
         'shouldReaggregate' : PropTypes.func,
         'cumulativeSum': PropTypes.bool,
+        'initialChartToggles': PropTypes.shape({
+            'chart': PropTypes.object,
+            'table': PropTypes.object,
+            'expanded': PropTypes.object
+        }),
         'children' : PropTypes.node.isRequired
     };
 
     constructor(props){
         super(props);
-        const { cumulativeSum = false } = props;
+        const {
+            cumulativeSum = false,
+            initialChartToggles = {
+                chart: {},
+                table: {},
+                expanded: {}
+            } } = props;
 
         this.getRefWidth = this.getRefWidth.bind(this);
         this.handleToggle = this.handleToggle.bind(this);
@@ -143,7 +154,7 @@ export class StatsChartViewAggregator extends React.PureComponent {
         this.handleToggleCumulativeSum = this.handleToggleCumulativeSum.bind(this);
         this.generateAggsToState = this.generateAggsToState.bind(this);
         this.state = _.extend(this.generateAggsToState(props, {}), {
-            'chartToggles' : {},
+            'chartToggles' : initialChartToggles,
             'smoothEdges' : false,
             'cumulativeSum': cumulativeSum
         });
@@ -188,12 +199,13 @@ export class StatsChartViewAggregator extends React.PureComponent {
         return this.elemRef && this.elemRef.current && this.elemRef.current.clientWidth;
     }
 
-    handleToggle(key, cb){
+    handleToggle(id, typeKey, callbackFunc){
         this.setState(function(currState){
-            var nextTogglesState = _.extend({}, currState.chartToggles);
-            nextTogglesState[key] = !(nextTogglesState[key]);
+            // deep clone
+            var nextTogglesState =JSON.parse(JSON.stringify(currState.chartToggles));
+            nextTogglesState[typeKey][id] = !(nextTogglesState[typeKey][id]);
             return { 'chartToggles' : nextTogglesState };
-        }, cb);
+        }, callbackFunc);
     }
 
     handleToggleSmoothEdges(smoothEdges, cb){
@@ -268,8 +280,8 @@ export class StatsChartViewAggregator extends React.PureComponent {
 export class GroupByController extends React.PureComponent {
 
     static getDerivedStateFromProps(props, state){
-        const { groupByOptions, initialGroupBy, dateRangeOptions, initialDateRangePreset } = props;
-        const { currentGroupBy, currentDateRangePreset } = state;
+        const { groupByOptions, initialGroupBy, dateRangeOptions, initialDateRangePreset, dateHistogramIntervalOptions, initialDateHistogramInterval } = props;
+        const { currentGroupBy, currentDateRangePreset, currentDateHistogramInterval } = state;
 
         const stateObj = {};
         if (typeof groupByOptions[currentGroupBy] === 'undefined') {
@@ -286,6 +298,14 @@ export class GroupByController extends React.PureComponent {
                 throw new Error('Changed props.dateRangeOptions but state.currentDateRangePreset and props.initialDateRangePreset are now both invalid.');
             } else {
                 _.extend(stateObj, { 'currentDateRangePreset': initialDateRangePreset });
+            }
+        }
+        if (dateHistogramIntervalOptions && typeof dateHistogramIntervalOptions[currentDateHistogramInterval] === 'undefined') {
+            if (typeof dateHistogramIntervalOptions[initialDateHistogramInterval] === 'undefined') {
+                logger.error('Changed props.dateHistogramIntervalOptions but state.currentDateHistogramInterval and props.initialDateHistogramInterval are now both invalid.');
+                throw new Error('Changed props.dateHistogramIntervalOptions but state.currentDateHistogramInterval and props.initialDateHistogramInterval are now both invalid.');
+            } else {
+                _.extend(stateObj, { 'currentDateHistogramInterval': initialDateHistogramInterval });
             }
         }
 
@@ -307,11 +327,13 @@ export class GroupByController extends React.PureComponent {
         super(props);
         this.handleGroupByChange = this.handleGroupByChange.bind(this);
         this.handleDateRangeChange = this.handleDateRangeChange.bind(this);
+        this.handleDateHistogramIntervalChange = this.handleDateHistogramIntervalChange.bind(this);
         this.state = {
             'currentGroupBy': props.initialGroupBy,
             'currentDateRangePreset': props.initialDateRangePreset,
             'currentDateRangeFrom': props.initialDateRangeFrom || null,
-            'currentDateRangeTo': props.initialDateRangeTo || null
+            'currentDateRangeTo': props.initialDateRangeTo || null,
+            'currentDateHistogramInterval': props.initialDateHistogramInterval,
         };
     }
 
@@ -339,16 +361,27 @@ export class GroupByController extends React.PureComponent {
         });
     }
 
+    handleDateHistogramIntervalChange(interval){
+        this.setState(function(currState){
+            if (currState.currentDateHistogramInterval === interval){
+                return null;
+            }
+            return { 'currentDateHistogramInterval' : interval };
+        });
+    }
+
     render(){
         const { children } = this.props;
-        const { currentGroupBy, currentDateRangePreset, currentDateRangeFrom, currentDateRangeTo } = this.state;
+        const { currentGroupBy, currentDateRangePreset, currentDateRangeFrom, currentDateRangeTo, currentDateHistogramInterval } = this.state;
         const childProps = _.extend(
             _.omit(this.props, 'children', 'initialGroupBy', 'initialDateRangePreset', 'initialDateRangeFrom', 'initialDateRangeTo'),
             {
                 currentGroupBy,
                 'handleGroupByChange': this.handleGroupByChange,
                 currentDateRangePreset, currentDateRangeFrom, currentDateRangeTo,
-                'handleDateRangeChange': this.handleDateRangeChange
+                'handleDateRangeChange': this.handleDateRangeChange,
+                currentDateHistogramInterval,
+                'handleDateHistogramIntervalChange': this.handleDateHistogramIntervalChange
             });
 
         if (Array.isArray(children)){
@@ -366,18 +399,20 @@ export class GroupByDropdown extends React.PureComponent {
         'groupByTitle' : "Group By",
         'dateRangeTitle' : "Date",
         'buttonStyle' : {
-            'marginLeft' : 12,
+            'marginLeft' : 0,
             'textAlign' : 'left'
         },
         'outerClassName' : "dropdown-container mb-15",
-        'groupById' : "select_primary_charts_group_by",
-        'dateRangeId' : "select_primary_charts_date_range"
+        'groupById' : "select_charts_group_by",
+        'dateRangeId' : "select_charts_date_range",
+        "dateHistogramIntervalId" : "select_charts_date_histogram_interval"
     };
 
     constructor(props){
         super(props);
         this.onGroupBySelect = _.throttle(this.onGroupBySelect.bind(this), 1000);
         this.onDateRangeSelect = this.onDateRangeSelect.bind(this);
+        this.onDateHistogramIntervalSelect = this.onDateHistogramIntervalSelect.bind(this);
         //used as workaround to fix input type="date" unwanted reset bug
         this.state = {
             'tempDateRangeFrom': '',
@@ -414,12 +449,22 @@ export class GroupByDropdown extends React.PureComponent {
         handleDateRangeChange(presetField, from, to);
     }
 
+    onDateHistogramIntervalSelect(eventKey, evt){
+        const { handleDateHistogramIntervalChange } = this.props;
+        if (typeof handleDateHistogramIntervalChange !== 'function'){
+            throw new Error("No handleDateHistogramIntervalChange function passed to GroupByDropdown.");
+        }
+        handleDateHistogramIntervalChange(eventKey);
+    }
+
     render(){
         const {
             groupByOptions, currentGroupBy, groupByTitle,
             dateRangeOptions, currentDateRangePreset, currentDateRangeFrom, currentDateRangeTo, dateRangeTitle,
+            dateHistogramIntervalOptions, currentDateHistogramInterval,
             loadingStatus, buttonStyle, outerClassName, children,
-            groupById, dateRangeId } = this.props;
+            groupById, dateRangeId, dateHistogramIntervalId
+        } = this.props;
         const { tempDateRangeFrom, tempDateRangeTo } = this.state;
         // group by
         const groupByOptionItems = _.map(_.pairs(groupByOptions), ([field, title]) =>
@@ -432,12 +477,16 @@ export class GroupByDropdown extends React.PureComponent {
                 <DropdownItem eventKey={field} key={field} active={field === currentDateRangePreset}>{title}</DropdownItem>
             );
             const selectedDateRangeValueTitle = (loadingStatus === 'loading' ? <i className="icon icon-fw icon-spin fas icon-circle-notch" /> : dateRangeOptions[currentDateRangePreset]);
-            const buttonStyleOverriden = buttonStyle && _.extend({}, buttonStyle, { 'marginLeft': 0 });
+            // date histogram interval
+            const dateHistogramInvervalOptionItems = _.map(_.pairs(dateHistogramIntervalOptions), ([interval, title]) =>
+                <DropdownItem eventKey={interval} key={interval} active={interval === currentDateHistogramInterval}>{title}</DropdownItem>
+            );
+            const selectedDateHistogramIntervalValueTitle = loadingStatus === 'loading' ? <i className="icon icon-fw icon-spin fas icon-circle-notch" /> : dateHistogramIntervalOptions[currentDateHistogramInterval];
             return (
                 <div className={outerClassName}>
-                    <div className="dropdown-container-col col-12 col-lg-3 align-top ps-2 pe-2">
+                    <div className="dropdown-container-col col-12 col-lg-2 align-top ps-2 pe-2">
                         <div className="text-500 d-block mb-1">{groupByTitle}</div>
-                        <DropdownButton id={groupById} title={selectedGroupByValueTitle} onSelect={this.onGroupBySelect} style={buttonStyleOverriden} disabled={groupByOptionItems.length < 2}>
+                        <DropdownButton id={groupById} title={selectedGroupByValueTitle} onSelect={this.onGroupBySelect} style={buttonStyle} disabled={groupByOptionItems.length < 2} size="sm">
                             {groupByOptionItems}
                         </DropdownButton>
                     </div>
@@ -445,7 +494,7 @@ export class GroupByDropdown extends React.PureComponent {
                         <div className="text-500 d-block mb-1">{dateRangeTitle}</div>
                         <div className="date-range">
                             {/* <span className="text-300 pt-05">Presets</span> */}
-                            <DropdownButton id={dateRangeId} title={selectedDateRangeValueTitle} onSelect={(e) => this.onDateRangeSelect(e, null, null)} style={buttonStyleOverriden}>
+                            <DropdownButton id={dateRangeId} title={selectedDateRangeValueTitle} onSelect={(e) => this.onDateRangeSelect(e, null, null)} style={buttonStyle} size="sm">
                                 {dateRangeOptionItems}
                             </DropdownButton>
                             <div className="d-flex custom-date-range">
@@ -461,7 +510,14 @@ export class GroupByDropdown extends React.PureComponent {
                             </div>
                         </div>
                     </div>
-                    <div className="dropdown-container-col col-12 col-lg-3 align-top ps-2">
+                    <div className="dropdown-container-col col-12 col-lg-2 align-top">
+                        <div className="text-500 d-block mb-1">{'Histogram Interval'}</div>
+                        <DropdownButton id={dateHistogramIntervalId} title={selectedDateHistogramIntervalValueTitle}
+                            onSelect={this.onDateHistogramIntervalSelect} style={buttonStyle} disabled={dateHistogramIntervalOptions.length < 2} size="sm">
+                            {dateHistogramInvervalOptionItems}
+                        </DropdownButton>
+                    </div>
+                    <div className="dropdown-container-col col-12 col-lg-2 align-top ps-2">
                         <div className="text-500 d-block mb-1">Settings</div>
                         {children}
                     </div>
@@ -471,11 +527,16 @@ export class GroupByDropdown extends React.PureComponent {
 
         return (
             <div className={outerClassName}>
-                <span className="text-500">{groupByTitle}</span>
-                <DropdownButton id={groupById} title={selectedGroupByValueTitle} onSelect={this.onGroupBySelect} style={buttonStyle} disabled={groupByOptionItems.length < 2}>
-                    {groupByOptionItems}
-                </DropdownButton>
-                {children}
+                <div className="dropdown-container-col col-12 col-lg-3 align-top">
+                    <span className="text-500 d-block mb-1">{groupByTitle}</span>
+                    <DropdownButton id={groupById} title={selectedGroupByValueTitle} onSelect={this.onGroupBySelect} style={buttonStyle} disabled={groupByOptionItems.length < 2} size="sm">
+                        {groupByOptionItems}
+                    </DropdownButton>
+                </div>
+                <div className="dropdown-container-col col-12 col-lg-9 align-top ps-1">
+                    <div className="text-500 d-block mb-1">Settings</div>
+                    {children}
+                </div>
             </div>
         );
     }
@@ -755,7 +816,7 @@ export class AreaChart extends React.PureComponent {
         'stackChildren'         : true,
         'height'                : 300,
         'yAxisLabel'            : 'Count',
-        'yAxisScale'            : 'Linear', // Must be one of 'Linear', 'Log', 'Pow'
+        'yAxisScale'            : 'Pow', // Must be one of 'Linear', 'Log', 'Pow'
         'yAxisPower'            : null,
         'xDomain'               : [ new Date('2017-03-01'), null ],
         'yDomain'               : [ 0, null ],
@@ -897,6 +958,8 @@ export class AreaChart extends React.PureComponent {
         const scale = d3['scale' + yAxisScale]().rangeRound([height, 0]).domain(yExtents);
         if (yAxisScale === 'Pow' && yAxisPower !== null){
             scale.exponent(yAxisPower);
+        } else if (yAxisScale === 'Symlog' && yAxisPower !== null){
+            scale.constant(yAxisPower);
         }
         return scale;
     }
@@ -1262,11 +1325,18 @@ ErrorIcon.defaultProps = { 'children' : "Loading failed. Please try again later.
 
 export class AreaChartContainer extends React.Component {
 
-    static isExpanded(props){
-        const { windowWidth, chartToggles, id } = props;
-        const gridState = layout.responsiveGridState(windowWidth);
-        if (gridState && ['lg', 'xl', 'xxl'].indexOf(gridState) === -1) return false;
-        return !!((chartToggles || {})[id]);
+    static isToggled(props, typeKey){
+        const { windowWidth, chartToggles = {}, id } = props;
+
+        const value = chartToggles[typeKey][id];
+        switch(typeKey) {
+            case 'expanded':
+                const gridState = layout.responsiveGridState(windowWidth);
+                if (gridState && ['lg', 'xl', 'xxl'].indexOf(gridState) === -1) return false;
+                return !!value;
+            default:
+                return !!value
+        }
     }
 
     static defaultProps = {
@@ -1278,8 +1348,8 @@ export class AreaChartContainer extends React.Component {
     constructor(props){
         super(props);
         this.buttonSection = this.buttonSection.bind(this);
-        this.toggleExpanded = _.throttle(this.toggleExpanded.bind(this), 1000);
-        this.expandButton = this.expandButton.bind(this);
+        this.toggleExpanded = _.throttle(this.toggleButton.bind(this), 1000);
+        this.commonButtons = this.commonButtons.bind(this);
 
         this.elemRef = React.createRef();
     }
@@ -1296,7 +1366,7 @@ export class AreaChartContainer extends React.Component {
         const { defaultColSize, width } = this.props;
         if (
             !(typeof width === 'number' && width) &&
-            (pastProps.defaultColSize !== defaultColSize || AreaChartContainer.isExpanded(pastProps) !== AreaChartContainer.isExpanded(this.props))
+            (pastProps.defaultColSize !== defaultColSize || AreaChartContainer.isToggled(pastProps, 'expanded') !== AreaChartContainer.isToggled(this.props, 'expanded'))
         ){
             setTimeout(()=>{ // Update w. new width.
                 this.forceUpdate();
@@ -1304,33 +1374,56 @@ export class AreaChartContainer extends React.Component {
         }
     }
 
-    toggleExpanded(e){
+    toggleButton(e, typeKey){
         const { onToggle, id } = this.props;
-        return typeof onToggle === 'function' && id && onToggle(id);
+        return typeof onToggle === 'function' && id && onToggle(id, typeKey);
     }
 
     getRefWidth(){
         return this.elemRef && this.elemRef.current && this.elemRef.current.clientWidth;
     }
 
-    expandButton(){
-        const { windowWidth } = this.props;
+    commonButtons(){
+        const { windowWidth, id, hideChartButton = false, hideTableButton = false } = this.props;
+        const buttons = [];
+
+        if (!hideChartButton) {
+            const toggled = AreaChartContainer.isToggled(this.props, 'chart');
+            const className = "btn btn-sm me-05 " + (toggled ? "btn-primary" : "btn-outline-dark");
+            buttons.push(
+                <button type="button" className={className} onClick={(e) => this.toggleButton(e, 'chart')} data-tip="Toggle chart view" key={id + '_chart'}>
+                    <i className="icon icon-fw fas icon-chart-bar" />
+                </button>
+            );
+        }
+        if (!hideTableButton) {
+            const toggled = AreaChartContainer.isToggled(this.props, 'table');
+            const className = "btn btn-sm me-05 " + (toggled ? "btn-primary" : "btn-outline-dark");
+            buttons.push(
+                <button type="button" className={className} onClick={(e) => this.toggleButton(e, 'table')} data-tip="Toggle data table view" key={id + '_table'}>
+                    <i className="icon icon-fw fas icon-table" />
+                </button>
+            );
+        }
         const gridState = layout.responsiveGridState(windowWidth);
-        if (['xs', 'sm', 'md'].indexOf(gridState) > -1) return null;
-        const expanded = AreaChartContainer.isExpanded(this.props);
-        return (
-            <button type="button" className="btn btn-outline-dark btn-sm" onClick={this.toggleExpanded}>
-                <i className={"icon icon-fw fas icon-search-" + (expanded ? 'minus' : 'plus')}/>
-            </button>
-        );
+        if (['xs', 'sm', 'md'].indexOf(gridState) === -1) {
+            const toggled = AreaChartContainer.isToggled(this.props, 'expanded');
+            const className = "btn btn-sm me-05 " + (toggled ? "btn-primary" : "btn-outline-dark");
+            buttons.push(
+                <button type="button" className={className} onClick={(e) => this.toggleButton(e, 'expanded')} data-tip="Toggle full width" key={id + '_expanded'}>
+                    <i className="icon icon-fw fas icon-expand-alt" />
+                </button>
+            );
+        }
+        return buttons;
     }
 
     buttonSection(){
         const { extraButtons } = this.props;
         return (
-            <div className="pull-right mt-07">
+            <div className="pull-right mt-05">
                 { extraButtons }
-                { this.expandButton() }
+                { this.commonButtons() }
             </div>
         );
     }
@@ -1338,7 +1431,7 @@ export class AreaChartContainer extends React.Component {
     render(){
         const { title, subTitle, children, width, defaultHeight, colorScale, chartMargin, updateColorStore, legend } = this.props;
 
-        const expanded = AreaChartContainer.isExpanded(this.props);
+        const expanded = AreaChartContainer.isToggled(this.props, 'expanded');
         const useWidth = width || this.getRefWidth();
         const chartInnerWidth = expanded ? useWidth * 3 : useWidth;
         const useHeight = expanded ? 500 : (defaultHeight || AreaChart.defaultProps.height);
