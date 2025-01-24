@@ -1886,22 +1886,24 @@ export const AxisScale = React.memo(function ({ scale, power, onChange, label = 
     const labelPairs = _.pairs(AxisScale.labels);
     const { showRange, rangeTooltip, rangeMin, rangeMax, rangeStep, defaultPower } = AxisScale.getDefaults(scale);
     return (
-        <div className="d-md-flex">
-            <label className="me-1">{label}:</label>
-            <div className="mb-15">
-                <DropdownButton size="sm" title={(scale && AxisScale.labels[scale]) || '-'} onSelect={(e) => onChange(e, defaultPower)}>
-                    {
-                        labelPairs.map(([key, val]) => (
-                            <DropdownItem eventKey={key} key={key}>{val}</DropdownItem>
-                        ))
-                    }
-                </DropdownButton>
-            </div>
-            <div className={"ms-05" + (showRange ? " d-block d-md-inline-block" : " d-none")}>
-                <input type="range" id="input_range_scale_power" className="w-75"
-                    min={rangeMin} max={rangeMax} step={rangeStep} value={power} data-tip={rangeTooltip}
-                    onChange={(e) => onChange(scale, e.target.valueAsNumber)} />
-                <span className="ms-05">{power}</span>
+        <div className="d-flex justify-content-center align-items-center">
+            <div className="d-md-flex align-items-center w-100">
+                <label className="me-1">{label}:</label>
+                <div>
+                    <DropdownButton size="sm" title={(scale && AxisScale.labels[scale]) || '-'} onSelect={(e) => onChange(e, defaultPower)}>
+                        {
+                            labelPairs.map(([key, val]) => (
+                                <DropdownItem eventKey={key} key={key}>{val}</DropdownItem>
+                            ))
+                        }
+                    </DropdownButton>
+                </div>
+                <div className={"ms-05" + (showRange ? " d-block d-md-inline-block" : " d-none")}>
+                    <input type="range" id="input_range_scale_power" className="w-75"
+                        min={rangeMin} max={rangeMax} step={rangeStep} value={power} data-tip={rangeTooltip}
+                        onChange={(e) => onChange(scale, e.target.valueAsNumber)} />
+                    <span className="ms-05">{power}</span>
+                </div>
             </div>
         </div>
     );
