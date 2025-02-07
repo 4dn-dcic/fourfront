@@ -26,7 +26,8 @@ export class FileDetailBody extends React.PureComponent {
         'session' : PropTypes.bool.isRequired,
         'minHeight' : PropTypes.number,
         'keyTitleDescriptionMap' : PropTypes.object,
-        'windowWidth' : PropTypes.number.isRequired
+        'windowWidth' : PropTypes.number.isRequired,
+        'canShowMetricURL' : PropTypes.bool
     };
 
     doesDescriptionOrNotesExist(){
@@ -81,10 +82,13 @@ export class FileDetailBody extends React.PureComponent {
     }
 
     downloadLinkBox(){
-        var { node, file, session } = this.props, content;
+        var { node, file, session, canShowMetricURL = false } = this.props, content;
 
-        if (WorkflowNodeElement.isNodeQCMetric(node)){
-            content = <ViewMetricButton {...{ node, file }}/>;
+        if (WorkflowNodeElement.isNodeQCMetric(node)) {
+            if (canShowMetricURL !== true) {
+                return null;
+            }
+            content = <ViewMetricButton {...{ node, file }} />;
         } else {
             content = <fileUtil.FileDownloadButtonAuto result={file} session={session} />;
         }
@@ -121,8 +125,8 @@ export class FileDetailBody extends React.PureComponent {
     }
 
     qcBox(){
-        var { file, node } = this.props,
-            qc, qcLink;
+        const { file, node, canShowMetricURL = false } = this.props;
+        let qc = null, qcLink = null;
 
         if (!file || Array.isArray(file)){
             return null;
@@ -131,7 +135,7 @@ export class FileDetailBody extends React.PureComponent {
         qc = file && file.quality_metric;
         qcLink = qc && (qc.url || object.itemUtil.atId(qc));
 
-        if (!qcLink) return null;
+        if (!qcLink || !canShowMetricURL) return null;
 
         return (
             <div className="col-sm-6 col-lg-4 right box buttons-container">

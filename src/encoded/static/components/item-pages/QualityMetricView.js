@@ -191,7 +191,7 @@ class QCMetricFromEmbed extends React.PureComponent {
         const { metric, qcProperty, schemaItem, schemas, fallbackTitle, tips, percent } = this.props;
         const { open, closing } = this.state;
 
-        // 2025-01-22: added to hide QC HTML Report Links after removal of bulk html reports already generated
+        // 2025-01-22: hide QC HTML Report Links upon removal of bulk html reports already generated
         if (qcProperty === "url") return null;
 
         const { qc_order = null, title = null, description: tip = null } = schemaItem || {};

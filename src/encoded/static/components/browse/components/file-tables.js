@@ -1100,7 +1100,7 @@ export class QCMetricsTable extends React.PureComponent {
     /**
      * Generates column headers for QCMetricsTable including render functions for each column
      * @param {*} fileGroups file groups
-     * @param {*} canShowMetricURL 2025-01-22: added to hide QC HTML Report Links after removal of bulk html reports already generated
+     * @param {*} canShowMetricURL 2025-01-22: hide QC HTML Report Links upon removal of bulk html reports already generated
      * @returns columnHeaders for QCMetricsTable including render functions for each column
      */
     static generateAlignedColumnHeaders(fileGroups, canShowMetricURL = false) {
@@ -1243,7 +1243,7 @@ export function QCMetricFromSummary(props){
     const { title, field } = props;
     const { value, tooltip } = QCMetricFromSummary.formatByNumberType(props);
 
-    // 2025-01-22: added to hide QC HTML Report Links after removal of bulk html reports already generated
+    // 2025-01-22: hide QC HTML Report Links upon removal of bulk html reports already generated
     if (field === 'url') { return null; }
 
     return (
