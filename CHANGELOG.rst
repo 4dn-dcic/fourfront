@@ -6,6 +6,14 @@ fourfront
 Change Log
 ----------
 
+8.5.1
+=====
+
+`PR 1921: QC report links updates <https://github.com/4dn-dcic/fourfront/pull/1921>`_
+
+* Bug fix: Hide QC HTML Report Links of WFR node details upon removal of bulk html reports already generated
+
+
 8.5.0
 =====
 
@@ -18,7 +26,7 @@ Change Log
 * Enhanced table-full-size toggles for usage statistics
 * New histogram interval options for submission statistics
 * Chart section header styles updated
-* Hide QC HTML Report Links after removal of bulk html reports already generated
+* Hide QC HTML Report Links upon removal of bulk html reports already generated
 
 
 8.4.6

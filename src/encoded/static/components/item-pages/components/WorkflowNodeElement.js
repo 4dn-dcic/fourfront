@@ -18,7 +18,8 @@ export class WorkflowNodeElement extends React.PureComponent {
         'disabled' : PropTypes.bool,
         'selected' : PropTypes.bool,
         'related'  : PropTypes.oneOfType([PropTypes.bool, PropTypes.string]),
-        'columnWidth' : PropTypes.number
+        'columnWidth' : PropTypes.number,
+        'canShowMetricURL' : PropTypes.bool // If true, will show a clickable link to QC metric URL.
     };
 
     static ioFileTypes = new Set(['data file', 'QC', 'reference file', 'report']);
@@ -405,7 +406,7 @@ export class WorkflowNodeElement extends React.PureComponent {
      * seems having a link on node would be bit unexpected if clicked accidentally.
      */
     qcMarker(){
-        const { node, selected } = this.props;
+        const { node, selected, canShowMetricURL = false } = this.props;
 
         if (!WorkflowNodeElement.isNodeFile(node) || !WorkflowNodeElement.doesRunDataExist(node)){
             return null;
@@ -432,7 +433,7 @@ export class WorkflowNodeElement extends React.PureComponent {
             else if (qcStatus === 'error') markerProps.className += ' status-error';
         }
 
-        if (selected && qc.url){
+        if (selected && qc.url && canShowMetricURL === true){
             markerProps.className += ' clickable';
             return <a href={qc.url} target="_blank" rel="noreferrer noopener" {...markerProps} onClick={function(e){
                 e.preventDefault();
