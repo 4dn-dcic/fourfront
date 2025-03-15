@@ -40,8 +40,8 @@
         "description": "Documentation and information about file transformation and analysis pipelines.",
         "content": [
             "reusable-dummy-sections.lorem-ipsum-overview",
-            "resources.analysis.hi-c-pipeline.alignment",
-            "resources.analysis.hi-c-pipeline.step-ii",
+            "resources.data-analysis.hi_c-processing-pipeline.alignment",
+            "resources.data-analysis.hi_c-processing-pipeline.filtering",
             "resources.analysis.hi-c-pipeline.step-iii-options"
         ],
         "table-of-contents": {

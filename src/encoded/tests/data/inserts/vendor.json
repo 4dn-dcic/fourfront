@@ -13,13 +13,13 @@
     {
         "title": "New England Biolabs",
         "name": "new-england-biolabs",
-        "aliases":["dcic:neb"],
+        "aliases":["dcic:neb", "4dn-dcic-lab:neb"],
         "description": "",
         "url": "https://www.neb.com",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
-        "uuid": "b31106bc-8535-4448-903e-854af460b21e"
+        "uuid": "11f94a17-51ed-4a0f-93b1-1cac2fd2844f"
     },
     {
         "title": "ThermoFisher Scientific",
@@ -35,11 +35,11 @@
     {
         "title": "Illumina",
         "name": "illumina",
-        "aliases":["dcic:illumina"],
+        "aliases":["dcic:illumina", "4dn-dcic-lab:illumina"],
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
         "url": "https://www.illumina.com/",
-        "uuid": "b31106bc-8535-4448-903e-854af4611111"
+        "uuid": "23ce3be3-a8fa-47e7-b414-3ce673c08257"
     }
 ]

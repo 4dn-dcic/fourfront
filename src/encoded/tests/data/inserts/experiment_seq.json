@@ -2,7 +2,7 @@
     {
         "accession":"4DNEXO6777A1",
         "biosample":"234411bc-8535-4448-903e-854af460b255",
-        "experiment_type": "e27b17cd-544a-3a3b-abc3-17a544544b3c",
+        "experiment_type": "47a593da-c458-422a-a974-82b3302e89cb",
         "files": ["4DNFIN232JB1", "4DNFIN232JB2"],
         "description": "Biorep 1 Techrep 1 ChIP-seq on GM12878 batch 1",
         "award": "1U01CA200059-01",
@@ -23,7 +23,7 @@
     {
         "accession":"4DNEXO6777B1",
         "biosample":"234511bc-8535-4448-903e-854af460b255",
-        "experiment_type": "e27b17cd-544a-3a3b-abc3-17a544544b3c",
+        "experiment_type": "47a593da-c458-422a-a974-82b3302e89cb",
         "files": ["4DNFIN232JB3"],
         "description": "Biorep 1 Techrep 2 ChIP-seq on GM12878 batch 1",
         "award": "1U01CA200059-01",

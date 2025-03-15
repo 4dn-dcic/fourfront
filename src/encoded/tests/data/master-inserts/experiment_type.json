@@ -6,7 +6,7 @@
         "assay_subclassification": "DNA-DNA Pairwise Interactions",
         "assay_subclass_short": "Hi-C",
         "raw_file_types": "Reads (fastq) provided by lab",
-        "uuid": "a17b17cd-544a-3a3b-abc3-17a544544b3c",
+        "uuid": "a2920a38-cdba-4ff0-b4f0-c6bb53257747",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
@@ -22,7 +22,7 @@
         "assay_subclassification": "DNA-DNA Pairwise Interactions",
         "assay_subclass_short": "Hi-C",
         "raw_file_types": "Reads (fastq) provided by lab",
-        "uuid": "b17b17cd-544a-3a3b-abc3-17a544544b3c",
+        "uuid": "832b7989-69ab-4bb6-97b9-195d5dd965ea",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
@@ -67,7 +67,7 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
-        "uuid": "c17b17cd-544a-3a3b-abc3-17a544544b3c",
+        "uuid": "5b35245d-5777-4983-b7e8-8dffd9ab83ab",
         "valid_item_types": ["ExperimentAtacseq"]
     },
     {
@@ -185,7 +185,7 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
-        "uuid": "e27b17cd-544a-3a3b-abc3-17a544544b3c",
+        "uuid": "47a593da-c458-422a-a974-82b3302e89cb",
         "valid_item_types": ["ExperimentSeq"]
     },
     {
@@ -268,7 +268,7 @@
         "assay_subclassification": "Single Particle Tracking",
         "assay_subclass_short": "SPT",
         "raw_file_types": "Reads (fastq) provided by lab",
-        "uuid": "a98e17cd-544a-3a3b-fed3-17a658544f3c",
+        "uuid": "d654c884-fc4f-4d53-818c-fc06fc33dfb3",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",

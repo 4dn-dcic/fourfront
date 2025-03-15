@@ -292,6 +292,8 @@ def bar_plot_chart(context, request):
 
     search_param_lists['limit'] = search_param_lists['from'] = [0]
     subreq = make_search_subreq(request, '{}?{}'.format('/browse/', urlencode(search_param_lists, True)) )
+    # TODO/FYI/20241120: Set breakpoint here and observe ES query WRT smaht-portal work for C4-1192, i.e.
+    # recently released files grouped by month, and cell-line/donor, and then file type/sequencer/assay.
     search_result = perform_search_request(None, subreq, custom_aggregations=primary_agg)
 
     for field_to_delete in ['@context', '@id', '@type', '@graph', 'title', 'filters', 'facets', 'sort', 'clear_filters', 'actions', 'columns']:

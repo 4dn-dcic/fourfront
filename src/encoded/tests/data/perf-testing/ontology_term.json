@@ -18,6 +18,7 @@
         "status": "released", 
         "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a", 
         "term_name": "cell line", 
+        "preferred_name": "cell line",
         "definition": "A cell line is a population of cells cultured in vitro that are descended through one or more generations (and possible sub-cultures) from a single primary culture which was originally derived from part of an organism.", 
         "term_url": "http://www.ebi.ac.uk/efo/EFO_0000322", 
         "term_id": "EFO:0000322", 

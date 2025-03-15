@@ -2,7 +2,7 @@
     {
         "awards": ["Test-4DN"],
         "name": "test-4dn-lab",
-        "title": "4DN Testing Lab",
+         "title": "4DN DCIC, HMS",
         "address2": "10 Schattuck Street",
         "address1": "Biomedical Bioinfomatics",
         "city": "Boston",
