@@ -2,11 +2,12 @@
 // Entry point for browser, compiled into bundle[.chunkHash].js.
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from 'react-dom/client';
+// import ReactDOM from 'react-dom';
 
 import App from './components';
 var domready = require('domready');
-import { store, mapStateToProps } from './store';
+import { store, mapStateToProps, batchDispatch } from './store';
 import { Provider, connect } from 'react-redux';
 import { patchedConsoleInstance as console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util/patched-console';
 import { logger }  from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
@@ -65,13 +66,15 @@ if (typeof window !== 'undefined' && window.document && !window.TEST_RUNNER) {
         // into <script data-prop-name={ propName }> elements.
         var initialReduxStoreState = App.getRenderedProps(document);
         delete initialReduxStoreState.user_details; // Stored into localStorage.
-        store.dispatch({ 'type' : initialReduxStoreState });
+
+        batchDispatch(store, initialReduxStoreState);
 
         const AppWithReduxProps = connect(mapStateToProps)(App);
         let app;
 
         try {
-            app = ReactDOM.hydrate(<Provider store={store}><AppWithReduxProps /></Provider>, document);
+            app = ReactDOM.hydrateRoot(document, <Provider store={store}><AppWithReduxProps /></Provider>);
+            // app = ReactDOM.hydrate(<Provider store={store}><AppWithReduxProps /></Provider>, document);
         } catch (e) {
             logger.error("INVARIANT ERROR",e); // To debug
             // So we can get printout and compare diff of renders.

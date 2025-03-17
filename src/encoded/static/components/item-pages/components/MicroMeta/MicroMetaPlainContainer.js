@@ -128,8 +128,9 @@ export class MicroMetaPlainContainer extends React.PureComponent {
         this.setState({ 'mounted' : false });
     }
 
-    componentDidCatch(){
+    componentDidCatch(error, info){
         this.setState({ 'hasRuntimeError' : true });
+        console.error('ERROR in MM - error:', error, ', info:', info);
     }
 
     componentDidUpdate(pastProps, pastState){

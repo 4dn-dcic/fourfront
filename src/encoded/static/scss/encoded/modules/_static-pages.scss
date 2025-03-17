@@ -842,7 +842,7 @@
     }
 }
 
-.static-section-entry {
+.static-section-entry, .static-content-item {
 
 	&:not([id]) .section-title > i.icon-link {
 		display: none;
@@ -870,6 +870,7 @@
 	// since rst-to-html non-customizable,
 	// tweak some css rules to display h3/h4 like h4/h5 respectively
 	// use the same styles for raw HTML
+	.markdown-container,
 	.rst-container,
 	.html-container {
 		h3 {
@@ -1307,15 +1308,23 @@
 
 .basic-carousel-wrapper {
 	margin-bottom: 50px;
-  
-	.slider-control-centerleft,
-	.slider-control-centerright {
+
+	.slider-control {
 		cursor: pointer;
 		opacity: 0.7;
+		position: absolute;
+		top: 50%;
   
 		&:hover{
 			opacity: 1;
 		}
+	}
+  
+	.slider-control-centerleft{
+		left: 0;
+	}
+	.slider-control-centerright {
+		right: 0;
 	}
   
 	.slider-control-bottomleft {
@@ -1550,6 +1559,37 @@ $markdown-table-result-row-height: 46px !default;
 .home-announcements {
 	padding: 5px !important;
 	margin-top: 30px;
+}
+
+/**********************************************************
+		Slide Carousel
+***********************************************************/
+
+.slide-carousel-wrapper {
+	.slider-control {
+		cursor: pointer;
+		opacity: 1;
+		position: absolute;
+		top: 50%;
+		padding: 10px;
+		border: 0;
+		background: rgba(0, 0, 0, 0.4);
+		color: white;
+		text-transform: uppercase;
+	}
+
+	.slider-control-centerleft {
+		left: 0;
+	}
+
+	.slider-control-centerright {
+		right: 0;
+	}
+
+	.slider-control-disabled {
+		cursor: not-allowed;
+		opacity: 0.3;
+	}
 }
 
 /**********************************************************

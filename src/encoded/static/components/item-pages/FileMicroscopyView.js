@@ -166,7 +166,7 @@ function FileViewVitessce (props) {
         const baseHref = (urlParts.protocol && urlParts.host) ? urlParts.protocol + '//' + urlParts.host : '';
 
         return {
-            "version": "1.0.1",
+            "version": "1.0.16",
             "name": name,
             "description": description || "-",
             "datasets": [

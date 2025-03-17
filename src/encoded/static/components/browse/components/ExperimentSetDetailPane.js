@@ -25,11 +25,11 @@ export class ExperimentSetDetailPane extends React.PureComponent {
 
     static propTypes = {
         'selectAllFilesInitially' : PropTypes.bool,
-        'result' : PropTypes.object.isRequired,
+        'result' : PropTypes.object,
         'containerWidth' : PropTypes.number,
         'paddingWidth' : PropTypes.number,
-        'windowWidth' : PropTypes.number.isRequired,
-        'href' : PropTypes.string.isRequired,
+        'windowWidth' : PropTypes.number,
+        'href' : PropTypes.string,
         'minimumWidth' : PropTypes.number,
         'initialStateCache' : PropTypes.object,
         'updateFileSectionStateCache' : PropTypes.func,
@@ -155,14 +155,17 @@ export class ExperimentSetDetailPane extends React.PureComponent {
 }
 
 const RawFilesSection = React.memo(function RawFilesSection(props){
-    const { containerWidth, result, href, minimumWidth, paddingWidth, open = false, onToggle, selectedFilesCount } = props;
+    const { containerWidth, result, href, minimumWidth, paddingWidth, open = false, onToggle, selectFile, selectedFilesCount = 0 } = props;
 
     // For debugging stacked tables
     //const useResult = require('./../../testdata/experiment_set/replicate_4DNESH4MYRID');
 
     const rawFilesCount = expFxn.fileCountFromExperimentSet(result, false, false);
-
     if (rawFilesCount === 0) return null;
+
+    const isTitleMuted = (typeof selectFile === 'function') && selectedFilesCount === 0;
+    const selectedFilesCountText = (selectedFilesCount > 0) ?
+        (<sup className="ml-05">({`${selectedFilesCount} file${selectedFilesCount > 1 ? 's' : ''} selected`})</sup>) : null;
 
     let innerTableContents = null;
     if (open) {
@@ -180,9 +183,10 @@ const RawFilesSection = React.memo(function RawFilesSection(props){
 
     return (
         <div className="raw-files-table-section">
-            <h4 className={"pane-section-title" + (selectedFilesCount > 0 ? "" : " text-muted")} onClick={onToggle}>
+            <h4 className={"pane-section-title" + (!isTitleMuted ? "" : " text-muted")} onClick={onToggle}>
                 <i className={"toggle-open-icon icon icon-fw fas icon-" + (open ? 'minus' : 'plus')} />
                 <i className="icon icon-fw icon-leaf fas"/> <span className="text-400">{ rawFilesCount }</span> Raw Files
+                {selectedFilesCountText}
             </h4>
             { innerTableContents }
         </div>
@@ -191,12 +195,15 @@ const RawFilesSection = React.memo(function RawFilesSection(props){
 });
 
 const ProcessedFilesSection = React.memo(function ProcessedFilesSection(props){
-    const { containerWidth, result, href, minimumWidth, paddingWidth, open = false, onToggle, selectedFilesCount = 0 } = props;
+    const { containerWidth, result, href, minimumWidth, paddingWidth, open = false, onToggle, selectFile, selectedFilesCount = 0 } = props;
     const processedFiles = expFxn.allProcessedFilesFromExperimentSet(result);
 
     if (!Array.isArray(processedFiles) || processedFiles.length === 0){
         return null;
     }
+    const isTitleMuted = (typeof selectFile === 'function') && selectedFilesCount === 0;
+    const selectedFilesCountText = (selectedFilesCount > 0) ?
+        (<sup className="ml-05">({`${selectedFilesCount} file${selectedFilesCount > 1 ? 's' : ''} selected`})</sup>) : null;
 
     let innerTableContents = null;
     if (open) {
@@ -209,9 +216,10 @@ const ProcessedFilesSection = React.memo(function ProcessedFilesSection(props){
 
     return (
         <div className="processed-files-table-section">
-            <h4 className={"pane-section-title" + (selectedFilesCount > 0 ? "" : " text-muted")} onClick={onToggle}>
+            <h4 className={"pane-section-title" + (!isTitleMuted ? "" : " text-muted")} onClick={onToggle}>
                 <i className={"toggle-open-icon icon icon-fw fas icon-" + (open ? 'minus' : 'plus')} />
                 <i className="icon icon-fw icon-microchip fas"/> <span className="text-400">{ processedFiles.length }</span> Processed Files
+                {selectedFilesCountText}
             </h4>
             { innerTableContents }
         </div>
@@ -219,12 +227,15 @@ const ProcessedFilesSection = React.memo(function ProcessedFilesSection(props){
 });
 
 const SupplementaryFilesSection = React.memo(function ProcessedFilesSection(props){
-    const { containerWidth, result, href, minimumWidth, paddingWidth, open = false, onToggle, selectedFilesCount = 0 } = props;
+    const { containerWidth, result, href, minimumWidth, paddingWidth, open = false, onToggle, selectFile, selectedFilesCount = 0 } = props;
     const supplementaryFiles = expFxn.allOtherProcessedFilesFromExperimentSet(result);
 
     if (!Array.isArray(supplementaryFiles) || supplementaryFiles.length === 0){
         return null;
     }
+    const isTitleMuted = (typeof selectFile === 'function') && selectedFilesCount === 0;
+    const selectedFilesCountText = (selectedFilesCount > 0) ?
+        (<sup className="ml-05">({`${selectedFilesCount} file${selectedFilesCount > 1 ? 's' : ''} selected`})</sup>) : null;
 
     let innerTableContents = null;
     if (open) {
@@ -238,9 +249,10 @@ const SupplementaryFilesSection = React.memo(function ProcessedFilesSection(prop
 
     return (
         <div className="processed-files-table-section">
-            <h4 className={"pane-section-title" + (selectedFilesCount > 0 ? "" : " text-muted")} onClick={onToggle}>
+            <h4 className={"pane-section-title" + (!isTitleMuted ? "" : " text-muted")} onClick={onToggle}>
                 <i className={"toggle-open-icon icon icon-fw fas icon-" + (open ? 'minus' : 'plus')} />
                 <i className="icon icon-fw icon-microchip fas"/> <span className="text-400">{ supplementaryFiles.length }</span> Supplementary Files
+                {selectedFilesCountText}
             </h4>
             { innerTableContents }
         </div>

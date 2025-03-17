@@ -18,7 +18,7 @@ import { FormattedInfoWrapper, WrappedCollapsibleList } from './FormattedInfoBlo
  * @prop {Element|Element[]} children   - React Element(s) to display in detail area under title.
  */
 const DetailBlock = React.memo(function DetailBlock(props){
-    const { publication = null, singularTitle, children } = props;
+    const { publication = null, singularTitle = 'Publication', children } = props;
     const publicationHref = object.itemUtil.atId(publication);
     if (!publication || !publicationHref) return null; // Is case if no view permission for Publiation, as well.
 
@@ -34,9 +34,6 @@ const DetailBlock = React.memo(function DetailBlock(props){
         </FormattedInfoWrapper>
     );
 });
-DetailBlock.defaultProps = {
-    'singularTitle' : 'Publication'
-};
 
 const ShortAttribution = React.memo(function ShortAttribution({ publication : pub }){
     if (!pub || !object.itemUtil.atId(pub)) return null;
@@ -92,22 +89,19 @@ ShortAttribution.propTypes = {
  * Maybe get rid of `<div className={outerClassName}>` completely and allow parent/containing
  * component to create own <div> with whatever className is desired, among other element attributes.
  */
-const PublicationBelowHeaderRow = React.memo(function PublicationBelowHeaderRow({ publication, singularTitle, outerClassName }){
-    if (!publication || !object.itemUtil.atId(publication)) return null;
-    return (
-        <div className={outerClassName}>
-            <DetailBlock publication={publication} singularTitle={singularTitle} >
-                <div className="more-details">
-                    <ShortAttribution publication={publication} />
-                </div>
-            </DetailBlock>
-        </div>
-    );
-});
-PublicationBelowHeaderRow.defaultProps = {
-    'singularTitle' : "Source Publication",
-    'outerClassName' : "mb-2"
-};
+const PublicationBelowHeaderRow = React.memo(
+    function PublicationBelowHeaderRow({ publication, singularTitle = "Source Publication", outerClassName = "mb-2" }) {
+        if (!publication || !object.itemUtil.atId(publication)) return null;
+        return (
+            <div className={outerClassName}>
+                <DetailBlock publication={publication} singularTitle={singularTitle} >
+                    <div className="more-details">
+                        <ShortAttribution publication={publication} />
+                    </div>
+                </DetailBlock>
+            </div>
+        );
+    });
 
 /**
  * Shows publications for current Item. Rendered by AttributionTabView.js.

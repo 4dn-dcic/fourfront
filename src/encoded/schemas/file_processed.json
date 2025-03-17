@@ -101,7 +101,8 @@
                 "imputed signal fold change",
                 "spt results",
                 "stripe calls",
-                "tri-alignments"
+                "tri-alignments",
+                "fragments"
             ],
             "ignored_enum": [
                 "contact list-combined",

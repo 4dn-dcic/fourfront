@@ -133,6 +133,7 @@ kibana-stop:
 
 kill:  # kills back-end processes associated with the application. Use with care.
 	pkill -f postgres &
+	pkill -f opensearch &
 	pkill -f elasticsearch &
 	pkill -f moto_server &
 
