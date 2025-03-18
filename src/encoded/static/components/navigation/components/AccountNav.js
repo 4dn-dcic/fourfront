@@ -53,7 +53,7 @@ export const AccountNav = React.memo(function AccountNav(props){
     if (!session) { // Render login button
 
         //TODO remove custom info after RAS transition completed
-        const auth0PopupText = '<p><span class="text-danger font-weight-bold">WARNING</span> - support for login to the portal via <b>GitHub</b> is ending in <b>early 2024</b>.</p><p>If you currently use your Github credentials to log in to the data portal you will need to transition to using a Google account or NIH credentials - eRA, <a href="https://login.gov">login.gov</a> or NIH passport.  More info and a guide to setting up a linked Google account can be found <a href="https://data.4dnucleome.org/help/user-guide/account-creation" target="_blank">here</a>.<p>';
+        const auth0PopupText = '<p><span class="text-danger fw-bold">WARNING</span> - support for login to the portal via <b>GitHub</b> is ending in <b>early 2024</b>.</p><p>If you currently use your Github credentials to log in to the data portal you will need to transition to using a Google account or NIH credentials - eRA, <a href="https://login.gov">login.gov</a> or NIH passport.  More info and a guide to setting up a linked Google account can be found <a href="https://data.4dnucleome.org/help/user-guide/account-creation" target="_blank">here</a>.<p>';
 
         return (
             <Nav className="navbar-acct">
@@ -108,13 +108,13 @@ function UserActionsMenu(props){
         const isActive = isActionActive(action, href);
         let prepend = null;
         if (actionID === "impersonate") {
-            prepend = <i className="icon icon-fw icon-user-secret fas mr-07"/>;
+            prepend = <i className="icon icon-fw icon-user-secret fas me-07"/>;
         }
         if (actionID === "profile") {
-            prepend = <i className="icon icon-fw icon-user fas mr-07"/>;
+            prepend = <i className="icon icon-fw icon-user fas me-07"/>;
         }
         if (actionID === "submissions") {
-            prepend = <i className="icon icon-fw icon-file-import fas mr-07"/>;
+            prepend = <i className="icon icon-fw icon-file-import fas me-07"/>;
         }
         return (
             <div className={"level-1-title-container" + (isActive ? " active" : "")} key={actionID}>
@@ -161,7 +161,7 @@ function LogoutLink({ performLogout, isLoading = false }){
     return (
         <div className="level-1-title-container">
             <a className="level-1-title text-medium d-block" onClick={performLogout} id="logoutbtn" href="#">
-                <i className={"icon icon-fw fas mr-07 icon-" + (isLoading ? "spin icon-circle-notch" : "sign-out-alt")} />
+                <i className={"icon icon-fw fas me-07 icon-" + (isLoading ? "spin icon-circle-notch" : "sign-out-alt")} />
                 <span>Log Out</span>
             </a>
         </div>

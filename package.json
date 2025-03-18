@@ -80,7 +80,7 @@
     "babel-jest": "^29.1.2",
     "babel-loader": "^8.2.3",
     "babel-plugin-minify-dead-code-elimination": "^0.5.1",
-    "bootstrap": "^4.6.1",
+    "bootstrap": "^5.3.0",
     "bufferutil": "^4.0.1",
     "eslint": "^8.10.0",
     "eslint-plugin-cypress": "^2.12.1",
@@ -100,14 +100,14 @@
     "string-replace-loader": "^3.1.0",
     "terser-webpack-plugin": "^5.3.6",
     "utf-8-validate": "^5.0.9",
-    "webpack": "5.92.1",
+    "webpack": "5.94.0",
     "webpack-bundle-analyzer": "^4.5.0",
     "webpack-deadcode-plugin": "^0.1.15"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-free": "^5.15.4",
+    "@fortawesome/fontawesome-free": "^6.6.0",
     "@hms-dbmi-bgm/react-workflow-viz": "0.1.11",
-    "@hms-dbmi-bgm/shared-portal-components": "git+https://github.com/4dn-dcic/shared-portal-components#0.1.90",
+    "@hms-dbmi-bgm/shared-portal-components": "git+https://github.com/4dn-dcic/shared-portal-components#0.1.92",
     "@reduxjs/toolkit": "^2.2.6",
     "auth0-lock": "^12.5.1",
     "d3": "^7.5.0",
@@ -129,7 +129,7 @@
     "query-string": "^8.1.0",
     "rc-tabs": "^9.7.0",
     "react": "^18.3.1",
-    "react-bootstrap": "^1.6.0",
+    "react-bootstrap": "^2.10.4",
     "react-dom": "^18.3.1",
     "react-draggable": "^4.4.4",
     "react-json-tree": "^0.19.0",
@@ -142,14 +142,13 @@
     "underscore": "^1.13.6",
     "url": "^0.11.0",
     "uuid": "^8.3.2",
-    "vitessce": "3.4.9"
+    "vitessce": "3.4.14"
   },
   "optionalDependencies": {
     "cypress": "^13.7.0"
   },
   "overrides": {
-    "@hms-dbmi-bgm/shared-portal-components": {
-      "auth0-lock": "$auth0-lock"
-    }
+    "cross-spawn@<7.0.5": "^7.0.5",
+    "nanoid@<3.3.8": "^3.3.8"
   }
 }

@@ -145,7 +145,7 @@ export class StackedBlockVisual extends React.PureComponent {
             const rowElem = (
                 <div className="row popover-entry mb-07" key={property}>
                     <div className="col-5 col-md-4">
-                        <div className="text-500 text-ellipsis-continer text-right">
+                        <div className="text-500 text-ellipsis-continer text-end">
                             { ((titleMap && titleMap[property]) || property) + (val ? ':' : '') }
                         </div>
                     </div>
@@ -710,7 +710,7 @@ export class StackedBlockGroupedRow extends React.PureComponent {
                 <div className="row grouping-row">
                     <div className={"col label-section " + labelClassName} style={labelSectionStyle}>
                         {(index === 0 && depth === 0) ? (
-                            <div className="text-right" onClick={onSorterClick}>
+                            <div className="text-end" onClick={onSorterClick}>
                                 <span className={labelSortIconClassName}>{labelSortIcon}</span>
                             </div>
                         ) : null}

@@ -445,6 +445,7 @@ def date_histogram_aggregations(context, request):
         'yearly'    : 'year'
     }
 
+    date_from, date_to = None, None
     try:
         json_body = request.json_body
         search_param_lists = json_body.get('search_query_params', deepcopy(DEFAULT_BROWSE_PARAM_LISTS))
@@ -476,8 +477,6 @@ def date_histogram_aggregations(context, request):
         if not search_param_lists:
             search_param_lists = deepcopy(DEFAULT_BROWSE_PARAM_LISTS)
             del search_param_lists['award.project']
-
-
 
     if 'ExperimentSet' in search_param_lists['type'] or 'ExperimentSetReplicate' in search_param_lists['type']:
         # Add predefined sub-aggs to collect Exp and File counts from ExpSet items, in addition to getting own doc_count.
@@ -550,7 +549,7 @@ def date_histogram_aggregations(context, request):
                 outer_date_histogram_agg[interval + '_interval_' + dh_field]['aggs'] = histogram_sub_aggs
 
     search_param_lists['limit'] = search_param_lists['from'] = [0]
-    subreq          = make_search_subreq(request, '{}?{}'.format('/browse/', urlencode(search_param_lists, True)) )
+    subreq          = make_search_subreq(request, '{}?{}'.format('/browse/', urlencode(search_param_lists, True)))
     search_result   = perform_search_request(None, subreq, custom_aggregations=outer_date_histogram_agg)
 
     for field_to_delete in ['@context', '@id', '@type', '@graph', 'title', 'filters', 'facets', 'sort', 'clear_filters', 'actions', 'columns']:
@@ -558,18 +557,24 @@ def date_histogram_aggregations(context, request):
             continue
         del search_result[field_to_delete]
 
+    search_result['from_date'] = date_from.strftime("%Y-%m-%d") if date_from is not None else None
+    search_result['to_date'] = date_to.strftime("%Y-%m-%d") if date_to is not None else None
+    search_result['interval'] = date_histogram_intervals
+
     return search_result
 
+
 DATE_RANGE_PRESETS = {
-    'all': lambda today: (None, None),
-    'thismonth': lambda today: (today.replace(day=1), None),
+    'all': lambda today: (datetime(2017, 1, 1), today),
+    'thismonth': lambda today: (today.replace(day=1), today),
     'previousmonth': lambda today: (today.replace(day=1) - relativedelta(months=1), today.replace(day=1) - relativedelta(days=1)),
-    'last3months': lambda today: (today.replace(day=1) - relativedelta(months=2), None),
-    'last6months': lambda today: (today.replace(day=1) - relativedelta(months=5), None),
-    'last12months': lambda today: (today.replace(day=1) - relativedelta(months=11), None),
-    'thisyear': lambda today: (datetime(today.year, 1, 1), None),
+    'last3months': lambda today: (today.replace(day=1) - relativedelta(months=2), today),
+    'last6months': lambda today: (today.replace(day=1) - relativedelta(months=5), today),
+    'last12months': lambda today: (today.replace(day=1) - relativedelta(months=11), today),
+    'thisyear': lambda today: (datetime(today.year, 1, 1), datetime(today.year, 12, 31)),
     'previousyear': lambda today: (datetime(today.year - 1, 1, 1), datetime(today.year - 1, 12, 31)),
 }
+
 
 def convert_date_range(date_range_str):
     data_range_split = date_range_str.split('|')

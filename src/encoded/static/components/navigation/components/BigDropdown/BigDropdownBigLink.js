@@ -25,13 +25,13 @@ export function BigDropdownBigLink(props){
 
     if (typeof titleIcon === "string") {
         iconCol = (
-            <div className="col-auto icon-beside-column text-right">
+            <div className="col-auto icon-beside-column text-end">
                 <i className={"icon icon-fw icon-2x icon-" + titleIcon}/>
             </div>
         );
     } else if (React.isValidElement(titleIcon)){
         iconCol = (
-            <div className="col-auto icon-beside-column text-right">
+            <div className="col-auto icon-beside-column text-end">
                 { titleIcon }
             </div>
         );

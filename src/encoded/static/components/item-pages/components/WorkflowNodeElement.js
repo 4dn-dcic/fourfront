@@ -18,7 +18,8 @@ export class WorkflowNodeElement extends React.PureComponent {
         'disabled' : PropTypes.bool,
         'selected' : PropTypes.bool,
         'related'  : PropTypes.oneOfType([PropTypes.bool, PropTypes.string]),
-        'columnWidth' : PropTypes.number
+        'columnWidth' : PropTypes.number,
+        'canShowMetricURL' : PropTypes.bool // If true, will show a clickable link to QC metric URL.
     };
 
     static ioFileTypes = new Set(['data file', 'QC', 'reference file', 'report']);
@@ -185,7 +186,7 @@ export class WorkflowNodeElement extends React.PureComponent {
                 output += '<hr class="mt-08 mb-05"/>';
             }
             if (argumentName === 'Input' || argumentName === 'Output'){
-                argumentName += ' Argument &nbsp; <span class="text-500 text-monospace">' + name + '</span>';
+                argumentName += ' Argument &nbsp; <span class="text-500 font-monospace">' + name + '</span>';
             }
             output += '<small class="mb-03 d-inline-block">' + argumentName + '</small>';
         }
@@ -236,14 +237,14 @@ export class WorkflowNodeElement extends React.PureComponent {
             && node.meta.workflow.steps.length > 0
             && typeof node.meta.workflow.steps[0].name === 'string'
         ){
-            //elemProps.className += ' text-monospace';
+            //elemProps.className += ' font-monospace';
             return <div {...elemProps}>{ _.pluck(node.meta.workflow.steps, 'name').join(', ') }</div>;
         }
 
         // If Parameter
         if (WorkflowNodeElement.isNodeParameter(node)){
             if (WorkflowNodeElement.doesRunDataExist(node)){
-                elemProps.className += ' text-monospace';
+                elemProps.className += ' font-monospace';
                 return <div {...elemProps}>{ node.name }</div>;
             }
             return <div {...elemProps}>Parameter</div>;
@@ -254,7 +255,7 @@ export class WorkflowNodeElement extends React.PureComponent {
             if (fileFormatAsString) {
                 return <div {...elemProps}>{ fileFormatAsString }</div>;
             }
-            elemProps.className += ' text-monospace';
+            elemProps.className += ' font-monospace';
             return <div {...elemProps}>{ title }</div>;
         }
 
@@ -341,7 +342,7 @@ export class WorkflowNodeElement extends React.PureComponent {
             } else if (node.meta && node.meta.run_data && node.meta.run_data.file && typeof node.meta.run_data.file === 'object' && node.meta.run_data.file.file_type){
                 belowTitle = node.meta.run_data.file.file_type;
             } else {
-                belowTitle = <small className="text-monospace" style={{ 'bottom' : -15, 'color' : '#888' }}>{ node.name }</small>;
+                belowTitle = <small className="font-monospace" style={{ 'bottom' : -15, 'color' : '#888' }}>{ node.name }</small>;
             }
             return <div {...elemProps}>{ belowTitle }</div>;
         }
@@ -382,7 +383,7 @@ export class WorkflowNodeElement extends React.PureComponent {
         if (WorkflowNodeElement.isNodeFile(node) && WorkflowNodeElement.doesRunDataExist(node)){
             const { file : { accession, display_title } } = run_data;
             return (
-                <div className={"node-name" + (accession ? ' text-monospace' : '')}>
+                <div className={"node-name" + (accession ? ' font-monospace' : '')}>
                     { this.icon() }
                     { typeof file === 'string' ? ioType : accession || display_title }
                 </div>
@@ -390,7 +391,7 @@ export class WorkflowNodeElement extends React.PureComponent {
         }
 
         if (WorkflowNodeElement.isNodeParameter(node) && WorkflowNodeElement.doesRunDataExist(node)){
-            return <div className="node-name text-monospace">{ this.icon() }{ run_data.value }</div>;
+            return <div className="node-name font-monospace">{ this.icon() }{ run_data.value }</div>;
         }
 
         // Fallback / Default - use node.name
@@ -405,7 +406,7 @@ export class WorkflowNodeElement extends React.PureComponent {
      * seems having a link on node would be bit unexpected if clicked accidentally.
      */
     qcMarker(){
-        const { node, selected } = this.props;
+        const { node, selected, canShowMetricURL = false } = this.props;
 
         if (!WorkflowNodeElement.isNodeFile(node) || !WorkflowNodeElement.doesRunDataExist(node)){
             return null;
@@ -432,7 +433,7 @@ export class WorkflowNodeElement extends React.PureComponent {
             else if (qcStatus === 'error') markerProps.className += ' status-error';
         }
 
-        if (selected && qc.url){
+        if (selected && qc.url && canShowMetricURL === true){
             markerProps.className += ' clickable';
             return <a href={qc.url} target="_blank" rel="noreferrer noopener" {...markerProps} onClick={function(e){
                 e.preventDefault();

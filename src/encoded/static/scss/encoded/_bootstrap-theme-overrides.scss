@@ -13,6 +13,7 @@
 
 .btn {
     font-weight: 500;
+    text-decoration: none !important;
 
     &:not(.btn-sm):not(.btn-xs):not(.btn-lg) {
         // overrides .375rem to better align inline text & icon fonts
@@ -22,6 +23,16 @@
     > i.icon {
         vertical-align: middle;
         transform: translate(0,-0.45px);
+    }
+
+    &.disabled,
+    &:disabled {
+        cursor: default;
+        pointer-events: auto;
+
+        &:active {
+            pointer-events: none;
+        }
     }
 }
 
@@ -47,7 +58,7 @@
 /** Extending Bootstrap button w/ rounded & ext-padding class **/
 /** btn-xs was removed in Bootstrap v4 so we recreate it here **/
 .btn.btn-xs {
-    @include button-size(1px, 5px, 0.825rem, 1.5, $border-radius-small);
+    @include button-size(1px, 5px, 0.825rem, 1.5);
     font-weight: 400;
     padding-top: 2px;
     > i.icon:only-child {
@@ -72,12 +83,19 @@
 }
 
 .btn.btn-primary {
+    color: #fff;
+
     /* Using brand-primary-dark color in place of default "darken(...)" to match rest of UI more nicely. */
     /* border-color: $brand-primary-dark; */
     &:hover, &:active, &.active {
         background-color: $brand-primary-dark;
         border-color: $brand-primary-dark;
+        color: #fff;
     }
+}
+
+.btn.btn-success {
+    color: #fff;
 }
 
 /* Light gray BG, more prominent button style than btn-default */
@@ -86,6 +104,12 @@
     &:active, &:focus {
         //background-color: #e4e4e4;
     }
+}
+
+.btn-close {
+	&:focus {
+		box-shadow: none;
+	}
 }
 
 /* Styling dropdown menus */
@@ -260,9 +284,15 @@
 
 		> .modal-header {
 			padding-top: 1.125rem; // Overrides 1rem.
-			> button.close {
+			> button.btn-close {
 				margin-top: -0.875rem; // Overrides -1rem.
 			}
+            > .modal-title {
+                margin: 0;
+            }
+            > .btn-close {
+                font-size: 0.85rem;
+            }
 		}
 
 		.modal-body p {
@@ -295,6 +325,21 @@ div[role="dialog"] {
 	position: relative;
 	> img {
 		max-width: 100%;
+	}
+}
+
+/**************************************
+ ************ Link Styles ***********
+ **************************************/
+
+ a {
+	text-decoration: none;
+	text-underline-offset: 0.125em;
+
+	&.link-underline-hover {
+		&:hover {
+			text-decoration: underline !important;
+		}
 	}
 }
 

@@ -226,7 +226,7 @@ class SummaryIcon extends React.PureComponent {
                 const countCommendations = badgesByClassification.Commendation.length;
                 const tooltip = countCommendations + " Commendation" + (countCommendations > 1 ? "s" : "");
                 return (
-                    <div className="d-inline-block pie-chart-icon-container mr-08" data-tip={tooltip}>
+                    <div className="d-inline-block pie-chart-icon-container me-08" data-tip={tooltip}>
                         <svg height={size} width={size} style={{ verticalAlign : 'middle' }}>
                             <EmbeddableSVGBadgeIcon badgeType="gold" size={size} />
                         </svg>
@@ -279,7 +279,7 @@ class SummaryIcon extends React.PureComponent {
         }).join(' + ');
 
         return (
-            <div className="d-inline-block pie-chart-icon-container mr-08" data-tip={tooltip}>
+            <div className="d-inline-block pie-chart-icon-container me-08" data-tip={tooltip}>
                 <svg width={size} height={size} style={{ verticalAlign : 'middle' }}>
                     <g transform={"translate(" + outerRadius + "," + outerRadius + ")"}>{ this.generateArcs(classificationRatioPairs) }</g>
                 </svg>
@@ -382,7 +382,7 @@ class BadgeItem extends React.PureComponent {
                 titleToShow = <React.Fragment>{ parentTypeTitle } <span className="text-600">{ parentDisplayTitle }</span></React.Fragment>;
                 tooltip = parentItem.description || tooltip;
             }
-            linkMsg = <div className="mt-02"><a href={parentID} data-tip={tooltip}>View { titleToShow }</a></div>;
+            linkMsg = <div className="mt-02"><a href={parentID} className="link-underline-hover" data-tip={tooltip}>View { titleToShow }</a></div>;
         }
 
         const image = badge_icon && (<div className="text-center icon-container"><img src={badge_icon} /></div>);
@@ -409,7 +409,7 @@ class BadgeItem extends React.PureComponent {
                         <div className="inner mb-05">
                             <h4 className="text-500 mb-0 mt-0">
                                 { badgeTitle }
-                                { description ? <i className="icon icon-fw icon-info-circle fas ml-05" data-tip={description} /> : null }
+                                { description ? <i className="icon icon-fw icon-info-circle fas ms-05" data-tip={description} /> : null }
                             </h4>
                             { renderedMessages }
                             { linkMsg }

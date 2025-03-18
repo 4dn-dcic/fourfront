@@ -104,7 +104,7 @@ class PublicationSummary extends React.PureComponent {
                         <h4 className={"mt-" + (Array.isArray(authors) && authors.length > 0 ? '3' : '2') + " mb-1 text-500"}>
                             Link
                         </h4>
-                        <p><a href={url} target="_blank" rel="noopener noreferrer">{ url }</a></p>
+                        <p><a href={url} className="link-underline-hover" target="_blank" rel="noopener noreferrer">{ url }</a></p>
                     </React.Fragment>
                     : null }
 
@@ -161,7 +161,7 @@ class PublicationSummary extends React.PureComponent {
                                 </h4>
                                 {
                                     _.map(categories, (cat)=>
-                                        <a className="btn btn-xs btn-info mr-02 mb-02 text-capitalize"
+                                        <a className="btn btn-xs btn-info me-02 mb-02 text-capitalize"
                                             href={"/search/?type=Publication&categories=" + encodeURIComponent(cat) }>
                                             { cat }
                                         </a>

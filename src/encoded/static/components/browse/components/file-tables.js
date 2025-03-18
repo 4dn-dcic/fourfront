@@ -115,7 +115,7 @@ class FileColumnActionsBtn extends React.PureComponent {
         }
 
         return (
-            <DropdownItem data-tip="Visualize this file in TCGA's JuiceBox Browser" onClick={onClick} key="juicebox" className="text-left">
+            <DropdownItem data-tip="Visualize this file in TCGA's JuiceBox Browser" onClick={onClick} key="juicebox" className="text-start">
                 JuiceBox <i className="icon icon-fw icon-external-link-alt text-smaller fas"/>
             </DropdownItem>
         );
@@ -145,7 +145,7 @@ class FileColumnActionsBtn extends React.PureComponent {
         }
 
         return (
-            <DropdownItem data-tip="Visualize this file in WashU Epigenome Browser" onClick={onClick} key="epigenome" className="text-left">
+            <DropdownItem data-tip="Visualize this file in WashU Epigenome Browser" onClick={onClick} key="epigenome" className="text-start">
                 Epigenome Browser <i className="icon icon-fw icon-external-link-alt text-smaller fas"/>
             </DropdownItem>
         );
@@ -205,7 +205,7 @@ export function renderFileTitleColumn(file, field, detailIndex, fileEntryBlockPr
         }
     }
 
-    const className = 'title-of-file' + (file.accession ? ' text-monospace' : '');
+    const className = 'link-underline-hover title-of-file' + (file.accession ? ' font-monospace' : '');
 
     /**
      * Allow these file rows to be dragged to other places.
@@ -343,8 +343,8 @@ export class RawFilesStackedTable extends React.PureComponent {
             case 'custom':
             case 'experiment':
                 return [
-                    { columnClass: 'biosample',     className: 'text-left',     title: 'Biosample',     initialWidth: 115   },
-                    { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment',    initialWidth: 145   },
+                    { columnClass: 'biosample',     className: 'text-start',     title: 'Biosample',     initialWidth: 115   },
+                    { columnClass: 'experiment',    className: 'text-start',     title: 'Experiment',    initialWidth: 145   },
                     { columnClass: 'file-group',                                title: 'File Group',    initialWidth: 30,   visibleTitle : function(stackedBlockProps){
                         if (stackedBlockProps.selectedFiles && Array.isArray(stackedBlockProps.allFiles)){
                             return <FileHeaderWithCheckbox {..._.pick(stackedBlockProps, 'selectedFiles', 'allFiles', 'handleFileCheckboxChange' )} data-tip="Select all files in this table" />;
@@ -355,8 +355,8 @@ export class RawFilesStackedTable extends React.PureComponent {
                 ];
             default:
                 return [
-                    { columnClass: 'biosample',     className: 'text-left',     title: 'Biosample',     initialWidth: 115   },
-                    { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment',    initialWidth: 145   },
+                    { columnClass: 'biosample',     className: 'text-start',     title: 'Biosample',     initialWidth: 115   },
+                    { columnClass: 'experiment',    className: 'text-start',     title: 'Experiment',    initialWidth: 145   },
                     { columnClass: 'file',          className: 'has-checkbox',  title: 'File',          initialWidth: 125,  render: renderFileTitleColumn, visibleTitle : renderFileHeaderWithCheckbox }
                 ];
         }
@@ -486,8 +486,8 @@ export class RawFilesStackedTable extends React.PureComponent {
         'fadeIn'        : true,
         'width'         : null,
         'columnHeaders'     : [
-            { columnClass: 'biosample',     className: 'text-left',     title: 'Biosample',     initialWidth: 115   },
-            { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment',    initialWidth: 145   },
+            { columnClass: 'biosample',     className: 'text-start',     title: 'Biosample',     initialWidth: 115   },
+            { columnClass: 'experiment',    className: 'text-start',     title: 'Experiment',    initialWidth: 145   },
             { columnClass: 'file-detail',                               title: 'File Size',     initialWidth: 80,   field : "file_size" }
         ],
         'collapseLongLists' : true,
@@ -654,14 +654,14 @@ export class RawFilesStackedTable extends React.PureComponent {
 
 
         const showMoreExtTitle = preventExpand && experimentSet ? (
-            <a href={object.itemUtil.atId(experimentSet)}>(view in Experiment Set)</a>
+            <a href={object.itemUtil.atId(experimentSet)} className="link-underline-hover">(view in Experiment Set)</a>
         ) : null;
 
         return (
             <StackedBlock key={ experimentAtId || exp.tec_rep_no || i } hideNameOnHover={false} columnClass="experiment" stripe={this.cache.oddExpRow}
                 label={<StackedBlockNameLabel title="Experiment" accession={exp.accession} subtitleVisible />}>
                 <StackedBlockName relativePosition={expFxn.fileCountFromSingleExperiment(exp) > 6}>
-                    { experimentAtId ? <a href={experimentAtId} className="name-title">{ linkTitle }</a> : <span className="name-title">{ linkTitle }</span> }
+                    { experimentAtId ? <a href={experimentAtId} className="link-underline-hover name-title">{ linkTitle }</a> : <span className="name-title">{ linkTitle }</span> }
                 </StackedBlockName>
                 <StackedBlockList {...{ collapseLimit, collapseShow, collapseLongLists, showMoreExtTitle, collapseShowMoreLimit, collapseItemsIncrement }} title={listTitle} className={contentsClassName}>
                     { contents }
@@ -684,7 +684,7 @@ export class RawFilesStackedTable extends React.PureComponent {
             <React.Fragment>
                 { appendCountStr }
                 { preventExpand ?
-                    <a href={object.itemUtil.atId(experimentSet)}>(view in Experiment Set)</a>
+                    <a href={object.itemUtil.atId(experimentSet)} className="link-underline-hover">(view in Experiment Set)</a>
                     : null }
             </React.Fragment>
         );
@@ -695,7 +695,7 @@ export class RawFilesStackedTable extends React.PureComponent {
                 label={<StackedBlockNameLabel title="Biosample" subtitle={bioRepTitle} accession={biosample.accession} subtitleVisible/>}>
                 <StackedBlockName relativePosition={expsWithBiosample.length > 3 || expFxn.fileCountFromExperiments(expsWithBiosample) > 6}>
                     { biosampleAtId ?
-                        <a href={biosampleAtId} className="name-title">{ biosampleTitle }</a>
+                        <a href={biosampleAtId} className="link-underline-hover name-title">{ biosampleTitle }</a>
                         : <span className="name-title">{ biosampleTitle }</span> }
                 </StackedBlockName>
                 <StackedBlockList className="experiments" title="Experiments" {...{ collapseLimit, collapseShow, showMoreExtTitle, collapseShowMoreLimit, collapseItemsIncrement }}>
@@ -741,7 +741,7 @@ export class RawFilesStackedTable extends React.PureComponent {
             <React.Fragment>
                 { appendCountStr }
                 { preventExpand ?
-                    <a href={object.itemUtil.atId(experimentSet)}>(view in Experiment Set)</a>
+                    <a href={object.itemUtil.atId(experimentSet)} className="link-underline-hover">(view in Experiment Set)</a>
                     : null }
             </React.Fragment>
         );
@@ -800,7 +800,7 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
 
     static defaultProps = {
         'columnHeaders' : [
-            { columnClass: 'experiment',  title: 'Experiment',  className: 'text-left',     initialWidth: 180  },
+            { columnClass: 'experiment',  title: 'Experiment',  className: 'text-start',     initialWidth: 180  },
             //{ columnClass: 'file-group',  title: 'File Group',initialWidth: 40, visibleTitle : <i className="icon icon-download fas"></i> },
             { columnClass: 'file',        title: 'File',        className: 'has-checkbox',  initialWidth: 165,  render: renderFileTitleColumn,          visibleTitle: renderFileHeaderWithCheckbox },
             { columnClass: 'file-detail', title: 'File Type',                               initialWidth: 135,  render: renderFileTypeSummaryColumn     },
@@ -943,7 +943,7 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
             const nameBlock = (
                 <StackedBlockName className={replicateNumbersExists ? "double-line" : ""}>
                     { replicateNumbersExists ? <div>Bio Rep <b>{ experiment.bio_rep_no }</b>, Tec Rep <b>{ experiment.tec_rep_no }</b></div> : <div/> }
-                    { experimentAtId ? <a href={experimentAtId} className="name-title text-500">{ nameTitle }</a> : <div className="name-title">{ nameTitle }</div> }
+                    { experimentAtId ? <a href={experimentAtId} className="link-underline-hover name-title">{ nameTitle }</a> : <div className="name-title">{ nameTitle }</div> }
                 </StackedBlockName>
             );
 
@@ -951,7 +951,7 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
             let showMoreExtTitle = null;
             if (preventExpand && expSetAccession) {
                 const expSetHref = object.itemUtil.atId(experiment.from_experiment_set) + (showMoreTargetTabKey ? '#' + showMoreTargetTabKey : '');
-                showMoreExtTitle = <a href={expSetHref}>(view in Experiment Set)</a>;
+                showMoreExtTitle = <a href={expSetHref} className="link-underline-hover">(view in Experiment Set)</a>;
             }
 
             return (
@@ -1000,14 +1000,14 @@ export class RawFilesStackedTableExtendedColumns extends React.PureComponent {
             return (
                 <span>
                     <i className="icon icon-check success fas" style={{ 'color' : 'green' }}/>
-                    &nbsp; { linkToReport ? <a href={linkToReport} target="_blank" rel="noreferrer noopener">Pass</a> : "Pass"}
+                    &nbsp; { linkToReport ? <a href={linkToReport} className="link-underline-hover" target="_blank" rel="noreferrer noopener">Pass</a> : "Pass"}
                 </span>
             );
         } else if (val === 'FAIL'){
             return (
                 <span>
                     <i className="icon icon-times fas" style={{ 'color' : 'red' }}/>
-                    &nbsp; { linkToReport ? <a href={linkToReport} target="_blank" rel="noreferrer noopener">Fail</a> : "Fail"}
+                    &nbsp; { linkToReport ? <a href={linkToReport} className="link-underline-hover" target="_blank" rel="noreferrer noopener">Fail</a> : "Fail"}
                 </span>
             );
         } else {
@@ -1091,18 +1091,23 @@ export class QCMetricsTable extends React.PureComponent {
         return (
             <React.Fragment>
                 <div>{Schemas.Term.toName("file_type_detailed", file.file_type_detailed, true)}</div>
-                <a className="text-500 name-title" href={fileAtId}>
+                <a className="link-underline-hover name-title" href={fileAtId}>
                     {fileTitleString}
                 </a>
             </React.Fragment>
         );
     }
-
-    static generateAlignedColumnHeaders(fileGroups) {
+    /**
+     * Generates column headers for QCMetricsTable including render functions for each column
+     * @param {*} fileGroups file groups
+     * @param {*} canShowMetricURL 2025-01-22: hide QC HTML Report Links upon removal of bulk html reports already generated
+     * @returns columnHeaders for QCMetricsTable including render functions for each column
+     */
+    static generateAlignedColumnHeaders(fileGroups, canShowMetricURL = false) {
         return fileGroups.map(function (fileGroup) {
             const titleTooltipsByQMSTitle = QCMetricsTable.qcSummaryItemTitleTooltipsByTitle(fileGroup);
             const columnHeaders = [ // Static / present-for-each-table headers
-                { columnClass: 'experiment', title: 'Experiment', initialWidth: 145, className: 'text-left' },
+                { columnClass: 'experiment', title: 'Experiment', initialWidth: 145, className: 'text-start' },
                 { columnClass: 'file', className: 'double-height-block', title: 'For File', initialWidth: 100, render: QCMetricsTable.renderForFileColValue }
             ].concat(fileGroup[0].quality_metric.quality_metric_summary.map(function (qmsObj, qmsIndex) { // Dynamic Headers
                 const { title, title_tooltip } = qmsObj;
@@ -1125,7 +1130,7 @@ export class QCMetricsTable extends React.PureComponent {
                 return f && f.quality_metric && f.quality_metric.url;
             });
 
-            if (anyFilesWithMetricURL) {
+            if (anyFilesWithMetricURL && canShowMetricURL) {
                 columnHeaders.push({ columnClass: 'file-detail', title: 'Report', initialWidth: 35, render: renderFileQCReportLinkButton });
                 columnHeaders.push({ columnClass: 'file-detail', title: 'Details', initialWidth: 35, render: renderFileQCDetailLinkButton });
             } else {
@@ -1235,18 +1240,21 @@ export class QCMetricsTable extends React.PureComponent {
 }
 
 export function QCMetricFromSummary(props){
-    const { title } = props;
+    const { title, field } = props;
     const { value, tooltip } = QCMetricFromSummary.formatByNumberType(props);
+
+    // 2025-01-22: hide QC HTML Report Links upon removal of bulk html reports already generated
+    if (field === 'url') { return null; }
 
     return (
         <div className="overview-list-element">
             <div className="row">
-                <div className="col-4 text-right">
+                <div className="col-4 text-end">
                     <h5 className="mb-0 mt-02">{ title }</h5>
                 </div>
                 <div className="col-8">
                     <div className="inner value">
-                        { tooltip ? <i className="icon icon-fw icon-info-circle mr-05 fas" data-tip={tooltip} /> : null }
+                        { tooltip ? <i className="icon icon-fw icon-info-circle me-05 fas" data-tip={tooltip} /> : null }
                         { value }
                     </div>
                 </div>

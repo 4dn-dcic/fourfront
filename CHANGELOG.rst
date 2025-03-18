@@ -6,12 +6,109 @@ fourfront
 Change Log
 ----------
 
-8.2.0
+8.6.0
 =====
 
 * Merged in master (2024-10-09)
 * Update DRS API to return JSON always
 * Update DRS download URLs to return direct downloads to Open Data where applicable
+
+  
+8.5.1
+=====
+
+`PR 1921: QC report links updates <https://github.com/4dn-dcic/fourfront/pull/1921>`_
+
+* Bug fix: Hide QC HTML Report Links of WFR node details upon removal of bulk html reports already generated
+
+
+8.5.0
+=====
+
+`PR 1920: npm security updates + statistics page improvements <https://github.com/4dn-dcic/fourfront/pull/1920>`_
+
+* Critical npm package updates for security vulnerabilities
+* New usage statistics table shows daily counts in tabular form
+* New TrackingItem viewer triggered by usage statistics table cell click (admin-only)
+* New Y-Axis scaling for usage statistics
+* Enhanced table-full-size toggles for usage statistics
+* New histogram interval options for submission statistics
+* Chart section header styles updated
+* Hide QC HTML Report Links upon removal of bulk html reports already generated
+
+
+8.4.6
+=====
+
+`PR 1919: Add suggested enum value to file_type <https://github.com/4dn-dcic/fourfront/pull/1919>`_
+
+* Add 'coverage' as a suggested_enum value for processed file file_type
+
+
+8.4.5
+=====
+
+`PR 1917: Add tests to verify the presence and non-empty content of <pre> elements <https://github.com/4dn-dcic/fourfront/pull/1917>`_
+
+* Update: Added tests to verify the presence and non-empty content of `<pre>` elements inside static section
+
+
+8.4.4
+=====
+
+`Enable React Tooltip for Disabled Buttons <https://github.com/4dn-dcic/fourfront/pull/1916>`_
+
+* Resolved an issue where **React Tooltip** was not displayed for `button` elements with the `disabled` attribute.
+* Updated CSS for disabled buttons:
+    - `cursor` is now set to `default`.
+    - `pointer-events` is now set to `auto`.
+* Tooltips are now consistently visible for disabled buttons.
+
+
+8.4.3
+=====
+
+`Update treatment item display title <https://github.com/4dn-dcic/fourfront/pull/1915>`_
+
+* Add 'override_treatment_title' property to Treatment items
+* Tweak the display_title calcprop to:
+  - use the override_treatment_title prop if present
+  - for biological treatments with constructs but no biological agent use construct names in treatment display_title
+* added tests
+
+
+8.4.2
+=====
+
+`Fix bar chart's x-axis dropdown width issue <https://github.com/4dn-dcic/fourfront/pull/1914>`_
+
+* Bug fix: The x-axis dropdown of the bar chart displayed on the home page and browse view is not correctly rendered on small and mid-size screens
+
+
+8.4.1
+=====
+
+* New enum added "ATTO 550" for imaging_path/labels
+
+
+8.4.0
+=====
+
+* Upgrade: Bootstrap v5
+* Upgrade: React-Bootstrap v2
+* Upgrade: FontAwesome v6
+
+
+8.3.0
+=======
+* 2024-10-11/dmichaels
+* Updated dcicutils version (8.16.1) for vulnerabilities.
+
+
+8.2.0
+=====
+
+* Node 18 to 20 upgrade including GitHub actions
 
 
 8.1.5

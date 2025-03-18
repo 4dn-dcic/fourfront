@@ -90,10 +90,10 @@ class QualityMetricViewOverview extends React.PureComponent {
                 <div className="overview-list-elements-container">
                     {_.map(quality_metric_summary, function (qmsItem) { return <QCMetricFromSummary {...qmsItem} key={qmsItem.title} />; })}
                     {context.url ?
-                        <QCMetricFromSummary title="Report" tooltip="Link to full quality metric report" value={
+                        <QCMetricFromSummary title="Report" tooltip="Link to full quality metric report" field="url" value={
                             <React.Fragment>
                                 <a href={context.url} target="_blank" rel="noopener noreferrer">{valueTransforms.hrefToFilename(context.url)}</a>
-                                <i className="ml-05 icon icon-fw icon-external-link-alt text-small fas" />
+                                <i className="ms-05 icon icon-fw icon-external-link-alt text-small fas" />
                             </React.Fragment>
                         } />
                         : null}
@@ -191,6 +191,9 @@ class QCMetricFromEmbed extends React.PureComponent {
         const { metric, qcProperty, schemaItem, schemas, fallbackTitle, tips, percent } = this.props;
         const { open, closing } = this.state;
 
+        // 2025-01-22: hide QC HTML Report Links upon removal of bulk html reports already generated
+        if (qcProperty === "url") return null;
+
         const { qc_order = null, title = null, description: tip = null } = schemaItem || {};
         if (schemaItem && typeof qc_order !== 'number') return null;
         let value = metric[qcProperty];
@@ -223,7 +226,7 @@ class QCMetricFromEmbed extends React.PureComponent {
                     return (
                         <div className="overview-list-element">
                             <div className="row">
-                                <div className="col-4 text-right">
+                                <div className="col-4 text-end">
                                     <object.TooltipInfoIconContainerAuto
                                         elementType="h5" fallbackTitle={(index + 1) + "."}
                                         className="mb-0 mt-02 text-break" />
@@ -245,7 +248,7 @@ class QCMetricFromEmbed extends React.PureComponent {
                 return (
                     <div className="overview-list-element">
                         <div className="row">
-                            <div className="col-4 text-right">
+                            <div className="col-4 text-end">
                                 <object.TooltipInfoIconContainerAuto
                                     elementType="h5" fallbackTitle={(index + 1) + "."}
                                     className="mb-0 mt-02 text-break" />
@@ -267,7 +270,7 @@ class QCMetricFromEmbed extends React.PureComponent {
                     (
                         <div className="overview-list-element">
                             <div className="row">
-                                <div className="col-4 text-right">
+                                <div className="col-4 text-end">
                                     <object.TooltipInfoIconContainerAuto result={metric} property={qcProperty} title={title} tips={tip || tips}
                                         elementType="h5" fallbackTitle={fallbackTitle || qcProperty} schemas={schemas}
                                         className="mb-0 mt-02 text-break" />
@@ -279,7 +282,7 @@ class QCMetricFromEmbed extends React.PureComponent {
                                 </div>
                             </div>
                         </div>
-                    ) : (<h5 className="qc-grouping-title" onClick={this.toggleOpen}><i className={"icon icon-fw fas mr-5 icon-" + (open ? 'minus' : 'plus')} /><span>{title || qcProperty}</span></h5>)}
+                    ) : (<h5 className="qc-grouping-title" onClick={this.toggleOpen}><i className={"icon icon-fw fas me-5 icon-" + (open ? 'minus' : 'plus')} /><span>{title || qcProperty}</span></h5>)}
                 {subQCRows ?
                     (
                         <Collapse in={open}>
@@ -326,10 +329,10 @@ export class QualityControlResults extends React.PureComponent {
             <div className="overview-list-elements-container">
                 { _.map(file.quality_metric.quality_metric_summary, function(qmsItem){ return <QCMetricFromSummary {...qmsItem} key={qmsItem.title} />; }) }
                 { metricURL ?
-                    <QCMetricFromSummary title="Report" tooltip="Link to full quality metric report" value={
+                    <QCMetricFromSummary title="Report" tooltip="Link to full quality metric report" field="url" value={
                         <React.Fragment>
                             <a href={metricURL} target="_blank" rel="noopener noreferrer">{ valueTransforms.hrefToFilename(metricURL) }</a>
-                            <i className="ml-05 icon icon-fw icon-external-link-alt text-small fas"/>
+                            <i className="ms-05 icon icon-fw icon-external-link-alt text-small fas"/>
                         </React.Fragment>
                     } />
                     : null }

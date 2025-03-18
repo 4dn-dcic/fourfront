@@ -96,7 +96,7 @@ export class TopRow extends React.Component {
             <div className="indicator-item view-ajax-button">
                 <i className="icon icon-fw icon-file-code far"/>{' '}
                 <a href={viewUrl}
-                    className="d-inline-block" target="_blank" rel="noreferrer noopener" tabIndex="3"
+                    className="link-underline-hover d-inline-block" target="_blank" rel="noreferrer noopener" tabIndex="3"
                     data-tip="Open raw JSON in new window" onClick={(e)=>{
                         if (window && window.open){
                             e.preventDefault();
@@ -126,7 +126,7 @@ export class TopRow extends React.Component {
             function(action, i){ // For each action, generate a clickable element.
                 return (
                     <div className="indicator-item action-button" data-action={action.name || null} key={action.name || i}>
-                        <a href={action.href} data-tip={itemActionsDescriptions[action.name]}>{ action.title }</a>
+                        <a href={action.href}  className="link-underline-hover" data-tip={itemActionsDescriptions[action.name]}>{ action.title }</a>
                     </div>
                 );
             }
@@ -336,7 +336,7 @@ export const BottomRow = React.memo(function BottomRow(props){
     }
 
     return (
-        <div className="row clearfix bottom-row">
+        <div className="row clearfix bottom-row mt-1">
             <div className="col text-300 set-type-indicators">{ children }</div>
             <h5 className="col-md-auto text-300 date-indicator">
                 { dateToUse?
