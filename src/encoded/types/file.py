@@ -1688,15 +1688,16 @@ def build_drs_object_from_props(drs_object_base, props):
     drs_object_base['aliases'] = [props['uuid']]
 
     # fields that are mapped to different names/structure
-    if 'content_md5sum' in props:
+    if 'content_md5sum' in props or 'md5sum' in props:
+        md5 = props.get('content_md5sum', props.get('md5sum'))
         drs_object_base['checksums'] = [
             {
-                'checksum': props['content_md5sum'],
+                'checksum': md5,
                 'type': 'md5'
             }
         ]
         # use md5sum as version
-        drs_object_base['version'] = props['content_md5sum']
+        drs_object_base['version'] = md5
     if 'filename' in props:
         drs_object_base['name'] = props['filename']
     if 'last_modified' in props:
