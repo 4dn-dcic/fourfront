@@ -1689,7 +1689,7 @@ def build_drs_object_from_props(drs_object_base, props):
 
     # fields that are mapped to different names/structure
     if 'content_md5sum' in props or 'md5sum' in props:
-        md5 = props.get('content_md5sum', props.get('md5sum'))
+        md5 = props.get('md5sum', props.get('content_md5sum'))
         drs_object_base['checksums'] = [
             {
                 'checksum': md5,
