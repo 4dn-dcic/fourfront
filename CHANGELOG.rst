@@ -6,6 +6,14 @@ fourfront
 Change Log
 ----------
 
+8.6.0
+=====
+
+* Merged in master (2024-10-09)
+* Update DRS API to return JSON always
+* Update DRS download URLs to return direct downloads to Open Data where applicable
+
+  
 8.5.1
 =====
 
@@ -161,7 +169,7 @@ Change Log
 7.10.1
 =====
 
-* Bug fix to revert schema version of workflow.json back to 7 
+* Bug fix to revert schema version of workflow.json back to 7
 
 
 7.10.0
@@ -212,6 +220,7 @@ Change Log
 `Add ignored enum  <https://github.com/4dn-dcic/fourfront/pull/1897>`_
 
 * Add value to ignored_enum for file_type
+>>>>>>> master
 
 
 7.5.7
