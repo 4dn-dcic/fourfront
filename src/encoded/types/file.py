@@ -20,6 +20,7 @@ from pyramid.settings import asbool
 from pyramid.threadlocal import get_current_request
 from pyramid.traversal import resource_path
 from pyramid.view import view_config
+from pyramid.response import Response
 from snovault import (
     AfterModified,
     BeforeModified,
@@ -569,7 +570,7 @@ class File(Item):
     def track_and_facet_info(self, request, biosource_name=None):
         props = self.upgrade_properties()
         # order matters here at leat for last 2 fields
-        fields = ['experiment_type', 'assay_info', 'experimental_lab', 'dataset', 'condition', 
+        fields = ['experiment_type', 'assay_info', 'experimental_lab', 'dataset', 'condition',
                   'biosource_name', 'replicate_info', 'experiment_bucket', 'lab_name', 'track_title']
         # look for existing _props
         track_info = {field: props.get('override_' + field) for field in fields}
@@ -1687,15 +1688,16 @@ def build_drs_object_from_props(drs_object_base, props):
     drs_object_base['aliases'] = [props['uuid']]
 
     # fields that are mapped to different names/structure
-    if 'content_md5sum' in props:
+    if 'content_md5sum' in props or 'md5sum' in props:
+        md5 = props.get('md5sum', props.get('content_md5sum'))
         drs_object_base['checksums'] = [
             {
-                'checksum': props['content_md5sum'],
+                'checksum': md5,
                 'type': 'md5'
             }
         ]
         # use md5sum as version
-        drs_object_base['version'] = props['content_md5sum']
+        drs_object_base['version'] = md5
     if 'filename' in props:
         drs_object_base['name'] = props['filename']
     if 'last_modified' in props:
@@ -1709,26 +1711,23 @@ def drs(context, request):
     """ DRS object implementation for file. """
     rendered_object = request.embed(str(context.uuid), '@@object', as_user=True)
     accession = rendered_object['accession']
+    open_data_url = rendered_object.get('open_data_url', None)
+    # TODO: implement access_id mechanism
+    if not open_data_url:
+        return Response('Access ID support planned for the future', status=404)
     drs_object_base = {
-        'id': rendered_object['@id'],
+        'id': accession,
         'created_time': rendered_object['date_created'],
-        'drs_id': accession,
-        'self_uri': f'drs://{request.host}{request.path}',
+        'self_uri': f'drs://{request.host}/{accession}',
         'access_methods': [
             {
-                # always prefer https
+                # always use open data
                 'access_url': {
-                    'url': f'https://{request.host}/{accession}/@@download'
+                    'url': open_data_url
                 },
-                'type': 'https'
-            },
-            {
-                # but provide http as well in case we are not on prod
-                'access_url': {
-                    'url': f'http://{request.host}/{accession}/@@download'
-                },
-                'type': 'http'
-            },
+                'type': 'https',
+                'access_id': 'https'
+            }
         ]
     }
     return build_drs_object_from_props(drs_object_base, rendered_object)
