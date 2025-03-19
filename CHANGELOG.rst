@@ -6,8 +6,21 @@ fourfront
 Change Log
 ----------
 
+
+8.6.1
+=====
+
+`PR 1922: QC Suggested enum updates <https://github.com/4dn-dcic/fourfront/pull/1922>`_
+
+* added file_type suggested_enums
+* reorg file_type suggested_enums (alphabetize and move some to ignored)
+* added imaging_path/labels suggested_enum
+  
+
 8.6.0
 =====
+
+`PR 1895: DRS updates <https://github.com/4dn-dcic/fourfront/pull/1895>`_
 
 * Merged in master (2024-10-09)
 * Update DRS API to return JSON always
