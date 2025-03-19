@@ -6,6 +6,11 @@ fourfront
 Change Log
 ----------
 
+8.6.2
+=====
+
+* and add one more suggested_enum that I forgot
+
 
 8.6.1
 =====
