@@ -42,6 +42,7 @@ def file(testapp, award, experiment, lab, file_formats):
 
 
 def validate_drs_conversion(drs_obj, meta, uri=None):
+    # import pdb; pdb.set_trace()
     """ Validates drs object structure against the metadata in the db """
     assert drs_obj['id'] == meta['accession']
     assert drs_obj['created_time'] == meta['date_created']
@@ -49,7 +50,11 @@ def validate_drs_conversion(drs_obj, meta, uri=None):
     assert drs_obj['version'] == meta['md5sum']
     assert drs_obj['name'] == meta['filename']
     assert drs_obj['aliases'] == [meta['uuid']]
-    assert drs_obj['access_methods'][0]['access_id'] == 'https'
+    for method in drs_obj['access_methods']:
+        if method['type'] == 'https':
+            assert method['access_url']['url'] == f'https://4dn-open-data-public.s3.amazonaws.com/fourfront-webprod/wfoutput/{meta["upload_key"]}'
+        if method['type'] == 's3':
+            assert method['access_url']['url'] == f's3://4dn-open-data-public/fourfront-webprod/wfoutput/{meta["upload_key"]}'
 
 
 def test_processed_file_drs_view(testapp, mcool_file_json):

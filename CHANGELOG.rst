@@ -6,6 +6,12 @@ fourfront
 Change Log
 ----------
 
+
+8.6.3b1
+=====
+
+* add s3 uri to drs response
+
 8.6.2
 =====
 
