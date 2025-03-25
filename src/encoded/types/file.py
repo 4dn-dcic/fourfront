@@ -1715,6 +1715,7 @@ def drs(context, request):
     # TODO: implement access_id mechanism
     if not open_data_url:
         return Response('Access ID support planned for the future', status=404)
+    s3_uri = '/'.join(open_data_url.split(".s3.amazonaws.com/")).replace('https', 's3')
     drs_object_base = {
         'id': accession,
         'created_time': rendered_object['date_created'],
@@ -1727,6 +1728,15 @@ def drs(context, request):
                 },
                 'type': 'https',
                 'access_id': 'https'
+            },
+            {
+                # add s3 method for open data
+                'access_url': {
+                    'url': s3_uri
+                },
+                'type': 's3',
+                'access_id': 's3',
+                'region': 'us-east-1'
             }
         ]
     }
