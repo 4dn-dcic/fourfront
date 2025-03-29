@@ -6,6 +6,12 @@ fourfront
 Change Log
 ----------
 
+8.6.3
+=====
+
+* fix suggested_enum typo
+
+
 8.6.2
 =====
 
