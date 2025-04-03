@@ -31,6 +31,13 @@ export const Footer = React.memo(function Footer(props){
                             </div>
                         </div>
                     </div>
+                    <div className="row">
+                        <div className="col-12">
+                            <div className="footer-section under-review-notice">
+                                This repository is under review for potential modification in compliance with Administration directives.
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </footer>
