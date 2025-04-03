@@ -7,10 +7,9 @@ Change Log
 ----------
 
 8.6.3
-=======
-`PR 1926: update footer text <https://github.com/4dn-dcic/fourfront/pull/1926>`_
+=====
 
-* Update text in footer
+* fix suggested_enum typo
 
 
 8.6.2
