@@ -309,12 +309,17 @@ h1.page-title + .page-subtitle {
 		display: block;
 		text-align: center;
 		color: #bfbfbf;
-		padding: 15px 0px 14px;
+		padding: 5px 0px 5px;
 
 		@include media-breakpoint-up(md){
 			text-align: right;
 			&.copy-notice {
 				text-align: left;
+			}
+			&.under-review-notice {
+				text-align: left;
+				padding-top: 0;
+				color: #b0b0b0;
 			}
 
 			li:last-child {

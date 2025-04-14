@@ -7,10 +7,25 @@ Change Log
 ----------
 
 
-8.6.3b1
+8.6.4b1
 =====
 
+* to become 8.6.5
 * add s3 uri to drs response
+
+
+8.6.4
+=======
+`PR 1926: update footer text <https://github.com/4dn-dcic/fourfront/pull/1926>`_
+
+* Update text in footer
+
+
+8.6.3
+=====
+
+* fix suggested_enum typo
+
 
 8.6.2
 =====
