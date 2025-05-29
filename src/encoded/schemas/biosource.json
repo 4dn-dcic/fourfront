@@ -140,7 +140,8 @@
             "permission": "import_items",
             "suggested_enum": [
                 "hamster",
-                "opossum"
+                "opossum",
+                "c-elegans"
             ],
             "lookup": 1000
         }

@@ -6,6 +6,12 @@ fourfront
 Change Log
 ----------
 
+8.6.5
+=======
+
+* Added new suggessted enums for ExperimentType:assay_subclassification, ExperimentType:assay_subclass_short, biosource:override_organism_name and ImagingPath:labels
+
+
 8.6.4
 =======
 `PR 1926: update footer text <https://github.com/4dn-dcic/fourfront/pull/1926>`_
