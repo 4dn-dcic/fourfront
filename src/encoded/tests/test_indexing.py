@@ -40,7 +40,7 @@ pytestmark = [pytest.mark.working, pytest.mark.indexing, pytest.mark.workbook]
 
 # These 4 versions are known to be compatible, older versions should not be
 # used, odds are 15 can be used as well - Will Jan 7 2023
-POSTGRES_COMPATIBLE_MAJOR_VERSIONS = ['11', '12', '13', '14']
+POSTGRES_COMPATIBLE_MAJOR_VERSIONS = ['11', '12', '13', '14', '15']
 
 
 def test_postgres_version(session):
