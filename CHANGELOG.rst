@@ -7,7 +7,7 @@ Change Log
 ----------
 
 
-8.8
+8.8.0
 =====
 `PR 1924: add s3 uri to drs reponse <https://github.com/4dn-dcic/fourfront/pull/1924>`_
 
