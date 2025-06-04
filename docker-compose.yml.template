@@ -50,6 +50,7 @@ services:
       # Default to caller's environment
       AWS_ACCESS_KEY_ID:
       AWS_SECRET_ACCESS_KEY:
+      AWS_SESSION_TOKEN: 
       # Needed to resolve env info
       GLOBAL_ENV_BUCKET:
       Auth0Client:
