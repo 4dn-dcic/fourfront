@@ -7,6 +7,12 @@ Change Log
 ----------
 
 
+8.8.1
+=====
+
+* Added new suggessted enums for ExperimentType:assay_subclassification, ExperimentType:assay_subclass_short, biosource:override_organism_name and ImagingPath:labels
+
+
 8.8.0
 =====
 `PR 1924: add s3 uri to drs reponse <https://github.com/4dn-dcic/fourfront/pull/1924>`_
