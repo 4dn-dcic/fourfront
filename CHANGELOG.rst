@@ -6,10 +6,20 @@ fourfront
 Change Log
 ----------
 
-8.6.5
-=======
 
-* Added new suggessted enums for ExperimentType:assay_subclassification, ExperimentType:assay_subclass_short, biosource:override_organism_name and ImagingPath:labels
+8.8.0
+=====
+`PR 1924: add s3 uri to drs reponse <https://github.com/4dn-dcic/fourfront/pull/1924>`_
+
+* add s3 uri to drs response
+
+
+8.7.0
+=======
+`PR 1928: update lockfile and postgres version <https://github.com/4dn-dcic/fourfront/pull/1928>`_
+
+* Update lockfile to latest versions of dependencies
+* Update postgres version to 15.5 in Dockerfile and docker-compose.yml  
 
 
 8.6.4
