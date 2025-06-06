@@ -115,7 +115,8 @@
                 "Scanning Electron Microscopy",
                 "Transmission Electron Microscopy",
                 "Chromatin Tracing",
-                "Synthetic Condensation"
+                "Synthetic Condensation",
+                "Epigenetic Profiling"
             ]
         },
         "assay_subclass_short": {
@@ -145,7 +146,8 @@
                 "Reporter Expression",
                 "OptoDroplet",
                 "SEM",
-                "TEM"
+                "TEM",
+                "Methylation"
             ],
             "default": "Unclassified",
             "exclude_from": ["submit4dn"]
