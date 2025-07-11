@@ -22,6 +22,9 @@ def fix_requirement(requirement):
         return _fix_requirement_string(requirement)
     elif isinstance(requirement, list):
         return fix_requirement(_select_requirement(requirement))
+    elif isinstance(requirement, dict):
+        import pdb; pdb.set_trace()
+        return _fix_requirement_dict(requirement)
     else:
         raise ValueError(f"Unrecognized requirement: {requirement!r}")
 
@@ -31,13 +34,11 @@ def _select_requirement(requirement):
         raise ValueError(f"{requirement!r} is not a list.")
     python_version = Version(f"{python_version_info.major}.{python_version_info.minor}.{python_version_info.micro}")
     for clause in requirement:
-        if set(clause.keys()) != {'python', 'version'}:
-            raise ValueError(f"Unanticipated requirement clause: {clause!r}")
+        if "python" not in clause:
+            raise ValueError(f"Missing 'python' in clause: {clause!r}")
         if SimpleSpec(clause['python']).match(python_version):
-            return clause['version']
-        else:
-            pass
-    raise ValueError(f"No clauses matched: {requirement!r}")
+            return clause
+        raise ValueError(f"No clauses matched: {requirement!r}")
 
 
 def _fix_requirement_string(requirement):
@@ -51,6 +52,20 @@ def _fix_requirement_string(requirement):
         return "==" + requirement
     else:
         return requirement
+
+
+def _fix_requirement_dict(requirement):
+    if "version" not in requirement:
+        raise ValueError(f"Missing 'version' in requirement: {requirement!r}")
+    
+    version = _fix_requirement_string(requirement["version"])
+    extras = requirement.get("extras", [])
+
+    if not extras:
+        return version
+    else:
+        extras_str = "[" + ",".join(extras) + "]"
+        return extras_str + version
 
 
 _EMAIL_MATCH = re.compile(r"^([^<]*)[<]([^>]*)[>]$")
