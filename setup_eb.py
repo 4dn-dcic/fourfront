@@ -23,7 +23,6 @@ def fix_requirement(requirement):
     elif isinstance(requirement, list):
         return fix_requirement(_select_requirement(requirement))
     elif isinstance(requirement, dict):
-        import pdb; pdb.set_trace()
         return _fix_requirement_dict(requirement)
     else:
         raise ValueError(f"Unrecognized requirement: {requirement!r}")
