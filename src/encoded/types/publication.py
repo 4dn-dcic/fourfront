@@ -153,7 +153,7 @@ def map_doi_pmid(doi):
     r = requests.get(www).text
     res = json.loads(r)
     try:
-        return res['records'][0]['pmid']
+        return str(res['records'][0]['pmid'])
     except Exception:
         return
 
