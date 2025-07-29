@@ -107,6 +107,7 @@
                 "tri-alignments"
             ],
             "ignored_enum": [
+                "AllC methylation and coverage counts",
                 "contact list-combined",
                 "contact list-replicate",
                 "calibration",
