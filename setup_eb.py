@@ -22,6 +22,8 @@ def fix_requirement(requirement):
         return _fix_requirement_string(requirement)
     elif isinstance(requirement, list):
         return fix_requirement(_select_requirement(requirement))
+    elif isinstance(requirement, dict):
+        return _fix_requirement_dict(requirement)
     else:
         raise ValueError(f"Unrecognized requirement: {requirement!r}")
 
@@ -31,13 +33,11 @@ def _select_requirement(requirement):
         raise ValueError(f"{requirement!r} is not a list.")
     python_version = Version(f"{python_version_info.major}.{python_version_info.minor}.{python_version_info.micro}")
     for clause in requirement:
-        if set(clause.keys()) != {'python', 'version'}:
-            raise ValueError(f"Unanticipated requirement clause: {clause!r}")
+        if "python" not in clause:
+            raise ValueError(f"Missing 'python' in clause: {clause!r}")
         if SimpleSpec(clause['python']).match(python_version):
-            return clause['version']
-        else:
-            pass
-    raise ValueError(f"No clauses matched: {requirement!r}")
+            return clause
+        raise ValueError(f"No clauses matched: {requirement!r}")
 
 
 def _fix_requirement_string(requirement):
@@ -53,6 +53,33 @@ def _fix_requirement_string(requirement):
         return requirement
 
 
+def _fix_requirement_dict(requirement):
+    extras = requirement.get("extras", [])
+    extras_str = f"[{','.join(extras)}]" if extras else ""
+
+    if "version" in requirement:
+        version = _fix_requirement_string(requirement["version"])
+        return f"{extras_str}{version}" if extras_str else version
+
+    # Handle VCS (Git) style requirements
+    vcs_keys = {"git", "hg", "svn", "bzr"}
+    vcs_type = next((key for key in vcs_keys if key in requirement), None)
+
+    if vcs_type:
+        vcs_url = requirement[vcs_type]
+        ref = ""
+        if "branch" in requirement:
+            ref = f"@{requirement['branch']}"
+        elif "rev" in requirement:
+            ref = f"@{requirement['rev']}"
+        elif "tag" in requirement:
+            ref = f"@{requirement['tag']}"
+
+        return f"{extras_str} {vcs_type}+{vcs_url}{ref}".strip()
+
+    raise ValueError(f"Unsupported requirement format: {requirement!r}")
+
+
 _EMAIL_MATCH = re.compile(r"^([^<]*)[<]([^>]*)[>]$")
 
 
@@ -66,7 +93,8 @@ def author_and_email(authorship_spec):
 
 def get_requirements(kind='dependencies'):
     return [
-        pkg + fix_requirement(requirement)
+        f"{pkg} @ {fix_requirement(requirement)}" if isinstance(requirement, dict) and any(vcs in requirement for vcs in {"git", "hg", "svn", "bzr"})
+        else pkg + fix_requirement(requirement)
         for pkg, requirement in POETRY_DATA[kind].items()
         if pkg != "python"
     ]

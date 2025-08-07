@@ -1,7 +1,7 @@
 [tool.poetry]
 # Note: Various modules refer to this system as "encoded", not "fourfront".
 name = "encoded"
-version = "8.8.1"
+version = "8.9.0"
 description = "4DN-DCIC Fourfront"
 authors = ["4DN-DCIC Team <support@4dnucleome.org>"]
 license = "MIT"
@@ -49,8 +49,9 @@ colorama = "0.3.3"
 # we get odd 'pyo3_runtime.PanicException: Python API call failed' error on import
 # of cryptography.hazmat.bindings._rust in cryptography package. 2023-04-21.
 cryptography = "^43.0.0"
-dcicsnovault = "^11.25.0"
-dcicutils = "^8.13.3"
+dcicsnovault = "^11.27.0"
+# dcicsnovault = { git = "https://github.com/4dn-dcic/snovault.git", branch = "branchnamehere" } # for testing
+dcicutils = "^8.18.3"
 elasticsearch = "7.13.4"
 elasticsearch-dsl = "^7.0.0"  # TODO: port code from cgap-portal to get rid of uses
 execnet = "1.4.1"
@@ -84,8 +85,8 @@ pytz = ">=2021.3"
 PyYAML = "^6.0.1"
 rdflib = "^4.2.2"
 rdflib-jsonld = ">=0.5.0,<1.0.0"
-requests = "^2.26.0"
-rsa = "3.3"
+requests = "^2.32.4"
+rsa = "^4.7"
 rutter = ">=0.3,<1"
 semantic_version = ">=2.9.0"
 # We don't use this directly. It's part of boto3. It slows down solving to pin.
@@ -104,7 +105,7 @@ translationstring = "1.3"
 uptime = ">=3.0.1,<4"
 urllib3 = "^1.26.6"
 venusian = "^3.1.0"
-waitress = "^2.1.1"
+waitress = "^3.0.1"
 WebOb = "^1.8.7"
 WebTest = "^2.0.35"
 WSGIProxy2 = "0.4.2"
@@ -145,7 +146,8 @@ lorem-text = "^2.1"
 # https://gitmemory.com/issue/spulec/moto/2118/474917895
 # TODO: Investigate whether this bug is fixed. If it is, update the version.
 #       If not, get a reference to an open bug report here so we can check back periodically.
-moto = "1.3.7"
+#moto = "1.3.7"
+moto = { version = "^5.1.0", extras = ["s3"] }
 pip-licenses = "^3.5.1"
 pipdeptree = "^2.1.0"
 pytest = "^7.2.1"

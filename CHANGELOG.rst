@@ -7,6 +7,15 @@ Change Log
 ----------
 
 
+8.9.0
+=====
+
+* update to setup_eb.py to be more flexible
+* update to docker-development.ini.template and development.ini to load test data correctly
+* updated several versions in pyproject.toml for security
+* use dcicsnovault 11.27.0
+* fix a newly appearing bug in types/publication.py that was causing a test to fail
+
 8.8.1
 =====
 
