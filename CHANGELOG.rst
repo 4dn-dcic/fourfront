@@ -7,6 +7,11 @@ Change Log
 ----------
 
 
+8.9.1
+=====
+
+* rollback waitress to 2.1.2 to avoid breaking change in waitress 3.0 and above
+
 8.9.0
 =====
 
