@@ -6,6 +6,11 @@ fourfront
 Change Log
 ----------
 
+8.9.2
+=====
+
+* Update GA build to use OIDC retrieved AWS Credentials
+
 
 8.9.1
 =====
@@ -39,7 +44,7 @@ Change Log
 `PR 1928: update lockfile and postgres version <https://github.com/4dn-dcic/fourfront/pull/1928>`_
 
 * Update lockfile to latest versions of dependencies
-* Update postgres version to 15.5 in Dockerfile and docker-compose.yml  
+* Update postgres version to 15.5 in Dockerfile and docker-compose.yml
 
 
 8.6.4
@@ -69,7 +74,7 @@ Change Log
 * added file_type suggested_enums
 * reorg file_type suggested_enums (alphabetize and move some to ignored)
 * added imaging_path/labels suggested_enum
-  
+
 
 8.6.0
 =====
@@ -80,7 +85,7 @@ Change Log
 * Update DRS API to return JSON always
 * Update DRS download URLs to return direct downloads to Open Data where applicable
 
-  
+
 8.5.1
 =====
 

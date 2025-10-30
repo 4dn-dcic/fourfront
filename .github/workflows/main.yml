@@ -13,6 +13,10 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
+permissions:
+  id-token: write   # This is required for requesting the JWT
+  contents: read    # This is required for actions/checkout
+
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
@@ -54,17 +58,19 @@ jobs:
           sudo apt-get install postgresql-14 postgresql-client-14
           echo "/usr/lib/postgresql/14/bin" >> $GITHUB_PATH
           sudo ln -s /usr/lib/postgresql/14/bin/initdb /usr/local/bin/initdb
+
       - name: Install Deps
         if: ${{ matrix.test_type == 'NPM' || matrix.test_type == 'UNIT' }}
         run: |
           node --version
           make build
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+
+      - name: configure aws credentials
+          uses: aws-actions/configure-aws-credentials@main
+          with:
+            role-to-assume: arn:aws:iam::643366669028:role/4dn-dcic-github-actions-deployment-role OR ${{ secret.oidc_arn }}
+            role-session-name: fourfront-unit-testing-session
+            aws-region: ${{ env.AWS_REGION }}
 
       - name: QA (NPM)
         if: ${{ matrix.test_type == 'NPM' }}
