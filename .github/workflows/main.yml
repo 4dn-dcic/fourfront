@@ -66,11 +66,11 @@ jobs:
           make build
 
       - name: configure aws credentials
-          uses: aws-actions/configure-aws-credentials@main
-          with:
-            role-to-assume: arn:aws:iam::643366669028:role/4dn-dcic-github-actions-deployment-role OR ${{ secret.oidc_arn }}
-            role-session-name: fourfront-unit-testing-session
-            aws-region: ${{ env.AWS_REGION }}
+        uses: aws-actions/configure-aws-credentials@main
+        with:
+          role-to-assume: arn:aws:iam::643366669028:role/4dn-dcic-github-actions-deployment-role OR ${{ secret.oidc_arn }}
+          role-session-name: fourfront-unit-testing-session
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: QA (NPM)
         if: ${{ matrix.test_type == 'NPM' }}
