@@ -70,7 +70,7 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::643366669028:role/4dn-dcic-github-actions-deployment-role OR ${{ secrets.oidc_arn }}
           role-session-name: fourfront-unit-testing-session
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: us-east-1
 
       - name: QA (NPM)
         if: ${{ matrix.test_type == 'NPM' }}
