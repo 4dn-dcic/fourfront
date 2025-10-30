@@ -68,7 +68,7 @@ jobs:
       - name: configure aws credentials
         uses: aws-actions/configure-aws-credentials@main
         with:
-          role-to-assume: arn:aws:iam::643366669028:role/4dn-dcic-github-actions-deployment-role OR ${{ secrets.oidc_arn }}
+          role-to-assume: arn:aws:iam::643366669028:role/4dn-dcic-github-actions-deployment-role
           role-session-name: fourfront-unit-testing-session
           aws-region: us-east-1
 
