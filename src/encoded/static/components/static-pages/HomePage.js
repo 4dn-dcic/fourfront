@@ -133,14 +133,30 @@ const DatasetsAndSocialMediaRow = React.memo(function DatasetsAndSocialMediaRow(
                             </div>
                             <div className="mt-05">
                                 <a href="https://doi.org/10.1038/s41467-022-29697-4" target="_blank" rel="noreferrer" className="btn-nature-4dn-article btn btn-primary w-100 mt-1">
-                                    <span className="float-start ms-1">Go to Nature Communications</span><span className="float-end me-1"><i className="icon icon-arrow-right fas"></i></span>
+                                    <span className="float-start ms-1">Data Portal Paper - Nature Communications</span><span className="float-end me-1"><i className="icon icon-arrow-right fas"></i></span>
                                 </a>
                             </div>
-                            <div>
+                            <div className="mt-05">
+                                <a href="https://doi.org/10.1038/s41586-025-09890-3" target="_blank" rel="noreferrer" className="btn-nature-4dn-article btn btn-primary w-100 mt-1">
+                                    <span className="float-start ms-1">Joint Analysis Paper - Nature</span><span className="float-end me-1"><i className="icon icon-arrow-right fas"></i></span>
+                                </a>
+                            </div>
+                            <div className="mt-05">
+                                <a href="/joint-analysis" target="_blank" rel="noreferrer" className="btn-joint-analysis-page btn btn-primary w-100 mt-1">
+                                    <span className="float-start ms-1">4DN Joint Analysis Page</span><span className="float-end me-1"><i className="icon icon-arrow-right fas"></i></span>
+                                </a>
+                            </div>
+                            <div className="mt-05">
+                                <a href="https://www.nature.com/collections/hdecbdjghd" target="_blank" rel="noreferrer" className="btn-nature-4dn-article btn btn-primary w-100 mt-1">
+                                    <span className="float-start ms-1">4DN Collection - Nature</span><span className="float-end me-1"><i className="icon icon-arrow-right fas"></i></span>
+                                </a>
+                            </div>
+                            
+                            {/* <div>
                                 <a href="https://x.com/4dn_dcic" target="_blank" rel="noreferrer" className="btn-follow-on-social-media btn btn-primary w-100 mt-1">
                                     <span className="float-start ms-1">Follow 4DN Data Portal on X</span><span className="float-end me-1"><i className="icon icon-arrow-right fas"></i></span>
                                 </a>
-                            </div>
+                            </div> */}
                         </div>
                     </div>
                 </div>
@@ -161,7 +177,7 @@ class RecentlyReleasedDataSets extends React.PureComponent {
 
     componentDidMount() {
         this.setState({ 'mounted': true, 'loading': true }, () => {
-            ajax.load('/recently_released_datasets', (res) => {
+            ajax.load('/recently_released_datasets/?max_row_count=8', (res) => {
                 if (res && res.terms && typeof res.terms === 'object') {
                     this.setState({ 'datasets': res.terms, 'loading': false });
                     setTimeout(ReactTooltip.rebuild, 100);
