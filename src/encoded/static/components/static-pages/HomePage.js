@@ -177,7 +177,7 @@ class RecentlyReleasedDataSets extends React.PureComponent {
 
     componentDidMount() {
         this.setState({ 'mounted': true, 'loading': true }, () => {
-            ajax.load('/recently_released_datasets/?max_row_count=8', (res) => {
+            ajax.load('/recently_released_datasets?max_row_count=8', (res) => {
                 if (res && res.terms && typeof res.terms === 'object') {
                     this.setState({ 'datasets': res.terms, 'loading': false });
                     setTimeout(ReactTooltip.rebuild, 100);

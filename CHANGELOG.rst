@@ -13,6 +13,7 @@ Change Log
 
 * add link for joint analysis paper, joint analysis page and collection to home page
 * remove X (Twitter) feed link from home page until further notice
+* modify recently released datasets fetch call to limit results to a maximum of 8 rows
 
 
 8.9.2
