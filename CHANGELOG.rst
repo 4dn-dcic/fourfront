@@ -6,6 +6,15 @@ fourfront
 Change Log
 ----------
 
+8.9.3
+=====
+
+`PR 1933: home page updates <https://github.com/4dn-dcic/fourfront/pull/1933>`_
+
+* add link for joint analysis paper, joint analysis page and collection to home page
+* remove X (Twitter) feed link from home page until further notice
+
+
 8.9.2
 =====
 
@@ -17,6 +26,7 @@ Change Log
 
 * rollback waitress to 2.1.2 to avoid breaking change in waitress 3.0 and above
 
+
 8.9.0
 =====
 
@@ -26,6 +36,7 @@ Change Log
 * use dcicsnovault 11.27.0
 * fix a newly appearing bug in types/publication.py that was causing a test to fail
 
+
 8.8.1
 =====
 
@@ -34,6 +45,7 @@ Change Log
 
 8.8.0
 =====
+
 `PR 1924: add s3 uri to drs reponse <https://github.com/4dn-dcic/fourfront/pull/1924>`_
 
 * add s3 uri to drs response
@@ -41,6 +53,7 @@ Change Log
 
 8.7.0
 =======
+
 `PR 1928: update lockfile and postgres version <https://github.com/4dn-dcic/fourfront/pull/1928>`_
 
 * Update lockfile to latest versions of dependencies
@@ -49,6 +62,7 @@ Change Log
 
 8.6.4
 =======
+
 `PR 1926: update footer text <https://github.com/4dn-dcic/fourfront/pull/1926>`_
 
 * Update text in footer
