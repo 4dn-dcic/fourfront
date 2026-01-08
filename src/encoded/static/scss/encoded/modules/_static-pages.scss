@@ -278,12 +278,14 @@
 
 				a.btn-nature-4dn-article,
 				a.btn-follow-on-social-media,
-				a.btn-joint-analysis-page {
+				a.btn-joint-analysis-page,
+				a.btn-nature-4dn-collections {
 					font-size: 1.1rem !important;
 					border-width: 0px;
-					border-radius: 20px !important;
+					border-radius: 10px !important;
 					background-color: #D5E9EB;
 					color: #34646C;
+					font-weight: 600;
 
 					&:hover {
 						color: #FFFFFF;
@@ -291,10 +293,12 @@
 					}
 				}
 
-				a.btn-follow-on-social-media, a.btn-joint-analysis-page {
+				a.btn-follow-on-social-media, a.btn-joint-analysis-page, a.btn-nature-4dn-collections {
 					background-color: #FFFFFF;
 					border-color: #D5E9EB;
 					border-width: 1px;
+					border-radius: 20px !important;
+					font-weight: 500;
 				}
 			}
 			
