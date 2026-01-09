@@ -200,10 +200,13 @@
 		
 			.search-headers-column-block[data-col="dataset"],
 			.search-result-column-block[data-col="dataset"] {
-				width: 280px;
+				width: 360px;
 		
 				@include media-breakpoint-down(xl) {
 					width: 250px;
+				}
+				@include media-breakpoint-down(lg) {
+					width: 300px;
 				}
 			}
 		
@@ -250,7 +253,7 @@
 					border-radius: 12px;
 					background-color: #EFF7F8;
 
-					img { width: 85%; }
+					img { width: 75%; }
 				}
 
 				.social-connections-block-title {

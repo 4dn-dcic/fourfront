@@ -128,7 +128,7 @@ const DatasetsAndSocialMediaRow = React.memo(function DatasetsAndSocialMediaRow(
                                 <a href="https://doi.org/10.1038/s41467-022-29697-4" target="_blank" rel="noreferrer" className="h-100">
                                     <div className="text-center w-100 pt-2 pb-2 social-connections-image"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-in-nature.png" alt="4DN in Nature Journals" /></div>
                                     <div className="social-connections-block-title mt-15">4DN in Nature Journals</div>
-                                    <div className="social-connections-desc mt-1">Learn more about the 4DN Consortium across Nature<br/> journals and collections</div>
+                                    <div className="social-connections-desc mt-1">Learn more about the 4DN Consortium across Nature<br className="d-none d-xxl-inline"/> journals and collections</div>
                                 </a>
                             </div>
                             <div className="d-flex flex-row gap-2 mt-1">
@@ -191,7 +191,7 @@ class RecentlyReleasedDataSets extends React.PureComponent {
 
     componentDidMount() {
         this.setState({ 'mounted': true, 'loading': true }, () => {
-            ajax.load('/recently_released_datasets?max_row_count=8', (res) => {
+            ajax.load('/recently_released_datasets?max_row_count=7', (res) => {
                 if (res && res.terms && typeof res.terms === 'object') {
                     this.setState({ 'datasets': res.terms, 'loading': false });
                     setTimeout(ReactTooltip.rebuild, 100);
@@ -435,7 +435,7 @@ const ToolsAndResourcesRow = React.memo(function ToolsAndResourcesRow(props) {
                                 </div>
                             </div>
                         </div>
-                        <div className="tools-and-resources-col-resources col-12 col-lg-4 ps-8 p-3 mt-sm-3 mt-lg-0 z-1 d-flex flex-wrap align-content-between">
+                        <div className="tools-and-resources-col-resources col-12 col-lg-4 ps-8 p-3 mt-sm-3 mt-lg-0 z-1 d-flex flex-column align-content-between">
                             <h2 className="homepage-section-title">Portal Resources</h2>
                             <div className="resource-detail p-3 d-flex flex-column">
                                 <a href="/resources/experimental-resources">
