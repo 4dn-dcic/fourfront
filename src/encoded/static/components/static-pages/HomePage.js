@@ -437,7 +437,7 @@ const ToolsAndResourcesRow = React.memo(function ToolsAndResourcesRow(props) {
                         </div>
                         <div className="tools-and-resources-col-resources col-12 col-lg-4 ps-8 p-3 mt-sm-3 mt-lg-0 z-1 d-flex flex-column align-content-between">
                             <h2 className="homepage-section-title">Portal Resources</h2>
-                            <div className="resource-detail p-3 d-flex flex-column">
+                            <div className="resource-detail p-3 p-xl-4 d-flex flex-column">
                                 <a href="/resources/experimental-resources">
                                     <div className="row">
                                         <div className="col-3 text-center">
@@ -450,7 +450,7 @@ const ToolsAndResourcesRow = React.memo(function ToolsAndResourcesRow(props) {
                                     </div>
                                 </a>
                             </div>
-                            <div className="resource-detail data-analysis p-3 d-flex flex-column mt-1">
+                            <div className="resource-detail data-analysis p-3 p-xl-4 d-flex flex-column mt-1">
                                 <a href="/resources/data-analysis">
                                     <div className="row">
                                         <div className="col-3 text-center">
