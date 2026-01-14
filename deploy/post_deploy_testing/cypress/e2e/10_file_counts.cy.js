@@ -26,8 +26,12 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
                                     currPagePath = pathName;
                                 }).wait(3000).end()
                                 .get('h1.page-title').should('not.be.empty').end()
-                                .get('div.rc-tabs span[data-tab-key="raw-files"]').should('contain', 'Raw Files')
-                                .get('div.rc-tabs span[data-tab-key="processed-files"]').should('contain', 'Processed Files')
+                                .get('div.rc-tabs span[data-tab-key="raw-files"]').should(($el) => {
+                                    expect($el.text().trim()).to.match(/^(1 Raw File|\d+ Raw Files)$/);
+                                })
+                                .get('div.rc-tabs span[data-tab-key="processed-files"]').should(($el) => {
+                                    expect($el.text().trim()).to.match(/^(1 Processed File|\d+ Processed Files)$/);
+                                })
                                 .get('div.rc-tabs span[data-tab-key="supplementary-files"]').should('contain', 'Supplementary Files').end();
 
                             // let currTabTitle = null;
@@ -102,8 +106,12 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
                                     console.log(currPagePath);
                                 }).wait(3000).end()
                                 .get('h1.page-title').should('not.be.empty').end()
-                                .get('div.rc-tabs span[data-tab-key="raw-files"]').should('contain', 'Raw File')
-                                .get('div.rc-tabs span[data-tab-key="processed-files"]').should('contain', 'Processed File')
+                                .get('div.rc-tabs span[data-tab-key="raw-files"]').should(($el) => {
+                                    expect($el.text().trim()).to.match(/^(1 Raw File|\d+ Raw Files)$/);
+                                })
+                                .get('div.rc-tabs span[data-tab-key="processed-files"]').should(($el) => {
+                                    expect($el.text().trim()).to.match(/^(1 Processed File|\d+ Processed Files)$/);
+                                })
                                 .get('div.rc-tabs span[data-tab-key="supplementary-files"]').should('contain', 'Supplementary File').end()
                                 .get('div.rc-tabs div.rc-tabs-tab[role="tab"]').then(($tabList) => {
                                     let currTabTitle = null;

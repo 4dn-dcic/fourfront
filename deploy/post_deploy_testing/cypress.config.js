@@ -19,4 +19,6 @@ module.exports = defineConfig({
         specPattern: 'cypress/e2e/**/*.{js,jsx,ts,tsx}',
         testIsolation: false
     },
+    viewportWidth: 1920,
+    viewportHeight: 1080,
 });
