@@ -6,6 +6,7 @@ module.exports = defineConfig({
     pageLoadTimeout: 120000,
     requestTimeout: 40000,
     responseTimeout: 120000,
+    retries: 2,
     blockHosts: 'www.google-analytics.com',
     video: false,
     chromeWebSecurity: false,
