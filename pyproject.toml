@@ -49,7 +49,7 @@ colorama = "0.3.3"
 # we get odd 'pyo3_runtime.PanicException: Python API call failed' error on import
 # of cryptography.hazmat.bindings._rust in cryptography package. 2023-04-21.
 cryptography = "^43.0.0"
-dcicsnovault = "^11.27.0"
+dcicsnovault = "11.27.0.0b2"
 # dcicsnovault = { git = "https://github.com/4dn-dcic/snovault.git", branch = "branchnamehere" } # for testing
 dcicutils = "^8.18.3"
 elasticsearch = "7.13.4"
