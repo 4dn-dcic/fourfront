@@ -185,28 +185,6 @@
         },
         "exp_sets_prod_in_pub.experiments_in_set.experiment_type.display_title": {
             "title": "Experiment Types"
-        },
-        "number_of_experiment_sets": {
-            "title": "Number of Experiment Sets",
-            "aggregation_type": "range",
-            "number_step": 1,
-            "ranges": [
-                {
-                    "from": 1,
-                    "to": 6
-                },
-                {
-                    "from": 7,
-                    "to": 18
-                },
-                {
-                    "from": 19,
-                    "to": 42
-                },
-                {
-                    "from": 43
-                }
-            ]
         }
     },
     "columns": {
