@@ -56,6 +56,8 @@ COMMON_EXCLUDED_URI_PARAMS = [
     'currentAction', 'additional_facet'
 ]
 ES_MAX_HIT_TOTAL = 10000
+SMALLEST_NONZERO_IEEE_32 = 1.1754e-38  # smallest epsilon > 0 (estimate)
+MISSING = object()  # sentinel for missing values
 
 
 @view_config(route_name='search', request_method='GET', permission='search')
@@ -1249,6 +1251,40 @@ def generate_filters_for_terms_agg_from_search_filters(query_field, search_filte
     return facet_filters
 
 
+def _build_range_aggregation(query_field, ranges):
+    """ Builds a range aggregation.
+        Detects when 0-0 range is specified and replaces 'to' with the
+        smallest IEEE 32 value such that the bucket effectively only captures
+        the value 0.
+    """
+    for r in ranges:
+        if 'from' in r and 'to' in r:
+            if r['from'] == 0 and r['to'] == 0:
+                r['to'] = SMALLEST_NONZERO_IEEE_32
+        if 'to' in r and r['to'] != SMALLEST_NONZERO_IEEE_32:
+            try:
+                to_val = r['to']
+                if isinstance(to_val, bool):  # skip
+                    continue
+                if isinstance(to_val, int):
+                    r['to'] = to_val + 1 # Move to next integer so bucket includes it.
+                else:
+                    to_float = float(to_val)
+                    if math.isfinite(to_float):
+                        # Move to the next representable float so the bucket includes it.
+                        # Adding cls.SMALLEST_NONZERO_IEEE_32 may not work due to float precision issues.
+                        r['to'] = math.nextafter(to_float, math.inf)
+            except (TypeError, ValueError):
+                # If non-numeric, leave unchanged; aggregation will behave as before.
+                pass
+    return {
+        'range': {
+            'field': query_field,
+            'ranges': ranges
+        }
+    }
+
+
 def set_facets(search, facets, search_filters, string_query, request, doc_types, custom_aggregations=None, base_field_filters=None, size=25, from_=0):
     """
     Sets facets in the query as ElasticSearch aggregations, with each aggregation to be
@@ -1311,14 +1347,11 @@ def set_facets(search, facets, search_filters, string_query, request, doc_types,
         # handle range aggregation
         elif agg_type == 'range':
             ranges = [{k: v for k, v in r.items() if k in ['from', 'to']} for r in facet['ranges']]
+            range_agg = _build_range_aggregation(query_field, ranges)
+
             aggs[agg_id] = {
                 'aggs': {
-                    'primary_agg': {
-                        'range': {
-                            'field': query_field,
-                            'ranges': ranges
-                        }
-                    }
+                    'primary_agg': range_agg
                 },
                 'filter': {'bool': facet_filters}
             }
@@ -1504,13 +1537,56 @@ def format_facets(es_results, facets, total, additional_facets, filters, search_
             elif agg_type == 'range':
                 bucket_location = aggregations[full_agg_name]['primary_agg']
 
+                def bounds_match(range_bound, bucket_bound):
+                    """Match bounds with tolerance for inclusive upper bumps (nextafter / +1)."""
+
+                    # handle missings
+                    if range_bound is MISSING or bucket_bound is MISSING:
+                        return range_bound is bucket_bound
+
+                    # bool is special (bool is a subclass of int)
+                    if isinstance(range_bound, bool) or isinstance(bucket_bound, bool):
+                        return range_bound == bucket_bound
+
+                    # try numeric comparison
+                    try:
+                        r = float(range_bound)
+                        b = float(bucket_bound)
+                    except (TypeError, ValueError):
+                        return range_bound == bucket_bound
+
+                    if not (math.isfinite(r) and math.isfinite(b)):
+                        return False
+
+                    # test exact equality first (covers +0.0/-0.0 too)
+                    if r == b:
+                        return True
+
+                    # allow nextafter bump (inclusive upper bound)
+                    if b == math.nextafter(r, math.inf):
+                        return True
+
+                    # allow "+1" bump only when both are integer-like
+                    def int_like(v, num):
+                        return (
+                            (isinstance(v, int) and not isinstance(v, bool)) or
+                            (isinstance(v, float) and num.is_integer())
+                        )
+                    
+                    if int_like(range_bound, r) and int_like(bucket_bound, b):
+                        return int(b) == int(r) + 1
+
+                    return False
+
+
                 # TODO - refactor ?
                 # merge bucket labels from ranges into buckets
                 for r in result_facet['ranges']:
                     for b in bucket_location['buckets']:
 
                         # if ranges match we found our bucket, propagate doc_count into 'ranges' field
-                        if (r.get('from', -1) == b.get('from', -1)) and (r.get('to', -1) == b.get('to', -1)):
+                        if bounds_match(r.get('from', MISSING), b.get('from', MISSING)) and \
+                            bounds_match(r.get('to', MISSING), b.get('to', MISSING)):
                             r['doc_count'] = b['doc_count']
                             break
 
