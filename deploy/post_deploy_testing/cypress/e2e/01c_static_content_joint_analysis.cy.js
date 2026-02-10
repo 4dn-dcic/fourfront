@@ -106,24 +106,24 @@ describe('Joint Analysis Page', function () {
 
     });
 
-    context("HiGlass Static Section(s)", function(){
+    context("HiGlass Static Section(s)", function () {
 
-        // Before each test in this context, start spying on HiGlass network calls
+        // Track HiGlass request failures in a simple counter so we can print a summary.
         beforeEach(function () {
+            Cypress.env('higlass_tileset_seen', 0);
+            Cypress.env('higlass_tiles_429', 0);
+            Cypress.env('higlass_tiles_5xx', 0);
+            Cypress.env('higlass_tiles_other4xx', 0);
+            Cypress.env('higlass_tiles_neterr', 0);
 
-            // Reset counters per test run
-            cy.wrap(null).then(() => {
-                Cypress.env('higlass_tiles_429', 0);
-                Cypress.env('higlass_tiles_5xx', 0);
-                Cypress.env('higlass_tiles_other4xx', 0);
-                Cypress.env('higlass_tiles_neterr', 0);
-            });
-
-            // Spy on tileset_info requests (initial HiGlass config fetch)
             cy.intercept('GET', '**/api/v1/tileset_info/**', (req) => {
+                Cypress.env('higlass_tileset_seen', (Cypress.env('higlass_tileset_seen') || 0) + 1);
+
+                // Log request URL once per match (useful if endpoint changes)
+                cy.task('log', `HiGlass tileset_info request: ${req.url}`);
+
                 req.on('response', (res) => {
                     cy.task('log', `HiGlass tileset_info status=${res.statusCode} server=${res.headers?.server || ''}`);
-                    cy.task('log', `HiGlass tileset_info content-type=${res.headers?.['content-type'] || ''}`);
                 });
 
                 req.on('error', (err) => {
@@ -131,12 +131,9 @@ describe('Joint Analysis Page', function () {
                 });
             }).as('tilesetInfo');
 
-            // Spy on tile requests (HiGlass makes many of these)
             cy.intercept('GET', '**/api/v1/tiles/**', (req) => {
                 req.on('response', (res) => {
                     const s = res.statusCode || 0;
-
-                    // Track rate limiting / server errors / other 4xx responses
                     if (s === 429) Cypress.env('higlass_tiles_429', (Cypress.env('higlass_tiles_429') || 0) + 1);
                     else if (s >= 500) Cypress.env('higlass_tiles_5xx', (Cypress.env('higlass_tiles_5xx') || 0) + 1);
                     else if (s >= 400) Cypress.env('higlass_tiles_other4xx', (Cypress.env('higlass_tiles_other4xx') || 0) + 1);
@@ -149,28 +146,31 @@ describe('Joint Analysis Page', function () {
             }).as('tiles');
         });
 
-
-        // After each test, print a summary into GitHub Actions logs
         afterEach(function () {
+            const seen = Cypress.env('higlass_tileset_seen') || 0;
             const a429 = Cypress.env('higlass_tiles_429') || 0;
             const a5xx = Cypress.env('higlass_tiles_5xx') || 0;
             const a4xx = Cypress.env('higlass_tiles_other4xx') || 0;
             const net = Cypress.env('higlass_tiles_neterr') || 0;
 
-            // This will appear in GA logs and Cypress Cloud terminal output
-            cy.task('log', `HiGlass tiles summary: 429=${a429} 5xx=${a5xx} other4xx=${a4xx} neterr=${net}`);
+            // This will appear in GitHub Actions logs and Cypress Cloud terminal output.
+            cy.task('log', `HiGlass summary: tileset_info_seen=${seen} tiles_429=${a429} tiles_5xx=${a5xx} tiles_other4xx=${a4xx} tiles_neterr=${net}`);
         });
-
 
         it("HiGlass initializes (very basic)", function () {
 
-            // Scroll to the bottom to ensure HiGlass viewport becomes visible
+            // IMPORTANT:
+            // HiGlass dependencies are lazy-loaded and the viewer often initializes only on a fresh page load + when it becomes visible.
+            // Since testIsolation=false and earlier tests change page state, we do a fresh visit here to mimic real user behavior.
+            cy.visit('/joint-analysis');
+
+            // Trigger lazy rendering / visibility-based initialization
             cy.window().scrollTo('bottom');
 
-            // Ensure tileset_info request succeeded before checking DOM
+            // Wait for at least one tileset_info call. If none happens, HiGlass never started initializing.
             cy.wait('@tilesetInfo', { timeout: 120000 });
 
-            // Give HiGlass a few seconds to request tiles
+            // Give the viewer some time to request tiles after tileset_info resolves
             cy.wait(3000);
 
             // Basic DOM visibility assertion for HiGlass renderer
@@ -179,7 +179,7 @@ describe('Joint Analysis Page', function () {
                 { timeout: (10 * 60 * 1000) }
             ).should('be.visible');
 
-            // Fail the test if we detect rate limiting or server errors
+            // If we see 429/5xx here, it strongly suggests throttling/overload in CI (often due to parallelization).
             cy.then(() => {
                 expect(Cypress.env('higlass_tiles_429') || 0, 'HiGlass tiles 429 count').to.eq(0);
                 expect(Cypress.env('higlass_tiles_5xx') || 0, 'HiGlass tiles 5xx count').to.eq(0);
@@ -188,5 +188,6 @@ describe('Joint Analysis Page', function () {
         });
 
     });
+
 
 });
