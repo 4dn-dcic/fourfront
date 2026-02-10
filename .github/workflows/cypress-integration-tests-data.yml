@@ -31,6 +31,14 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Check HiGlass API reachability (runner)
+        run: |
+          set -euxo pipefail
+          URL="https://higlass.4dnucleome.org/api/v1/tileset_info/?d=bJORvAOhSmCkED7QGB7FYA&s=ZxS34729QDKoiUIAcgZIUA"
+          echo "Testing: $URL"
+          curl -sS -D - -o /dev/null --retry 5 --retry-delay 2 --connect-timeout 10 --max-time 30 "$URL" || true
+
+
       - name: Cypress run
         uses: cypress-io/github-action@v6
         with:
