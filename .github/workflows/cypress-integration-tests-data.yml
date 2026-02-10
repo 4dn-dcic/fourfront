@@ -38,6 +38,13 @@ jobs:
           echo "Testing: $URL"
           curl -sS -D - -o /dev/null --retry 5 --retry-delay 2 --connect-timeout 10 --max-time 30 "$URL" || true
 
+      - name: Check HiGlass tiles endpoint (runner)
+        run: |
+          set -euxo pipefail
+          curl -sS -D - -o /dev/null --retry 3 --retry-delay 2 --connect-timeout 10 --max-time 30 \
+          "https://higlass.4dnucleome.org/api/v1/tiles/" || true
+
+
 
       - name: Cypress run
         uses: cypress-io/github-action@v6
