@@ -9,223 +9,223 @@ const draftUrl = "/higlass-view-configs/00000000-1111-0000-1111-000000000002/";
  */
 describe("HiGlass Display pages", function () {
 
-  function waitForHiGlassReady() {
-    // Ensure the HiGlass container is visible so lazy init can trigger reliably in CI/headless.
-    cy.get('.higlass-instance', { timeout: 120000 }).scrollIntoView();
+    function waitForHiGlassReady() {
+        // Ensure the HiGlass container is visible so lazy init can trigger reliably in CI/headless.
+        cy.get('.higlass-instance', { timeout: 120000 }).scrollIntoView();
 
-    // Wait for HiGlass to mount its internal layout.
-    cy.get('.higlass-instance .react-grid-layout', { timeout: 240000 }).should('be.visible');
+        // Wait for HiGlass to mount its internal layout.
+        cy.get('.higlass-instance .react-grid-layout', { timeout: 240000 }).should('be.visible');
 
-    // Wait for the main visualization selector to be present (stronger readiness signal).
-    cy.get(higlassItemViewVizSelector, { timeout: 240000 }).should('be.visible');
-  }
+        // Wait for the main visualization selector to be present (stronger readiness signal).
+        cy.get(higlassItemViewVizSelector, { timeout: 240000 }).should('be.visible');
+    }
 
-  context('Higlass Display summary page', function () {
+    context('Higlass Display summary page', function () {
 
-    // Simulate pre-test isolation behavior (Cypress 12 migration guidance).
-    beforeEach(() => {
-      cy.clearLocalStorage();
-      cy.clearCookies();
-      // other beforeEach logic to restore the expected local storage or cookies needed on the client.
-    });
-
-    it('Can visit HiGlass Display collection page without login', function(){
-
-      // Visit the page and confirm you can see the table and facet properties.
-      cy.visit('/higlass-view-configs').end()
-        .get(".search-headers-column-block .column-title").should('have.text', ['Title', 'Creator'].join('')).end()
-        .get(".facets-header .facets-title").should('have.text', 'Included Properties');
-
-      // All of the higlass displays you can view should have the "released" status.
-      cy.request({
-        'url' : "/higlass-view-configs/?format=json",
-        'method' : "GET",
-        'headers' : { 'Content-Type' : "application/json; charset=UTF-8" },
-        'followRedirect' : true
-      }).then((response)=>{
-        const nonReleasedFound = Cypress._.some(response.body["@graph"], (higlassViewConf)=>{
-          if (higlassViewConf.status && higlassViewConf.status === "released") {
-            return false;
-          }
-          return true;
+        // Simulate pre-test isolation behavior (Cypress 12 migration guidance).
+        beforeEach(() => {
+            cy.clearLocalStorage();
+            cy.clearCookies();
+            // other beforeEach logic to restore the expected local storage or cookies needed on the client.
         });
-        expect(nonReleasedFound).to.not.be.ok;
-      });
+
+        it('Can visit HiGlass Display collection page without login', function () {
+
+            // Visit the page and confirm you can see the table and facet properties.
+            cy.visit('/higlass-view-configs').end()
+                .get(".search-headers-column-block .column-title").should('have.text', ['Title', 'Creator'].join('')).end()
+                .get(".facets-header .facets-title").should('have.text', 'Included Properties');
+
+            // All of the higlass displays you can view should have the "released" status.
+            cy.request({
+                'url': "/higlass-view-configs/?format=json",
+                'method': "GET",
+                'headers': { 'Content-Type': "application/json; charset=UTF-8" },
+                'followRedirect': true
+            }).then((response) => {
+                const nonReleasedFound = Cypress._.some(response.body["@graph"], (higlassViewConf) => {
+                    if (higlassViewConf.status && higlassViewConf.status === "released") {
+                        return false;
+                    }
+                    return true;
+                });
+                expect(nonReleasedFound).to.not.be.ok;
+            });
+
+        });
+
+        it('Have permission to create new displays & view own drafts', function () {
+
+            // Log in, visit the page and look for the create button to assert ability to create.
+            cy.login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).end()
+                .get(".above-results-table-row a.btn.btn-xs").should('contain', 'Create');
+
+            cy.visit(draftUrl).end().logout4DN();
+
+        });
 
     });
 
-    it('Have permission to create new displays & view own drafts', function(){
 
-      // Log in, visit the page and look for the create button to assert ability to create.
-      cy.login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken' : true }).end()
-        .get(".above-results-table-row a.btn.btn-xs").should('contain', 'Create');
+    context('Share/Create and Edit Individual Higlass display page', function () {
 
-      cy.visit(draftUrl).end().logout4DN();
+        // Tracks uuids across tests so they can be deleted afterwards.
+        var testItemsToDelete = [];
 
-    });
+        beforeEach(function () {
+            cy.clearLocalStorage();
+            cy.clearCookies();
+            // Log in.
+            cy.visit('/higlass-view-configs/').login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).end();
+        });
 
-  });
-
-
-  context('Share/Create and Edit Individual Higlass display page', function() {
-
-    // Tracks uuids across tests so they can be deleted afterwards.
-    var testItemsToDelete = [];
-
-    beforeEach(function() {
-      cy.clearLocalStorage();
-      cy.clearCookies();
-      // Log in.
-      cy.visit('/higlass-view-configs/').login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken' : true }).end();
-    });
-
-        after(function(){
+        after(function () {
 
             // Maybe we could just delete ALL higlass displays owned by 'ud4dntest@gmail.com'
             // as a more complete cleanup (except like hardcoded 00000000-1111-0000-1111-000000000002)
             // In case some tests fail and terminate before getting to this point of cleanup.
 
-      const testItemsToDeleteIDs = testItemsToDelete.map(function({ '@id' : id }){ return id; });
+            const testItemsToDeleteIDs = testItemsToDelete.map(function ({ '@id': id }) { return id; });
 
-      Cypress.log({
-        'name' : "Deleting Newly-Created HiGlass View Configs Items",
-        'message' : "Count: " + testItemsToDelete.length + ", Item IDs: " + testItemsToDeleteIDs.join(", ")
-      });
-
-      if (testItemsToDeleteIDs.length === 0) return;
-
-      // Log in _as admin_.
-      cy.visit('/higlass-view-configs/').login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken' : true }).end();
-
-      // Delete all newly created higlass views.
-      cy.wrap(testItemsToDeleteIDs).each(function(testItemID){ // Synchronously process async stuff.
-        cy.getCookie('jwtToken')
-          .then((cookie) => {
-            const token = cookie.value;
-            cy.request({
-              method: "PATCH",
-              url: testItemID,
-              headers: {
-                'Authorization': 'Bearer ' + token,
-                "Content-Type" : "application/json",
-                "Accept" : "application/json"
-              },
-              body: JSON.stringify({ "tags" : ["deleted_by_cypress_test"] })
+            Cypress.log({
+                'name': "Deleting Newly-Created HiGlass View Configs Items",
+                'message': "Count: " + testItemsToDelete.length + ", Item IDs: " + testItemsToDeleteIDs.join(", ")
             });
-          });
-      });
 
-      // Empty the array now that we're done.
-      testItemsToDelete = [];
+            if (testItemsToDeleteIDs.length === 0) return;
+
+            // Log in _as admin_.
+            cy.visit('/higlass-view-configs/').login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).end();
+
+            // Delete all newly created higlass views.
+            cy.wrap(testItemsToDeleteIDs).each(function (testItemID) { // Synchronously process async stuff.
+                cy.getCookie('jwtToken')
+                    .then((cookie) => {
+                        const token = cookie.value;
+                        cy.request({
+                            method: "PATCH",
+                            url: testItemID,
+                            headers: {
+                                'Authorization': 'Bearer ' + token,
+                                "Content-Type": "application/json",
+                                "Accept": "application/json"
+                            },
+                            body: JSON.stringify({ "tags": ["deleted_by_cypress_test"] })
+                        });
+                    });
+            });
+
+            // Empty the array now that we're done.
+            testItemsToDelete = [];
+        });
+
+
+        it('Can clone new draft views', function () {
+            // Verify logged in users can save higlass displays.
+
+            // Go to the display for the draft display.
+            cy.visit(draftUrl);
+
+            // When the app creates a new HiGlass display, we'll capture the JSON of the POST call.
+            cy.intercept('POST', '/higlass-view-configs/').as('newHiglassDisplay');
+
+            // Ensure HiGlass is fully mounted before clicking Clone (prevents CI/headless flake).
+            waitForHiGlassReady();
+
+            // Click the 'Clone' button.
+            cy.get(".tab-section-title .tabview-title-controls-container").within(function ($panel) {
+                return cy.contains('Clone').click().end();
+            }).end()
+                .get('.alert div').should('contain.text', 'Saved new display.').end()
+                // Inspect POST response.
+                .get('@newHiglassDisplay').then(function ({ request, response }) {
+
+                    // Expect a 201 response.
+                    expect(response.statusCode).to.eq(201);
+
+                    // Expect a new uuid.
+                    expect(response.body["@graph"][0]["uuid"]).to.not.equal("00000000-1111-0000-1111-000000000002");
+
+                    // Add the test Item so we can delete it later.
+                    testItemsToDelete.push(response.body["@graph"][0]);
+                })
+                .end()
+                // Keep the existing readiness wait as an extra safety net.
+                .get(higlassItemViewVizSelector).end();
+        });
+
+        it('Can edit the title and description', function () {
+
+            // Change the title and description, then save.
+            const newTitle = "Cypress Cool Display";
+            const newDescription = "Look at the description";
+
+            // Verify logged in users can save higlass displays.
+
+            // Go to the display for the draft display.
+            cy.visit(draftUrl);
+
+            // There will be an AJAX response to a POST for the new Higlass display, so capture it here.
+            cy.intercept('POST', '/higlass-view-configs/').as('newHiglassDisplay');
+
+            // Ensure HiGlass is fully mounted before clicking Clone (prevents CI/headless flake).
+            waitForHiGlassReady();
+
+            // Click the 'Clone' button.
+            cy.get(".tab-section-title .tabview-title-controls-container").within(function ($panel) {
+                return cy.contains('Clone').click().end();
+            }).end()
+
+                // Confirm there is a success message.
+                .get('.alert div').should('contain.text', 'Saved new display.').end()
+
+                // Inspect the AJAX response so we can capture the new uuid.
+                .get('@newHiglassDisplay').then(function ({ request, response }) {
+
+                    // Expect a 201 response.
+                    expect(response.statusCode).to.eq(201);
+
+                    // Expect a new uuid.
+                    expect(response.body["@graph"][0]["uuid"]).to.not.equal("00000000-1111-0000-1111-000000000002");
+
+                    // Add the test uuid so we can delete it later.
+                    testItemsToDelete.push(response.body["@graph"][0]);
+                    const newID = response.body["@graph"][0]["@id"];
+                    expect(newID).to.be.ok;
+
+                    // Clicking the SaveAs button should redirect us to the new page
+                    cy.location('pathname')
+                        .should('eq', newID).end()
+                        // Wait for HiGlass to fully be initialized as well, to avoid __zoom error perhaps.
+                        .get(higlassItemViewVizSelector).end()
+
+                        // Click on the edit button and wait for the page load.
+                        .get(".action-button[data-action='edit'] a").click({ force: true }).end()
+                        .get("input#field_for_title").clear().type(newTitle, { delay: 0 }).end()
+                        .get('#field_for_description').clear().type(newDescription, { delay: 0 }).end()
+                        .get('input#field_for_tags.form-control').focus().type('deleted_by_cypress_test', { delay: 0 }).end()
+                        // Click validate then click submit
+                        .get(".action-buttons-container button.btn-info").click().end()
+                        .get(".action-buttons-container button.btn-success").click().end()
+                        // Wait for HiGlass to fully be initialized as well, to avoid __zoom error perhaps.
+                        .get(higlassItemViewVizSelector).end()
+                        // Once the page reloads, look for the updated title/description
+                        .request({
+                            'url': newID + "?format=json&datastore=database",
+                            'method': "GET",
+                            'headers': { 'Content-Type': "application/json; charset=UTF-8" },
+                            'followRedirect': true
+                        }).then((resp) => {
+                            expect(resp.body.title).to.equal(newTitle);
+                            expect(resp.body.description).to.equal(newDescription);
+                        }).end();
+
+                });
+        });
     });
 
 
-        it('Can clone new draft views', function() {
-      // Verify logged in users can save higlass displays.
-
-      // Go to the display for the draft display.
-      cy.visit(draftUrl);
-
-      // When the app creates a new HiGlass display, we'll capture the JSON of the POST call.
-      cy.intercept('POST', '/higlass-view-configs/').as('newHiglassDisplay');
-
-      // Ensure HiGlass is fully mounted before clicking Clone (prevents CI/headless flake).
-      waitForHiGlassReady();
-
-      // Click the 'Clone' button.
-      cy.get(".tab-section-title .tabview-title-controls-container").within(function($panel){
-        return cy.contains('Clone').click().end();
-      }).end()
-        .get('.alert div').should('contain.text', 'Saved new display.').end()
-        // Inspect POST response.
-        .get('@newHiglassDisplay').then(function ({ request, response }) {
-
-          // Expect a 201 response.
-          expect(response.statusCode).to.eq(201);
-
-          // Expect a new uuid.
-          expect(response.body["@graph"][0]["uuid"]).to.not.equal("00000000-1111-0000-1111-000000000002");
-
-          // Add the test Item so we can delete it later.
-          testItemsToDelete.push(response.body["@graph"][0]);
-        })
-        .end()
-        // Keep the existing readiness wait as an extra safety net.
-        .get(higlassItemViewVizSelector).end();
-    });
-
-      it('Can edit the title and description', function() {
-
-          // Change the title and description, then save.
-          const newTitle = "Cypress Cool Display";
-          const newDescription = "Look at the description";
-
-          // Verify logged in users can save higlass displays.
-
-          // Go to the display for the draft display.
-          cy.visit(draftUrl);
-
-          // There will be an AJAX response to a POST for the new Higlass display, so capture it here.
-          cy.intercept('POST', '/higlass-view-configs/').as('newHiglassDisplay');
-
-          // Ensure HiGlass is fully mounted before clicking Clone (prevents CI/headless flake).
-          waitForHiGlassReady();
-
-          // Click the 'Clone' button.
-          cy.get(".tab-section-title .tabview-title-controls-container").within(function($panel){
-              return cy.contains('Clone').click().end();
-          }).end()
-
-              // Confirm there is a success message.
-              .get('.alert div').should('contain.text', 'Saved new display.').end()
-
-              // Inspect the AJAX response so we can capture the new uuid.
-              .get('@newHiglassDisplay').then(function ({ request, response }) {
-
-                  // Expect a 201 response.
-                  expect(response.statusCode).to.eq(201);
-
-                  // Expect a new uuid.
-                  expect(response.body["@graph"][0]["uuid"]).to.not.equal("00000000-1111-0000-1111-000000000002");
-
-                  // Add the test uuid so we can delete it later.
-                  testItemsToDelete.push(response.body["@graph"][0]);
-                  const newID = response.body["@graph"][0]["@id"];
-                  expect(newID).to.be.ok;
-
-                  // Clicking the SaveAs button should redirect us to the new page
-                  cy.location('pathname')
-                      .should('eq', newID).end()
-                      // Wait for HiGlass to fully be initialized as well, to avoid __zoom error perhaps.
-                      .get(higlassItemViewVizSelector).end()
-
-                      // Click on the edit button and wait for the page load.
-                      .get(".action-button[data-action='edit'] a").click({ force: true }).end()
-                      .get("input#field_for_title").clear().type(newTitle, { delay: 0 }).end()
-                      .get('#field_for_description').clear().type(newDescription, { delay: 0 }).end()
-                      .get('input#field_for_tags.form-control').focus().type('deleted_by_cypress_test', { delay: 0 }).end()
-                      // Click validate then click submit
-                      .get(".action-buttons-container button.btn-info").click().end()
-                      .get(".action-buttons-container button.btn-success").click().end()
-                      // Wait for HiGlass to fully be initialized as well, to avoid __zoom error perhaps.
-                      .get(higlassItemViewVizSelector).end()
-                      // Once the page reloads, look for the updated title/description
-                      .request({
-                            'url' : newID + "?format=json&datastore=database",
-                            'method' : "GET",
-                            'headers' : { 'Content-Type' : "application/json; charset=UTF-8" },
-                            'followRedirect' : true
-                        }).then((resp)=>{
-                          expect(resp.body.title).to.equal(newTitle);
-                          expect(resp.body.description).to.equal(newDescription);
-                      }).end();
-
-              });
-      });
-  });
-
-
-    context('Sharing on the Individual Higlass display page', function() {
+    context('Sharing on the Individual Higlass display page', function () {
 
         // https://docs.cypress.io/guides/references/migration-guide#Simulating-Pre-Test-Isolation-Behavior
         beforeEach(() => {
@@ -233,10 +233,10 @@ describe("HiGlass Display pages", function () {
             cy.clearCookies();
         });
 
-        after(function(){
+        after(function () {
 
             // Edit the higlass display back to draft status.
-            cy.visit('/higlass-view-configs/').login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken' : true }).end()
+            cy.visit('/higlass-view-configs/').login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).end()
                 .getCookie('jwtToken')
                 .then((cookie) => {
                     const token = cookie.value;
@@ -245,18 +245,18 @@ describe("HiGlass Display pages", function () {
                         url: draftUrl,
                         headers: {
                             'Authorization': 'Bearer ' + token,
-                            "Content-Type" : "application/json",
-                            "Accept" : "application/json"
+                            "Content-Type": "application/json",
+                            "Accept": "application/json"
                         },
-                        body: JSON.stringify({ "status" : "draft" })
+                        body: JSON.stringify({ "status": "draft" })
                     }).logout4DN();
                 });
         });
 
-        it('Can release HiGlass Item to public.', function() {
+        it('Can release HiGlass Item to public.', function () {
 
             // Log in as the sharing user.
-            cy.visit('/higlass-view-configs/').login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken' : true }).end();
+            cy.visit('/higlass-view-configs/').login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).end();
 
             // Go to the draft higlass display and release it.
             cy.visit(draftUrl);
@@ -266,7 +266,7 @@ describe("HiGlass Display pages", function () {
 
             cy.get('.item-view-header .indicator-item.item-status').should('have.text', 'draft').end()
                 .get(".tab-section-title .tabview-title-controls-container button.btn-info.dropdown-toggle").click().end()
-                .get(".tab-section-title .tabview-title-controls-container button.btn-info.dropdown-toggle + .dropdown-menu.show").within(function($menu){
+                .get(".tab-section-title .tabview-title-controls-container button.btn-info.dropdown-toggle + .dropdown-menu.show").within(function ($menu) {
                     return cy.contains("Visible by Everyone").click().end();
                 }).end()
                 .get('.alert div').should('contain', 'Changed Display status to released.').end()
@@ -274,7 +274,7 @@ describe("HiGlass Display pages", function () {
                 .get(higlassItemViewVizSelector).end()
 
                 // Download the JSON to see if the higlass display is released
-                .request(draftUrl + "?format=json&datastore=database").then((newJson)=>{
+                .request(draftUrl + "?format=json&datastore=database").then((newJson) => {
                     expect(newJson.body.status).to.equal("released");
                 }).logout4DN().end();
         });
