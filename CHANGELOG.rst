@@ -6,6 +6,14 @@ fourfront
 Change Log
 ----------
 
+8.9.4
+=====
+
+`PR 1934: Fix failing HiGlass related Cypress tests  <https://github.com/4dn-dcic/fourfront/pull/1934>`_
+
+* update settings to enforce using the WebGL in headless chromium browsers
+
+
 8.9.3
 =====
 
