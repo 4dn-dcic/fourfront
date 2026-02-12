@@ -109,19 +109,24 @@ describe('Joint Analysis Page', function () {
     context("HiGlass Static Section(s)", function () {
 
         it("HiGlass initializes (very basic)", function () {
-            // Fresh visit ensures HiGlass lazy-loaded dependencies initialize reliably
-            // when testIsolation=false and earlier tests may have changed page state.
             cy.visit('/joint-analysis');
 
-            cy.window().scrollTo('bottom');
+            // Make sure the HiGlass section gets into the viewport so lazy init can trigger
+            cy.get('.higlass-instance', { timeout: 120000 }).scrollIntoView();
 
+            // Wait for the internal layout container that appears only after HiGlass mounts
+            cy.get('.higlass-instance .react-grid-layout', { timeout: 240000 })
+                .should('be.visible');
+
+            // Then assert a deeper renderer element (keep your original selector if you want)
             cy.get(
                 'div.tiled-plot-div div.track-renderer-div div.center-track-container',
-                { timeout: (10 * 60 * 1000) }
+                { timeout: 240000 }
             ).should('be.visible');
         });
 
     });
+
 
 
 });
