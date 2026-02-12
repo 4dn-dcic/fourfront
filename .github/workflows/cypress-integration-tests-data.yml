@@ -1,43 +1,35 @@
 # Action that Runs Cypress Tests
+
 name: Cypress Tests - Data
 
+# Controls when the action will run.
 on:
   schedule:
     - cron: '0 5 * * 1,4'
+
+  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   cypress-run:
+    # The type of runner that the job will run on
     runs-on: ubuntu-22.04
-
     strategy:
-      fail-fast: false
+      fail-fast: false  # suggested by Cypress
       matrix:
         containers: [1, 2, 3, 4, 5]
-
+    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Setup Node.js 20
       - name: Use Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-
-      # Verify HiGlass API reachable from runner (network sanity check)
-      - name: Check HiGlass API reachability (runner)
-        run: |
-          set -euxo pipefail
-          URL="https://higlass.4dnucleome.org/api/v1/tileset_info/?d=bJORvAOhSmCkED7QGB7FYA&s=ZxS34729QDKoiUIAcgZIUA"
-          echo "Testing: $URL"
-          curl -sS -D - -o /dev/null --retry 5 --retry-delay 2 --connect-timeout 10 --max-time 30 "$URL" || true
-
-      # Optional: verify tiles endpoint reachable (just for diagnostics)
-      - name: Check HiGlass tiles endpoint (runner)
-        run: |
-          set -euxo pipefail
-          curl -sS -D - -o /dev/null --retry 3 --retry-delay 2 --connect-timeout 10 --max-time 30 \
-          "https://higlass.4dnucleome.org/api/v1/tiles/" || true
 
       - name: Cypress run
         uses: cypress-io/github-action@v6
@@ -46,16 +38,9 @@ jobs:
           record: true
           browser: chrome
           parallel: true
-
-          # IMPORTANT: increase timeouts for lazy-loaded HiGlass + slower CI environment
-          config: >
-            baseUrl=https://data.4dnucleome.org/,
-            defaultCommandTimeout=15000,
-            requestTimeout=60000,
-            responseTimeout=120000,
-            pageLoadTimeout=180000
-
+          config: baseUrl=https://data.4dnucleome.org/
         env:
+          # pass GitHub token to allow accurately detecting a build vs a re-run build
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_KEY }}
           CYPRESS_Auth0Client: ${{ secrets.Auth0Client }}
