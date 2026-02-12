@@ -25,5 +25,18 @@ module.exports = (on, config) => {
     }
   });
 
+  on('before:browser:launch', (browser = {}, launchOptions) => {
+    if (browser.family === 'chromium') {
+      // Make WebGL work reliably in CI/headless environments
+      launchOptions.args.push('--use-gl=swiftshader');
+      launchOptions.args.push('--enable-webgl');
+      launchOptions.args.push('--ignore-gpu-blocklist');
+
+      // Optional but sometimes helps stability
+      launchOptions.args.push('--disable-dev-shm-usage');
+    }
+    return launchOptions;
+  });
+
   return config;
 }
