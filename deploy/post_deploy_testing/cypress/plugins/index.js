@@ -27,13 +27,23 @@ module.exports = (on, config) => {
 
   on('before:browser:launch', (browser = {}, launchOptions) => {
     if (browser.family === 'chromium') {
-      // Make WebGL work reliably in CI/headless environments
-      launchOptions.args.push('--use-gl=swiftshader');
+      console.log('[cypress] before:browser:launch fired');
+      console.log('[cypress] browser:', browser.name, browser.family, browser.version);
+      console.log('[cypress] initial args:', launchOptions.args);
+
+      // Force software rendering / WebGL in CI
+      launchOptions.args.push('--no-sandbox');
+      launchOptions.args.push('--disable-setuid-sandbox');
+      launchOptions.args.push('--disable-dev-shm-usage');
+
+      // These combinations tend to work better on Ubuntu runners
+      launchOptions.args.push('--use-angle=swiftshader');
+      launchOptions.args.push('--use-gl=angle');
       launchOptions.args.push('--enable-webgl');
       launchOptions.args.push('--ignore-gpu-blocklist');
+      launchOptions.args.push('--enable-unsafe-swiftshader');
 
-      // Optional but sometimes helps stability
-      launchOptions.args.push('--disable-dev-shm-usage');
+      console.log('[cypress] final args:', launchOptions.args);
     }
     return launchOptions;
   });
