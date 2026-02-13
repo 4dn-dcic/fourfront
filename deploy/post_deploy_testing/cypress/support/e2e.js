@@ -31,4 +31,7 @@ Cypress.on("uncaught:exception", (err) => {
     ) {
         return false;
     }
+
+    // eslint-disable-next-line no-console
+    console.error('UNCAUGHT:', err);
 });
