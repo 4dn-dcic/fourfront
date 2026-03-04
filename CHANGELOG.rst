@@ -9,7 +9,7 @@ Change Log
 8.10.0
 =====
 
-* Upgrade Node to 21.7.3
+* Upgrade Node to 24.14.0
 
 
 8.9.4
