@@ -6,6 +6,12 @@ fourfront
 Change Log
 ----------
 
+8.10.0
+=====
+
+* Upgrade Node to 21.7.3
+
+
 8.9.4
 =====
 
