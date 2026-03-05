@@ -80,6 +80,33 @@ const rules = [
     },
 ];
 
+const webRules = [
+  // Prevent auth0-js from ever detecting CordovaAuth0Plugin in web builds
+  {
+    test: /node_modules[\\/]+auth0-js[\\/]+dist[\\/]+auth0\.min\.esm\.js$/,
+    loader: 'string-replace-loader',
+    enforce: 'pre',
+    options: {
+      // auth0-js uses this token internally; renaming it disables the detection path
+      search: 'CordovaAuth0Plugin',
+      replace: '__DISABLED__CordovaAuth0Plugin'
+    }
+  },
+
+  // patch the non-esm min build if it ever gets pulled in
+  {
+    test: /node_modules[\\/]+auth0-js[\\/]+dist[\\/]+auth0\.min\.js$/,
+    loader: 'string-replace-loader',
+    enforce: 'pre',
+    options: {
+      search: 'CordovaAuth0Plugin',
+      replace: '__DISABLED__CordovaAuth0Plugin'
+    }
+  },
+
+  ...rules
+];
+
 const resolve = {
     extensions : [".webpack.js", ".web.js", ".js", ".json", ".jsx"],
     //symlinks: false,
@@ -139,6 +166,12 @@ webPlugins.push(new webpack.DefinePlugin({
     'SERVERSIDE' : JSON.stringify(false),
     'BUILDTYPE' : JSON.stringify(env)
 }));
+webPlugins.push(
+  new webpack.NormalModuleReplacementPlugin(
+    /auth0-js[\\/]dist[\\/]cordova-auth0-plugin\.min\.js$/,
+    path.resolve(__dirname, 'src/encoded/static/shims/auth0-cordova-plugin.disabled.web.js')
+  )
+);
 
 serverPlugins.push(new webpack.DefinePlugin({
     'process.env.NODE_ENV': JSON.stringify(env),
