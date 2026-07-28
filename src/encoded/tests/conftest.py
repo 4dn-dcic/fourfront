@@ -34,7 +34,7 @@ README:
 
 
 # hacked version
-@pytest.yield_fixture
+@pytest.fixture
 def external_tx(request, conn):
     # overridden from snovault to detect and continue from savepoint error
     if NO_SERVER_FIXTURES:
@@ -115,7 +115,7 @@ def pytest_configure():
     logging.getLogger('sqlalchemy.engine.base.Engine').addFilter(Shorten())
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def threadlocals(request, dummy_request, registry):
     notice_pytest_fixtures(request, dummy_request, registry)
     threadlocal_manager.push({'request': dummy_request, 'registry': registry})
@@ -377,7 +377,25 @@ class WorkbookCache:
         elif load_res:
             raise RuntimeError("load_all returned a true value that was not an exception.")
 
-        testapp.post_json('/index', {})
+        # Index the freshly-loaded workbook, then keep re-indexing until the DB
+        # and ES document counts agree. A single /index pass can under-index when
+        # secondary (embedded) invalidation is still draining, which was a source
+        # of flaky/false-negative workbook-test failures previously masked by the
+        # Makefile's `--force-flaky --max-runs=3`. Looping on /counts addresses the
+        # root cause instead of retrying whole tests.
+        # (Mirrors the snovault/smaht-portal conftest pattern.)
+        testapp.post_json('/index', {'record': True})
+        tries = 0
+        max_tries = 20
+        while 'more items' in testapp.get('/counts').json['db_es_total']:
+            if tries >= max_tries:
+                raise RuntimeError(
+                    "Workbook indexing did not settle after %s re-index passes; "
+                    "latest /counts db_es_total was: %s"
+                    % (max_tries, testapp.get('/counts').json['db_es_total'])
+                )
+            testapp.post_json('/index', {'record': True})
+            tries += 1
         return True
 
 
@@ -388,7 +406,7 @@ def workbook(es_app):
     WorkbookCache.initialize_if_needed(es_app)
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def mocked_file_system():
     with MockFileSystem(auto_mirror_files_for_read=True).mock_exists_open_remove():
         yield

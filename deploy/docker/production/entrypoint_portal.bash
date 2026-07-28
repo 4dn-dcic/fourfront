@@ -6,9 +6,8 @@ echo "Starting up Fourfront WSGI"
 # secrets manager - this builds production.ini
 poetry run python -m assume_identity
 
-# Start nginx proxy
-service nginx start
-
-# Start application
+# Start application. nginx is now supervised as a supervisord program (see
+# supervisord.conf) rather than started here with `service nginx start`, so that
+# it is restarted on crash and its logs are unified under supervisord.
 echo "Starting supervisor"
 supervisord -c supervisord.conf

@@ -153,7 +153,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
 
     ### Adding facets, plus any optional custom aggregations.
     ### Uses 'size' and 'from_' to conditionally skip (no facets if from > 0; no aggs if size > 0).
-    search = set_facets(search, facets, query_filters, string_query, request, doc_types, custom_aggregations, base_field_filters, size, from_)
+    search = set_facets(search, facets, query_filters, string_query, request, doc_types, custom_aggregations, base_field_filters, size, from_, search_frame)
 
     ### Add preference from session, if available
     search_session_id = None
@@ -349,11 +349,20 @@ def get_pagination(request):
 
 
 def get_all_subsequent_results(initial_search_result, search, extra_requests_needed_count, size_increment):
+    # Aggregations (facets) and the exact total-hit count are only needed from the
+    # first page -- they are already captured in `initial_search_result`. Re-running
+    # whole-index aggregations and exact total-hit counting on every subsequent page
+    # of a `limit=all` scan is pure wasted ES work, so build a lightweight clone that
+    # drops the aggregations and disables `track_total_hits` for the remaining pages.
+    # (Mirrors the snovault search fix; see 4dn-dcic/snovault #318.)
+    subsequent_search_base = search._clone()
+    subsequent_search_base.aggs._params = {}
+    subsequent_search_base = subsequent_search_base.extra(track_total_hits=False)
     from_ = 0
     while extra_requests_needed_count > 0:
         # print(f"{extra_requests_needed_count} requests left to get all results.")
         from_ = from_ + size_increment
-        subsequent_search = search[from_:from_ + size_increment]
+        subsequent_search = subsequent_search_base[from_:from_ + size_increment]
         subsequent_search_result = execute_search(subsequent_search)
         extra_requests_needed_count -= 1
         for hit in subsequent_search_result['hits'].get('hits', []):
@@ -598,14 +607,14 @@ def list_source_fields(request, doc_types, frame):
         for field in fields_requested:
             fields.append('embedded.' + field)
     elif frame in ['embedded', 'object', 'raw']:
-        if frame != 'embedded':
-            # frame=raw corresponds to 'properties' in ES
-            if frame == 'raw':
-                frame = 'properties'
-            # let embedded be searched as well (for faceting)
-            fields = ['embedded.*', frame + '.*']
-        else:
-            fields = [frame + '.*']
+        # frame=raw corresponds to 'properties' in ES
+        if frame == 'raw':
+            frame = 'properties'
+        # Only fetch the requested frame's fields. For object/raw frames the
+        # embedded blob is discarded by format_results, and faceting reads ES
+        # aggregations rather than _source, so pulling `embedded.*` into _source
+        # here was wasted per-hit payload. (Mirrors snovault search #318.)
+        fields = [frame + '.*']
     else:
         fields = ['embedded.*']
     return fields
@@ -1249,7 +1258,7 @@ def generate_filters_for_terms_agg_from_search_filters(query_field, search_filte
     return facet_filters
 
 
-def set_facets(search, facets, search_filters, string_query, request, doc_types, custom_aggregations=None, base_field_filters=None, size=25, from_=0):
+def set_facets(search, facets, search_filters, string_query, request, doc_types, custom_aggregations=None, base_field_filters=None, size=25, from_=0, search_frame='embedded'):
     """
     Sets facets in the query as ElasticSearch aggregations, with each aggregation to be
     filtered by search_filters minus filter affecting facet field in order to get counts
@@ -1267,7 +1276,12 @@ def set_facets(search, facets, search_filters, string_query, request, doc_types,
 
     aggs = OrderedDict()
 
-    for field, facet in facets: # E.g. 'type','experimentset_type','experiments_in_set.award.project', ...
+    # Default facet aggregations are surfaced in the response only for frame=embedded
+    # (format_facets returns no facets for object/raw frames), so skip the expensive
+    # per-facet filtered aggregation construction when the selected frame will discard
+    # them. Custom/schema aggregations (set_additional_aggregations, below) are not
+    # frame-gated and remain applied. (Mirrors snovault search #318 facet gating.)
+    for field, facet in (facets if search_frame == 'embedded' else []): # E.g. 'type','experimentset_type','experiments_in_set.award.project', ...
 
         field_schema = schema_for_field(field, request, doc_types, should_log=True)
         is_date_field = field_schema and determine_if_is_date_field(field, field_schema)

@@ -66,7 +66,8 @@ jobs:
           make build
 
       - name: configure aws credentials
-        uses: aws-actions/configure-aws-credentials@main
+        # Pin to a released major tag instead of the mutable @main branch (supply-chain hygiene).
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::643366669028:role/4dn-dcic-github-actions-deployment-role
           role-session-name: fourfront-unit-testing-session
@@ -103,6 +104,10 @@ jobs:
           ACCOUNT_NUMBER: $ {{ secrets.ACCOUNT_NUMBER }}
         run: |
           poetry run wipe-test-indices $TEST_JOB_ID search-fourfront-testing-opensearch-kqm7pliix4wgiu4druk2indorq.us-east-1.es.amazonaws.com:443
+          # Also delete the per-run SQS indexer queues created by this job. They are
+          # namespaced by TEST_JOB_ID and otherwise accumulate, a known driver of
+          # indexing-test flakiness. Non-fatal if the CI role lacks sqs:ListQueues.
+          poetry run wipe-test-indexer-queues $TEST_JOB_ID
 
       - name: QA (UNIT)
         if: ${{ matrix.test_type == 'UNIT' }}
@@ -129,6 +134,10 @@ jobs:
           ACCOUNT_NUMBER: $ {{ secrets.ACCOUNT_NUMBER }}
         run: |
           poetry run wipe-test-indices $TEST_JOB_ID search-fourfront-testing-opensearch-kqm7pliix4wgiu4druk2indorq.us-east-1.es.amazonaws.com:443
+          # Also delete the per-run SQS indexer queues created by this job. They are
+          # namespaced by TEST_JOB_ID and otherwise accumulate, a known driver of
+          # indexing-test flakiness. Non-fatal if the CI role lacks sqs:ListQueues.
+          poetry run wipe-test-indexer-queues $TEST_JOB_ID
 
       - name: Docker Build
         if: ${{ matrix.test_type == 'Docker' && matrix.node_version == '20' && matrix.python_version == '3.11' }}

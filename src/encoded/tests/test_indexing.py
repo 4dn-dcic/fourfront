@@ -55,7 +55,7 @@ def test_postgres_version(session):
 TEST_COLLECTIONS = ['testing_post_put_patch', 'file_processed']
 
 
-@pytest.yield_fixture(scope='session')
+@pytest.fixture(scope='session')
 def app(es_app_settings, request):
     # for now, don't run with mpindexer. Add `True` to params above to do so
     # if request.param:
@@ -70,7 +70,7 @@ def app(es_app_settings, request):
 
 
 # explicitly specify now (invalidation scope tests don't need this)
-@pytest.yield_fixture
+@pytest.fixture
 def setup_and_teardown(es_app):
     """
     Run create mapping and purge queue before tests and clear out the

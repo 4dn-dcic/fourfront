@@ -33,6 +33,27 @@ import structlog
 log = structlog.getLogger(__name__)
 
 
+# CSV/TSV formula injection (CWE-1236): spreadsheet applications (Excel, Google
+# Sheets, LibreOffice) interpret any cell whose text begins with one of these
+# characters as a formula, which lets submitter-controlled metadata values run
+# as code when a downloaded manifest is opened. Prefixing a single quote forces
+# the cell to be treated as literal text instead.
+FORMULA_INJECTION_LEAD_CHARS = ('=', '+', '-', '@')
+
+
+def neutralize_formula_injection(value):
+    """Neutralize spreadsheet formula injection in a single cell value.
+
+    If ``value`` is a string that begins with a formula-trigger character
+    (``=``, ``+``, ``-`` or ``@``), return it prefixed with a single quote so
+    spreadsheet software renders it literally. Non-string or empty values, and
+    strings that do not begin with a trigger character, are returned unchanged.
+    """
+    if isinstance(value, str) and value and value[0] in FORMULA_INJECTION_LEAD_CHARS:
+        return "'" + value
+    return value
+
+
 def includeme(config):
     config.add_route('batch_download', '/batch_download/{search_params}')
     config.add_route('metadata', '/metadata/')
@@ -218,7 +239,7 @@ def peak_metadata(context, request):
     fout = io.StringIO()
     writer = csv.writer(fout, delimiter='\t')
     writer.writerow(header)
-    writer.writerows(rows)
+    writer.writerows([neutralize_formula_injection(cell) for cell in row] for row in rows)
     return Response(
         content_type='text/tsv',
         body=fout.getvalue(),
@@ -654,7 +675,7 @@ def metadata_tsv(context, request):
         yield line.read().encode('utf-8')
 
         for file_row_dict in file_row_dictionaries:
-            writer.writerow([ file_row_dict.get(column) or 'N/A' for column in header ])
+            writer.writerow([ neutralize_formula_injection(file_row_dict.get(column) or 'N/A') for column in header ])
             yield line.read().encode('utf-8')
 
         for summary_line in generate_summary_lines():
@@ -784,10 +805,19 @@ def report_download(context, request):
     columns = build_table_columns(request, the_schema, [the_type])
     header = [column.get('title') or field for field, column in columns.items()]
 
+    # Restrict the ES _source to exactly the column paths we render instead of
+    # pulling the entire embedded document for every hit. lookup_column_value
+    # only ever traverses these column paths, so bounding the field set here is
+    # output-neutral while avoiding multi-MB per-hit payloads. Only inject the
+    # default field set when the caller has not already restricted `field`.
+    if not request.GET.getall('field'):
+        for field in columns:
+            request.GET.add('field', field)
+
     def generate_rows():
         yield format_row(header)
         for item in iter_search_results(context, request):
-            values = [lookup_column_value(item, path) for path in columns]
+            values = [neutralize_formula_injection(lookup_column_value(item, path)) for path in columns]
             yield format_row(values)
 
     # Stream response using chunked encoding.

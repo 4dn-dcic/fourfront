@@ -111,6 +111,11 @@ RUN chown -R nginx:nginx /var/cache/nginx && \
     mkdir -p /data/nginx/cache && \
     chown -R nginx:nginx /data/nginx/cache
 
+# Fail the image build if the nginx configuration is invalid, rather than only
+# discovering it when the container starts. Runs after the filesystem setup above
+# so all referenced log/pid paths already exist.
+RUN nginx -v && nginx -t
+
 # Pull all required files
 # Note that *.ini must match the env name in secrets manager!
 # Note that deploy/docker/production/entrypoint.sh resolves which entrypoint to run
