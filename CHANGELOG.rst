@@ -6,6 +6,18 @@ fourfront
 Change Log
 ----------
 
+8.10.0
+======
+
+`PR 1936: Align Fourfront with snovault 11.35.2 / SMaHT <https://github.com/4dn-dcic/fourfront/pull/1936>`_
+
+* Bump ``dcicsnovault`` 11.27.0 -> 11.35.2 and ``dcicutils`` 8.18.3 -> 8.18.8 (lockfile regenerated). Delivers the #335 nested-``linkTo`` invalidation-scope correctness fix (stale-ES documents), the #333 indexing ``MAX(sid)`` hoist, #324 ES access-pattern efficiency, and attachment/JWT/AccessKey-secret security fixes.
+* Search efficiency (ports of snovault #318 into the local ``search.py``): omit aggregations and total-hit counting on subsequent ``limit=all`` pages; stop fetching ``embedded.*`` for object/raw frames; skip default facet aggregations when the frame discards them.
+* ``batch_download``: neutralize CSV/TSV formula injection (CWE-1236) for cells starting with ``=``/``+``/``-``/``@``; bound ``/report.tsv`` source fields to the rendered columns instead of the full embedded document.
+* Test/CI reliability: re-index the ``workbook`` fixture until DB/ES counts agree; replace deprecated ``@pytest.yield_fixture``; add ``wipe-test-indexer-queues`` CI cleanup; add a ``pyramid.debug_authorization`` config guardrail test.
+* Docker/deploy hardening: supervise nginx under supervisord with ``set -e`` fail-fast deploy entrypoint; bounded nginx upstream retries and enlarged upstream zone; ``nginx -t`` build gate; pin the OpenSearch image and the ``configure-aws-credentials`` action.
+
+
 8.9.4
 =====
 
