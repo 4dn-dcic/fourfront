@@ -1,5 +1,4 @@
 import re
-import math
 import itertools
 from functools import reduce
 from pyramid.view import view_config
@@ -348,38 +347,70 @@ def get_pagination(request):
     return from_, size
 
 
-def get_all_subsequent_results(initial_search_result, search, extra_requests_needed_count, size_increment):
-    # Aggregations (facets) and the exact total-hit count are only needed from the
-    # first page -- they are already captured in `initial_search_result`. Re-running
-    # whole-index aggregations and exact total-hit counting on every subsequent page
-    # of a `limit=all` scan is pure wasted ES work, so build a lightweight clone that
-    # drops the aggregations and disables `track_total_hits` for the remaining pages.
-    # (Mirrors the snovault search fix; see 4dn-dcic/snovault #318.)
+def _search_with_stable_tiebreaker(search):
+    """Return a clone whose existing sort ends with a stable unique key."""
+    sort_clauses = list(search.to_dict().get('sort', []))
+    has_id_sort = any(
+        (isinstance(clause, str) and clause.lstrip('-') == '_id') or
+        (isinstance(clause, dict) and '_id' in clause)
+        for clause in sort_clauses
+    )
+    if not has_id_sort:
+        sort_clauses.append({'_id': {'order': 'asc'}})
+    return search.sort(*sort_clauses)
+
+
+def get_all_subsequent_results(initial_hits, search, size_increment):
+    """Yield every page after the first using Elasticsearch ``search_after``."""
+    previous_hits = initial_hits
+    last_search_after = None
+    if len(previous_hits) < size_increment:
+        return
+
+    # Aggregations (facets) and the exact total-hit count are only needed from
+    # the first page. The stable sort already added by
+    # _search_with_stable_tiebreaker makes the final hit's sort values a safe
+    # cursor without the O(N^2) cost and max-result-window limit of from/size.
     subsequent_search_base = search._clone()
     subsequent_search_base.aggs._params = {}
     subsequent_search_base = subsequent_search_base.extra(track_total_hits=False)
-    from_ = 0
-    while extra_requests_needed_count > 0:
-        # print(f"{extra_requests_needed_count} requests left to get all results.")
-        from_ = from_ + size_increment
-        subsequent_search = subsequent_search_base[from_:from_ + size_increment]
+
+    while len(previous_hits) == size_increment:
+        search_after = previous_hits[-1].get('sort')
+        if not search_after:
+            raise HTTPBadRequest(
+                explanation='The search could not continue because Elasticsearch '
+                            'did not return a stable pagination cursor.'
+            )
+        if search_after == last_search_after:
+            raise HTTPBadRequest(
+                explanation='The search could not continue because Elasticsearch '
+                            'returned the same pagination cursor twice.'
+            )
+        last_search_after = search_after
+        subsequent_search = subsequent_search_base.extra(
+            size=size_increment,
+            search_after=search_after,
+        )
         subsequent_search_result = execute_search(subsequent_search)
-        extra_requests_needed_count -= 1
-        for hit in subsequent_search_result['hits'].get('hits', []):
+        previous_hits = subsequent_search_result['hits'].get('hits', [])
+        for hit in previous_hits:
             yield hit
 
 
-def execute_search_for_all_results(search):
-    chunk_size = 100  # Decrease this to like 5 or 10 to test.
-
-    first_search = search[0:chunk_size]  # get aggregations from here
+def execute_search_for_all_results(search, chunk_size=100):
+    # Preserve the caller's primary ordering while making ties deterministic.
+    # Exact totals and aggregations are paid only on the first page.
+    stable_search = _search_with_stable_tiebreaker(search)
+    first_search = stable_search[0:chunk_size].extra(track_total_hits=True)
     es_result = execute_search(first_search)
+    first_hits = es_result['hits'].get('hits', [])
 
-    total_results_expected = es_result['hits'].get('total', {}).get('value', 0)
-    extra_requests_needed_count = int(math.ceil(total_results_expected / chunk_size)) - 1  # Decrease by 1 (first es_result already happened)
-
-    if extra_requests_needed_count > 0:
-        es_result['hits']['hits'] = itertools.chain(es_result['hits']['hits'], get_all_subsequent_results(es_result, search, extra_requests_needed_count, chunk_size))
+    if first_hits:
+        es_result['hits']['hits'] = itertools.chain(
+            first_hits,
+            get_all_subsequent_results(first_hits, stable_search, chunk_size)
+        )
     return es_result
 
 
@@ -1389,22 +1420,26 @@ def set_facets(search, facets, search_filters, string_query, request, doc_types,
         if facet.get('description') is None and field_schema and 'description' in field_schema:
             facet['description'] = field_schema['description']
 
-    # to achieve OR behavior within facets, search among GLOBAL results,
-    # not just returned ones. to do this, wrap aggs in ['all_items']
-    # and add "global": {} to top level aggs query
-    # see elasticsearch global aggs for documentation (should be ES5 compliant)
     search_as_dict = search.to_dict()
-    search_as_dict['aggs'] = {
-        'all_items': {
-            'global': {},
-            'aggs': aggs
+    if search_frame == 'embedded':
+        # To achieve OR behavior within facets, search among GLOBAL results,
+        # not just returned ones.
+        search_as_dict['aggs'] = {
+            'all_items': {
+                'global': {},
+                'aggs': aggs
+            }
         }
-    }
+    else:
+        search_as_dict.pop('aggs', None)
 
     if size == 0:
         # Only perform aggs if size==0 requested, to improve performance for search page queries.
         # We do currently have (hidden) monthly date histogram facets which may yet to be utilized for common size!=0 agg use cases.
+        search_as_dict.setdefault('aggs', {})
         set_additional_aggregations(search_as_dict, request, doc_types, custom_aggregations)
+        if not search_as_dict['aggs']:
+            del search_as_dict['aggs']
 
     search.update_from_dict(search_as_dict)
     return search

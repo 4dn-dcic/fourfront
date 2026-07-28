@@ -4,12 +4,17 @@ Covers the CSV/TSV formula-injection neutralization (CWE-1236) added to the
 manifest / report streaming paths in src/encoded/batch_download.py.
 """
 
+import csv
+import io
+
 import pytest
 
 from ..batch_download import (
+    FORMULA_INJECTION_CONTROL_LEAD_CHARS,
+    FORMULA_INJECTION_LEAD_CHARS,
+    format_row,
     neutralize_formula_injection,
     lookup_column_value,
-    FORMULA_INJECTION_LEAD_CHARS,
 )
 
 
@@ -29,6 +34,7 @@ def test_neutralize_prefixes_leading_formula_chars(lead):
 def test_lead_chars_are_the_documented_set():
     # Guardrail: the neutralized set matches the CWE-1236 trigger characters.
     assert FORMULA_INJECTION_LEAD_CHARS == ('=', '+', '-', '@')
+    assert FORMULA_INJECTION_CONTROL_LEAD_CHARS == ('\t', '\r', '\n')
 
 
 @pytest.mark.parametrize('value', [
@@ -51,11 +57,25 @@ def test_non_string_values_untouched(value):
     assert neutralize_formula_injection(value) is value
 
 
-def test_only_leading_char_matters():
-    # Trigger chars later in the string are not a spreadsheet injection risk and
-    # must be left alone to preserve data fidelity.
+def test_formula_chars_after_content_are_untouched():
     assert neutralize_formula_injection('a=b+c') == 'a=b+c'
     assert neutralize_formula_injection('lab@example.org') == 'lab@example.org'
+
+
+@pytest.mark.parametrize('value', [
+    ' =1+1',
+    '\t=1+1',
+    '\r\n@SUM(A1:A2)',
+    '\v\f-2+2',
+    '\x00\x7f+cmd',
+])
+def test_whitespace_and_control_prefixes_cannot_hide_formula(value):
+    assert neutralize_formula_injection(value) == "'" + value
+
+
+@pytest.mark.parametrize('value', ['\tplain', '\rplain', '\nplain'])
+def test_dangerous_leading_controls_are_always_neutralized(value):
+    assert neutralize_formula_injection(value) == "'" + value
 
 
 def test_double_neutralization_is_idempotent_on_already_quoted():
@@ -109,3 +129,39 @@ def test_report_cell_pipeline_neutralizes_nested_malicious_value():
     raw = lookup_column_value(item, 'lab.display_title')
     assert raw.startswith('=')
     assert neutralize_formula_injection(raw) == "'" + raw
+
+
+def _parse_tsv_row(encoded_row):
+    return next(
+        csv.reader(io.StringIO(encoded_row.decode('utf-8')), delimiter='\t')
+    )
+
+
+@pytest.mark.parametrize('value', [
+    'safe\t=1+1',
+    'safe\r\n@SUM(A1:A2)',
+    'contains "quotes"',
+])
+def test_format_row_quotes_delimiters_newlines_and_quotes(value):
+    encoded = format_row(['fixed', neutralize_formula_injection(value), 'tail'])
+    assert _parse_tsv_row(encoded) == ['fixed', value, 'tail']
+
+
+def test_nested_and_missing_cells_preserve_column_parity():
+    item = {
+        'lab': {'display_title': '\t=HYPERLINK("https://evil")'},
+    }
+    paths = ['lab.display_title', 'award.project', 'missing']
+    values = [
+        neutralize_formula_injection(lookup_column_value(item, path))
+        for path in paths
+    ]
+
+    parsed = _parse_tsv_row(format_row(values))
+
+    assert len(parsed) == len(paths)
+    assert parsed == [
+        "'\t=HYPERLINK(\"https://evil\")",
+        '',
+        '',
+    ]

@@ -16,7 +16,7 @@ from dcicutils.qa_utils import notice_pytest_fixtures, MockFileSystem
 from pyramid.request import apply_request_extensions
 from pyramid.testing import DummyRequest
 from pyramid.threadlocal import get_current_registry, manager as threadlocal_manager
-from snovault import DBSESSION, ROOT, UPGRADER
+from snovault import COLLECTIONS, DBSESSION, ROOT, STORAGE, UPGRADER
 from snovault.elasticsearch import ELASTIC_SEARCH, create_mapping
 from snovault.util import generate_indexer_namespace_for_testing
 from .conftest_settings import make_app_settings_dictionary
@@ -377,26 +377,73 @@ class WorkbookCache:
         elif load_res:
             raise RuntimeError("load_all returned a true value that was not an exception.")
 
-        # Index the freshly-loaded workbook, then keep re-indexing until the DB
-        # and ES document counts agree. A single /index pass can under-index when
-        # secondary (embedded) invalidation is still draining, which was a source
-        # of flaky/false-negative workbook-test failures previously masked by the
-        # Makefile's `--force-flaky --max-runs=3`. Looping on /counts addresses the
-        # root cause instead of retrying whole tests.
-        # (Mirrors the snovault/smaht-portal conftest pattern.)
-        testapp.post_json('/index', {'record': True})
-        tries = 0
-        max_tries = 20
-        while 'more items' in testapp.get('/counts').json['db_es_total']:
-            if tries >= max_tries:
+        # Drain the normal queue first so this fixture exercises the production
+        # indexing path. If deferred/in-flight SQS messages leave concrete DB
+        # UUIDs absent from ES, recover those UUIDs synchronously instead of
+        # issuing blind immediate queue passes that cannot see messages during
+        # their visibility timeout.
+        indexing_history = []
+        queue_result = testapp.post_json('/index', {'record': True}).json
+        indexing_history.append(cls._indexing_summary('queue', queue_result))
+
+        max_sync_passes = 3
+        for sync_pass in range(max_sync_passes + 1):
+            counts = testapp.get('/counts').json
+            missing, extra = cls._workbook_index_delta(es_app)
+            if not missing and not extra:
+                return True
+            if extra or sync_pass == max_sync_passes:
                 raise RuntimeError(
-                    "Workbook indexing did not settle after %s re-index passes; "
-                    "latest /counts db_es_total was: %s"
-                    % (max_tries, testapp.get('/counts').json['db_es_total'])
+                    "Workbook indexing did not converge. counts=%r missing=%r "
+                    "extra=%r indexing_history=%r"
+                    % (
+                        counts['db_es_total'],
+                        cls._describe_uuids(es_app, missing),
+                        cls._describe_uuids(es_app, extra),
+                        indexing_history,
+                    )
                 )
-            testapp.post_json('/index', {'record': True})
-            tries += 1
-        return True
+
+            sync_result = testapp.post_json(
+                '/index',
+                {'record': True, 'uuids': sorted(missing)}
+            ).json
+            indexing_history.append(
+                cls._indexing_summary('sync-%s' % (sync_pass + 1), sync_result)
+            )
+
+        raise AssertionError("Unreachable workbook indexing state.")
+
+    @staticmethod
+    def _workbook_index_delta(es_app):
+        storage = es_app.registry[STORAGE]
+        item_types = tuple(es_app.registry[COLLECTIONS].by_item_type)
+        db_uuids = set(str(uuid) for uuid in storage.write.__iter__(*item_types))
+        es_uuids = set(str(uuid) for uuid in storage.read.__iter__(*item_types))
+        return db_uuids - es_uuids, es_uuids - db_uuids
+
+    @staticmethod
+    def _describe_uuids(es_app, uuids):
+        storage = es_app.registry[STORAGE]
+        descriptions = []
+        for item_uuid in sorted(uuids):
+            model = storage.write.get_by_uuid(item_uuid)
+            descriptions.append({
+                'uuid': item_uuid,
+                'item_type': getattr(model, 'item_type', '<not-in-database>'),
+            })
+        return descriptions
+
+    @staticmethod
+    def _indexing_summary(mode, result):
+        content = result.get('indexing_content', {})
+        return {
+            'mode': mode,
+            'indexing_count': result.get('indexing_count'),
+            'errors': result.get('errors', []),
+            'initial_queue_status': content.get('initial_queue_status'),
+            'finished_queue_status': content.get('finished_queue_status'),
+        }
 
 
 @pytest.fixture(scope='session')

@@ -1,7 +1,11 @@
 import pytest
 
 from base64 import b64decode
+from pyramid.httpexceptions import HTTPFound
+from snovault import BLOBS
 from unittest import mock
+
+from ..types import download, get_s3_presigned_url
 
 
 pytestmark = [pytest.mark.working, pytest.mark.setone]
@@ -17,6 +21,16 @@ AAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAgY0hSTQ
 AAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPA
 AAAANQTFRFALfvPEv6TAAAAAtJREFUCB1jYMAHAAAeAAEBGN
 laAAAAAElFTkSuQmCC"""
+
+ACTIVE_HTML = (
+    "data:text/html;base64,"
+    "PGh0bWw+PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0PjwvaHRtbD4="
+)
+ACTIVE_SVG = (
+    "data:image/svg+xml;base64,"
+    "PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxzY3Jp"
+    "cHQ+YWxlcnQoMSk8L3NjcmlwdD48L3N2Zz4="
+)
 
 
 @pytest.fixture
@@ -49,6 +63,7 @@ def test_download_create(testapp, testing_download):
     url = testing_download + '/' + attachment['href']
     res = testapp.get(url)
     assert res.content_type == 'image/png'
+    assert res.headers['Content-Disposition'] == 'attachment; filename="red-dot.png"'
     assert res.body == b64decode(RED_DOT.split(',', 1)[1])
 
     assert attachment2['href'] == '@@download/attachment2/blue-dot.png'
@@ -59,7 +74,77 @@ def test_download_create(testapp, testing_download):
     url = testing_download + '/' + attachment2['href']
     res = testapp.get(url)
     assert res.content_type == 'image/png'
+    assert res.headers['Content-Disposition'] == 'attachment; filename="blue-dot.png"'
     assert res.body == b64decode(BLUE_DOT.split(',', 1)[1])
+
+
+@pytest.mark.parametrize('filename,href,content_type', [
+    ('active.html', ACTIVE_HTML, 'text/html'),
+    ('active.svg', ACTIVE_SVG, 'image/svg+xml'),
+])
+def test_active_content_download_is_forced_to_attachment(
+    testapp, filename, href, content_type
+):
+    item = {
+        'attachment': {
+            'download': filename,
+            'href': href,
+        },
+    }
+    location = testapp.post_json('/testing-downloads/', item, status=201).location
+    attachment = testapp.get(location).json['attachment']
+    response = testapp.get(location + '/' + attachment['href'])
+
+    assert response.content_type == content_type
+    assert response.headers['Content-Disposition'] == (
+        'attachment; filename="%s"' % filename
+    )
+
+
+def test_s3_presign_forces_sanitized_attachment_disposition():
+    client = mock.Mock()
+    client.generate_presigned_url.return_value = 'https://example.test/download'
+    with mock.patch('encoded.types.boto3.client', return_value=client):
+        location = get_s3_presigned_url(
+            {'bucket': 'bucket', 'key': 'key'},
+            'unsafe\r\n"name.svg',
+        )
+
+    assert location == 'https://example.test/download'
+    params = client.generate_presigned_url.call_args.kwargs['Params']
+    assert params['ResponseContentDisposition'] == (
+        'attachment; filename="unsafename.svg"'
+    )
+
+
+def test_blob_url_branch_receives_sanitized_download_metadata():
+    blob_storage = mock.Mock()
+    blob_storage.get_blob_url.return_value = 'https://example.test/download'
+    context = mock.Mock(
+        properties={},
+        propsheets={
+            'downloads': {
+                'attachment': {
+                    'download': 'unsafe\r\n"name.svg',
+                    'blob_id': 'blob-id',
+                },
+            },
+        },
+    )
+    request = mock.Mock(
+        subpath=('attachment', 'unsafe\r\n"name.svg'),
+        registry={BLOBS: blob_storage},
+    )
+
+    with pytest.raises(HTTPFound) as raised:
+        download(context, request)
+
+    assert raised.value.location == 'https://example.test/download'
+    download_meta = blob_storage.get_blob_url.call_args.args[0]
+    assert download_meta['download'] == 'unsafename.svg'
+    assert context.propsheets['downloads']['attachment']['download'] == (
+        'unsafe\r\n"name.svg'
+    )
 
 
 def test_download_update(testapp, testing_download):

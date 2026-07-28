@@ -1,5 +1,4 @@
 from collections import OrderedDict
-from pyramid.compat import bytes_
 from pyramid.httpexceptions import (
     HTTPBadRequest,
     HTTPMovedPermanently
@@ -39,18 +38,38 @@ log = structlog.getLogger(__name__)
 # as code when a downloaded manifest is opened. Prefixing a single quote forces
 # the cell to be treated as literal text instead.
 FORMULA_INJECTION_LEAD_CHARS = ('=', '+', '-', '@')
+FORMULA_INJECTION_CONTROL_LEAD_CHARS = ('\t', '\r', '\n')
 
 
 def neutralize_formula_injection(value):
     """Neutralize spreadsheet formula injection in a single cell value.
 
-    If ``value`` is a string that begins with a formula-trigger character
-    (``=``, ``+``, ``-`` or ``@``), return it prefixed with a single quote so
-    spreadsheet software renders it literally. Non-string or empty values, and
-    strings that do not begin with a trigger character, are returned unchanged.
+    Formula characters are also detected after leading whitespace/control
+    characters because spreadsheet applications may ignore that prefix. A
+    leading tab, CR, or LF is dangerous by itself. Non-string or empty values
+    are returned unchanged.
     """
-    if isinstance(value, str) and value and value[0] in FORMULA_INJECTION_LEAD_CHARS:
-        return "'" + value
+    if isinstance(value, str) and value:
+        first_non_whitespace_or_control = 0
+        while (
+            first_non_whitespace_or_control < len(value) and
+            (
+                value[first_non_whitespace_or_control].isspace() or
+                ord(value[first_non_whitespace_or_control]) < 32 or
+                ord(value[first_non_whitespace_or_control]) == 127
+            )
+        ):
+            first_non_whitespace_or_control += 1
+        first_content_char = (
+            value[first_non_whitespace_or_control]
+            if first_non_whitespace_or_control < len(value)
+            else ''
+        )
+        if (
+            value[0] in FORMULA_INJECTION_CONTROL_LEAD_CHARS or
+            first_content_char in FORMULA_INJECTION_LEAD_CHARS
+        ):
+            return "'" + value
     return value
 
 
@@ -786,7 +805,10 @@ def lookup_column_value(value, path):
 
 def format_row(columns):
     """Format a list of text columns as a tab-separated byte string."""
-    return b'\t'.join([bytes_(c, 'utf-8') for c in columns]) + b'\r\n'
+    output = io.StringIO(newline='')
+    writer = csv.writer(output, delimiter='\t', lineterminator='\r\n')
+    writer.writerow(columns)
+    return output.getvalue().encode('utf-8')
 
 
 @view_config(route_name='report_download', request_method='GET')
