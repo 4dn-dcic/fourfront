@@ -403,11 +403,12 @@ class TestInvalidationScopeViewFourfront:
          ),
         # Test ExperimentSet
         ('FileProcessed', 'ExperimentSet',
-            DEFAULT_SCOPE + ['accession', 'contributing_labs', 'dbxrefs', 'description', 'extra_files.file_size',
-                             'extra_files.href', 'extra_files.md5sum', 'extra_files.use_for', 'file_classification',
-                             'file_format', 'file_size', 'file_type', 'genome_assembly', 'higlass_uid', 'lab',
-                             'last_modified.date_modified', 'md5sum', 'notes_to_tsv', 'quality_metric',
-                             'related_files.relationship_type', 'static_content.description', 'static_content.location']
+            DEFAULT_SCOPE + ['accession', 'contributing_labs', 'dbxrefs', 'description', 'extra_files.file_format',
+                             'extra_files.file_size', 'extra_files.href', 'extra_files.md5sum', 'extra_files.use_for',
+                             'file_classification', 'file_format', 'file_size', 'file_type', 'genome_assembly',
+                             'higlass_uid', 'lab', 'last_modified.date_modified', 'md5sum', 'notes_to_tsv',
+                             'quality_metric', 'related_files.relationship_type', 'static_content.content',
+                             'static_content.description', 'static_content.location']
          ),
         ('User', 'ExperimentSet',
             DEFAULT_SCOPE + ['email', 'first_name', 'job_title', 'lab', 'last_name', 'preferred_email', 'submitted_by',
@@ -434,8 +435,8 @@ class TestInvalidationScopeViewFourfront:
                              'genome_location', 'organism_name', 'preferred_label', 'relevant_genes']
          ),
         ('Biosample', 'ExperimentSet',
-            DEFAULT_SCOPE + ['accession', 'badges.messages', 'biosource', 'cell_culture_details', 'description',
-                             'modifications', 'treatments']
+            DEFAULT_SCOPE + ['accession', 'badges.badge', 'badges.messages', 'biosource', 'cell_culture_details',
+                             'description', 'modifications', 'treatments']
          ),
         ('Biosource', 'ExperimentSet',
             DEFAULT_SCOPE + ['accession', 'biosource_type', 'cell_line', 'cell_line_tier', 'override_biosource_name',
@@ -448,11 +449,12 @@ class TestInvalidationScopeViewFourfront:
             DEFAULT_SCOPE + ['name']
          ),
         ('FileReference', 'ExperimentSet',
-         DEFAULT_SCOPE + ['accession', 'contributing_labs', 'dbxrefs', 'description', 'extra_files.file_size',
-                          'extra_files.href', 'extra_files.md5sum', 'extra_files.use_for', 'file_classification',
-                          'file_format', 'file_size', 'file_type', 'genome_assembly', 'higlass_uid', 'lab',
-                          'last_modified.date_modified', 'md5sum', 'notes_to_tsv', 'quality_metric',
-                          'related_files.relationship_type', 'static_content.description', 'static_content.location']
+         DEFAULT_SCOPE + ['accession', 'contributing_labs', 'dbxrefs', 'description', 'extra_files.file_format',
+                          'extra_files.file_size', 'extra_files.href', 'extra_files.md5sum', 'extra_files.use_for',
+                          'file_classification', 'file_format', 'file_size', 'file_type', 'genome_assembly',
+                          'higlass_uid', 'lab', 'last_modified.date_modified', 'md5sum', 'notes_to_tsv',
+                          'quality_metric', 'related_files.relationship_type', 'static_content.content',
+                          'static_content.description', 'static_content.location']
          ),
         ('FileFormat', 'ExperimentSet',
             DEFAULT_SCOPE + ['file_format']
