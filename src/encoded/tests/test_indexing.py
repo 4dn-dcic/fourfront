@@ -492,19 +492,38 @@ class TestInvalidationScopeViewFourfront:
 
 
 def test_nested_workflow_software_change_reindexes_workflow_run(
-    workbook, es_app, es_testapp, indexer_testapp, award, lab
+    workbook, es_app, es_testapp, indexer_testapp, award, lab, request
 ):
     """A Workflow link change must refresh the dependent WorkflowRun ES doc."""
     unique = uuid.uuid4().hex[:10]
+    es = es_app.registry[ELASTIC_SEARCH]
+    indexer_queue = es_app.registry[INDEXER_QUEUE]
+    created_items = []
+
+    def cleanup_indexed_items():
+        indexer_queue.clear_queue()
+        for item_type, item_uuid in created_items:
+            try:
+                es.delete(
+                    index=get_namespaced_index(es_app, item_type),
+                    id=item_uuid,
+                    refresh=True,
+                )
+            except NotFoundError:
+                pass
+
+    request.addfinalizer(cleanup_indexed_items)
 
     def create_software(name):
-        return es_testapp.post_json('/software', {
+        software = es_testapp.post_json('/software', {
             'name': name,
             'software_type': ['workflow'],
             'version': '1',
             'award': award['@id'],
             'lab': lab['@id'],
         }).json['@graph'][0]
+        created_items.append(('software', software['uuid']))
+        return software
 
     first_software = create_software('scope-first-%s' % unique)
     second_software = create_software('scope-second-%s' % unique)
@@ -524,6 +543,7 @@ def test_nested_workflow_software_change_reindexes_workflow_run(
         'award': award['@id'],
         'lab': lab['@id'],
     }).json['@graph'][0]
+    created_items.append(('workflow', workflow['uuid']))
     workflow_run = es_testapp.post_json('/workflow_run_awsem', {
         'run_platform': 'AWSEM',
         'parameters': [],
@@ -534,9 +554,8 @@ def test_nested_workflow_software_change_reindexes_workflow_run(
         'lab': lab['@id'],
         'run_status': 'started',
     }).json['@graph'][0]
+    created_items.append(('workflow_run_awsem', workflow_run['uuid']))
 
-    es = es_app.registry[ELASTIC_SEARCH]
-    indexer_queue = es_app.registry[INDEXER_QUEUE]
     workflow_run_index = get_namespaced_index(es_app, 'workflow_run_awsem')
 
     def embedded_software_names():
