@@ -107,7 +107,7 @@ jobs:
           # Also delete the per-run SQS indexer queues created by this job. They are
           # namespaced by TEST_JOB_ID and otherwise accumulate, a known driver of
           # indexing-test flakiness. Non-fatal if the CI role lacks sqs:ListQueues.
-          poetry run wipe-test-indexer-queues $TEST_JOB_ID
+          poetry run wipe-test-indexer-queues $TEST_JOB_ID || true
 
       - name: QA (UNIT)
         if: ${{ matrix.test_type == 'UNIT' }}
@@ -137,7 +137,7 @@ jobs:
           # Also delete the per-run SQS indexer queues created by this job. They are
           # namespaced by TEST_JOB_ID and otherwise accumulate, a known driver of
           # indexing-test flakiness. Non-fatal if the CI role lacks sqs:ListQueues.
-          poetry run wipe-test-indexer-queues $TEST_JOB_ID
+          poetry run wipe-test-indexer-queues $TEST_JOB_ID || true
 
       - name: Docker Build
         if: ${{ matrix.test_type == 'Docker' && matrix.node_version == '20' && matrix.python_version == '3.11' }}

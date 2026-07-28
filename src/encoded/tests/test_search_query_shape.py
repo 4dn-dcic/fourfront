@@ -156,6 +156,68 @@ def test_execute_search_for_all_results_is_complete_beyond_10000(monkeypatch):
     assert captured[1]['search_after'] == [0, '999']
 
 
+def test_execute_search_for_all_results_raises_on_first_page_shard_failure(monkeypatch):
+    # A partial shard failure on the very first page returns a short hits array
+    # with a plausible total; the scan must fail loudly instead of silently
+    # truncating.
+    def fake_execute_search(search):
+        return {
+            '_shards': {'total': 5, 'successful': 4, 'failed': 1},
+            'hits': {
+                'total': {'value': 3, 'relation': 'eq'},
+                'hits': [
+                    {'_id': str(index), '_source': {'embedded': {}}, 'sort': [0, index]}
+                    for index in range(3)
+                ],
+            },
+            'aggregations': {'all_items': {'doc_count': 3}},
+        }
+
+    monkeypatch.setattr(search_module, 'execute_search', fake_execute_search)
+    base_search = Search(index='x').query('match_all').sort('embedded.uuid.raw')
+    base_search.aggs.bucket('all_items', 'global')
+
+    with pytest.raises(HTTPBadRequest, match='shards failed'):
+        result = search_module.execute_search_for_all_results(base_search, chunk_size=100)
+        list(result['hits']['hits'])
+
+
+def test_get_all_subsequent_results_raises_on_midscan_shard_failure(monkeypatch):
+    page_number = 0
+
+    def fake_execute_search(search):
+        nonlocal page_number
+        page_number += 1
+        if page_number == 1:
+            return {
+                'hits': {
+                    'hits': [
+                        {'_id': str(index), 'sort': [1, index]}
+                        for index in range(100)
+                    ],
+                },
+            }
+        return {
+            '_shards': {'total': 5, 'successful': 4, 'failed': 1},
+            'hits': {
+                'hits': [
+                    {'_id': str(200 + index), 'sort': [2, index]}
+                    for index in range(100)
+                ],
+            },
+        }
+
+    monkeypatch.setattr(search_module, 'execute_search', fake_execute_search)
+    initial_hits = [{'_id': str(index), 'sort': [0, index]} for index in range(100)]
+
+    with pytest.raises(HTTPBadRequest, match='shards failed'):
+        list(search_module.get_all_subsequent_results(
+            initial_hits=initial_hits,
+            search=_search_with_aggs_and_total(),
+            size_increment=100,
+        ))
+
+
 def test_get_all_subsequent_results_fails_without_cursor(monkeypatch):
     monkeypatch.setattr(
         search_module,

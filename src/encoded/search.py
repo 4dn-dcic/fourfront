@@ -360,6 +360,25 @@ def _search_with_stable_tiebreaker(search):
     return search.sort(*sort_clauses)
 
 
+def _raise_if_incomplete_scan(es_result):
+    """Fail a ``limit=all`` scan loudly when a page did not query every shard.
+
+    A partial shard failure returns HTTP 200 with a short ``hits`` array, which
+    would otherwise silently end the ``search_after`` scan early and yield an
+    incomplete result set alongside a plausible-looking total.
+    """
+    shards = es_result.get('_shards') or {}
+    failed = shards.get('failed') or 0
+    if failed:
+        total_shards = shards.get('total')
+        raise HTTPBadRequest(
+            explanation='The search could not be completed because %s of %s '
+                        'Elasticsearch shards failed to respond, which would '
+                        'silently truncate the full result set. Please retry '
+                        'the query.' % (failed, total_shards if total_shards is not None else 'the')
+        )
+
+
 def get_all_subsequent_results(initial_hits, search, size_increment):
     """Yield every page after the first using Elasticsearch ``search_after``."""
     previous_hits = initial_hits
@@ -393,6 +412,7 @@ def get_all_subsequent_results(initial_hits, search, size_increment):
             search_after=search_after,
         )
         subsequent_search_result = execute_search(subsequent_search)
+        _raise_if_incomplete_scan(subsequent_search_result)
         previous_hits = subsequent_search_result['hits'].get('hits', [])
         for hit in previous_hits:
             yield hit
@@ -404,6 +424,7 @@ def execute_search_for_all_results(search, chunk_size=100):
     stable_search = _search_with_stable_tiebreaker(search)
     first_search = stable_search[0:chunk_size].extra(track_total_hits=True)
     es_result = execute_search(first_search)
+    _raise_if_incomplete_scan(es_result)
     first_hits = es_result['hits'].get('hits', [])
 
     if first_hits:
