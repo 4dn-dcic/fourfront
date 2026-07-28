@@ -368,8 +368,8 @@ class TestInvalidationScopeViewFourfront:
                              'steps.meta.software_used']
          ),
         ('WorkflowRunAwsem', 'FileProcessed',
-            DEFAULT_SCOPE + ['input_files.workflow_argument_name', 'output_files.workflow_argument_name', 'title',
-                             'workflow']
+            DEFAULT_SCOPE + ['input_files.value', 'input_files.workflow_argument_name', 'output_files.value',
+                             'output_files.value_qc', 'output_files.workflow_argument_name', 'title', 'workflow']
          ),
         # Test FileProcessed
         ('Enzyme', 'FileProcessed',  # embeds 'name'
