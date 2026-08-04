@@ -139,6 +139,9 @@ class Document(ItemWithAttachment, Item):
     item_type = 'document'
     schema = load_schema('encoded:schemas/document.json')
 
+    class Collection(Item.Collection):
+        pass
+
     @calculated_property(schema={
         "title": "Display Title",
         "description": "A calculated title",
