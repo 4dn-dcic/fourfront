@@ -11,7 +11,6 @@ from snovault.attachment import (
 )
 from snovault.crud_views import collection_add as sno_collection_add
 from snovault.schema_utils import validate_request
-from snovault.validators import validate_item_content_post
 from snovault.validation import ValidationFailure
 from snovault.util import debug_log
 from snovault import (
@@ -156,7 +155,7 @@ class Document(ItemWithAttachment, Item):
 OCTET_STREAM_MIME_TYPE = 'application/octet-stream'
 
 
-def normalize_document_attachment_mime_type(context, request):
+def normalize_document_attachment_mime_type(context, properties):
     """Treat a browser's generic binary MIME type as unspecified when safe.
 
     Browsers use ``application/octet-stream`` in a FileReader data URI when
@@ -165,7 +164,6 @@ def normalize_document_attachment_mime_type(context, request):
     Document schema. ItemWithAttachment then performs its existing filename,
     libmagic content, allowlist, and checksum validation before storing it.
     """
-    properties = request.json
     attachment = properties.get('attachment')
     if not isinstance(attachment, dict):
         return
@@ -203,11 +201,18 @@ def normalize_document_attachment_mime_type(context, request):
     properties['attachment'] = normalized_attachment
 
 
+def validate_document_attachment_post(context, request):
+    """Normalize and validate the same decoded Document request body."""
+    properties = request.json
+    normalize_document_attachment_mime_type(context, properties)
+    validate_request(context.type_info.schema, request, properties)
+
+
 @view_config(
     context=Document.Collection,
     permission='add',
     request_method='POST',
-    validators=[normalize_document_attachment_mime_type, validate_item_content_post],
+    validators=[validate_document_attachment_post],
 )
 @debug_log
 def document_add(context, request, render=None):

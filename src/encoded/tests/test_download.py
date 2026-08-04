@@ -3,7 +3,9 @@ import pytest
 from base64 import b64decode, b64encode
 from pathlib import Path
 from pyramid.httpexceptions import HTTPFound
+from pyramid.request import Request
 from snovault import BLOBS
+from snovault.validation import Errors
 from unittest import mock
 
 from ..types import (
@@ -11,6 +13,7 @@ from ..types import (
     download,
     get_s3_presigned_url,
     normalize_document_attachment_mime_type,
+    validate_document_attachment_post,
 )
 
 
@@ -346,9 +349,8 @@ def test_normalize_document_attachment_mime_type_for_allowed_filename():
     attachment = browser_octet_stream_attachment('synthetic-document.pdf', b'pdf')
     properties = {'attachment': attachment}
     context = mock.Mock(type_info=mock.Mock(schema=Document.schema))
-    request = mock.Mock(json=properties)
 
-    normalize_document_attachment_mime_type(context, request)
+    normalize_document_attachment_mime_type(context, properties)
 
     assert properties['attachment'] == {
         'download': 'synthetic-document.pdf',
@@ -362,11 +364,42 @@ def test_normalize_document_attachment_mime_type_keeps_unknown_filename():
     attachment = browser_octet_stream_attachment('synthetic-document.payload', b'bin')
     properties = {'attachment': attachment}
     context = mock.Mock(type_info=mock.Mock(schema=Document.schema))
-    request = mock.Mock(json=properties)
 
-    normalize_document_attachment_mime_type(context, request)
+    normalize_document_attachment_mime_type(context, properties)
 
     assert properties['attachment'] is attachment
+
+
+def test_document_attachment_post_validates_normalized_request_mapping():
+    schema = {
+        'type': 'object',
+        'properties': {
+            'attachment': {
+                'type': 'object',
+                'properties': {
+                    'download': {'type': 'string'},
+                    'type': {'type': 'string', 'enum': ['application/pdf']},
+                    'href': {'type': 'string'},
+                },
+            },
+        },
+    }
+    context = mock.Mock(type_info=mock.Mock(schema=schema))
+    request = Request.blank(
+        '/document',
+        method='POST',
+        content_type='application/json',
+        json={'attachment': browser_octet_stream_attachment('synthetic.pdf', b'pdf')},
+    )
+    request.errors = Errors()
+    request.validated = {}
+
+    assert request.json is not request.json
+    validate_document_attachment_post(context, request)
+
+    assert not request.errors
+    assert request.validated['attachment']['type'] == 'application/pdf'
+    assert request.validated['attachment']['href'].startswith('data:application/pdf;')
 
 
 def test_document_upload_normalizes_browser_octet_stream(testapp, award, lab):
