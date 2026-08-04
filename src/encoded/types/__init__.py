@@ -5,11 +5,13 @@ import transaction
 
 from mimetypes import guess_type
 from snovault.attachment import (
+    guess_mime_type,
     ItemWithAttachment,
     safe_content_disposition_filename,
 )
 from snovault.crud_views import collection_add as sno_collection_add
 from snovault.schema_utils import validate_request
+from snovault.validators import validate_item_content_post
 from snovault.validation import ValidationFailure
 from snovault.util import debug_log
 from snovault import (
@@ -146,6 +148,67 @@ class Document(ItemWithAttachment, Item):
         if attachment:
             return attachment.get('download')
         return Item.display_title(self)
+
+
+OCTET_STREAM_MIME_TYPE = 'application/octet-stream'
+
+
+def normalize_document_attachment_mime_type(context, request):
+    """Treat a browser's generic binary MIME type as unspecified when safe.
+
+    Browsers use ``application/octet-stream`` in a FileReader data URI when
+    they do not recognize a selected file's type. Only replace that generic
+    value when the filename implies a MIME type already allowed by the
+    Document schema. ItemWithAttachment then performs its existing filename,
+    libmagic content, allowlist, and checksum validation before storing it.
+    """
+    properties = request.json
+    attachment = properties.get('attachment')
+    if not isinstance(attachment, dict):
+        return
+
+    href = attachment.get('href')
+    filename = attachment.get('download')
+    if not isinstance(href, str) or not isinstance(filename, str):
+        return
+
+    header, separator, payload = href.partition(',')
+    if not separator or not header.startswith('data:'):
+        return
+
+    media_type_and_options = header[len('data:'):].split(';')
+    if media_type_and_options[0].strip().lower() != OCTET_STREAM_MIME_TYPE:
+        return
+
+    implied_mime_type = guess_mime_type(filename)
+    try:
+        allowed_mime_types = context.type_info.schema['properties']['attachment'][
+            'properties'
+        ]['type']['enum']
+    except (KeyError, TypeError):
+        return
+    if implied_mime_type not in allowed_mime_types:
+        return
+
+    media_type_and_options[0] = implied_mime_type
+    normalized_attachment = attachment.copy()
+    normalized_attachment['type'] = implied_mime_type
+    normalized_attachment['href'] = 'data:%s,%s' % (
+        ';'.join(media_type_and_options),
+        payload,
+    )
+    properties['attachment'] = normalized_attachment
+
+
+@view_config(
+    context=Document.Collection,
+    permission='add',
+    request_method='POST',
+    validators=[normalize_document_attachment_mime_type, validate_item_content_post],
+)
+@debug_log
+def document_add(context, request, render=None):
+    return sno_collection_add(context, request, render)
 
 
 @view_config(name='download', context=ItemWithAttachment, request_method='GET',

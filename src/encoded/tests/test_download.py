@@ -1,11 +1,17 @@
 import pytest
 
-from base64 import b64decode
+from base64 import b64decode, b64encode
+from pathlib import Path
 from pyramid.httpexceptions import HTTPFound
 from snovault import BLOBS
 from unittest import mock
 
-from ..types import download, get_s3_presigned_url
+from ..types import (
+    Document,
+    download,
+    get_s3_presigned_url,
+    normalize_document_attachment_mime_type,
+)
 
 
 pytestmark = [pytest.mark.working, pytest.mark.setone]
@@ -316,3 +322,91 @@ def test_download_item_with_attachment(testapp, award, lab):
 
     with mock.patch('encoded.types.get_s3_presigned_url', return_value=''):
         testapp.get(res['@id'] + res['attachment']['href'], status=200)
+
+
+def browser_octet_stream_attachment(filename, content):
+    return {
+        'download': filename,
+        'type': 'application/octet-stream',
+        'href': 'data:application/octet-stream;base64,%s' % (
+            b64encode(content).decode('ascii')
+        ),
+    }
+
+
+def document_with_attachment(award, lab, attachment):
+    return {
+        'attachment': attachment,
+        'award': award['@id'],
+        'lab': lab['@id'],
+    }
+
+
+def test_normalize_document_attachment_mime_type_for_allowed_filename():
+    attachment = browser_octet_stream_attachment('synthetic-document.pdf', b'pdf')
+    properties = {'attachment': attachment}
+    context = mock.Mock(type_info=mock.Mock(schema=Document.schema))
+    request = mock.Mock(json=properties)
+
+    normalize_document_attachment_mime_type(context, request)
+
+    assert properties['attachment'] == {
+        'download': 'synthetic-document.pdf',
+        'type': 'application/pdf',
+        'href': 'data:application/pdf;base64,cGRm',
+    }
+    assert properties['attachment'] is not attachment
+
+
+def test_normalize_document_attachment_mime_type_keeps_unknown_filename():
+    attachment = browser_octet_stream_attachment('synthetic-document.payload', b'bin')
+    properties = {'attachment': attachment}
+    context = mock.Mock(type_info=mock.Mock(schema=Document.schema))
+    request = mock.Mock(json=properties)
+
+    normalize_document_attachment_mime_type(context, request)
+
+    assert properties['attachment'] is attachment
+
+
+def test_document_upload_normalizes_browser_octet_stream(testapp, award, lab):
+    pdf = Path(__file__).parent.joinpath('data', 'documents', 'test.pdf').read_bytes()
+    item = document_with_attachment(
+        award,
+        lab,
+        browser_octet_stream_attachment('synthetic-document.pdf', pdf),
+    )
+
+    document = testapp.post_json('/document', item, status=201).json['@graph'][0]
+
+    assert document['attachment']['type'] == 'application/pdf'
+    assert document['attachment']['href'].endswith('/synthetic-document.pdf')
+
+
+def test_document_upload_still_rejects_octet_stream_content_mismatch(
+    testapp, award, lab
+):
+    item = document_with_attachment(
+        award,
+        lab,
+        browser_octet_stream_attachment('synthetic-document.pdf', b'\x00' * 1024),
+    )
+
+    response = testapp.post_json('/document', item, status=422)
+
+    assert any(
+        'Incorrect file type' in error['description']
+        for error in response.json['errors']
+    )
+
+
+def test_document_upload_still_rejects_unknown_octet_stream_type(
+    testapp, award, lab
+):
+    item = document_with_attachment(
+        award,
+        lab,
+        browser_octet_stream_attachment('synthetic-document.payload', b'\x00' * 1024),
+    )
+
+    testapp.post_json('/document', item, status=422)
