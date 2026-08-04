@@ -9,7 +9,7 @@ import structlog
 import transaction
 import urllib.parse
 
-from botocore.exceptions import ClientError
+from botocore.exceptions import BotoCoreError, ClientError
 from copy import deepcopy
 from pyramid.httpexceptions import (
     HTTPForbidden,
@@ -49,7 +49,6 @@ from snovault.validators import (
     no_validate_item_content_patch
 )
 from dcicutils.secrets_utils import assume_identity
-from dcicutils.misc_utils import override_environ
 from urllib.parse import (
     parse_qs,
     urlparse,
@@ -100,11 +99,36 @@ def show_upload_credentials(request=None, context=None, status=None):
     return request.has_permission('edit', context)
 
 
+def s3_upload_role_arn():
+    """ Resolves the IAM role that Fourfront assumes to mint scoped, temporary S3 credentials.
+
+        Production reads it out of the global application configuration identity; the plain
+        environment is consulted as a fallback so the value can be supplied without rotating
+        that secret. The fallback is not merely defensive here: the repo-root ``conftest.py``
+        unconditionally sets ``IDENTITY``, so an identity-only lookup would leave the
+        environment unreachable for every test and CI run.
+    """
+    role_arn = None
+    if 'IDENTITY' in os.environ:
+        role_arn = assume_identity().get('S3_UPLOAD_ROLE_ARN')
+    return role_arn or os.environ.get('S3_UPLOAD_ROLE_ARN')
+
+
 def external_creds(bucket, key, name=None, profile_name=None):
     """
     if name is None, we want the link to s3 but no need to generate
     an access token.  This is useful for linking metadata to files that
     already exist on s3.
+
+    Credentials are minted with sts:AssumeRole rather than sts:GetFederationToken.
+    GetFederationToken can only be called with the long-lived access keys of an IAM user;
+    AWS rejects it outright when the caller itself holds temporary credentials, which is
+    the case for every role-based caller (ECS task roles, GitHub Actions OIDC). AssumeRole
+    works off the ambient credential chain, so no access keys are passed to boto3.
+
+    The session policy below is unchanged, so the authorization boundary is unchanged too:
+    the returned credentials are still limited to s3:PutObject on this one key, now as the
+    intersection of that policy with the assumed role's own permissions.
     """
 
     logging.getLogger('boto3').setLevel(logging.CRITICAL)
@@ -120,17 +144,14 @@ def external_creds(bucket, key, name=None, profile_name=None):
                 }
             ]
         }
-        if 'IDENTITY' in os.environ:
-            identity = assume_identity()
-            with override_environ(**identity):
-                conn = boto3.client('sts',
-                                    aws_access_key_id=os.environ.get('S3_AWS_ACCESS_KEY_ID'),
-                                    aws_secret_access_key=os.environ.get('S3_AWS_SECRET_ACCESS_KEY'))
-                token = conn.get_federation_token(Name=name, Policy=json.dumps(policy))
-        else:
-            # boto.set_stream_logger('boto3')
-            conn = boto3.client('sts')
-            token = conn.get_federation_token(Name=name, Policy=json.dumps(policy))
+        conn = boto3.client('sts')
+        # `name` is already truncated to 32 chars by callers, which satisfies RoleSessionName
+        # (2-64 chars) just as it did the old GetFederationToken `Name` (2-32 chars).
+        token = conn.assume_role(
+            RoleArn=s3_upload_role_arn(),
+            RoleSessionName=name,
+            Policy=json.dumps(policy)
+        )
         # 'access_key' 'secret_key' 'expiration' 'session_token'
         credentials = token.get('Credentials')
         # Convert Expiration datetime object to string via cast
@@ -138,8 +159,8 @@ def external_creds(bucket, key, name=None, profile_name=None):
         credentials['Expiration'] = str(credentials['Expiration'])
         credentials.update({
             'upload_url': f's3://{bucket}/{key}',
-            'federated_user_arn': token.get('FederatedUser').get('Arn'),
-            'federated_user_id': token.get('FederatedUser').get('FederatedUserId'),
+            'federated_user_arn': token.get('AssumedRoleUser').get('Arn'),
+            'federated_user_id': token.get('AssumedRoleUser').get('AssumedRoleId'),
             'request_id': token.get('ResponseMetadata').get('RequestId'),
             'key': key
         })
@@ -789,7 +810,11 @@ class File(Item):
         if not external or not extkey or extkey != self.build_key(self.registry, self.uuid, properties):
             try:
                 external = self.build_external_creds(self.registry, self.uuid, properties)
-            except ClientError as e:
+            # BotoCoreError is caught alongside ClientError so this calculated property keeps
+            # degrading to a message instead of a 500. AssumeRole can fail client-side with a
+            # ParamValidationError (a BotoCoreError, not a ClientError) when S3_UPLOAD_ROLE_ARN
+            # is not configured, which the old GetFederationToken call could never raise.
+            except (BotoCoreError, ClientError) as e:
                 return f'Failed to acquire upload credentials for {self.uuid} with error {e}'
         return external['key']
 
