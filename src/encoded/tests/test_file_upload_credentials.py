@@ -22,7 +22,7 @@ from unittest import mock
 from ..types.file import File, external_creds, s3_upload_role_arn
 
 
-pytestmark = [pytest.mark.setone, pytest.mark.working]
+pytestmark = [pytest.mark.working, pytest.mark.unit]
 
 
 ROLE_ARN = 'arn:aws:iam::643366669028:role/test-s3-upload-role'
@@ -41,7 +41,7 @@ def _assume_role_response():
             'Expiration': mock.sentinel.expiration,
         },
         'AssumedRoleUser': {
-            'Arn': f'arn:aws:sts::643366669028:assumed-role/test-s3-upload-role/4DNFI000AAAA.fastq.gz',
+            'Arn': 'arn:aws:sts::643366669028:assumed-role/test-s3-upload-role/4DNFI000AAAA.fastq.gz',
             'AssumedRoleId': 'AROATESTTESTTESTTEST:4DNFI000AAAA.fastq.gz',
         },
         'ResponseMetadata': {'RequestId': 'test-request-id'},
