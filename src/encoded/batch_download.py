@@ -16,6 +16,7 @@ from urllib.parse import (
 )
 from .search import (
     iter_search_results,
+    normalize_query,
     build_table_columns,
     get_iterable_search_results,
     make_search_subreq
@@ -535,7 +536,9 @@ def metadata_tsv(context, request):
         #
         # IMPORTANT: since we add the Supplementary Files download option in Exp Set, users can download reference files directly.
         # So directly downloaded reference files should not be considered as 'reference file for' of an experiment)
-        if not any(triple[2] == f.get('accession', '') for triple in accession_triples) and 'reference_file_for' in f:
+        if 'reference_file_for' in f and not any(
+            triple[2] == f.get('accession', '') for triple in (accession_triples or [])
+        ):
             all_row_vals['Related File Relationship'] = 'reference file for'
             all_row_vals['Related File'] = 'Experiment - ' + f.get('reference_file_for', '')
         if not all_row_vals.get('File Classification'):
@@ -698,7 +701,7 @@ def metadata_tsv(context, request):
             yield line.read().encode('utf-8')
 
         for summary_line in generate_summary_lines():
-            writer.writerow(summary_line)
+            writer.writerow([neutralize_formula_injection(cell) for cell in summary_line])
             yield line.read().encode('utf-8')
 
     if not endpoints_initialized['metadata']: # For some reason first result after bootup returns empty, so we do once extra for first request.
@@ -807,7 +810,7 @@ def format_row(columns):
     """Format a list of text columns as a tab-separated byte string."""
     output = io.StringIO(newline='')
     writer = csv.writer(output, delimiter='\t', lineterminator='\r\n')
-    writer.writerow(columns)
+    writer.writerow([neutralize_formula_injection(cell) for cell in columns])
     return output.getvalue().encode('utf-8')
 
 
@@ -823,7 +826,13 @@ def report_download(context, request):
     # Make sure we get all results
     request.GET['limit'] = 'all'
 
-    the_schema = [request.registry[TYPES][the_type.schema]]
+    try:
+        type_info = request.registry[TYPES][the_type]
+    except KeyError:
+        raise HTTPBadRequest(explanation='Unknown report type: %s' % the_type)
+    the_type = type_info.name
+    the_schema = [type_info.schema]
+    normalize_query(request, request.registry[TYPES], [the_type])
     columns = build_table_columns(request, the_schema, [the_type])
     header = [column.get('title') or field for field, column in columns.items()]
 
@@ -839,7 +848,7 @@ def report_download(context, request):
     def generate_rows():
         yield format_row(header)
         for item in iter_search_results(context, request):
-            values = [neutralize_formula_injection(lookup_column_value(item, path)) for path in columns]
+            values = [lookup_column_value(item, path) for path in columns]
             yield format_row(values)
 
     # Stream response using chunked encoding.

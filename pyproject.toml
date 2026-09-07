@@ -79,7 +79,7 @@ pyramid-retry = "^1.0"
 pyramid-tm = "^2.4"
 pyramid_translogger = "^0.1"
 python-dateutil = "^2.8.2"
-# python-magic is presently pinned to 0.4.15 in lockstep with dcicsnovault's requirements. See explanation there.
+# python-magic wraps a separately installed native libmagic; see docs/attachment-mime.md.
 python_magic = ">=0.4.24,<1"
 pytz = ">=2021.3"
 PyYAML = "^6.0.1"
@@ -137,17 +137,7 @@ flaky = ">=3.7.0"
 # flask only for moto[server]
 flask = ">=2.0.3"
 lorem-text = "^2.1"
-# Here AND ELSEWHERE (related scripts), we pin use of moto 1.3.7.
-# I asked Will today why we're pinning that and he explained to me that above there (i.e., in version 1.3.8),
-# an SQS-related bug is introduced, and that we cannot upgrade versions until this bug is fixed.
-# His belief is that moto has not had a "true" release in months, so we will have to stick with this version.
-# I searched the web and see this bug introduced in 1.3.8 and allegedly fixed. -kmp 29-Apr-2020
-# https://github.com/spulec/moto/issues/2172
-# Here's another report that might be related and it's not clear if this is fixed:
-# https://gitmemory.com/issue/spulec/moto/2118/474917895
-# TODO: Investigate whether this bug is fixed. If it is, update the version.
-#       If not, get a reference to an open bug report here so we can check back periodically.
-#moto = "1.3.7"
+# Keep the lockfile authoritative: Moto 1.x no longer imports on Python 3.11.
 moto = { version = "^5.1.0", extras = ["s3"] }
 pip-licenses = "^3.5.1"
 pipdeptree = "^2.1.0"

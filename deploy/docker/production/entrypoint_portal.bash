@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 echo "Starting up Fourfront WSGI"
 
@@ -10,4 +11,4 @@ poetry run python -m assume_identity
 # supervisord.conf) rather than started here with `service nginx start`, so that
 # it is restarted on crash and its logs are unified under supervisord.
 echo "Starting supervisor"
-supervisord -c supervisord.conf
+exec supervisord -c supervisord.conf

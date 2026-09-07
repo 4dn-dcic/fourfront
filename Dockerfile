@@ -101,8 +101,6 @@ COPY deploy/docker/production/nginx.conf /etc/nginx/nginx.conf
 RUN chown -R nginx:nginx /var/cache/nginx && \
     chown -R nginx:nginx /var/log/nginx && \
     chown -R nginx:nginx /etc/nginx/conf.d && \
-    touch /var/run/nginx.pid && \
-    chown -R nginx:nginx /var/run/nginx.pid && \
     rm -f /var/log/nginx/* && \
     touch /var/log/nginx/access.log && \
     chown -R nginx:nginx /var/log/nginx/access.log && \
@@ -114,7 +112,9 @@ RUN chown -R nginx:nginx /var/cache/nginx && \
 # Fail the image build if the nginx configuration is invalid, rather than only
 # discovering it when the container starts. Runs after the filesystem setup above
 # so all referenced log/pid paths already exist.
+USER nginx
 RUN nginx -v && nginx -t
+USER root
 
 # Pull all required files
 # Note that *.ini must match the env name in secrets manager!

@@ -1,4 +1,7 @@
+import json
 import pytest
+
+from snovault.loadxl import format_for_attachment
 
 from base64 import b64decode, b64encode
 from pathlib import Path
@@ -402,6 +405,11 @@ def test_document_attachment_post_validates_normalized_request_mapping():
     assert request.validated['attachment']['href'].startswith('data:application/pdf;')
 
 
+@pytest.mark.parametrize('body', [[], None, 'not an object'])
+def test_document_post_nonobject_is_validation_error(testapp, body):
+    testapp.post_json('/document', body, status=422)
+
+
 def test_document_upload_normalizes_browser_octet_stream(testapp, award, lab):
     pdf = Path(__file__).parent.joinpath('data', 'documents', 'test.pdf').read_bytes()
     item = document_with_attachment(
@@ -414,6 +422,65 @@ def test_document_upload_normalizes_browser_octet_stream(testapp, award, lab):
 
     assert document['attachment']['type'] == 'application/pdf'
     assert document['attachment']['href'].endswith('/synthetic-document.pdf')
+
+
+def test_document_insert_archive_round_trip(testapp, award, lab):
+    """The reviewer's loadxl UUID: POST a shell, then PATCH photo.zip's data URI."""
+    data = Path(__file__).parent / 'data'
+    item = next(
+        item for item in json.loads((data / 'inserts/document.json').read_text())
+        if item['uuid'] == 'dcf15d5e-40aa-43bc-b81c-32c70c9afb48'
+    )
+    item.pop('submitted_by')
+    item.update(award=award['@id'], lab=lab['@id'])
+    location = testapp.post_json('/document', {
+        key: item[key] for key in ('uuid', 'award', 'lab')
+    }, status=201).location
+    item = format_for_attachment(item, [str(data / 'documents')])
+    assert item['attachment']['type'] == 'application/zip'
+    document = testapp.patch_json(location, item, status=200).json['@graph'][0]
+    attachment = document['attachment']
+    assert attachment['type'] == 'application/zip'
+    response = testapp.get(document['@id'] + attachment['href'])
+    assert response.body == (data / 'documents/photo.zip').read_bytes()
+    assert response.headers['Content-Disposition'] == 'attachment; filename="photo.zip"'
+
+
+@pytest.mark.parametrize('method', ['put_json', 'patch_json'])
+def test_document_edit_normalizes_browser_octet_stream(testapp, award, lab, method):
+    item = document_with_attachment(award, lab, {'download': 'red-dot.png', 'href': RED_DOT})
+    location = testapp.post_json('/document', item, status=201).location
+    pdf = Path(__file__).parent.joinpath('data/documents/test.pdf').read_bytes()
+    item['attachment'] = browser_octet_stream_attachment('replacement.pdf', pdf)
+    response = getattr(testapp, method)(location, item, status=200)
+    assert response.json['@graph'][0]['attachment']['type'] == 'application/pdf'
+    # MIME mismatches and checksums remain enforced on both edit paths.
+    item['attachment'] = browser_octet_stream_attachment('replacement.pdf', b'\x00' * 1024)
+    getattr(testapp, method)(location, item, status=422)
+    item['attachment'] = browser_octet_stream_attachment('replacement.pdf', pdf)
+    item['attachment']['md5sum'] = '0' * 32
+    getattr(testapp, method)(location, item, status=422)
+    item['attachment'].pop('md5sum')
+    item['uuid'] = '00000000-0000-0000-0000-000000000001'
+    getattr(testapp, method)(location, item, status=422)
+
+
+@pytest.mark.parametrize('validate', ['', '?validate=false'])
+def test_document_normalization_does_not_bypass_permissions(testapp, award, lab, validate):
+    item = document_with_attachment(award, lab, {'download': 'red-dot.png', 'href': RED_DOT})
+    location = testapp.post_json('/document', item, status=201).location
+    anonymous = {'REMOTE_USER': ''}
+    testapp.post_json('/document' + validate, item, extra_environ=anonymous, status=403)
+    for method in ('put_json', 'patch_json'):
+        getattr(testapp, method)(location + validate, item, extra_environ=anonymous, status=403)
+
+
+def test_document_edit_preserves_delete_fields(testapp, award, lab):
+    item = document_with_attachment(award, lab, {'download': 'red-dot.png', 'href': RED_DOT})
+    item['description'] = 'delete me'
+    location = testapp.post_json('/document', item, status=201).location
+    response = testapp.patch_json(location + '?delete_fields=description', {}, status=200)
+    assert 'description' not in response.json['@graph'][0]
 
 
 def test_document_upload_still_rejects_octet_stream_content_mismatch(

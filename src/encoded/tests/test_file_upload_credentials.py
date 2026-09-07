@@ -1,6 +1,9 @@
 """Regression coverage for the S3 credential mechanism behind file upload and download.
 
-Fourfront mints scoped, temporary S3 credentials with ``sts:AssumeRole``.  It must not use
+Fourfront mints scoped, temporary S3 upload credentials with ``sts:AssumeRole``.
+Downloads only discover locations; upload keys are calculated locally.
+Neither read path mints PutObject credentials.
+The upload path must not use
 ``sts:GetFederationToken``: AWS only accepts that call from an IAM user holding long-lived
 access keys and rejects it whenever the caller itself holds temporary credentials, which is
 the case for every role-based caller (ECS task roles, GitHub Actions OIDC).
@@ -169,7 +172,7 @@ def test_role_arn_missing_everywhere_is_none(monkeypatch):
         assert s3_upload_role_arn() is None
 
 
-# --- the download caller shares the same mint ---------------------------------------------
+# --- upload minting and read-only location discovery --------------------------------------
 
 
 class _StubFileFormat:
@@ -190,13 +193,8 @@ class _StubRegistry:
         return {'FileFormat': {'fastq': _StubFileFormat()}}
 
 
-def test_build_external_creds_routes_download_path_through_assume_role(sts):
-    """`build_external_creds` serves both upload and download, so both use AssumeRole.
-
-    The `@@download` view calls this whenever a File has no stored `external` propsheet --
-    which is every File created in a status outside ('uploading', 'to be uploaded by
-    workflow', 'upload failed'), and every extra_file whose per-format propsheet is absent.
-    """
+def test_build_external_creds_mints_upload_credentials_with_assume_role(sts):
+    """Only an upload needs scoped PutObject credentials."""
     uuid = 'd3b07384-d9a0-4c9b-9a0b-0e4f2ba2c9de'
     properties = {'file_format': 'fastq', 'accession': '4DNFI000AAAA', 'filename': 'reads.fastq.gz'}
 
@@ -224,14 +222,76 @@ def test_presigned_download_url_uses_ambient_credentials(sts):
     assert not sts.get_federation_token.called
 
 
+@pytest.mark.parametrize('name', ['x', 'reads with spaces.fastq.gz', 'Δ.fastq.gz', 'a' * 100])
+def test_assume_role_session_label_accepts_valid_filenames(sts, name):
+    import re
+    external_creds(BUCKET, KEY, name)
+    kwargs = sts.assume_role.call_args.kwargs
+    assert re.fullmatch(r'[A-Za-z0-9_+=,.@-]{2,64}', kwargs['RoleSessionName'])
+    assert json.loads(kwargs['Policy'])['Statement'][0]['Resource'] == f'arn:aws:s3:::{BUCKET}/{KEY}'
+
+
+def test_location_discovery_never_mints_put_credentials(sts):
+    properties = {'file_format': 'fastq', 'accession': '4DNFI000AAAA', 'filename': 'reads.fastq.gz'}
+    with mock.patch('encoded.types.file.s3_upload_role_arn', side_effect=AssertionError('read requires no role')):
+        result = File.build_external_creds(_StubRegistry(), 'uuid', properties, make_upload_credentials=False)
+    assert result['upload_credentials'] == {}
+    assert result['bucket'] == BUCKET  # wfout wins when both buckets have the key
+    sts.head_object.assert_called_once_with(Bucket=BUCKET, Key='uuid/4DNFI000AAAA.fastq.gz')
+    sts.assume_role.assert_not_called()
+
+
+def test_location_discovery_falls_back_to_upload_bucket(sts):
+    sts.head_object.side_effect = [ClientError({'Error': {'Code': '404'}}, 'HeadObject'), {}]
+    properties = {'file_format': 'fastq', 'accession': '4DNFI000AAAA'}
+    result = File.build_external_creds(_StubRegistry(), 'uuid', properties, make_upload_credentials=False)
+    assert result['bucket'] == 'test-upload-bucket'
+    assert sts.head_object.call_count == 2
+    sts.assume_role.assert_not_called()
+
+
+@pytest.mark.parametrize('extra', [False, True])
+def test_download_without_propsheet_never_requests_upload_credentials(extra):
+    from pyramid.httpexceptions import HTTPTemporaryRedirect
+    from ..types import file as file_module
+
+    props = {'file_format': 'fastq', 'status': 'uploaded', 'filename': 'reads.fastq.gz'}
+    extra_props = {'file_format': 'index', 'filename': 'reads.idx'}
+    if extra:
+        props['extra_files'] = [extra_props]
+    context = mock.Mock(properties=props, propsheets={}, uuid='uuid')
+    context.upgrade_properties.return_value = props
+    context.build_external_creds.return_value = {'service': 's3', 'bucket': BUCKET, 'key': KEY}
+    context.get_open_data_url_or_presigned_url_location.return_value = 'https://example.test/file'
+    request = mock.Mock(subpath=(), range=None, datastore='database', client_addr=None)
+    request.registry = {'aws_ipset': []}
+    # A dict with registry settings is enough for the analytics branch.
+    class Registry(dict):
+        settings = {}
+    request.registry = Registry(request.registry)
+    request.params = {}
+    with mock.patch.multiple(file_module,
+                             check_user_is_logged_in=mock.Mock(),
+                             is_range_request_for_vitessce=mock.Mock(return_value=False),
+                             session_properties=mock.Mock(return_value={}),
+                             get_item_or_none=mock.Mock(return_value={'uuid': 'format-uuid'}),
+                             get_file_experiment_type=mock.Mock(return_value=None),
+                             is_file_to_download=mock.Mock(side_effect=[None, 'reads.idx'] if extra else ['reads.fastq.gz'])):
+        with pytest.raises(HTTPTemporaryRedirect):
+            file_module.download(context, request)
+    context.build_external_creds.assert_called_once_with(
+        request.registry, 'uuid', extra_props if extra else props, make_upload_credentials=False
+    )
+
+
 # --- failure behavior --------------------------------------------------------------------
 
 
 def test_missing_role_arn_raises_botocore_error_not_client_error(monkeypatch):
     """A missing role ARN fails client-side as a BotoCoreError, not a ClientError.
 
-    This is the failure mode the old GetFederationToken call could never produce, and it is
-    why `upload_key` must catch BotoCoreError as well.
+    Uploads need explicit role configuration. Read-only upload-key calculation
+    and downloads must not reach this call at all.
     """
     monkeypatch.delenv('IDENTITY', raising=False)
     monkeypatch.delenv('S3_UPLOAD_ROLE_ARN', raising=False)
@@ -263,7 +323,8 @@ class _StubFileItem:
     def build_key(registry, uuid, properties):
         return 'a-key-that-does-not-match'
 
-    def build_external_creds(self, registry, uuid, properties):
+    def build_external_creds(self, registry, uuid, properties, *, make_upload_credentials=True):
+        assert make_upload_credentials is False
         raise self._error
 
 
@@ -271,8 +332,9 @@ class _StubFileItem:
     ParamValidationError(report='S3_UPLOAD_ROLE_ARN is not configured'),
     ClientError({'Error': {'Code': 'AccessDenied', 'Message': 'denied'}}, 'AssumeRole'),
 ])
-def test_upload_key_degrades_instead_of_raising(error):
-    """upload_key keeps masking credential failures rather than 500ing the item view."""
-    result = File.upload_key(_StubFileItem(error), request=None)
-
-    assert result.startswith(f'Failed to acquire upload credentials for {_StubFileItem.uuid}')
+@pytest.mark.parametrize('stored_key', [None, 'old-key', 'a-key-that-does-not-match'])
+def test_upload_key_is_computed_without_cloud_discovery(error, stored_key):
+    """Missing/stale propsheets never require S3 HEADs, secrets discovery or STS."""
+    item = _StubFileItem(error)
+    item.propsheets = {'external': {'key': stored_key}} if stored_key else {}
+    assert File.upload_key(item, request=None) == 'a-key-that-does-not-match'

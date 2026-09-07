@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -e
 
 # Global Fourfront Application Entrypoint
 # This script resolves which application type is desired based on
@@ -20,26 +20,24 @@ portal="portal"
 local="local"
 
 echo "Generating session randomness"
-cat /dev/urandom | head -c 256 | base64 >> session-secret.b64
+head -c 256 /dev/urandom | base64 > session-secret.b64
 
 echo "Resolving which entrypoint is desired"
 
 # shellcheck disable=SC2154
 if [ "$application_type" = $deployment ]; then
-  /bin/bash entrypoint_deployment.bash
+  exec /bin/bash entrypoint_deployment.bash
 elif [ "$application_type" = $ingester ]; then
-  /bin/bash entrypoint_ingester.bash
+  exec /bin/bash entrypoint_ingester.bash
 elif [ "$application_type" = $indexer ]; then
-  /bin/bash entrypoint_indexer.bash
+  exec /bin/bash entrypoint_indexer.bash
 elif [ "$application_type" = $portal ]; then
-  /bin/bash entrypoint_portal.bash
+  exec /bin/bash entrypoint_portal.bash
 elif [ "$application_type" = $local ]; then
-  /bin/bash entrypoint_local.bash
+  exec /bin/bash entrypoint_local.bash
 else
   echo "Could not resolve entrypoint! Check that \$application_type is set."
   exit 1
 fi
-
-exit 0
 
 

@@ -348,15 +348,15 @@ def get_pagination(request):
 
 
 def _search_with_stable_tiebreaker(search):
-    """Return a clone whose existing sort ends with a stable unique key."""
+    """Use the indexed UUID keyword's doc values, not heap-backed _id fielddata."""
     sort_clauses = list(search.to_dict().get('sort', []))
-    has_id_sort = any(
-        (isinstance(clause, str) and clause.lstrip('-') == '_id') or
-        (isinstance(clause, dict) and '_id' in clause)
+    has_uuid_sort = any(
+        (isinstance(clause, str) and clause.lstrip('-') == 'uuid') or
+        (isinstance(clause, dict) and 'uuid' in clause)
         for clause in sort_clauses
     )
-    if not has_id_sort:
-        sort_clauses.append({'_id': {'order': 'asc'}})
+    if not has_uuid_sort:
+        sort_clauses.append({'uuid': {'order': 'asc'}})
     return search.sort(*sort_clauses)
 
 
@@ -367,6 +367,11 @@ def _raise_if_incomplete_scan(es_result):
     would otherwise silently end the ``search_after`` scan early and yield an
     incomplete result set alongside a plausible-looking total.
     """
+    if es_result.get('timed_out') or es_result.get('terminated_early'):
+        raise HTTPBadRequest(
+            explanation='The search timed out or terminated early and may be '
+                        'incomplete. Please retry the query.'
+        )
     shards = es_result.get('_shards') or {}
     failed = shards.get('failed') or 0
     if failed:

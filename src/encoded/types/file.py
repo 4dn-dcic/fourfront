@@ -4,12 +4,13 @@ import json
 import logging
 import os
 import pytz
+import re
 import requests
 import structlog
 import transaction
 import urllib.parse
 
-from botocore.exceptions import BotoCoreError, ClientError
+from botocore.exceptions import ClientError
 from copy import deepcopy
 from pyramid.httpexceptions import (
     HTTPForbidden,
@@ -145,11 +146,12 @@ def external_creds(bucket, key, name=None, profile_name=None):
             ]
         }
         conn = boto3.client('sts')
-        # `name` is already truncated to 32 chars by callers, which satisfies RoleSessionName
-        # (2-64 chars) just as it did the old GetFederationToken `Name` (2-32 chars).
+        # Filenames can contain spaces/Unicode and can be just one character.
+        # This label is not part of the S3 key or the authorization policy.
+        session_name = re.sub(r'[^A-Za-z0-9_+=,.@-]', '_', name)[:64].ljust(2, '_')
         token = conn.assume_role(
             RoleArn=s3_upload_role_arn(),
-            RoleSessionName=name,
+            RoleSessionName=session_name,
             Policy=json.dumps(policy)
         )
         # 'access_key' 'secret_key' 'expiration' 'session_token'
@@ -801,22 +803,10 @@ class File(Item):
         "type": "string",
     })
     def upload_key(self, request, filename=None):
-        properties = self.properties
-        external = self.propsheets.get('external', {})
-        extkey = external.get('key')
-        # od_url = self._open_data_url(self.properties['status'], filename=filename)
-        # if od_url:
-        #     return f'No upload key for open data file {filename}'
-        if not external or not extkey or extkey != self.build_key(self.registry, self.uuid, properties):
-            try:
-                external = self.build_external_creds(self.registry, self.uuid, properties)
-            # BotoCoreError is caught alongside ClientError so this calculated property keeps
-            # degrading to a message instead of a 500. AssumeRole can fail client-side with a
-            # ParamValidationError (a BotoCoreError, not a ClientError) when S3_UPLOAD_ROLE_ARN
-            # is not configured, which the old GetFederationToken call could never raise.
-            except (BotoCoreError, ClientError) as e:
-                return f'Failed to acquire upload credentials for {self.uuid} with error {e}'
-        return external['key']
+        # Both the stored-credentials and regenerated-credentials branches used
+        # this same deterministic key. Bucket discovery and STS do not affect it
+        # and must not run for every metadata read or indexing operation.
+        return self.build_key(self.registry, self.uuid, self.properties)
 
     @calculated_property(condition=show_upload_credentials, schema={
         "type": "object",
@@ -950,9 +940,11 @@ class File(Item):
             accession=properties.get('accession'))
 
     @classmethod
-    def build_external_creds(cls, registry, uuid, properties):
+    def build_external_creds(cls, registry, uuid, properties, *, make_upload_credentials=True):
         """ This function is very important in that it determines both the upload
             and download location of files - so we have two distinct cases to handle.
+            Read-only callers set make_upload_credentials=False: location discovery
+            must not require the upload role or mint PutObject credentials.
 
             It is sometimes the case that we build_external_creds for extra files that
             may not be in the same bucket as the source file. So we first assume the
@@ -967,10 +959,11 @@ class File(Item):
         bucket = None
         key = cls.build_key(registry, uuid, properties)
         # _head_s3 for both files and wfoutput buckets if we are doing a download
-        for b in [registry.settings['file_wfout_bucket'], registry.settings['file_upload_bucket']]:
+        for b in dict.fromkeys([registry.settings['file_wfout_bucket'], registry.settings['file_upload_bucket']]):
             try:
                 cls._head_s3(conn, b, key)
                 bucket = b
+                break
             except ClientError:
                 continue  # try other key
 
@@ -981,7 +974,7 @@ class File(Item):
         # remove the path from the file name and only take first 32 chars
         fname = properties.get('filename')
         name = None
-        if fname:
+        if fname and make_upload_credentials:
             name = fname.split('/')[-1][:32]
 
         profile_name = registry.settings.get('file_upload_profile_name')
@@ -1658,7 +1651,11 @@ def download(context, request):
 
     request_datastore_is_database = (request.datastore == 'database')
     if not external:
-        external = context.build_external_creds(request.registry, context.uuid, properties)
+        # A download only needs the bucket/key. Never mint PutObject credentials
+        # (or require the upload role) on a read-only request, including extras.
+        external = context.build_external_creds(
+            request.registry, context.uuid, properties, make_upload_credentials=False
+        )
     if external.get('service') == 's3':
         location = context.get_open_data_url_or_presigned_url_location(external, request, filename,
                                                                        request_datastore_is_database)

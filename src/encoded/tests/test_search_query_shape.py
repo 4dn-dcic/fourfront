@@ -149,7 +149,7 @@ def test_execute_search_for_all_results_is_complete_beyond_10000(monkeypatch):
     assert hits[-1]['_id'] == str(total_hits - 1)
     assert captured[0]['track_total_hits'] is True
     assert 'aggs' in captured[0]
-    assert captured[0]['sort'][-1] == {'_id': {'order': 'asc'}}
+    assert captured[0]['sort'][-1] == {'uuid': {'order': 'asc'}}
     assert all(page['track_total_hits'] is False for page in captured[1:])
     assert all('aggs' not in page for page in captured[1:])
     assert all('from' not in page for page in captured[1:])
@@ -256,6 +256,36 @@ def test_get_all_subsequent_results_fails_on_repeated_cursor(monkeypatch):
             Search(index='x').sort('_id'),
             size_increment=2,
         ))
+
+
+@pytest.mark.parametrize('partial_flag', ['timed_out', 'terminated_early'])
+@pytest.mark.parametrize('page_number', [1, 2])
+def test_scan_rejects_partial_pages_without_shard_failures(monkeypatch, partial_flag, page_number):
+    calls = 0
+
+    def execute(search):
+        nonlocal calls
+        calls += 1
+        return {
+            partial_flag: calls == page_number,
+            '_shards': {'total': 1, 'successful': 1, 'failed': 0},
+            'hits': {
+                'total': {'value': 2, 'relation': 'eq'},
+                'hits': [{'_id': str(calls), 'sort': [calls]}],
+            },
+        }
+
+    monkeypatch.setattr(search_module, 'execute_search', execute)
+    with pytest.raises(HTTPBadRequest, match='incomplete'):
+        result = search_module.execute_search_for_all_results(Search(), chunk_size=1)
+        list(result['hits']['hits'])
+    assert calls == page_number
+
+
+@pytest.mark.parametrize('sort', ['uuid', '-uuid', {'uuid': {'order': 'desc'}}])
+def test_uuid_tiebreaker_is_not_duplicated(sort):
+    search = Search().sort(sort)
+    assert search_module._search_with_stable_tiebreaker(search).to_dict() == search.to_dict()
 
 
 class _FakeParams:

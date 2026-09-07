@@ -1,6 +1,7 @@
 """init.py lists all the collections that do not have a dedicated types file."""
 
 import boto3
+import json
 import transaction
 
 from mimetypes import guess_type
@@ -9,7 +10,8 @@ from snovault.attachment import (
     ItemWithAttachment,
     safe_content_disposition_filename,
 )
-from snovault.crud_views import collection_add as sno_collection_add
+from snovault.crud_views import collection_add as sno_collection_add, item_edit
+from snovault.validators import validate_item_content_patch, validate_item_content_put
 from snovault.schema_utils import validate_request
 from snovault.validation import ValidationFailure
 from snovault.util import debug_log
@@ -33,6 +35,7 @@ from .base import (
     ALLOW_LAB_SUBMITTER_EDIT_ACL
 )
 from .dependencies import DependencyEmbedder
+from pyramid.config import not_
 from pyramid.view import view_config
 from pyramid.response import Response
 from pyramid.httpexceptions import (
@@ -164,6 +167,8 @@ def normalize_document_attachment_mime_type(context, properties):
     Document schema. ItemWithAttachment then performs its existing filename,
     libmagic content, allowlist, and checksum validation before storing it.
     """
+    if not isinstance(properties, dict):
+        return
     attachment = properties.get('attachment')
     if not isinstance(attachment, dict):
         return
@@ -199,6 +204,14 @@ def normalize_document_attachment_mime_type(context, properties):
         payload,
     )
     properties['attachment'] = normalized_attachment
+    return True
+
+
+def normalize_document_attachment_request(context, request):
+    """Give the standard edit validators the normalized body, not a decoded copy."""
+    properties = request.json
+    if normalize_document_attachment_mime_type(context, properties):
+        request.body = json.dumps(properties).encode('utf-8')
 
 
 def validate_document_attachment_post(context, request):
@@ -213,10 +226,26 @@ def validate_document_attachment_post(context, request):
     permission='add',
     request_method='POST',
     validators=[validate_document_attachment_post],
+    request_param=not_('validate=false'),
 )
 @debug_log
 def document_add(context, request, render=None):
     return sno_collection_add(context, request, render)
+
+
+@view_config(
+    context=Document, permission='edit', request_method='PUT',
+    validators=[normalize_document_attachment_request, validate_item_content_put],
+    request_param=not_('validate=false'),
+)
+@view_config(
+    context=Document, permission='edit', request_method='PATCH',
+    validators=[normalize_document_attachment_request, validate_item_content_patch],
+    request_param=not_('validate=false'),
+)
+@debug_log
+def document_edit(context, request, render=None):
+    return item_edit(context, request, render)
 
 
 @view_config(name='download', context=ItemWithAttachment, request_method='GET',
