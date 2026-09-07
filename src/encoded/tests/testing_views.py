@@ -46,7 +46,7 @@ class TestingDownload(ItemWithAttachment):
                 'properties': {
                     'type': {
                         'type': 'string',
-                        'enum': ['image/png'],
+                        'enum': ['image/png', 'image/svg+xml', 'text/html'],
                     }
                 }
             },
@@ -56,7 +56,7 @@ class TestingDownload(ItemWithAttachment):
                 'properties': {
                     'type': {
                         'type': 'string',
-                        'enum': ['image/png'],
+                        'enum': ['image/png', 'image/svg+xml', 'text/html'],
                     }
                 }
             }

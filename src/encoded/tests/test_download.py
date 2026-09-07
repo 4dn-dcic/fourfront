@@ -1,7 +1,23 @@
+import json
 import pytest
 
-from base64 import b64decode
+from snovault.loadxl import format_for_attachment
+
+from base64 import b64decode, b64encode
+from pathlib import Path
+from pyramid.httpexceptions import HTTPFound
+from pyramid.request import Request
+from snovault import BLOBS
+from snovault.validation import Errors
 from unittest import mock
+
+from ..types import (
+    Document,
+    download,
+    get_s3_presigned_url,
+    normalize_document_attachment_mime_type,
+    validate_document_attachment_post,
+)
 
 
 pytestmark = [pytest.mark.working, pytest.mark.setone]
@@ -17,6 +33,16 @@ AAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAgY0hSTQ
 AAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPA
 AAAANQTFRFALfvPEv6TAAAAAtJREFUCB1jYMAHAAAeAAEBGN
 laAAAAAElFTkSuQmCC"""
+
+ACTIVE_HTML = (
+    "data:text/html;base64,"
+    "PGh0bWw+PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0PjwvaHRtbD4="
+)
+ACTIVE_SVG = (
+    "data:image/svg+xml;base64,"
+    "PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxzY3Jp"
+    "cHQ+YWxlcnQoMSk8L3NjcmlwdD48L3N2Zz4="
+)
 
 
 @pytest.fixture
@@ -49,6 +75,7 @@ def test_download_create(testapp, testing_download):
     url = testing_download + '/' + attachment['href']
     res = testapp.get(url)
     assert res.content_type == 'image/png'
+    assert res.headers['Content-Disposition'] == 'attachment; filename="red-dot.png"'
     assert res.body == b64decode(RED_DOT.split(',', 1)[1])
 
     assert attachment2['href'] == '@@download/attachment2/blue-dot.png'
@@ -59,7 +86,77 @@ def test_download_create(testapp, testing_download):
     url = testing_download + '/' + attachment2['href']
     res = testapp.get(url)
     assert res.content_type == 'image/png'
+    assert res.headers['Content-Disposition'] == 'attachment; filename="blue-dot.png"'
     assert res.body == b64decode(BLUE_DOT.split(',', 1)[1])
+
+
+@pytest.mark.parametrize('filename,href,content_type', [
+    ('active.html', ACTIVE_HTML, 'text/html'),
+    ('active.svg', ACTIVE_SVG, 'image/svg+xml'),
+])
+def test_active_content_download_is_forced_to_attachment(
+    testapp, filename, href, content_type
+):
+    item = {
+        'attachment': {
+            'download': filename,
+            'href': href,
+        },
+    }
+    location = testapp.post_json('/testing-downloads/', item, status=201).location
+    attachment = testapp.get(location).json['attachment']
+    response = testapp.get(location + '/' + attachment['href'])
+
+    assert response.content_type == content_type
+    assert response.headers['Content-Disposition'] == (
+        'attachment; filename="%s"' % filename
+    )
+
+
+def test_s3_presign_forces_sanitized_attachment_disposition():
+    client = mock.Mock()
+    client.generate_presigned_url.return_value = 'https://example.test/download'
+    with mock.patch('encoded.types.boto3.client', return_value=client):
+        location = get_s3_presigned_url(
+            {'bucket': 'bucket', 'key': 'key'},
+            'unsafe\r\n"name.svg',
+        )
+
+    assert location == 'https://example.test/download'
+    params = client.generate_presigned_url.call_args.kwargs['Params']
+    assert params['ResponseContentDisposition'] == (
+        'attachment; filename="unsafename.svg"'
+    )
+
+
+def test_blob_url_branch_receives_sanitized_download_metadata():
+    blob_storage = mock.Mock()
+    blob_storage.get_blob_url.return_value = 'https://example.test/download'
+    context = mock.Mock(
+        properties={},
+        propsheets={
+            'downloads': {
+                'attachment': {
+                    'download': 'unsafe\r\n"name.svg',
+                    'blob_id': 'blob-id',
+                },
+            },
+        },
+    )
+    request = mock.Mock(
+        subpath=('attachment', 'unsafe\r\n"name.svg'),
+        registry={BLOBS: blob_storage},
+    )
+
+    with pytest.raises(HTTPFound) as raised:
+        download(context, request)
+
+    assert raised.value.location == 'https://example.test/download'
+    download_meta = blob_storage.get_blob_url.call_args.args[0]
+    assert download_meta['download'] == 'unsafename.svg'
+    assert context.propsheets['downloads']['attachment']['download'] == (
+        'unsafe\r\n"name.svg'
+    )
 
 
 def test_download_update(testapp, testing_download):
@@ -231,3 +328,185 @@ def test_download_item_with_attachment(testapp, award, lab):
 
     with mock.patch('encoded.types.get_s3_presigned_url', return_value=''):
         testapp.get(res['@id'] + res['attachment']['href'], status=200)
+
+
+def browser_octet_stream_attachment(filename, content):
+    return {
+        'download': filename,
+        'type': 'application/octet-stream',
+        'href': 'data:application/octet-stream;base64,%s' % (
+            b64encode(content).decode('ascii')
+        ),
+    }
+
+
+def document_with_attachment(award, lab, attachment):
+    return {
+        'attachment': attachment,
+        'award': award['@id'],
+        'lab': lab['@id'],
+    }
+
+
+def test_normalize_document_attachment_mime_type_for_allowed_filename():
+    attachment = browser_octet_stream_attachment('synthetic-document.pdf', b'pdf')
+    properties = {'attachment': attachment}
+    context = mock.Mock(type_info=mock.Mock(schema=Document.schema))
+
+    normalize_document_attachment_mime_type(context, properties)
+
+    assert properties['attachment'] == {
+        'download': 'synthetic-document.pdf',
+        'type': 'application/pdf',
+        'href': 'data:application/pdf;base64,cGRm',
+    }
+    assert properties['attachment'] is not attachment
+
+
+def test_normalize_document_attachment_mime_type_keeps_unknown_filename():
+    attachment = browser_octet_stream_attachment('synthetic-document.payload', b'bin')
+    properties = {'attachment': attachment}
+    context = mock.Mock(type_info=mock.Mock(schema=Document.schema))
+
+    normalize_document_attachment_mime_type(context, properties)
+
+    assert properties['attachment'] is attachment
+
+
+def test_document_attachment_post_validates_normalized_request_mapping():
+    schema = {
+        'type': 'object',
+        'properties': {
+            'attachment': {
+                'type': 'object',
+                'properties': {
+                    'download': {'type': 'string'},
+                    'type': {'type': 'string', 'enum': ['application/pdf']},
+                    'href': {'type': 'string'},
+                },
+            },
+        },
+    }
+    context = mock.Mock(type_info=mock.Mock(schema=schema))
+    request = Request.blank(
+        '/document',
+        method='POST',
+        content_type='application/json',
+        json={'attachment': browser_octet_stream_attachment('synthetic.pdf', b'pdf')},
+    )
+    request.errors = Errors()
+    request.validated = {}
+
+    assert request.json is not request.json
+    validate_document_attachment_post(context, request)
+
+    assert not request.errors
+    assert request.validated['attachment']['type'] == 'application/pdf'
+    assert request.validated['attachment']['href'].startswith('data:application/pdf;')
+
+
+@pytest.mark.parametrize('body', [[], None, 'not an object'])
+def test_document_post_nonobject_is_validation_error(testapp, body):
+    testapp.post_json('/document', body, status=422)
+
+
+def test_document_upload_normalizes_browser_octet_stream(testapp, award, lab):
+    pdf = Path(__file__).parent.joinpath('data', 'documents', 'test.pdf').read_bytes()
+    item = document_with_attachment(
+        award,
+        lab,
+        browser_octet_stream_attachment('synthetic-document.pdf', pdf),
+    )
+
+    document = testapp.post_json('/document', item, status=201).json['@graph'][0]
+
+    assert document['attachment']['type'] == 'application/pdf'
+    assert document['attachment']['href'].endswith('/synthetic-document.pdf')
+
+
+def test_document_insert_archive_round_trip(testapp, award, lab):
+    """The reviewer's loadxl UUID: POST a shell, then PATCH photo.zip's data URI."""
+    data = Path(__file__).parent / 'data'
+    item = next(
+        item for item in json.loads((data / 'inserts/document.json').read_text())
+        if item['uuid'] == 'dcf15d5e-40aa-43bc-b81c-32c70c9afb48'
+    )
+    item.pop('submitted_by')
+    item.update(award=award['@id'], lab=lab['@id'])
+    location = testapp.post_json('/document', {
+        key: item[key] for key in ('uuid', 'award', 'lab')
+    }, status=201).location
+    item = format_for_attachment(item, [str(data / 'documents')])
+    assert item['attachment']['type'] == 'application/zip'
+    document = testapp.patch_json(location, item, status=200).json['@graph'][0]
+    attachment = document['attachment']
+    assert attachment['type'] == 'application/zip'
+    response = testapp.get(document['@id'] + attachment['href'])
+    assert response.body == (data / 'documents/photo.zip').read_bytes()
+    assert response.headers['Content-Disposition'] == 'attachment; filename="photo.zip"'
+
+
+@pytest.mark.parametrize('method', ['put_json', 'patch_json'])
+def test_document_edit_normalizes_browser_octet_stream(testapp, award, lab, method):
+    item = document_with_attachment(award, lab, {'download': 'red-dot.png', 'href': RED_DOT})
+    location = testapp.post_json('/document', item, status=201).location
+    pdf = Path(__file__).parent.joinpath('data/documents/test.pdf').read_bytes()
+    item['attachment'] = browser_octet_stream_attachment('replacement.pdf', pdf)
+    response = getattr(testapp, method)(location, item, status=200)
+    assert response.json['@graph'][0]['attachment']['type'] == 'application/pdf'
+    # MIME mismatches and checksums remain enforced on both edit paths.
+    item['attachment'] = browser_octet_stream_attachment('replacement.pdf', b'\x00' * 1024)
+    getattr(testapp, method)(location, item, status=422)
+    item['attachment'] = browser_octet_stream_attachment('replacement.pdf', pdf)
+    item['attachment']['md5sum'] = '0' * 32
+    getattr(testapp, method)(location, item, status=422)
+    item['attachment'].pop('md5sum')
+    item['uuid'] = '00000000-0000-0000-0000-000000000001'
+    getattr(testapp, method)(location, item, status=422)
+
+
+@pytest.mark.parametrize('validate', ['', '?validate=false'])
+def test_document_normalization_does_not_bypass_permissions(testapp, award, lab, validate):
+    item = document_with_attachment(award, lab, {'download': 'red-dot.png', 'href': RED_DOT})
+    location = testapp.post_json('/document', item, status=201).location
+    anonymous = {'REMOTE_USER': ''}
+    testapp.post_json('/document' + validate, item, extra_environ=anonymous, status=403)
+    for method in ('put_json', 'patch_json'):
+        getattr(testapp, method)(location + validate, item, extra_environ=anonymous, status=403)
+
+
+def test_document_edit_preserves_delete_fields(testapp, award, lab):
+    item = document_with_attachment(award, lab, {'download': 'red-dot.png', 'href': RED_DOT})
+    item['description'] = 'delete me'
+    location = testapp.post_json('/document', item, status=201).location
+    response = testapp.patch_json(location + '?delete_fields=description', {}, status=200)
+    assert 'description' not in response.json['@graph'][0]
+
+
+def test_document_upload_still_rejects_octet_stream_content_mismatch(
+    testapp, award, lab
+):
+    item = document_with_attachment(
+        award,
+        lab,
+        browser_octet_stream_attachment('synthetic-document.pdf', b'\x00' * 1024),
+    )
+
+    response = testapp.post_json('/document', item, status=422)
+
+    assert any(
+        'Incorrect file type' in error['description']
+        for error in response.json['errors']
+    )
+
+
+def test_document_upload_still_rejects_unknown_octet_stream_type(
+    testapp, award, lab
+):
+    item = document_with_attachment(
+        award,
+        lab,
+        browser_octet_stream_attachment('synthetic-document.payload', b'\x00' * 1024),
+    )
+
+    testapp.post_json('/document', item, status=422)

@@ -225,7 +225,7 @@ export class CurrentContext extends React.PureComponent {
             return retObj;
 
         }
-    }
+    };
 
     /**
      * Go down `@type` list for this Item/context and find a transformation fxn, if any.

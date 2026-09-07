@@ -498,7 +498,7 @@ export class FormattedInfoBlock extends React.Component {
         'extraDetailClassName'      : PropTypes.string,
         'loading'                   : PropTypes.bool,
         'debug'                     : PropTypes.bool    // Verbose log messages.
-    }
+    };
 
 
     static defaultProps = {
@@ -511,7 +511,7 @@ export class FormattedInfoBlock extends React.Component {
         'loading'                   : false,
         'children'                  : null, // Inner contents of <FormattedInfoBlock>...</FormattedInfoBlock>
         'debug'                     : false
-    }
+    };
 
     constructor(props){
         super(props);

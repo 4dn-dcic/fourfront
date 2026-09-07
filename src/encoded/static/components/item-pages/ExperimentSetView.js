@@ -63,11 +63,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
         this.allProcessedFilesFromExperimentSet = memoize(expFxn.allProcessedFilesFromExperimentSet);
         this.allFilesFromExperimentSet = memoize(expFxn.allFilesFromExperimentSet);
 
-        /**
-         * Explicit self-assignment to remind that we inherit the following properties from WorkfowRunTracingView:
-         * `loadingGraphSteps`, `allRuns`, `steps`, & `mounted`
-         */
-        this.state = this.state;
+        // WorkflowRunTracingView initializes loadingGraphSteps, allRuns, steps, and mounted.
     }
 
     shouldGraphExist(){

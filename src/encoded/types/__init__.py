@@ -1,12 +1,17 @@
 """init.py lists all the collections that do not have a dedicated types file."""
 
 import boto3
+import json
 import transaction
 
 from mimetypes import guess_type
-from urllib.parse import quote
-from snovault.attachment import ItemWithAttachment
-from snovault.crud_views import collection_add as sno_collection_add
+from snovault.attachment import (
+    guess_mime_type,
+    ItemWithAttachment,
+    safe_content_disposition_filename,
+)
+from snovault.crud_views import collection_add as sno_collection_add, item_edit
+from snovault.validators import validate_item_content_patch, validate_item_content_put
 from snovault.schema_utils import validate_request
 from snovault.validation import ValidationFailure
 from snovault.util import debug_log
@@ -30,6 +35,7 @@ from .base import (
     ALLOW_LAB_SUBMITTER_EDIT_ACL
 )
 from .dependencies import DependencyEmbedder
+from pyramid.config import not_
 from pyramid.view import view_config
 from pyramid.response import Response
 from pyramid.httpexceptions import (
@@ -135,6 +141,9 @@ class Document(ItemWithAttachment, Item):
     item_type = 'document'
     schema = load_schema('encoded:schemas/document.json')
 
+    class Collection(Item.Collection):
+        pass
+
     @calculated_property(schema={
         "title": "Display Title",
         "description": "A calculated title",
@@ -144,6 +153,99 @@ class Document(ItemWithAttachment, Item):
         if attachment:
             return attachment.get('download')
         return Item.display_title(self)
+
+
+OCTET_STREAM_MIME_TYPE = 'application/octet-stream'
+
+
+def normalize_document_attachment_mime_type(context, properties):
+    """Treat a browser's generic binary MIME type as unspecified when safe.
+
+    Browsers use ``application/octet-stream`` in a FileReader data URI when
+    they do not recognize a selected file's type. Only replace that generic
+    value when the filename implies a MIME type already allowed by the
+    Document schema. ItemWithAttachment then performs its existing filename,
+    libmagic content, allowlist, and checksum validation before storing it.
+    """
+    if not isinstance(properties, dict):
+        return
+    attachment = properties.get('attachment')
+    if not isinstance(attachment, dict):
+        return
+
+    href = attachment.get('href')
+    filename = attachment.get('download')
+    if not isinstance(href, str) or not isinstance(filename, str):
+        return
+
+    header, separator, payload = href.partition(',')
+    if not separator or not header.startswith('data:'):
+        return
+
+    media_type_and_options = header[len('data:'):].split(';')
+    if media_type_and_options[0].strip().lower() != OCTET_STREAM_MIME_TYPE:
+        return
+
+    implied_mime_type = guess_mime_type(filename)
+    try:
+        allowed_mime_types = context.type_info.schema['properties']['attachment'][
+            'properties'
+        ]['type']['enum']
+    except (KeyError, TypeError):
+        return
+    if implied_mime_type not in allowed_mime_types:
+        return
+
+    media_type_and_options[0] = implied_mime_type
+    normalized_attachment = attachment.copy()
+    normalized_attachment['type'] = implied_mime_type
+    normalized_attachment['href'] = 'data:%s,%s' % (
+        ';'.join(media_type_and_options),
+        payload,
+    )
+    properties['attachment'] = normalized_attachment
+    return True
+
+
+def normalize_document_attachment_request(context, request):
+    """Give the standard edit validators the normalized body, not a decoded copy."""
+    properties = request.json
+    if normalize_document_attachment_mime_type(context, properties):
+        request.body = json.dumps(properties).encode('utf-8')
+
+
+def validate_document_attachment_post(context, request):
+    """Normalize and validate the same decoded Document request body."""
+    properties = request.json
+    normalize_document_attachment_mime_type(context, properties)
+    validate_request(context.type_info.schema, request, properties)
+
+
+@view_config(
+    context=Document.Collection,
+    permission='add',
+    request_method='POST',
+    validators=[validate_document_attachment_post],
+    request_param=not_('validate=false'),
+)
+@debug_log
+def document_add(context, request, render=None):
+    return sno_collection_add(context, request, render)
+
+
+@view_config(
+    context=Document, permission='edit', request_method='PUT',
+    validators=[normalize_document_attachment_request, validate_item_content_put],
+    request_param=not_('validate=false'),
+)
+@view_config(
+    context=Document, permission='edit', request_method='PATCH',
+    validators=[normalize_document_attachment_request, validate_item_content_patch],
+    request_param=not_('validate=false'),
+)
+@debug_log
+def document_edit(context, request, render=None):
+    return item_edit(context, request, render)
 
 
 @view_config(name='download', context=ItemWithAttachment, request_method='GET',
@@ -175,29 +277,37 @@ def download(context, request):
     if mimetype is None:
         mimetype = 'application/octet-stream'
 
+    safe_filename = safe_content_disposition_filename(filename)
+
     # If blob is on s3, redirect us there
     blob_storage = request.registry[BLOBS]
     if 'bucket' in download_meta:
-        location = get_s3_presigned_url(download_meta, filename)
+        location = get_s3_presigned_url(download_meta, safe_filename)
         raise HTTPFound(location=location)
     elif hasattr(blob_storage, 'get_blob_url'):  # default fallback - filename is s3 blob id
-        blob_url = blob_storage.get_blob_url(download_meta)
+        # Snovault's S3BlobStorage uses this metadata value to force an
+        # attachment disposition on its presigned URL. Pass a copy so this
+        # response-only sanitization does not mutate the stored propsheet.
+        safe_download_meta = dict(download_meta, download=safe_filename)
+        blob_url = blob_storage.get_blob_url(safe_download_meta)
         raise HTTPFound(location=str(blob_url))
 
     # Otherwise serve the blob data ourselves
     blob = blob_storage.get_blob(download_meta)
     headers = {
         'Content-Type': mimetype,
+        'Content-Disposition': 'attachment; filename="%s"' % safe_filename,
     }
     return Response(body=blob, headers=headers)
 
 
 def get_s3_presigned_url(download_meta, filename):
+    filename = safe_content_disposition_filename(filename)
     conn = boto3.client('s3')
     param_get_object = {
         'Bucket': download_meta['bucket'],
         'Key': download_meta['key'],
-        'ResponseContentDisposition': "inline; filename=" + quote(filename)
+        'ResponseContentDisposition': 'attachment; filename="%s"' % filename
     }
     location = conn.generate_presigned_url(
         ClientMethod='get_object',

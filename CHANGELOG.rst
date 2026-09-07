@@ -6,6 +6,21 @@ fourfront
 Change Log
 ----------
 
+8.10.0
+======
+
+`PR 1936: Align Fourfront with snovault 11.35.2 / SMaHT <https://github.com/4dn-dcic/fourfront/pull/1936>`_
+
+* Bump ``dcicsnovault`` 11.27.0 -> 11.35.2 and ``dcicutils`` 8.18.3 -> 8.18.8 (lockfile regenerated). Delivers the #335 nested-``linkTo`` invalidation-scope correctness fix (stale-ES documents), the #333 indexing ``MAX(sid)`` hoist, #324 ES access-pattern efficiency, and attachment/JWT/AccessKey-secret security fixes.
+* Search: paginate ``limit=all`` beyond 10,000 hits using ``search_after`` and the UUID keyword's doc values; reject partial/timed-out scans; omit repeated aggregations and totals, discarded embedded fields, and unused facets.
+* Exports: neutralize spreadsheet formulas (including summary/header cells), quote TSV cells, repair ``/report.tsv`` schema/query initialization, bound report source fields, and handle metadata GETs without a POST selection.
+* Attachments: force sanitized download dispositions; normalize generic browser MIME declarations on Document POST/PUT/PATCH without bypassing validation. Detect the native libmagic 5.46 ZIP-buffer regression at startup, with an actionable installation error; see ``docs/attachment-mime.md``.
+* Upload credentials: use ``sts:AssumeRole`` with the same single-key ``s3:PutObject`` policy and safe session labels. Provision ``S3_UPLOAD_ROLE_ARN`` in the identity or environment (CI also supports the repository variable). Read-only downloads and upload-key calculation no longer mint write credentials or require this role; location lookup stops at the first matching bucket, preferring wfout.
+* Tests/CI: reconcile workbook UUIDs and invalidation contracts; replace deprecated fixtures; fix the File suite's misspelled selection marker; preserve locked Moto instead of reinstalling incompatible 1.x. Correct the account expression, isolate cleanup by run attempt, and clean queues independently of index cleanup. Guard against deployment of ``pyramid.debug_authorization``.
+* Deploy: propagate entrypoint failures/signals, stop on failed identity setup, supervise nginx with a writable PID path and stderr logging, validate nginx as its non-root runtime user, and bound upstream retries. Pin the OpenSearch image and AWS action.
+* Frontend: repair existing ESLint errors without suppressions; restore Jest compatibility with explicitly allowlisted ESM dependencies and browser fixtures; close JSDOM cleanly to prevent post-test load-event races. Update stale homepage, carousel, and Redux test contracts and add compatibility regressions.
+
+
 8.9.4
 =====
 

@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import pytz
+import re
 import requests
 import structlog
 import transaction
@@ -49,7 +50,6 @@ from snovault.validators import (
     no_validate_item_content_patch
 )
 from dcicutils.secrets_utils import assume_identity
-from dcicutils.misc_utils import override_environ
 from urllib.parse import (
     parse_qs,
     urlparse,
@@ -100,11 +100,36 @@ def show_upload_credentials(request=None, context=None, status=None):
     return request.has_permission('edit', context)
 
 
+def s3_upload_role_arn():
+    """ Resolves the IAM role that Fourfront assumes to mint scoped, temporary S3 credentials.
+
+        Production reads it out of the global application configuration identity; the plain
+        environment is consulted as a fallback so the value can be supplied without rotating
+        that secret. The fallback is not merely defensive here: the repo-root ``conftest.py``
+        unconditionally sets ``IDENTITY``, so an identity-only lookup would leave the
+        environment unreachable for every test and CI run.
+    """
+    role_arn = None
+    if 'IDENTITY' in os.environ:
+        role_arn = assume_identity().get('S3_UPLOAD_ROLE_ARN')
+    return role_arn or os.environ.get('S3_UPLOAD_ROLE_ARN')
+
+
 def external_creds(bucket, key, name=None, profile_name=None):
     """
     if name is None, we want the link to s3 but no need to generate
     an access token.  This is useful for linking metadata to files that
     already exist on s3.
+
+    Credentials are minted with sts:AssumeRole rather than sts:GetFederationToken.
+    GetFederationToken can only be called with the long-lived access keys of an IAM user;
+    AWS rejects it outright when the caller itself holds temporary credentials, which is
+    the case for every role-based caller (ECS task roles, GitHub Actions OIDC). AssumeRole
+    works off the ambient credential chain, so no access keys are passed to boto3.
+
+    The session policy below is unchanged, so the authorization boundary is unchanged too:
+    the returned credentials are still limited to s3:PutObject on this one key, now as the
+    intersection of that policy with the assumed role's own permissions.
     """
 
     logging.getLogger('boto3').setLevel(logging.CRITICAL)
@@ -120,17 +145,15 @@ def external_creds(bucket, key, name=None, profile_name=None):
                 }
             ]
         }
-        if 'IDENTITY' in os.environ:
-            identity = assume_identity()
-            with override_environ(**identity):
-                conn = boto3.client('sts',
-                                    aws_access_key_id=os.environ.get('S3_AWS_ACCESS_KEY_ID'),
-                                    aws_secret_access_key=os.environ.get('S3_AWS_SECRET_ACCESS_KEY'))
-                token = conn.get_federation_token(Name=name, Policy=json.dumps(policy))
-        else:
-            # boto.set_stream_logger('boto3')
-            conn = boto3.client('sts')
-            token = conn.get_federation_token(Name=name, Policy=json.dumps(policy))
+        conn = boto3.client('sts')
+        # Filenames can contain spaces/Unicode and can be just one character.
+        # This label is not part of the S3 key or the authorization policy.
+        session_name = re.sub(r'[^A-Za-z0-9_+=,.@-]', '_', name)[:64].ljust(2, '_')
+        token = conn.assume_role(
+            RoleArn=s3_upload_role_arn(),
+            RoleSessionName=session_name,
+            Policy=json.dumps(policy)
+        )
         # 'access_key' 'secret_key' 'expiration' 'session_token'
         credentials = token.get('Credentials')
         # Convert Expiration datetime object to string via cast
@@ -138,8 +161,8 @@ def external_creds(bucket, key, name=None, profile_name=None):
         credentials['Expiration'] = str(credentials['Expiration'])
         credentials.update({
             'upload_url': f's3://{bucket}/{key}',
-            'federated_user_arn': token.get('FederatedUser').get('Arn'),
-            'federated_user_id': token.get('FederatedUser').get('FederatedUserId'),
+            'federated_user_arn': token.get('AssumedRoleUser').get('Arn'),
+            'federated_user_id': token.get('AssumedRoleUser').get('AssumedRoleId'),
             'request_id': token.get('ResponseMetadata').get('RequestId'),
             'key': key
         })
@@ -780,18 +803,10 @@ class File(Item):
         "type": "string",
     })
     def upload_key(self, request, filename=None):
-        properties = self.properties
-        external = self.propsheets.get('external', {})
-        extkey = external.get('key')
-        # od_url = self._open_data_url(self.properties['status'], filename=filename)
-        # if od_url:
-        #     return f'No upload key for open data file {filename}'
-        if not external or not extkey or extkey != self.build_key(self.registry, self.uuid, properties):
-            try:
-                external = self.build_external_creds(self.registry, self.uuid, properties)
-            except ClientError as e:
-                return f'Failed to acquire upload credentials for {self.uuid} with error {e}'
-        return external['key']
+        # Both the stored-credentials and regenerated-credentials branches used
+        # this same deterministic key. Bucket discovery and STS do not affect it
+        # and must not run for every metadata read or indexing operation.
+        return self.build_key(self.registry, self.uuid, self.properties)
 
     @calculated_property(condition=show_upload_credentials, schema={
         "type": "object",
@@ -925,9 +940,11 @@ class File(Item):
             accession=properties.get('accession'))
 
     @classmethod
-    def build_external_creds(cls, registry, uuid, properties):
+    def build_external_creds(cls, registry, uuid, properties, *, make_upload_credentials=True):
         """ This function is very important in that it determines both the upload
             and download location of files - so we have two distinct cases to handle.
+            Read-only callers set make_upload_credentials=False: location discovery
+            must not require the upload role or mint PutObject credentials.
 
             It is sometimes the case that we build_external_creds for extra files that
             may not be in the same bucket as the source file. So we first assume the
@@ -942,10 +959,11 @@ class File(Item):
         bucket = None
         key = cls.build_key(registry, uuid, properties)
         # _head_s3 for both files and wfoutput buckets if we are doing a download
-        for b in [registry.settings['file_wfout_bucket'], registry.settings['file_upload_bucket']]:
+        for b in dict.fromkeys([registry.settings['file_wfout_bucket'], registry.settings['file_upload_bucket']]):
             try:
                 cls._head_s3(conn, b, key)
                 bucket = b
+                break
             except ClientError:
                 continue  # try other key
 
@@ -956,7 +974,7 @@ class File(Item):
         # remove the path from the file name and only take first 32 chars
         fname = properties.get('filename')
         name = None
-        if fname:
+        if fname and make_upload_credentials:
             name = fname.split('/')[-1][:32]
 
         profile_name = registry.settings.get('file_upload_profile_name')
@@ -1633,7 +1651,11 @@ def download(context, request):
 
     request_datastore_is_database = (request.datastore == 'database')
     if not external:
-        external = context.build_external_creds(request.registry, context.uuid, properties)
+        # A download only needs the bucket/key. Never mint PutObject credentials
+        # (or require the upload role) on a read-only request, including extras.
+        external = context.build_external_creds(
+            request.registry, context.uuid, properties, make_upload_credentials=False
+        )
     if external.get('service') == 's3':
         location = context.get_open_data_url_or_presigned_url_location(external, request, filename,
                                                                        request_datastore_is_database)

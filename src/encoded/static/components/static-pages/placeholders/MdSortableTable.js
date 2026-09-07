@@ -22,7 +22,7 @@ export class MdSortableTable extends React.PureComponent {
 
     static defaultProps = {
         subTitlePosition: 'inside'
-    }
+    };
 
     constructor(props) {
         super(props);
@@ -159,10 +159,10 @@ const Utils = {
      */
     removeMarkdown: (md, options) => {
         options = options || {};
-        options.listUnicodeChar = options.hasOwnProperty('listUnicodeChar') ? options.listUnicodeChar : false;
-        options.stripListLeaders = options.hasOwnProperty('stripListLeaders') ? options.stripListLeaders : true;
-        options.gfm = options.hasOwnProperty('gfm') ? options.gfm : true;
-        options.useImgAltText = options.hasOwnProperty('useImgAltText') ? options.useImgAltText : true;
+        options.listUnicodeChar = Object.prototype.hasOwnProperty.call(options, 'listUnicodeChar') ? options.listUnicodeChar : false;
+        options.stripListLeaders = Object.prototype.hasOwnProperty.call(options, 'stripListLeaders') ? options.stripListLeaders : true;
+        options.gfm = Object.prototype.hasOwnProperty.call(options, 'gfm') ? options.gfm : true;
+        options.useImgAltText = Object.prototype.hasOwnProperty.call(options, 'useImgAltText') ? options.useImgAltText : true;
 
         let output = md || '';
 
@@ -172,9 +172,9 @@ const Utils = {
         try {
             if (options.stripListLeaders) {
                 if (options.listUnicodeChar)
-                    output = output.replace(/^([\s\t]*)([\*\-\+]|\d+\.)\s+/gm, options.listUnicodeChar + ' $1');
+                    output = output.replace(/^([\s\t]*)([*\-+]|\d+\.)\s+/gm, options.listUnicodeChar + ' $1');
                 else
-                    output = output.replace(/^([\s\t]*)([\*\-\+]|\d+\.)\s+/gm, '$1');
+                    output = output.replace(/^([\s\t]*)([*\-+]|\d+\.)\s+/gm, '$1');
             }
             if (options.gfm) {
                 output = output
@@ -191,14 +191,14 @@ const Utils = {
                 // Remove HTML tags
                 .replace(/<[^>]*>/g, '')
                 // Remove setext-style headers
-                .replace(/^[=\-]{2,}\s*$/g, '')
+                .replace(/^[=-]{2,}\s*$/g, '')
                 // Remove footnotes?
-                .replace(/\[\^.+?\](\: .*?$)?/g, '')
+                .replace(/\[\^.+?\](: .*?$)?/g, '')
                 .replace(/\s{0,2}\[.*?\]: .*?$/g, '')
                 // Remove images
-                .replace(/\!\[(.*?)\][\[\(].*?[\]\)]/g, options.useImgAltText ? '$1' : '')
+                .replace(/!\[(.*?)\][[(].*?[\])]/g, options.useImgAltText ? '$1' : '')
                 // Remove inline links
-                .replace(/\[(.*?)\][\[\(].*?[\]\)]/g, '$1')
+                .replace(/\[(.*?)\][[(].*?[\])]/g, '$1')
                 // Remove blockquotes
                 .replace(/^\s{0,3}>\s?/g, '')
                 // Remove reference-style links?
@@ -206,8 +206,8 @@ const Utils = {
                 // Remove atx-style headers
                 .replace(/^(\n)?\s{0,}#{1,6}\s+| {0,}(\n)?\s{0,}#{0,} {0,}(\n)?\s{0,}$/gm, '$1$2$3')
                 // Remove emphasis (repeat the line to remove double emphasis)
-                .replace(/([\*_]{1,3})(\S.*?\S{0,1})\1/g, '$2')
-                .replace(/([\*_]{1,3})(\S.*?\S{0,1})\1/g, '$2')
+                .replace(/([*_]{1,3})(\S.*?\S{0,1})\1/g, '$2')
+                .replace(/([*_]{1,3})(\S.*?\S{0,1})\1/g, '$2')
                 // Remove code blocks
                 .replace(/(`{3,})(.*?)\1/gm, '$2')
                 // Remove inline code
@@ -275,7 +275,7 @@ class SortableTable extends React.PureComponent {
         iconDesc: PropTypes.node,
         iconAsc: PropTypes.node,
         iconBoth: PropTypes.node
-    }
+    };
 
     constructor(props) {
         super(props);
@@ -542,7 +542,7 @@ class SortableTableHeader extends React.PureComponent {
         iconBoth: PropTypes.node,
         setHeaderWidths: PropTypes.func.isRequired,
         headerColumnWidths: PropTypes.array,
-    }
+    };
 
     constructor(props) {
         super(props);
@@ -684,7 +684,7 @@ function FaIcon(props) {
     const { icon, iconClass } = props;
     const className = `fas icon ${icon} ${iconClass}`;
     return (
-        <i className={className} align="right" />
+        <i className={className} />
     );
 }
 FaIcon.propTypes = {

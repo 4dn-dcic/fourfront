@@ -70,17 +70,11 @@ describe("Server rendering", function () {
         App = require('..').default;
         store = require('../../store').store;
         // test dispatching some values to store
-        const dispatch_vals = {
-            'href': home_url,
-            'context': home,
-            'contextRequest': {},
-            'slow': false
-        };
+        const { batchDispatch } = require('../../store');
         act(()=>{
-            store.dispatch({
-                type: dispatch_vals
-            });
+            batchDispatch(store, { href: home_url, context: home, slow: false });
         });
+        expect(store.getState()).toMatchObject({ href: home_url, context: home, slow: false });
         const props = store.getState();
         const server_app = <App {...props} />;
         const markup = '<!DOCTYPE html>\n' + ReactDOMServer.renderToString(server_app);

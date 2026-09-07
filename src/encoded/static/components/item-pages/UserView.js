@@ -525,7 +525,7 @@ class ProfileWorkFields extends React.PureComponent {
 
     static defaultProps = {
         containerClassName : 'panel user-work-info shadow-border'
-    }
+    };
 
     constructor(props){
         super(props);

@@ -18,7 +18,7 @@ export class MicroMetaAjaxLoadContainer extends React.PureComponent {
     static propTypes = {
         'microscopeItem': PropTypes.object,
         'height': PropTypes.number
-    }
+    };
 
     constructor(props){
         super(props);

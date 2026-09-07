@@ -27,7 +27,7 @@ export class EmbeddedExperimentSetSearchTable extends React.PureComponent {
         //     "experiments_in_set.biosample.biosource_summary": { "title" : "Biosource Summary" },
         //     "experiments_in_set.experiment_categorizer.combined" : columnExtensionMap4DN["experiments_in_set.experiment_categorizer.combined"]
         // }
-    }
+    };
 
     constructor(props){
         super(props);
@@ -50,7 +50,7 @@ export class EmbeddedExperimentSetSearchTable extends React.PureComponent {
         const { windowWidth, href } = this.props;
         return (
             <ExperimentSetDetailPane {...{ result, href, windowWidth }} containerWidth={width || null} paddingWidthMap={{
-                'xs' : 0, 'sm' : 10, 'md' : 47, 'lg' : 47, 'xl' : 47, 'xxl' : 47 
+                'xs' : 0, 'sm' : 10, 'md' : 47, 'lg' : 47, 'xl' : 47, 'xxl' : 47
             }} updateFileSectionStateCache={this.updateDetailPaneFileSectionStateCache} />
         );
     }
@@ -94,7 +94,8 @@ export function ExperimentSetsTableTabView(props){
                 </div>
             ) : null}
             <EmbeddedExperimentSetSearchTable {...tableProps}>{children}</EmbeddedExperimentSetSearchTable>
-        </div>);
+        </div>
+    );
 }
 ExperimentSetsTableTabView.getTabObject = function(props){
     return {

@@ -55,7 +55,7 @@ def test_postgres_version(session):
 TEST_COLLECTIONS = ['testing_post_put_patch', 'file_processed']
 
 
-@pytest.yield_fixture(scope='session')
+@pytest.fixture(scope='session')
 def app(es_app_settings, request):
     # for now, don't run with mpindexer. Add `True` to params above to do so
     # if request.param:
@@ -70,7 +70,7 @@ def app(es_app_settings, request):
 
 
 # explicitly specify now (invalidation scope tests don't need this)
-@pytest.yield_fixture
+@pytest.fixture
 def setup_and_teardown(es_app):
     """
     Run create mapping and purge queue before tests and clear out the
@@ -364,11 +364,12 @@ class TestInvalidationScopeViewFourfront:
             DEFAULT_SCOPE + ['name', 'title', 'version', 'commit', 'source_url']
          ),
         ('Workflow', 'WorkflowRunAwsem',
-            DEFAULT_SCOPE + ['title', 'name', 'experiment_types', 'category', 'app_name', 'steps.name']
+            DEFAULT_SCOPE + ['title', 'name', 'experiment_types', 'category', 'app_name', 'steps.name',
+                             'steps.meta.software_used']
          ),
         ('WorkflowRunAwsem', 'FileProcessed',
-            DEFAULT_SCOPE + ['input_files.workflow_argument_name', 'output_files.workflow_argument_name', 'title',
-                             'workflow']
+            DEFAULT_SCOPE + ['input_files.value', 'input_files.workflow_argument_name', 'output_files.value',
+                             'output_files.value_qc', 'output_files.workflow_argument_name', 'title', 'workflow']
          ),
         # Test FileProcessed
         ('Enzyme', 'FileProcessed',  # embeds 'name'
@@ -402,11 +403,12 @@ class TestInvalidationScopeViewFourfront:
          ),
         # Test ExperimentSet
         ('FileProcessed', 'ExperimentSet',
-            DEFAULT_SCOPE + ['accession', 'contributing_labs', 'dbxrefs', 'description', 'extra_files.file_size',
-                             'extra_files.href', 'extra_files.md5sum', 'extra_files.use_for', 'file_classification',
-                             'file_format', 'file_size', 'file_type', 'genome_assembly', 'higlass_uid', 'lab',
-                             'last_modified.date_modified', 'md5sum', 'notes_to_tsv', 'quality_metric',
-                             'related_files.relationship_type', 'static_content.description', 'static_content.location']
+            DEFAULT_SCOPE + ['accession', 'contributing_labs', 'dbxrefs', 'description', 'extra_files.file_format',
+                             'extra_files.file_size', 'extra_files.href', 'extra_files.md5sum', 'extra_files.use_for',
+                             'file_classification', 'file_format', 'file_size', 'file_type', 'genome_assembly',
+                             'higlass_uid', 'lab', 'last_modified.date_modified', 'md5sum', 'notes_to_tsv',
+                             'quality_metric', 'related_files.relationship_type', 'static_content.content',
+                             'static_content.description', 'static_content.location']
          ),
         ('User', 'ExperimentSet',
             DEFAULT_SCOPE + ['email', 'first_name', 'job_title', 'lab', 'last_name', 'preferred_email', 'submitted_by',
@@ -433,8 +435,8 @@ class TestInvalidationScopeViewFourfront:
                              'genome_location', 'organism_name', 'preferred_label', 'relevant_genes']
          ),
         ('Biosample', 'ExperimentSet',
-            DEFAULT_SCOPE + ['accession', 'badges.messages', 'biosource', 'cell_culture_details', 'description',
-                             'modifications', 'treatments']
+            DEFAULT_SCOPE + ['accession', 'badges.badge', 'badges.messages', 'biosource', 'cell_culture_details',
+                             'description', 'modifications', 'treatments']
          ),
         ('Biosource', 'ExperimentSet',
             DEFAULT_SCOPE + ['accession', 'biosource_type', 'cell_line', 'cell_line_tier', 'override_biosource_name',
@@ -447,11 +449,12 @@ class TestInvalidationScopeViewFourfront:
             DEFAULT_SCOPE + ['name']
          ),
         ('FileReference', 'ExperimentSet',
-         DEFAULT_SCOPE + ['accession', 'contributing_labs', 'dbxrefs', 'description', 'extra_files.file_size',
-                          'extra_files.href', 'extra_files.md5sum', 'extra_files.use_for', 'file_classification',
-                          'file_format', 'file_size', 'file_type', 'genome_assembly', 'higlass_uid', 'lab',
-                          'last_modified.date_modified', 'md5sum', 'notes_to_tsv', 'quality_metric',
-                          'related_files.relationship_type', 'static_content.description', 'static_content.location']
+         DEFAULT_SCOPE + ['accession', 'contributing_labs', 'dbxrefs', 'description', 'extra_files.file_format',
+                          'extra_files.file_size', 'extra_files.href', 'extra_files.md5sum', 'extra_files.use_for',
+                          'file_classification', 'file_format', 'file_size', 'file_type', 'genome_assembly',
+                          'higlass_uid', 'lab', 'last_modified.date_modified', 'md5sum', 'notes_to_tsv',
+                          'quality_metric', 'related_files.relationship_type', 'static_content.content',
+                          'static_content.description', 'static_content.location']
          ),
         ('FileFormat', 'ExperimentSet',
             DEFAULT_SCOPE + ['file_format']
@@ -486,3 +489,128 @@ class TestInvalidationScopeViewFourfront:
     #     req = self.MockedRequest(indexer_testapp.app.registry, source_type, target_type)
     #     scope = compute_invalidation_scope(None, req)
     #     assert sorted(scope['Invalidated']) == sorted(invalidated)
+
+
+def test_nested_workflow_software_change_reindexes_workflow_run(
+    workbook, es_app, es_testapp, indexer_testapp, award, lab, request
+):
+    """A Workflow link change must refresh the dependent WorkflowRun ES doc."""
+    unique = uuid.uuid4().hex[:10]
+    es = es_app.registry[ELASTIC_SEARCH]
+    indexer_queue = es_app.registry[INDEXER_QUEUE]
+    created_items = []
+
+    def cleanup_indexed_items():
+        indexer_queue.clear_queue()
+        for item_type, item_uuid in created_items:
+            try:
+                es.delete(
+                    index=get_namespaced_index(es_app, item_type),
+                    id=item_uuid,
+                    refresh=True,
+                )
+            except NotFoundError:
+                pass
+
+    request.addfinalizer(cleanup_indexed_items)
+
+    def create_software(name):
+        software = es_testapp.post_json('/software', {
+            'name': name,
+            'software_type': ['workflow'],
+            'version': '1',
+            'award': award['@id'],
+            'lab': lab['@id'],
+        }).json['@graph'][0]
+        created_items.append(('software', software['uuid']))
+        return software
+
+    first_software = create_software('scope-first-%s' % unique)
+    second_software = create_software('scope-second-%s' % unique)
+
+    def steps_for(software):
+        return [{
+            'name': 'nested-software-step',
+            'meta': {
+                'software_used': [software['@id']],
+            },
+        }]
+
+    workflow = es_testapp.post_json('/workflow', {
+        'title': 'Invalidation scope workflow %s' % unique,
+        'name': 'invalidation_scope_workflow_%s' % unique,
+        'steps': steps_for(first_software),
+        'award': award['@id'],
+        'lab': lab['@id'],
+    }).json['@graph'][0]
+    created_items.append(('workflow', workflow['uuid']))
+    workflow_run = es_testapp.post_json('/workflow_run_awsem', {
+        'run_platform': 'AWSEM',
+        'parameters': [],
+        'workflow': workflow['@id'],
+        'title': 'Invalidation scope run %s' % unique,
+        'award': award['@id'],
+        'awsem_job_id': 'scope-%s' % unique,
+        'lab': lab['@id'],
+        'run_status': 'started',
+    }).json['@graph'][0]
+    created_items.append(('workflow_run_awsem', workflow_run['uuid']))
+
+    workflow_run_index = get_namespaced_index(es_app, 'workflow_run_awsem')
+
+    def embedded_software_names():
+        es.indices.refresh(index=workflow_run_index)
+        try:
+            source = es.get(
+                index=workflow_run_index,
+                id=workflow_run['uuid'],
+            )['_source']['embedded']
+        except NotFoundError:
+            return []
+        return [
+            software['name']
+            for step in source['workflow'].get('steps', [])
+            for software in step.get('meta', {}).get('software_used', [])
+        ]
+
+    # Remove creation notifications, then establish the starting ES state
+    # synchronously. This isolates the queue behavior under test to the
+    # following Workflow PATCH and avoids depending on SQS visibility timing.
+    indexer_queue.clear_queue()
+    initial_result = indexer_testapp.post_json('/index', {
+        'record': True,
+        'uuids': [
+            first_software['uuid'],
+            second_software['uuid'],
+            workflow['uuid'],
+            workflow_run['uuid'],
+        ],
+    }).json
+    assert not initial_result['errors']
+    assert embedded_software_names() == [first_software['name']]
+
+    es_testapp.patch_json(
+        workflow['@id'],
+        {'steps': steps_for(second_software)},
+    )
+
+    patch_history = []
+    total_indexed = 0
+    for _ in range(8):
+        result = indexer_testapp.post_json('/index', {'record': True}).json
+        total_indexed += result['indexing_count']
+        patch_history.append({
+            'count': result['indexing_count'],
+            'errors': result['errors'],
+        })
+        if embedded_software_names() == [second_software['name']]:
+            break
+    else:
+        pytest.fail(
+            "Dependent WorkflowRun did not refresh after nested Workflow "
+            "software change: %r" % patch_history
+        )
+
+    assert not any(entry['errors'] for entry in patch_history)
+    # The Workflow itself and its dependent WorkflowRun must both be indexed.
+    assert total_indexed >= 2

@@ -126,7 +126,7 @@ export class TopRow extends React.Component {
             function(action, i){ // For each action, generate a clickable element.
                 return (
                     <div className="indicator-item action-button" data-action={action.name || null} key={action.name || i}>
-                        <a href={action.href}  className="link-underline-hover" data-tip={itemActionsDescriptions[action.name]}>{ action.title }</a>
+                        <a href={action.href} className="link-underline-hover" data-tip={itemActionsDescriptions[action.name]}>{ action.title }</a>
                     </div>
                 );
             }

@@ -1,5 +1,4 @@
 from collections import OrderedDict
-from pyramid.compat import bytes_
 from pyramid.httpexceptions import (
     HTTPBadRequest,
     HTTPMovedPermanently
@@ -17,6 +16,7 @@ from urllib.parse import (
 )
 from .search import (
     iter_search_results,
+    normalize_query,
     build_table_columns,
     get_iterable_search_results,
     make_search_subreq
@@ -31,6 +31,47 @@ import structlog
 
 
 log = structlog.getLogger(__name__)
+
+
+# CSV/TSV formula injection (CWE-1236): spreadsheet applications (Excel, Google
+# Sheets, LibreOffice) interpret any cell whose text begins with one of these
+# characters as a formula, which lets submitter-controlled metadata values run
+# as code when a downloaded manifest is opened. Prefixing a single quote forces
+# the cell to be treated as literal text instead.
+FORMULA_INJECTION_LEAD_CHARS = ('=', '+', '-', '@')
+FORMULA_INJECTION_CONTROL_LEAD_CHARS = ('\t', '\r', '\n')
+
+
+def neutralize_formula_injection(value):
+    """Neutralize spreadsheet formula injection in a single cell value.
+
+    Formula characters are also detected after leading whitespace/control
+    characters because spreadsheet applications may ignore that prefix. A
+    leading tab, CR, or LF is dangerous by itself. Non-string or empty values
+    are returned unchanged.
+    """
+    if isinstance(value, str) and value:
+        first_non_whitespace_or_control = 0
+        while (
+            first_non_whitespace_or_control < len(value) and
+            (
+                value[first_non_whitespace_or_control].isspace() or
+                ord(value[first_non_whitespace_or_control]) < 32 or
+                ord(value[first_non_whitespace_or_control]) == 127
+            )
+        ):
+            first_non_whitespace_or_control += 1
+        first_content_char = (
+            value[first_non_whitespace_or_control]
+            if first_non_whitespace_or_control < len(value)
+            else ''
+        )
+        if (
+            value[0] in FORMULA_INJECTION_CONTROL_LEAD_CHARS or
+            first_content_char in FORMULA_INJECTION_LEAD_CHARS
+        ):
+            return "'" + value
+    return value
 
 
 def includeme(config):
@@ -218,7 +259,7 @@ def peak_metadata(context, request):
     fout = io.StringIO()
     writer = csv.writer(fout, delimiter='\t')
     writer.writerow(header)
-    writer.writerows(rows)
+    writer.writerows([neutralize_formula_injection(cell) for cell in row] for row in rows)
     return Response(
         content_type='text/tsv',
         body=fout.getvalue(),
@@ -495,7 +536,9 @@ def metadata_tsv(context, request):
         #
         # IMPORTANT: since we add the Supplementary Files download option in Exp Set, users can download reference files directly.
         # So directly downloaded reference files should not be considered as 'reference file for' of an experiment)
-        if not any(triple[2] == f.get('accession', '') for triple in accession_triples) and 'reference_file_for' in f:
+        if 'reference_file_for' in f and not any(
+            triple[2] == f.get('accession', '') for triple in (accession_triples or [])
+        ):
             all_row_vals['Related File Relationship'] = 'reference file for'
             all_row_vals['Related File'] = 'Experiment - ' + f.get('reference_file_for', '')
         if not all_row_vals.get('File Classification'):
@@ -654,11 +697,11 @@ def metadata_tsv(context, request):
         yield line.read().encode('utf-8')
 
         for file_row_dict in file_row_dictionaries:
-            writer.writerow([ file_row_dict.get(column) or 'N/A' for column in header ])
+            writer.writerow([ neutralize_formula_injection(file_row_dict.get(column) or 'N/A') for column in header ])
             yield line.read().encode('utf-8')
 
         for summary_line in generate_summary_lines():
-            writer.writerow(summary_line)
+            writer.writerow([neutralize_formula_injection(cell) for cell in summary_line])
             yield line.read().encode('utf-8')
 
     if not endpoints_initialized['metadata']: # For some reason first result after bootup returns empty, so we do once extra for first request.
@@ -765,7 +808,10 @@ def lookup_column_value(value, path):
 
 def format_row(columns):
     """Format a list of text columns as a tab-separated byte string."""
-    return b'\t'.join([bytes_(c, 'utf-8') for c in columns]) + b'\r\n'
+    output = io.StringIO(newline='')
+    writer = csv.writer(output, delimiter='\t', lineterminator='\r\n')
+    writer.writerow([neutralize_formula_injection(cell) for cell in columns])
+    return output.getvalue().encode('utf-8')
 
 
 @view_config(route_name='report_download', request_method='GET')
@@ -780,9 +826,24 @@ def report_download(context, request):
     # Make sure we get all results
     request.GET['limit'] = 'all'
 
-    the_schema = [request.registry[TYPES][the_type.schema]]
+    try:
+        type_info = request.registry[TYPES][the_type]
+    except KeyError:
+        raise HTTPBadRequest(explanation='Unknown report type: %s' % the_type)
+    the_type = type_info.name
+    the_schema = [type_info.schema]
+    normalize_query(request, request.registry[TYPES], [the_type])
     columns = build_table_columns(request, the_schema, [the_type])
     header = [column.get('title') or field for field, column in columns.items()]
+
+    # Restrict the ES _source to exactly the column paths we render instead of
+    # pulling the entire embedded document for every hit. lookup_column_value
+    # only ever traverses these column paths, so bounding the field set here is
+    # output-neutral while avoiding multi-MB per-hit payloads. Only inject the
+    # default field set when the caller has not already restricted `field`.
+    if not request.GET.getall('field'):
+        for field in columns:
+            request.GET.add('field', field)
 
     def generate_rows():
         yield format_row(header)
