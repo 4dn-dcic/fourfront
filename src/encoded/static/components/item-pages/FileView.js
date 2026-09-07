@@ -291,7 +291,7 @@ export class ExternalVisualizationButtons extends React.PureComponent {
 
     render(){
         const { file, wrapInColumn, className } = this.props;
-        const { open_data_url } = file || {};
+        const { open_data_url } = file || {};
         let epigenomeBtn, juiceBoxBtn;
 
         if (!(file.status === 'archived' || file.status === 'released')){

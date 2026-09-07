@@ -313,7 +313,8 @@ export class CSVMatrixView extends React.PureComponent {
             throw new Error("No valid CSV prop defined.");
         }
 
-        const { grid, title, xAxisLabels, yAxisLabels } = CSVParsingUtilities.CSVStringTo2DArraySet(this.props.csv, options);
+        const { CSVStringTo2DArraySet: parseCSV } = CSVParsingUtilities;
+        const { grid, title, xAxisLabels, yAxisLabels } = parseCSV(this.props.csv, options);
         const propsToPass = _.extend({
             grid, xAxisLabels, yAxisLabels, title,
             xAxisTitle: options.xaxisTitle,

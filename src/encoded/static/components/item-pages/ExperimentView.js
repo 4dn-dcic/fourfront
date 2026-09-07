@@ -62,11 +62,7 @@ export default class ExperimentView extends WorkflowRunTracingView {
         this.allFilesFromExperiment = memoize(expFxn.allFilesFromExperiment);
         this.allProcessedFilesFromExperiments = memoize(expFxn.allProcessedFilesFromExperiments);
 
-        /**
-         * Explicit self-assignment to remind that we inherit the following properties from WorkfowRunTracingView:
-         * `loadingGraphSteps`, `allRuns`, `steps`, & `mounted`
-         */
-        this.state = this.state;
+        // WorkflowRunTracingView initializes loadingGraphSteps, allRuns, steps, and mounted.
     }
 
     shouldGraphExist(){
@@ -469,7 +465,7 @@ class ExperimentSupplementaryFilesOPFCollection extends React.PureComponent {
             return statuses;
         }
         return null;
-    }
+    };
 
     static getStatusAndColHeaders(columnHeaders, files) {
         const status = ExperimentSupplementaryFilesOPFCollection.collectionStatus(files);
@@ -632,7 +628,7 @@ class ExperimentSupplementaryFilesTabView extends React.PureComponent {
         _.forEach(experiment.other_processed_files || [], function(collection){
             const { files : origFiles } = collection;
             const files = _.map(origFiles || [], function(file){
-                return _.extend({ 'from_experiment' : _.extend({ 'from_experiment_set' : {'accession': 'NONE'} }, experiment), 'from_experiment_set' : {'accession': 'NONE'} }, file);
+                return _.extend({ 'from_experiment' : _.extend({ 'from_experiment_set' : { 'accession': 'NONE' } }, experiment), 'from_experiment_set' : { 'accession': 'NONE' } }, file);
             });
             allCollectionsFromExperiment.push(_.extend({}, collection, { files }));
         });
@@ -692,9 +688,9 @@ class ExperimentSupplementaryFilesTabView extends React.PureComponent {
                 // Also for metadata TSV downloads.
                 const extendedFile = _.extend({}, file, {
                     'from_experiment': _.extend({}, experiment, {
-                        'from_experiment_set': {'accession': 'NONE'}
+                        'from_experiment_set': { 'accession': 'NONE' }
                     }),
-                    'from_experiment_set': {'accession': 'NONE'}
+                    'from_experiment_set': { 'accession': 'NONE' }
                 });
                 referenceFilesByAtID.set(fileAtID, extendedFile);
             }

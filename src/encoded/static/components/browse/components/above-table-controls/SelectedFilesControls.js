@@ -350,7 +350,7 @@ const SelectedFilesFilterByButton = React.memo(function SelectedFilesFilterByBut
 
     return (
         <button type="button" id="selected-files-file-type-filter-button" className={cls} onClick={onFilterFilesByClick}
-            key="filter-selected-files-by" disabled={isDisabled} active={active.toString()} data-tip={tooltip} data-html>
+            key="filter-selected-files-by" disabled={isDisabled} aria-pressed={active} data-tip={tooltip} data-html>
             <i className="icon icon-filter fas icon-fw me-05" style={{ opacity : currentFiltersLength > 0 ? 1 : 0.75 }}/>
             {
                 currentFiltersLength > 0 ? <span>{ currentFiltersLength } </span> : (

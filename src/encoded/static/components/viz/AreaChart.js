@@ -1010,7 +1010,7 @@ export class AreaChart extends React.PureComponent {
             return;
         }
         if (this.drawnD3Elements) {
-            logger.error('Drawn chart already exists. Exiting.');;
+            logger.error('Drawn chart already exists. Exiting.');
             this.setState({ 'drawingError' : true });
             return;
         }
@@ -1330,12 +1330,13 @@ export class AreaChartContainer extends React.Component {
 
         const value = chartToggles[typeKey][id];
         switch(typeKey) {
-            case 'expanded':
+            case 'expanded': {
                 const gridState = layout.responsiveGridState(windowWidth);
                 if (gridState && ['lg', 'xl', 'xxl'].indexOf(gridState) === -1) return false;
                 return !!value;
+            }
             default:
-                return !!value
+                return !!value;
         }
     }
 

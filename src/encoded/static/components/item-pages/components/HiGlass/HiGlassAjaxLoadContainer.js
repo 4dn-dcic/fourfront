@@ -19,11 +19,11 @@ export class HiGlassAjaxLoadContainer extends React.PureComponent {
         'higlassItem': PropTypes.object,
         'scale1dTopTrack': PropTypes.bool.isRequired,
         'height': PropTypes.number
-    }
+    };
 
     static defaultProps = {
         'scale1dTopTrack': true
-    }
+    };
 
     constructor(props){
         super(props);

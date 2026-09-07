@@ -20,7 +20,7 @@ import { getTabStaticContent } from './components/TabbedView';
 export default class PublicationView extends DefaultItemView {
 
     static anyExperimentSetsWithPermissions = memoize(function (expSetsUsedInPub, expSetsProdInPub) {
-        return _.any(expSetsUsedInPub || [], isReplicateExperimentSet) || _.any(expSetsProdInPub || [], isReplicateExperimentSet)
+        return _.any(expSetsUsedInPub || [], isReplicateExperimentSet) || _.any(expSetsProdInPub || [], isReplicateExperimentSet);
     });
 
     getTabViewContents(){

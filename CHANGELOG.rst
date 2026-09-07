@@ -18,6 +18,7 @@ Change Log
 * Upload credentials: use ``sts:AssumeRole`` with the same single-key ``s3:PutObject`` policy and safe session labels. Provision ``S3_UPLOAD_ROLE_ARN`` in the identity or environment (CI also supports the repository variable). Read-only downloads and upload-key calculation no longer mint write credentials or require this role; location lookup stops at the first matching bucket, preferring wfout.
 * Tests/CI: reconcile workbook UUIDs and invalidation contracts; replace deprecated fixtures; fix the File suite's misspelled selection marker; preserve locked Moto instead of reinstalling incompatible 1.x. Correct the account expression, isolate cleanup by run attempt, and clean queues independently of index cleanup. Guard against deployment of ``pyramid.debug_authorization``.
 * Deploy: propagate entrypoint failures/signals, stop on failed identity setup, supervise nginx with a writable PID path and stderr logging, validate nginx as its non-root runtime user, and bound upstream retries. Pin the OpenSearch image and AWS action.
+* Frontend: repair existing ESLint errors without suppressions; restore Jest compatibility with explicitly allowlisted ESM dependencies and browser fixtures; close JSDOM cleanly to prevent post-test load-event races. Update stale homepage, carousel, and Redux test contracts and add compatibility regressions.
 
 
 8.9.4

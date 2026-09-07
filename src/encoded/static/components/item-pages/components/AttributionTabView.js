@@ -65,6 +65,7 @@ export const ContactPersonListItem = React.memo(function ContactPersonListItem({
 });
 
 export const AttributionTabView = React.memo(function AttributionTabView({ context, schemas, width }){
+    const { Award: renderAward, User: renderUser } = FormattedInfoBlock;
     const {
         produced_in_pub = null,
         publications_of_set = [],
@@ -94,13 +95,13 @@ export const AttributionTabView = React.memo(function AttributionTabView({ conte
                 { labsExist ?
                     <div className={"col-12 col-md-" + (submittedByExists ? '7' : '12')}>
                         <LabsSection context={context} />
-                        { awardExists ? FormattedInfoBlock.Award(award) : null }
+                        { awardExists ? renderAward(award) : null }
                     </div>
                     : null }
 
                 { submittedByExists ?
                     <div className={"col-12 col-md-" + (labsExist ? '5' : '12')}>
-                        { FormattedInfoBlock.User(submitted_by) }
+                        { renderUser(submitted_by) }
                     </div>
                     : null }
 
@@ -183,6 +184,7 @@ class LabsSection extends React.PureComponent {
             },
             className = null
         } = this.props;
+        const { Lab: renderLab } = FormattedInfoBlock;
         const contribLabLen = contributingLabs.length;
         const { mounted } = this.state;
 
@@ -190,7 +192,7 @@ class LabsSection extends React.PureComponent {
 
         return (
             <div className={className}>
-                { primaryLab ? FormattedInfoBlock.Lab(primaryLab, true, true, mounted) : null }
+                { primaryLab ? renderLab(primaryLab, true, true, mounted) : null }
                 { contribLabLen > 0 ?
                     <WrappedCollapsibleList wrapperElement="div" items={contributingLabs} singularTitle="Contributing Lab"
                         iconClass="user-plus fas" itemRenderFxn={this.contributingLabRenderFxn} />

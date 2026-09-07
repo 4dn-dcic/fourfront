@@ -26,7 +26,7 @@ describe('Testing DefaultItemView.js', function() {
 
         server.respondWith(
             "GET",
-            '/profiles/?format=json',
+            /^\/profiles\/\?format=json$/,
             [
                 200, 
                 { "Content-Type" : "application/json" },

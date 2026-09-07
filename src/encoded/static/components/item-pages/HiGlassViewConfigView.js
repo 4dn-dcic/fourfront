@@ -1028,9 +1028,9 @@ function HiGlassFileDetailPane(props) {
                             <thead>
                                 <tr>
                                     <th><div className="tooltip-info-container"><span>In View</span></div></th>
-                                    <th><div className="tooltip-info-container"><span>Track Position&nbsp;<i data-tip="Position of track" className="icon fas icon-info-circle" currentitem="false"></i></span></div></th>
-                                    <th><div className="tooltip-info-container"><span>Width&nbsp;<i data-tip="Width of track" className="icon fas icon-info-circle" currentitem="false"></i></span></div></th>
-                                    <th><div className="tooltip-info-container"><span>Height&nbsp;<i data-tip="Height of track" className="icon fas icon-info-circle" currentitem="false"></i></span></div></th>
+                                    <th><div className="tooltip-info-container"><span>Track Position&nbsp;<i data-tip="Position of track" className="icon fas icon-info-circle"></i></span></div></th>
+                                    <th><div className="tooltip-info-container"><span>Width&nbsp;<i data-tip="Width of track" className="icon fas icon-info-circle"></i></span></div></th>
+                                    <th><div className="tooltip-info-container"><span>Height&nbsp;<i data-tip="Height of track" className="icon fas icon-info-circle"></i></span></div></th>
                                     <th><div className="tooltip-info-container"><span>Title</span></div></th>
                                 </tr>
                             </thead>

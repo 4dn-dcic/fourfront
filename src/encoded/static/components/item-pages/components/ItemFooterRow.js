@@ -196,7 +196,8 @@ export const ExternalReferencesStackedTable = React.memo(function ExternalRefere
                 <a className="link-underline-hover title-of-file font-monospace name-title" href={fileAtId}>
                     {fileTitleString}
                 </a>
-            </React.Fragment>);
+            </React.Fragment>
+        );
     };
     const renderExtRefColFunc = function (file, field, detailIndex, fileEntryBlockProps) {
         if (!file.external_references || !Array.isArray(file.external_references) || file.external_references.length === 0) {

@@ -4,6 +4,7 @@ This file is the project's committed home for project-intrinsic agent knowledge:
 
 - The Python package is `encoded`; dependency/tool versions are in `pyproject.toml` and `poetry.lock`. Use a dedicated Python 3.11 environment and do not override the locked Moto after installation.
 - Test entrypoints are `pytest.ini`, root `conftest.py`, and `src/encoded/tests/conftest_settings.py`. Root conftest initializes environment discovery and sets `IDENTITY`; even a nominal unit run can contact AWS. Truly service-free modules can use `pytest --noconftest -o addopts=`; integration tests need explicit isolated service fixtures.
+- Frontend tests use Node 20, `npm test -- --runInBand`, the explicit ESM transform allowlist in `package.json`, and browser lifecycle fixtures in `jest/environment.js` and `jest/cleanup.js`. Keep dependency transforms narrow; `frontend-compatibility-test.js` guards those boundaries.
 - Fourfront intentionally maintains local `src/encoded/search.py` and `batch_download.py` forks. Preserve its schemas, facets, and authorization contracts when aligning with Snovault.
 - For ZIP/document insertion failures, consult `docs/attachment-mime.md` before changing MIME validation. Native libmagic and its rules are separate from the Python lockfile.
 
