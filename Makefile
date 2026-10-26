@@ -35,8 +35,8 @@ npm-setup:  # runs all front-end setup
 	npm run build-scss
 	make aws-ip-ranges
 
-moto-setup:  # optional moto setup that must be done separately
-	pip install "moto[server]==1.3.7"
+moto-setup:  # compatibility target: install the locked test dependencies
+	poetry install
 
 configure:  # does any pre-requisite installs
 	pip install --upgrade pip==24.1.2
@@ -83,7 +83,7 @@ build-full:  # rebuilds for Catalina, addressing zlib possibly being in an alter
 	make build
 
 build-after-poetry:  # continuation of build after poetry install
-	make moto-setup
+	# Do not overwrite Poetry's locked Moto with the Python-3.11-incompatible 1.x release.
 	make npm-setup-if-needed
 	poetry run python setup_eb.py develop
 	make fix-dist-info

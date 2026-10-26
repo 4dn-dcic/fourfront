@@ -102,9 +102,19 @@ describe('Testing home.js', function() {
     });
     */
 
-    it('has welcome, announcements headers', function() {
-        var newsHeaders = TestUtils.scryRenderedDOMComponentsWithClass(page, "homepage-section-title");
-        expect(newsHeaders.length).toEqual(3);
+    it('renders the data, resource, mission, and help sections of the redesigned homepage', function() {
+        // HomePage's 2022 redesign replaced the three-section 2019 layout.
+        const headers = TestUtils.scryRenderedDOMComponentsWithClass(page, "homepage-section-title");
+        expect(headers.map((header) => header.textContent.trim())).toEqual([
+            '4DN Data Collections',
+            'Recently Released Datasets',
+            'Explore Our Tools and Resources for Data Visualization & Analysis',
+            'Portal Resources',
+            expect.stringContaining('Mission'),
+            'Data Use Guidelines',
+            '4DN Help',
+            'External Links'
+        ]);
     });
 
 });

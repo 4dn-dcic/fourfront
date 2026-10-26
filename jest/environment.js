@@ -6,10 +6,31 @@
 
 import jsdom from 'jsdom';
 const { JSDOM } = jsdom;
-const dom = new JSDOM();
+const dom = new JSDOM('', { url: 'http://localhost/' });
 global.document = dom.window.document;
 global.window = dom.window;
 global.DOMParser = window.DOMParser;
+global.Element = window.Element;
+global.HTMLElement = window.HTMLElement;
+// In browsers window properties are also globals. The Node + JSDOM fixture
+// keeps them separate, so expose the analytics queue installed by the app.
+Object.defineProperty(global, 'gtag', { configurable: true, get: () => window.gtag });
+
+// JSDOM has no media-query/layout engine. Keep the default fixture in reduced
+// motion mode; tests may override matches or element geometry when needed.
+window.matchMedia = (media) => Object.assign(new window.EventTarget(), {
+    media,
+    matches: false,
+    onchange: null,
+    addListener(listener) { this.addEventListener('change', listener); },
+    removeListener(listener) { this.removeEventListener('change', listener); }
+});
+global.ResizeObserver = window.ResizeObserver = class ResizeObserver {
+    constructor(callback) { this.callback = callback; }
+    observe(target) { this.callback([{ target, contentRect: target.getBoundingClientRect() }], this); }
+    unobserve() {}
+    disconnect() {}
+};
 global.XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
 global.navigator = {
     userAgent: 'node',

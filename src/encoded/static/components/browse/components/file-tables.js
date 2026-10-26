@@ -555,7 +555,7 @@ export class RawFilesStackedTable extends React.PureComponent {
             impressionedItems.forEach((item, index) => item.index = index + 1);
             analytics.event("view_item_list", "RawFilesStackedTable", "Mounted", null, {
                 items: impressionedItems,
-                list_name: experimentSet ? experimentSet.display_title : propExperiment.display_title 
+                list_name: experimentSet ? experimentSet.display_title : propExperiment.display_title
             });
         }, 250);
     }

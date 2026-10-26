@@ -36,7 +36,7 @@ class Label extends React.PureComponent {
         'className' : 'y-axis-matrix-label',
         'label' : ['Label', 'Sub-Label', 'More Info...'],
         'style' : {}
-    }
+    };
 
     heightIncrement(){
         if (this.props.height >= 64) return 64;
@@ -208,7 +208,7 @@ export class MatrixContainer extends React.PureComponent {
                 />
                 <YAxis labels={yAxisLabels} width={yLabelsWidth} cellSize={cellSize} registerPostUpdateFxn={this.registerPostUpdateFxn} />
                 <div className="matrix-grid-container" style={{ width : Math.min(maxGridWidth, gridWidth) }}>
-                    <Matrix data={_.zip.apply(_, grid)} setStyle={this.cellStyle} registerPostUpdateFxn={this.registerPostUpdateFxn} tooltipDataFor="matrix-tooltip" />
+                    <Matrix data={_.zip(...grid)} setStyle={this.cellStyle} registerPostUpdateFxn={this.registerPostUpdateFxn} tooltipDataFor="matrix-tooltip" />
                 </div>
             </div>
         );

@@ -1,6 +1,6 @@
 'use strict';
 
-import TestUtils from 'react-dom/test-utils';
+import TestUtils, { act } from 'react-dom/test-utils';
 import React from 'react';
 
 /**
@@ -19,17 +19,31 @@ jest.dontMock('underscore');
 
 describe('Testing help.js', function() {
     var HelpPage, testItem, page, context, _, banners, Wrapper, helpEntries;
+    let offsetWidth, scrollWidth;
 
     beforeAll(function() {
+        // Nuka 8 measures scrollable pages; JSDOM deliberately has no layout.
+        offsetWidth = jest.spyOn(HTMLElement.prototype, 'offsetWidth', 'get').mockReturnValue(720);
+        scrollWidth = jest.spyOn(HTMLElement.prototype, 'scrollWidth', 'get').mockImplementation(function() {
+            const slides = this.querySelector('#nuka-wrapper');
+            return 720 * (slides ? slides.children.length : 1);
+        });
         _ = require('underscore');
         HelpPage = require('../static-pages/StaticPage').default;
         context = require('../testdata/static/helppage');
 
-        page = TestUtils.renderIntoDocument(<HelpPage context={context} />);
+        act(() => {
+            page = TestUtils.renderIntoDocument(<HelpPage context={context} />);
+        });
         helpEntries = TestUtils.scryRenderedDOMComponentsWithClass(page, 'help-entry');
         
     });
 
+
+    afterAll(() => {
+        offsetWidth.mockRestore();
+        scrollWidth.mockRestore();
+    });
 
     it('Has at least one help entry with paragraph, title', function() {
         expect(helpEntries.length).toBeGreaterThan(0); // Doesn't matter if 1 or more entries.
@@ -74,40 +88,31 @@ describe('Testing help.js', function() {
 
 
     it('Has functional slideshow/slider', function() {
-        var sliderFrame = TestUtils.scryRenderedDOMComponentsWithClass(page, 'slider-frame');
-        expect(helpEntries.length).toBeGreaterThan(0); // It exists on page.
+        const carousel = TestUtils.scryRenderedDOMComponentsWithClass(page, 'slide-carousel-wrapper')[0];
+        const slideCount = carousel.querySelectorAll('#nuka-wrapper > div').length;
+        const scroller = carousel.querySelector('.nuka-overflow');
+        // SlideCarousel's current controls are buttons themselves, not wrappers.
+        const previous = carousel.querySelector('.slider-control-centerleft');
+        const next = carousel.querySelector('.slider-control-centerright');
+        expect(slideCount).toBe(16);
+        expect(previous.textContent).toBe('Prev');
+        expect(next.textContent).toBe('Next');
+        expect(previous.disabled).toBe(true);
+        expect(next.disabled).toBe(false);
+        expect(scroller.scrollLeft).toBe(0);
 
-        var nextBtn = TestUtils.scryRenderedDOMComponentsWithClass(page, 'slider-control-centerright')[0].children[0];
-        var prevBtn = TestUtils.scryRenderedDOMComponentsWithClass(page, 'slider-control-centerleft')[0].children[0];
-
-        // div.slide-display > div.slide-controls > button.btn (x2)
-        //var nextButton = slideDisplay[0].children[0].children[1];
-        //var prevButton = slideDisplay[0].children[0].children[0];
-
-        // Proper labeling (subject to change in future (?))
-        expect(nextBtn.innerHTML.toLowerCase()).toEqual('next');
-        expect(prevBtn.innerHTML.toLowerCase()).toEqual('prev');
-
-        // Original image exists w/ src.
-        /*
-        var originalSlideImage = slideDisplay[0].children[1];
-        var originalSlideImageURL = originalSlideImage.src;
-        expect(originalSlideImageURL.length).toBeGreaterThan(0); // Img URL is a string w/ length
-
-        // Simulate clicking to ensure image SRC changes.
-        expect(originalSlideImage.src == originalSlideImageURL).toBe(true);
-        TestUtils.Simulate.click(nextBtn); // Slide 0 -> Slide 1
-        expect(originalSlideImage.src == originalSlideImageURL).toBe(false);
-        TestUtils.Simulate.click(nextBtn); // Slide 1 -> Slide 2
-        TestUtils.Simulate.click(prevBtn); // Slide 2 -> Slide 1
-        TestUtils.Simulate.click(prevBtn); // Slide 1 -> Slide 0
-        expect(originalSlideImage.src == originalSlideImageURL).toBe(true);
-
-        // Check to make sure slide deck doesn't loop
-        TestUtils.Simulate.click(prevBtn); // Slide 0 -> Slide 0
-        expect(originalSlideImage.src.length).toBeGreaterThan(0); // Img URL is a string w/ length
-        expect(originalSlideImage.src == originalSlideImageURL).toBe(true);
-        */
+        for (let current = 1; current < slideCount; current++) {
+            act(() => { TestUtils.Simulate.click(next); });
+            expect(scroller.scrollLeft).toBe(current * 720);
+        }
+        expect(next.disabled).toBe(true); // No wrapping beyond the final slide.
+        expect(previous.disabled).toBe(false);
+        for (let current = slideCount - 2; current >= 0; current--) {
+            act(() => { TestUtils.Simulate.click(previous); });
+            expect(scroller.scrollLeft).toBe(current * 720);
+        }
+        expect(previous.disabled).toBe(true);
+        expect(next.disabled).toBe(false);
     });
 
 

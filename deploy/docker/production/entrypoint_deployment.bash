@@ -1,4 +1,7 @@
 #!/bin/bash
+# Fail fast: abort the deployment if any step below errors, rather than silently
+# proceeding (e.g. running load-data after a failed create-mapping-on-deploy).
+set -e
 
 echo "Running a Fourfront deployment on the given environment"
 

@@ -1,7 +1,6 @@
 import boto3
 import os
 import pytest
-import tempfile
 
 from dcicutils.beanstalk_utils import source_beanstalk_env_vars
 from pyramid.httpexceptions import HTTPForbidden
@@ -10,7 +9,7 @@ from ..types.file import FileFastq, post_upload, external_creds
 
 
 # adding a mark to a list applies it to every test in the file
-pytestmark = [pytest.mark.setone, pytest.mark.workinG]
+pytestmark = [pytest.mark.setone, pytest.mark.working]
 
 
 def test_processed_file_unique_md5(testapp, mcool_file_json):
@@ -500,7 +499,7 @@ def fastq_related_file(fastq_json):
     item['related_files'] = [{'relationship_type': 'derived from',
                               'file': fastq_json['accession']}]
     item['md5sum'] = '2123456789abcdef0123456789abcdef'
-    item['accession'] = ''
+    item.pop('accession', None)
     return item
 
 
@@ -688,34 +687,17 @@ def test_no_experiment_set_rev_link_on_raw_file(testapp, fastq_json, experiment_
     assert 'experiment_sets' not in new_file
 
 
-def test_force_beanstalk_env():
-    """
-    This test is a bit outdated, since env variable loading has moved to
-    application __init__ from file.py. But let's keep the test...
-    """
-    secret = os.environ.get("AWS_SECRET_ACCESS_KEY")
-    key = os.environ.get("AWS_ACCESS_KEY_ID")
-    os.environ.pop("AWS_SECRET_ACCESS_KEY")
-    os.environ.pop("AWS_ACCESS_KEY_ID")
-
-    test_cfg = tempfile.NamedTemporaryFile(mode='w', delete=False)
-    test_cfg.write('export AWS_SECRET_ACCESS_KEY="its a secret"\n')
-    test_cfg.write('export AWS_ACCESS_KEY_ID="its a secret id"\n')
-    test_cfg_name = test_cfg.name
-    test_cfg.close()
-
-    # mock_boto
+def test_force_beanstalk_env(tmp_path, monkeypatch):
+    """The Beanstalk config helper must work without ambient static credentials."""
+    monkeypatch.setenv('AWS_SECRET_ACCESS_KEY', '')
+    monkeypatch.setenv('AWS_ACCESS_KEY_ID', '')
+    test_cfg = tmp_path / 'beanstalk-env'
+    test_cfg.write_text('export AWS_SECRET_ACCESS_KEY="its a secret"\n'
+                        'export AWS_ACCESS_KEY_ID="its a secret id"\n')
     with mock.patch('encoded.tests.test_file.boto3', autospec=True) as mock_boto:
-
-        source_beanstalk_env_vars(test_cfg_name)
-        boto3.client('sts', aws_access_key_id=os.environ.get("AWS_ACCESS_KEY_ID"),
-                     aws_secret_access_key=os.environ.get("AWS_SECRET_ACCESS_KEY"))
-        # reset
-        os.environ["AWS_SECRET_ACCESS_KEY"] = secret
-        os.environ["AWS_ACCESS_KEY_ID"] = key
-        # os.remove(test_cfg.delete)
-
-        # ensure boto called with correct arguments
+        source_beanstalk_env_vars(str(test_cfg))
+        boto3.client('sts', aws_access_key_id=os.environ.get('AWS_ACCESS_KEY_ID'),
+                     aws_secret_access_key=os.environ.get('AWS_SECRET_ACCESS_KEY'))
         mock_boto.client.assert_called_once_with('sts', aws_access_key_id='its a secret id',
                                                  aws_secret_access_key='its a secret')
 

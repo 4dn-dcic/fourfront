@@ -165,7 +165,7 @@ const DatasetsAndSocialMediaRow = React.memo(function DatasetsAndSocialMediaRow(
                                 <a href="/joint-analysis" target="_blank" title="Go to 4DN Joint Analysis Datasets" rel="noreferrer" className="btn-joint-analysis-page btn btn-primary w-100 mt-1">
                                     <span className="float-start ms-1">4DN Joint Analysis Datasets</span><span className="float-end me-1"><i className="icon icon-arrow-right fas"></i></span>
                                 </a>
-                            </div>                      
+                            </div>
                             {/* <div>
                                 <a href="https://x.com/4dn_dcic" target="_blank" rel="noreferrer" className="btn-follow-on-social-media btn btn-primary w-100 mt-1">
                                     <span className="float-start ms-1">Follow 4DN Data Portal on X</span><span className="float-end me-1"><i className="icon icon-arrow-right fas"></i></span>
@@ -548,7 +548,7 @@ const HelpRow = React.memo(function HelpRow(props) {
                     </div>
                 </div>
             </div>
-        </div> 
+        </div>
     );
 });
 

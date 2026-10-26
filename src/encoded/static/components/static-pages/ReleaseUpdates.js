@@ -142,7 +142,7 @@ class SingleUpdate extends React.Component {
         'onStartOpen' : PropTypes.func,
         'onFinishClose' : PropTypes.func,
         'onStartClose' : PropTypes.func
-    }
+    };
 
     constructor(props){
         super(props);

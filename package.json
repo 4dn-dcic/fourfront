@@ -34,6 +34,9 @@
     "setupFiles": [
       "../../../jest/environment.js"
     ],
+    "setupFilesAfterEnv": [
+      "../../../jest/cleanup.js"
+    ],
     "timers": "fake",
     "unmockedModulePathPatterns": [
       "node_modules/react",
@@ -45,7 +48,7 @@
       "^.+\\.jsx?$": "babel-jest"
     },
     "transformIgnorePatterns": [
-      "node_modules/(?!(@hms-dbmi-bgm/shared-portal-components|micro-meta-app-react|d3-brush|d3-drag|d3-selection|d3-array|@hms-dbmi-bgm/react-workflow-viz|@babel|react-bootstrap|react-infinite)/).+\\.js$"
+      "node_modules/(?!(@hms-dbmi-bgm/shared-portal-components|micro-meta-app-react|react-json-tree|react-base16-styling|lodash-es|react-jsx-parser|query-string|decode-uri-component|split-on-first|filter-obj|d3(?:-[^/]+)?|internmap|delaunator|robust-predicates|@hms-dbmi-bgm/react-workflow-viz|@babel|react-bootstrap|react-infinite)/).+\\.js$"
     ],
     "testPathIgnorePatterns": [
       "node_modules/",

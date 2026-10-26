@@ -258,7 +258,7 @@ export const commonParsingFxn = {
             const { google_analytics : {
                 reports : {
                     [reportName] : currentReport = []
-                } = {}, // `currentReport` => List of JSON objects (report entries, 1 per unique dimension value) - Note: 1 per unique dimension may not be valid for post processing report items in smaht-foursight 
+                } = {}, // `currentReport` => List of JSON objects (report entries, 1 per unique dimension value) - Note: 1 per unique dimension may not be valid for post processing report items in smaht-foursight
                 for_date
             } } = trackingItem;
 
@@ -1075,7 +1075,7 @@ export function UsageStatsView(props){
     let enableDetail = false;
     const userGroups = (session && JWT.getUserGroups()) || null;
     if (userGroups && userGroups.indexOf('admin') !== -1) {
-        enableDetail = true
+        enableDetail = true;
     }
 
     const isSticky = true; //!_.any(_.values(tableToggle), (v)=> v === true);

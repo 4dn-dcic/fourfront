@@ -58,6 +58,11 @@ Install or update dependencies::
 
 NOTES:
 
+* Native libmagic 5.46 misidentifies ZIP attachment buffers and causes document-insert
+  failures. Use a working native library and matching magic database (5.47 verified).
+  See `attachment MIME dependencies <docs/attachment-mime.md>`_ for diagnosis;
+  updating ``python-magic`` alone does not fix this.
+
 * To migrate from ES5 to ES6 (--force option may be needed)::
 
     $ brew unlink elasticsearch@5.6

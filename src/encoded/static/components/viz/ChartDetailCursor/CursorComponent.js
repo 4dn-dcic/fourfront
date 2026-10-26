@@ -24,7 +24,7 @@ class CursorContent extends React.PureComponent {
         'offsetX'   : -1,
         'offsetY'   : -1,
         'isVisible' : false
-    }
+    };
 
     componentDidUpdate(pastProps){
         if (this.props.isVisible === false && pastProps.isVisible === true){

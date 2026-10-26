@@ -15,7 +15,7 @@ export class ColorCycler {
             '#f15854',  // red
             '#4d4d4d'   // gray
         ]
-    }
+    };
 
     constructor(props){
         this.props = _.extend({}, ColorCycler.defaultProps, (props || {}));

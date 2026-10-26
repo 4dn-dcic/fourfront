@@ -117,7 +117,7 @@ export class StackedBlockVisual extends React.PureComponent {
 
     static propTypes = {
         rowLabelListingProportion: PropTypes.oneOf(['wide-label', 'wide-listing', 'balanced']),
-    }
+    };
 
     static generatePopoverRowsFromJSON(d, props){
         const { groupingProperties, columnGrouping, titleMap } = props;
@@ -244,7 +244,7 @@ export class StackedBlockVisual extends React.PureComponent {
         });
 
         return moreData;
-    }
+    };
 
     constructor(props){
         super(props);
@@ -794,7 +794,7 @@ function FaIcon(props) {
     const { icon, iconClass } = props;
     const className = `fas icon ${icon} ${iconClass}`;
     return (
-        <i className={className} align="right" />
+        <i className={className} />
     );
 }
 function SortIconDesc(props) {

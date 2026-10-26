@@ -1,5 +1,4 @@
 import re
-import math
 import itertools
 from functools import reduce
 from pyramid.view import view_config
@@ -153,7 +152,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
 
     ### Adding facets, plus any optional custom aggregations.
     ### Uses 'size' and 'from_' to conditionally skip (no facets if from > 0; no aggs if size > 0).
-    search = set_facets(search, facets, query_filters, string_query, request, doc_types, custom_aggregations, base_field_filters, size, from_)
+    search = set_facets(search, facets, query_filters, string_query, request, doc_types, custom_aggregations, base_field_filters, size, from_, search_frame)
 
     ### Add preference from session, if available
     search_session_id = None
@@ -348,29 +347,96 @@ def get_pagination(request):
     return from_, size
 
 
-def get_all_subsequent_results(initial_search_result, search, extra_requests_needed_count, size_increment):
-    from_ = 0
-    while extra_requests_needed_count > 0:
-        # print(f"{extra_requests_needed_count} requests left to get all results.")
-        from_ = from_ + size_increment
-        subsequent_search = search[from_:from_ + size_increment]
+def _search_with_stable_tiebreaker(search):
+    """Use the indexed UUID keyword's doc values, not heap-backed _id fielddata."""
+    sort_clauses = list(search.to_dict().get('sort', []))
+    has_uuid_sort = any(
+        (isinstance(clause, str) and clause.lstrip('-') == 'uuid') or
+        (isinstance(clause, dict) and 'uuid' in clause)
+        for clause in sort_clauses
+    )
+    if not has_uuid_sort:
+        sort_clauses.append({'uuid': {'order': 'asc'}})
+    return search.sort(*sort_clauses)
+
+
+def _raise_if_incomplete_scan(es_result):
+    """Fail a ``limit=all`` scan loudly when a page did not query every shard.
+
+    A partial shard failure returns HTTP 200 with a short ``hits`` array, which
+    would otherwise silently end the ``search_after`` scan early and yield an
+    incomplete result set alongside a plausible-looking total.
+    """
+    if es_result.get('timed_out') or es_result.get('terminated_early'):
+        raise HTTPBadRequest(
+            explanation='The search timed out or terminated early and may be '
+                        'incomplete. Please retry the query.'
+        )
+    shards = es_result.get('_shards') or {}
+    failed = shards.get('failed') or 0
+    if failed:
+        total_shards = shards.get('total')
+        raise HTTPBadRequest(
+            explanation='The search could not be completed because %s of %s '
+                        'Elasticsearch shards failed to respond, which would '
+                        'silently truncate the full result set. Please retry '
+                        'the query.' % (failed, total_shards if total_shards is not None else 'the')
+        )
+
+
+def get_all_subsequent_results(initial_hits, search, size_increment):
+    """Yield every page after the first using Elasticsearch ``search_after``."""
+    previous_hits = initial_hits
+    last_search_after = None
+    if len(previous_hits) < size_increment:
+        return
+
+    # Aggregations (facets) and the exact total-hit count are only needed from
+    # the first page. The stable sort already added by
+    # _search_with_stable_tiebreaker makes the final hit's sort values a safe
+    # cursor without the O(N^2) cost and max-result-window limit of from/size.
+    subsequent_search_base = search._clone()
+    subsequent_search_base.aggs._params = {}
+    subsequent_search_base = subsequent_search_base.extra(track_total_hits=False)
+
+    while len(previous_hits) == size_increment:
+        search_after = previous_hits[-1].get('sort')
+        if not search_after:
+            raise HTTPBadRequest(
+                explanation='The search could not continue because Elasticsearch '
+                            'did not return a stable pagination cursor.'
+            )
+        if search_after == last_search_after:
+            raise HTTPBadRequest(
+                explanation='The search could not continue because Elasticsearch '
+                            'returned the same pagination cursor twice.'
+            )
+        last_search_after = search_after
+        subsequent_search = subsequent_search_base.extra(
+            size=size_increment,
+            search_after=search_after,
+        )
         subsequent_search_result = execute_search(subsequent_search)
-        extra_requests_needed_count -= 1
-        for hit in subsequent_search_result['hits'].get('hits', []):
+        _raise_if_incomplete_scan(subsequent_search_result)
+        previous_hits = subsequent_search_result['hits'].get('hits', [])
+        for hit in previous_hits:
             yield hit
 
 
-def execute_search_for_all_results(search):
-    chunk_size = 100  # Decrease this to like 5 or 10 to test.
-
-    first_search = search[0:chunk_size]  # get aggregations from here
+def execute_search_for_all_results(search, chunk_size=100):
+    # Preserve the caller's primary ordering while making ties deterministic.
+    # Exact totals and aggregations are paid only on the first page.
+    stable_search = _search_with_stable_tiebreaker(search)
+    first_search = stable_search[0:chunk_size].extra(track_total_hits=True)
     es_result = execute_search(first_search)
+    _raise_if_incomplete_scan(es_result)
+    first_hits = es_result['hits'].get('hits', [])
 
-    total_results_expected = es_result['hits'].get('total', {}).get('value', 0)
-    extra_requests_needed_count = int(math.ceil(total_results_expected / chunk_size)) - 1  # Decrease by 1 (first es_result already happened)
-
-    if extra_requests_needed_count > 0:
-        es_result['hits']['hits'] = itertools.chain(es_result['hits']['hits'], get_all_subsequent_results(es_result, search, extra_requests_needed_count, chunk_size))
+    if first_hits:
+        es_result['hits']['hits'] = itertools.chain(
+            first_hits,
+            get_all_subsequent_results(first_hits, stable_search, chunk_size)
+        )
     return es_result
 
 
@@ -598,14 +664,14 @@ def list_source_fields(request, doc_types, frame):
         for field in fields_requested:
             fields.append('embedded.' + field)
     elif frame in ['embedded', 'object', 'raw']:
-        if frame != 'embedded':
-            # frame=raw corresponds to 'properties' in ES
-            if frame == 'raw':
-                frame = 'properties'
-            # let embedded be searched as well (for faceting)
-            fields = ['embedded.*', frame + '.*']
-        else:
-            fields = [frame + '.*']
+        # frame=raw corresponds to 'properties' in ES
+        if frame == 'raw':
+            frame = 'properties'
+        # Only fetch the requested frame's fields. For object/raw frames the
+        # embedded blob is discarded by format_results, and faceting reads ES
+        # aggregations rather than _source, so pulling `embedded.*` into _source
+        # here was wasted per-hit payload. (Mirrors snovault search #318.)
+        fields = [frame + '.*']
     else:
         fields = ['embedded.*']
     return fields
@@ -1249,7 +1315,7 @@ def generate_filters_for_terms_agg_from_search_filters(query_field, search_filte
     return facet_filters
 
 
-def set_facets(search, facets, search_filters, string_query, request, doc_types, custom_aggregations=None, base_field_filters=None, size=25, from_=0):
+def set_facets(search, facets, search_filters, string_query, request, doc_types, custom_aggregations=None, base_field_filters=None, size=25, from_=0, search_frame='embedded'):
     """
     Sets facets in the query as ElasticSearch aggregations, with each aggregation to be
     filtered by search_filters minus filter affecting facet field in order to get counts
@@ -1267,7 +1333,12 @@ def set_facets(search, facets, search_filters, string_query, request, doc_types,
 
     aggs = OrderedDict()
 
-    for field, facet in facets: # E.g. 'type','experimentset_type','experiments_in_set.award.project', ...
+    # Default facet aggregations are surfaced in the response only for frame=embedded
+    # (format_facets returns no facets for object/raw frames), so skip the expensive
+    # per-facet filtered aggregation construction when the selected frame will discard
+    # them. Custom/schema aggregations (set_additional_aggregations, below) are not
+    # frame-gated and remain applied. (Mirrors snovault search #318 facet gating.)
+    for field, facet in (facets if search_frame == 'embedded' else []): # E.g. 'type','experimentset_type','experiments_in_set.award.project', ...
 
         field_schema = schema_for_field(field, request, doc_types, should_log=True)
         is_date_field = field_schema and determine_if_is_date_field(field, field_schema)
@@ -1375,22 +1446,26 @@ def set_facets(search, facets, search_filters, string_query, request, doc_types,
         if facet.get('description') is None and field_schema and 'description' in field_schema:
             facet['description'] = field_schema['description']
 
-    # to achieve OR behavior within facets, search among GLOBAL results,
-    # not just returned ones. to do this, wrap aggs in ['all_items']
-    # and add "global": {} to top level aggs query
-    # see elasticsearch global aggs for documentation (should be ES5 compliant)
     search_as_dict = search.to_dict()
-    search_as_dict['aggs'] = {
-        'all_items': {
-            'global': {},
-            'aggs': aggs
+    if search_frame == 'embedded':
+        # To achieve OR behavior within facets, search among GLOBAL results,
+        # not just returned ones.
+        search_as_dict['aggs'] = {
+            'all_items': {
+                'global': {},
+                'aggs': aggs
+            }
         }
-    }
+    else:
+        search_as_dict.pop('aggs', None)
 
     if size == 0:
         # Only perform aggs if size==0 requested, to improve performance for search page queries.
         # We do currently have (hidden) monthly date histogram facets which may yet to be utilized for common size!=0 agg use cases.
+        search_as_dict.setdefault('aggs', {})
         set_additional_aggregations(search_as_dict, request, doc_types, custom_aggregations)
+        if not search_as_dict['aggs']:
+            del search_as_dict['aggs']
 
     search.update_from_dict(search_as_dict)
     return search

@@ -30,6 +30,7 @@ from snovault.elasticsearch import APP_FACTORY
 from snovault.elasticsearch.interfaces import INVALIDATION_SCOPE_ENABLED
 
 from .appdefs import APP_VERSION_REGISTRY_KEY
+from .attachment import verify_attachment_mime_detection
 from .schema_formats import format_checker
 from snovault.loadxl import load_all
 
@@ -152,6 +153,9 @@ def main(global_config, **local_config):
     """
     This function returns a Pyramid WSGI application.
     """
+
+    # Check the native dependency before any AWS discovery or insert loading.
+    verify_attachment_mime_detection()
 
     settings = global_config
     settings.update(local_config)
