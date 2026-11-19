@@ -89,6 +89,7 @@ def test_get_gene_info_from_response_text_multiple_value_lines():
     assert not respdict
 
 
+@pytest.mark.integratedx  # needs the live NCBI site (which blocks automated clients); parsing is covered by unit tests above
 def test_fetch_gene_info_from_ncbi():
     geneid = '5885'  # human rad21
     # as of 2019-01-28
