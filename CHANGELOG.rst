@@ -9,7 +9,7 @@ Change Log
 8.9.5
 =====
 
-`PR PRNUM: Upgrade nginx to 1.31.9 <https://github.com/4dn-dcic/fourfront/pull/PRNUM>`_
+`PR 1937: Upgrade nginx to 1.31.9 <https://github.com/4dn-dcic/fourfront/pull/1937>`_
 
 * Upgrade nginx in the production image from 1.21.6 to 1.31.9 (njs 1.0.2), the fix for CVE-2026-123633 and
   CVE-2026-123007 (see https://nginx.org/en/security_advisories.html)
