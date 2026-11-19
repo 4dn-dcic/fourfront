@@ -68,7 +68,11 @@ clear-aws:
 
 build-poetry:
 	make configure
-	poetry install
+	# Install sequentially: poetry is installed into the same environment as the project (virtualenvs.create is false)
+	# and the lock file downgrades some of poetry's own dependencies (e.g. packaging). With the parallel installer,
+	# a source build can import a half-replaced 'packaging' ("cannot import name '_manylinux' from 'packaging'",
+	# ChefInstallError), which makes the install fail intermittently.
+	POETRY_INSTALLER_PARALLEL=false poetry install
 
 build:  # builds
 	make build-poetry
