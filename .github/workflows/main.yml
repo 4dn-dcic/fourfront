@@ -135,4 +135,8 @@ jobs:
         run: |
           # The docker_development.ini has node 20 and Python 3.11 wired into it.
           touch deploy/docker/local/docker_development.ini  # cheap substitute for prepare-docker to make ignored file
-          docker build .
+          docker build -t fourfront-ci-build .
+          # Smoke test the nginx baked into the image, as the (non-root) user the container runs as:
+          # report the installed version (install_nginx.sh already fails the build on a version mismatch) and
+          # check that the production nginx.conf parses. No server is started and no traffic is sent.
+          docker run --rm --entrypoint bash fourfront-ci-build -c 'nginx -v && nginx -t'

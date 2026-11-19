@@ -31,7 +31,7 @@ The production application configuration is in ``deploy/docker/production``. A d
     * entrypoint_portal.sh - serves portal API requests
     * entrypoint_deployment.sh - deployment entrypoint
     * entrypoint_indexer.sh - indexer entrypoint
-    * install_nginx.sh - script for pulling in nginx
+    * install_nginx.sh - script for pulling in nginx (exact pinned version from the signed nginx.org apt repository)
     * fourfront_any_alpha.ini - base ini file used to build production.ini on the server given variables set in the GAC
     * nginx.conf - nginx configuration
 
