@@ -28,6 +28,8 @@ jobs:
 
     # Build matrix
     strategy:
+      # Don't let a failure in one test type cancel the others (e.g. the Docker build must still run and report)
+      fail-fast: false
       matrix:
         test_type: ['UNIT', 'NPM', 'Docker']
         # We are really not set up for these next two to be multiplicative, so be careful adding more.
