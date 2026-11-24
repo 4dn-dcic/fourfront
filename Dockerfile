@@ -1,10 +1,13 @@
 # Fourfront (Production) Dockerfile
 # Based off of the cgap-portal Dockerfile
 
-# Bullseye with Python 3.11.5
+# Bookworm with Python 3.11.5
 # 2023-09-28: Update docker image to a Python 3.11 version;
 # this was previously: FROM python:3.8.13-slim-buster
-FROM python:3.11.5-slim-bullseye
+# 2026-11: Moved from slim-bullseye to slim-bookworm (same Python 3.11.5) because nginx.org publishes no
+# bullseye packages after nginx 1.31.6 and the nginx security fixes (CVE-2026-123633, CVE-2026-123007)
+# are in 1.31.9 (see deploy/docker/production/install_nginx.sh).
+FROM python:3.11.5-slim-bookworm
 
 MAINTAINER William Ronchetti "william_ronchetti@hms.harvard.edu"
 
@@ -35,7 +38,7 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 # Note that the ordering of these operations is intentional to minimize package footprint
 WORKDIR /home/nginx/.nvm
 ENV NVM_DIR=/home/nginx/.nvm
-COPY deploy/docker/production/install_nginx_bullseye.sh /install_nginx.sh
+COPY deploy/docker/production/install_nginx.sh /install_nginx.sh
 
 # Temporarily replacing
 #     curl -sSL https://install.python-poetry.org | POETRY_HOME=/opt/venv python - && \

@@ -6,6 +6,22 @@ fourfront
 Change Log
 ----------
 
+8.9.5
+=====
+
+`PR 1937: Upgrade nginx to 1.31.9 <https://github.com/4dn-dcic/fourfront/pull/1937>`_
+
+* Upgrade nginx in the production image from 1.21.6 to 1.31.9 (njs 1.0.2), the fix for CVE-2026-123633 and
+  CVE-2026-123007 (see https://nginx.org/en/security_advisories.html)
+* nginx.org publishes no bullseye packages after 1.31.6, so the image base moves from
+  ``python:3.11.5-slim-bullseye`` to ``python:3.11.5-slim-bookworm`` (same Python version)
+* ``install_nginx_bullseye.sh`` is now ``install_nginx.sh`` (replacing the unused upstream template of that name);
+  it installs exact pinned packages from the nginx.org repository using ``signed-by`` verification with the
+  pinned nginx.org signing keys (the previous ``trusted=yes`` bypass is removed) and fails the build if the
+  installed nginx version is not the pinned one
+* CI Docker build now also runs ``nginx -v`` and ``nginx -t`` in the built image
+
+
 8.9.4
 =====
 

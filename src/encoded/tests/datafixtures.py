@@ -1,7 +1,38 @@
 import copy
 import pytest
 
+from unittest import mock
 from uuid import uuid4
+
+
+# Gene items fetch their metadata from NCBI when they are created (see encoded.types.gene). NCBI now answers
+# automated clients (and CI runners) with a reCAPTCHA challenge page or rate limiting, in which case the gene is
+# created without its symbol/organism ("GENE ID:5885" instead of "RAD21") and tests that expect the real metadata
+# fail. So gene tests use this canned data (same shape as encoded.types.gene.fetch_gene_info_from_ncbi returns);
+# unknown ids behave like an id NCBI does not know, i.e. no info. Tests that really need NCBI are marked integratedx.
+NCBI_GENE_INFO = {
+    '5885': {  # human RAD21
+        'Symbol': 'RAD21', 'tax_id': '9606', 'Status': 'live', 'description': 'RAD21 cohesin complex component',
+        'url': 'https://www.ncbi.nlm.nih.gov/gene/5885',
+        'Aliases': ['CDLS4', 'HR21', 'HRAD21', 'MCD1', 'MGS', 'NXP1', 'SCC1', 'hHR21'],
+    },
+    '16825': {  # mouse Ldb1
+        'Symbol': 'Ldb1', 'tax_id': '10090', 'Status': 'live', 'description': 'LIM domain binding 1',
+        'url': 'https://www.ncbi.nlm.nih.gov/gene/16825',
+    },
+    '10664': {  # human CTCF
+        'Symbol': 'CTCF', 'tax_id': '9606', 'Status': 'live', 'description': 'CCCTC-binding factor',
+        'url': 'https://www.ncbi.nlm.nih.gov/gene/10664',
+    },
+}
+
+
+@pytest.fixture(scope='session', autouse=True)
+def ncbi_gene_info():
+    """ Replaces the online NCBI gene lookup for the whole test session (including the workbook inserts). """
+    with mock.patch('encoded.types.gene.fetch_gene_info_from_ncbi',
+                    side_effect=lambda geneid: copy.deepcopy(NCBI_GENE_INFO.get(str(geneid), {}))):
+        yield
 
 
 ORDER = [
